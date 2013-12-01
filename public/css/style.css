@@ -1,0 +1,34 @@
+div.ui-slider-switch {
+    margin: 6px 10px 10px 0 !important;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.ui-focus,
+.ui-btn:focus {
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none ;
+}
+
+
+.ui-btn, .ui-btn a, .ui-btn a:hover, .ui-li {
+  font-weight: normal;
+}
+
+span.if, span.then {
+  font-weight: bold;
+}
+
+.in, .out {
+    -webkit-animation-timing-function: ease-in-out;
+    -webkit-animation-duration: 120ms !important;
+}
+
+fieldset .ui-block-a .ui-btn{
+    margin-left: 0px;
+}
+fieldset .ui-block-b .ui-btn{
+    margin-right: 0px;
+}

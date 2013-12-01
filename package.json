@@ -1,0 +1,31 @@
+{ "name": "pimatic-mobile-frontend",
+  "description": "mobile-frontend plugin for pimatic",
+  "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://sweetpi.de)",
+  "main": "mobile-frontend.coffee",
+  "files": [
+    "mobile-frontend.coffee",
+    "coffee",
+    "public",
+    "views",
+    "README.md"
+  ],
+  "version": "0.1.1",
+  "homepage": "http://github.com/pimatic/pimatic",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pimatic/pimatic.git/node_modules/pimatic-mobile-frontend"
+  },
+  "dependencies": {
+    "connect-coffee-script": "0.1.*",
+    "connect-offline": "1.0.*",
+    "jade": "0.27.*",
+    "socket.io": "0.9.*"
+  },
+  "peerDependencies": {
+    "pimatic": "~0.1.0"
+  },
+  "engines": {
+    "node": ">0.8.x",
+    "npm": ">1.1.x"
+  }
+}
