@@ -15,7 +15,7 @@
   "homepage": "http://github.com/sweetpi/pimatic",
   "repository": {
     "type": "git",
-    "url": "git://github.com/sweetpi/pimatic.git"
+    "url": "git://github.com/sweetpi/pimatic-log-mobile-frontend.git"
   },
   "dependencies": {
     "jade": "0.27.*",
