@@ -1,16 +1,21 @@
-# ##Dependencies
-express = require "express" 
-coffee = require 'coffee-script'
-socketIo = require 'socket.io'
-assert = require 'cassert'
-Q = require 'q'
-convict = require 'convict'
-i18n = require 'i18n'
-util = require 'util'
-fs = require 'fs'
-path = require 'path'
-
 module.exports = (env) ->
+
+  # ##Dependencies
+  # * from node.js
+  util = require 'util'
+  fs = require 'fs'
+  path = require 'path'
+
+  # * pimatic imports.
+  convict = env.require "convict"
+  Q = env.require 'q'
+  assert = env.require 'cassert'
+  express = env.require "express" 
+  coffee = env.require 'coffee-script'
+  i18n = env.require 'i18n'
+
+  # * own
+  socketIo = require 'socket.io'
 
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
@@ -28,14 +33,20 @@ module.exports = (env) ->
 
       # Makes a relative path to this moduel, relative to the cwd
       # and returns x.min.file versions of min.file when they exist
+
       relPath = (p) => 
-        prefix = path.relative process.cwd(), __dirname
+        prefix = './'
+        console.log prefix
         # Check if a minimised version exists:
         if @config.mode is "production"
           minFile = prefix + "/" + p.replace(/\.[^\.]+$/, '.min$&')
+
           if fs.existsSync minFile then return minFile
         # in other modes or when not exist return full file:
         return prefix + "/" + p
+
+      cwd = process.cwd()
+      #process.chdir __dirname
 
       # Configure static assets with nap
       nap(
