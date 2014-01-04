@@ -31,50 +31,46 @@ module.exports = (env) ->
 
       global.nap = require 'nap'
 
-      # Makes a relative path to this moduel, relative to the cwd
-      # and returns x.min.file versions of min.file when they exist
-
-      relPath = (p) => 
-        prefix = './'
-        console.log prefix
+      # Returns p.min.file versions of p.file when it exist
+      minPath = (p) => 
         # Check if a minimised version exists:
         if @config.mode is "production"
-          minFile = prefix + "/" + p.replace(/\.[^\.]+$/, '.min$&')
-
-          if fs.existsSync minFile then return minFile
+          minFile = p.replace(/\.[^\.]+$/, '.min$&')
+          if fs.existsSync __dirname + "/" + minFile then return minFile
         # in other modes or when not exist return full file:
-        return prefix + "/" + p
+        return p
 
       cwd = process.cwd()
       #process.chdir __dirname
 
       # Configure static assets with nap
       nap(
-        publicDir: relPath "public"
+        appDir: __dirname
+        publicDir: "public"
         mode: @config.mode
         minify: true
         assets:
           js:
             jquery: [
-              relPath "app/js/jquery-1.10.2.js"
-              relPath "app/js/jquery.mobile-1.3.2.js"
-              relPath "app/js/jquery.mobile.toast.js"
-              relPath "app/js/jquery-ui-1.10.3.custom.js"
-              relPath "app/js/jquery.ui.touch-punch.js"
+              minPath "app/js/jquery-1.10.2.js"
+              minPath "app/js/jquery.mobile-1.3.2.js"
+              minPath "app/js/jquery.mobile.toast.js"
+              minPath "app/js/jquery-ui-1.10.3.custom.js"
+              minPath "app/js/jquery.ui.touch-punch.js"
             ]
             main: [
-              relPath "app/scope.coffee"
-              relPath "app/helper.coffee"
-              relPath "app/pages/*"
+              "app/scope.coffee"
+              "app/helper.coffee"
+              "app/pages/*"
             ]
           css:
             theme: [
-              relPath "app/css/theme/default/jquery.mobile-1.3.2.css"
-              relPath "app/css/themes/graphite/water/jquery.mobile-1.3.2.css"
-              relPath "app/css/jquery.mobile.toast.css"
+              minPath "app/css/theme/default/jquery.mobile-1.3.2.css"
+              minPath "app/css/themes/graphite/water/jquery.mobile-1.3.2.css"
+              minPath "app/css/jquery.mobile.toast.css"
             ]
             style: [
-              relPath "app/css/style.css"
+              "app/css/style.css"
             ]
       )
 
@@ -96,7 +92,7 @@ module.exports = (env) ->
           createAppManifest = =>
 
             # Collect all files in "public/assets"
-            assets = ( "/assets/#{f}" for f in fs.readdirSync relPath 'public/assets' )
+            assets = ( "/assets/#{f}" for f in fs.readdirSync  __dirname + '/public/assets' )
 
             # Render the app manifest
             renderManifest = require "render-appcache-manifest"
