@@ -29,6 +29,9 @@ $(document).on "pageshow", '#updates', (event) ->
         $('#updates .message').append $('<p>').text(__('Updates was successful. Please restart pimatic.'))
         $('#updates #restart-now').show()
     ).fail(ajaxAlertFail)
+
+    $('#updates').on "click", '#restart-now', (event, ui) ->
+      $.get('/api/restart').fail(ajaxAlertFail)
   
 
 
