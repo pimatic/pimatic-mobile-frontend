@@ -4,18 +4,6 @@
 $(document).on "pagecreate", '#index', (event) ->
   loadData()
 
-$(document).on "pageinit", '#index', (event) ->
-  if device?
-    $("#talk").show().bind "vclick", (event, ui) ->
-      device.startVoiceRecognition "voiceCallback"
-
-  socket = io.connect("/", 
-    'connect timeout': 5000
-    'reconnection delay': 500
-    'reconnection limit': 2000 # the max delay
-    'max reconnection attempts': Infinity
-  )
-
   socket.on "switch-status", (data) ->
     if data.state?
       value = (if data.state then "on" else "off")
@@ -27,38 +15,14 @@ $(document).on "pageinit", '#index', (event) ->
   socket.on "rule-update", (rule) -> updateRule rule
   socket.on "rule-remove", (rule) -> removeRule rule
   socket.on "item-add", (item) -> addItem item
+  
 
-  socket.on 'log', (entry) -> 
-    if entry.level is 'error' 
-      errorCount++
-      updateErrorCount()
-    showToast entry.msg
-    console.log entry
+$(document).on "pageinit", '#index', (event) ->
+  if device?
+    $("#talk").show().bind "vclick", (event, ui) ->
+      device.startVoiceRecognition "voiceCallback"
 
-  socket.on 'reconnect', ->
-    $.mobile.loading "hide"
-    loadData()
 
-  socket.on 'disconnect', ->
-   $.mobile.loading "show",
-    text: __("connection lost, retying")+'...'
-    textVisible: true
-    textonly: false
-
-  onConnectionError = ->
-    $.mobile.loading "show",
-      text: __("could not connect, retying")+'...'
-      textVisible: true
-      textonly: false
-    setTimeout ->
-      socket.socket.connect(->
-        $.mobile.loading "hide"
-        loadData()
-      )
-    , 2000
-
-  socket.on 'error', onConnectionError
-  socket.on 'connect_error', onConnectionError
 
   $('#index #items').on "change", ".switch",(event, ui) ->
     actuatorId = $(this).data('actuator-id')

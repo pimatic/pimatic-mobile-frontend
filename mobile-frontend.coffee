@@ -61,6 +61,7 @@ module.exports = (env) ->
             main: [
               "app/scope.coffee"
               "app/helper.coffee"
+              "app/connection.coffee"
               "app/pages/*"
             ]
           css:
