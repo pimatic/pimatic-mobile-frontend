@@ -1,13 +1,25 @@
-# plugins-page
+# updates-page
 # ---------
 
 outdatedPlugins = null
 pimaticUpdate = null
 
+$(document).on "pagebeforeshow", '#updates', (event) ->
+  $('#install-updates').hide()
+
 $(document).on "pageshow", '#updates', (event) ->
   searchForPimaticUpdate().done ->
     searchForOutdatedPlugins().done ->
+      if pimaticUpdate isnt false or outdatedPlugins.length isnt 0
+        $('#install-updates').show()
 
+  $('#updates').on "click", '#install-updates', (event, ui) ->
+    modules = (if pimaticUpdate then ['pimatic'] else [])
+    modules.concate (p.name for p in outdatedPlugins)
+    
+    $.post("/api/update", modules: modules).done( (data) ->
+      console.log data
+    ).fail(ajaxAlertFail)
   
 
 
