@@ -5,7 +5,8 @@ outdatedPlugins = null
 pimaticUpdate = null
 
 $(document).on "pagebeforeshow", '#updates', (event) ->
-  $('#install-updates').hide()
+  $('#updates #install-updates').hide()
+  $('#updates #restart-now').hide()
 
 $(document).on "pageshow", '#updates', (event) ->
   searchForPimaticUpdate().done ->
@@ -15,10 +16,18 @@ $(document).on "pageshow", '#updates', (event) ->
 
   $('#updates').on "click", '#install-updates', (event, ui) ->
     modules = (if pimaticUpdate then ['pimatic'] else [])
-    modules.concate (p.name for p in outdatedPlugins)
-    
-    $.post("/api/update", modules: modules).done( (data) ->
-      console.log data
+    modules = modules.concat (p.plugin for p in outdatedPlugins)
+
+    $.ajax(
+      url: "/api/update"
+      type: 'POST'
+      data: modules: modules
+      timeout: 600000 #ms
+    ).done( (data) ->
+      $('#updates #install-updates').hide()
+      if data.success
+        $('#updates .message').append $('<p>').text(__('Updates was successful. Please restart pimatic.'))
+        $('#updates #restart-now').show()
     ).fail(ajaxAlertFail)
   
 
@@ -38,7 +47,7 @@ searchForPimaticUpdate = ->
           'pimatic', data.isOutdated.current, data.isOutdated.latest
         )
       ) 
-    outdatedPlugins = data.isOutdated
+    pimaticUpdate = data.isOutdated
     return 
   ).fail(ajaxAlertFail)
 
@@ -56,6 +65,6 @@ searchForOutdatedPlugins = ->
             p.plugin, p.current, p.latest
           )
         ) 
-    pimaticUpdate = data.outdated
+    outdatedPlugins = data.outdated
     return
   ).fail(ajaxAlertFail)

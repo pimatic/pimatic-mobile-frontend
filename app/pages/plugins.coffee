@@ -33,7 +33,7 @@ $(document).on "pageinit", '#plugins', (event) ->
         for p in data.plugins
           addBrowsePlugin(p)
           if p.isNewer
-            $("#plugin-#{plugin.name} .update-available").text __('update available')
+            $("#plugin-#{p.name} .update-available").show()
         if $('#plugin-browse-list').data('mobileListview')?
           $('#plugin-browse-list').listview("refresh")
         disableInstallButtons()
@@ -71,7 +71,9 @@ addPlugin = (plugin) ->
   li.find('.description').text(plugin.description)
   li.find('.version').text(plugin.version)
   li.find('.homepage').text(plugin.homepage).attr('href', plugin.homepage)
-  li.find('.active').text(if plugin.active then __('active') else '')
+  if plugin.active then li.find('.active').show()
+  else li.find('.active').hide()
+  li.find('.update-available').hide()
   li.find("input[type='checkbox']").attr('id', checkBoxId).attr('name', checkBoxId)
     .data('plugin-name', plugin.name)
   $('#plugin-list').append li
@@ -121,6 +123,8 @@ addBrowsePlugin = (plugin) ->
   li.find('.name').text(plugin.name)
   li.find('.description').text(plugin.description)
   li.find('.version').text(plugin.version)
-  li.find('.active').text(if plugin.active then __('active') else '')
-  li.find('.installed').text(if plugin.installed then __('installed') else '')
+  if plugin.active then li.find('.active').show()
+  else li.find('.active').hide()
+  if plugin.installed then li.find('.installed').show()
+  else li.find('.installed').hide()
   $('#plugin-browse-list').append li

@@ -7,7 +7,9 @@ script#plugin-template(type='text/template')
           | 
           span.version
           | 
-          span.active
+          span.active=__('active')
+          | 
+          span.update-available=__('update available')
         //-p
         //-  a.homepage(data-role="none")
         p.description
@@ -21,9 +23,9 @@ script#plugin-browse-template(type='text/template')
           | 
           span.version
           | 
-          span.installed
+          span.installed=__('installed')
           | 
-          span.update-available
+          span.active=__('active')
         //-p
         //-  a.homepage(data-role="none")
         p.description

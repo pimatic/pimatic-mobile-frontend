@@ -148,7 +148,7 @@ li.sortable-placeholder{
   border-top: 0px;
 }
 
-#plugin-list .active, #plugin-browse-list .active, #plugin-browse-list .update-available, 
+#plugin-list .active, #plugin-browse-list .active, #plugin-list .update-available, 
 #plugin-browse-list .installed{
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
