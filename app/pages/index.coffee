@@ -130,6 +130,8 @@ addItem = (item) ->
       buildActuator(item)
     when 'sensor'
       buildSensor(item)
+    when 'header'
+      buildHeader(item)
   li.data('item-type', item.type)
   li.data('item-id', item.id)
   li.addClass 'item'
@@ -170,6 +172,11 @@ buildSensor = (sensor) ->
   li.find('label').text(sensor.name)
   if sensor.error?
     li.find('.error').text(sensor.error)
+  return li
+
+buildHeader = (header) ->
+  li = $ $('#header-template').html()
+  li.find('label').text(header.text)
   return li
 
 buildTemperature = (sensor) ->

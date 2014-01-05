@@ -1,5 +1,5 @@
 script#item-add-template(type='text/template')
-  li(data-role="fieldcontain", data-icon="plus", data-iconpos="left")
+  li.item(data-role="fieldcontain", data-icon="plus", data-iconpos="left")
     a(href="")
       label
 
@@ -13,3 +13,7 @@ div#add-item(data-role='page')
       li(data-role='list-divider')=__('Actuators')
     ul#sensor-items(data-role='listview', data-inset='true')
       li(data-role='list-divider')=__('Sensors')
+    ul#add-other(data-role='listview', data-inset='true')
+      li(data-role="fieldcontain", data-icon="plus", data-iconpos="left")
+        a#add-a-header()
+          label=__('Add a group header')

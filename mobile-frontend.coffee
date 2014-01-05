@@ -57,6 +57,7 @@ module.exports = (env) ->
               minPath "app/js/jquery.mobile.toast.js"
               minPath "app/js/jquery-ui-1.10.3.custom.js"
               minPath "app/js/jquery.ui.touch-punch.js"
+              minPath "app/js/jquery.mobile.simpledialog2.js"
             ]
             main: [
               "app/scope.coffee"
@@ -69,6 +70,7 @@ module.exports = (env) ->
               minPath "app/css/theme/default/jquery.mobile-1.3.2.css"
               minPath "app/css/themes/graphite/water/jquery.mobile-1.3.2.css"
               minPath "app/css/jquery.mobile.toast.css"
+              minPath "app/css/jquery.mobile.simpledialog.css"
             ]
             style: [
               "app/css/style.css"
@@ -174,7 +176,7 @@ module.exports = (env) ->
       app.get '/add-actuator/:actuatorId', (req, res) =>
         actuatorId = req.params.actuatorId
         if not acutatorId?
-          res.send 200, {success: false, message: 'no id given'}
+          return res.send 200, {success: false, message: 'no id given'}
         found = false
         for item in @config.items
           if item.type is 'actuator' and item.id is actuatorId
@@ -195,7 +197,7 @@ module.exports = (env) ->
       app.get '/add-sensor/:sensorId', (req, res) =>
         sensorId = req.params.sensorId
         if not sensorId?
-          res.send 200, {success: false, message: 'no id given'}
+          return res.send 200, {success: false, message: 'no id given'}
         found = false
         for item in @config.items
           if item.type is 'sensor' and item.id is sensorId
@@ -208,6 +210,18 @@ module.exports = (env) ->
         item = 
           type: 'sensor'
           id: sensorId
+
+        @addNewItem item
+        res.send 200, {success: true}
+
+      app.get '/add-header/:name', (req, res) =>
+        name = req.params.name
+        if not acutatorId? or name is ""
+          res.send 200, {success: false, message: 'no name given'}
+        item = 
+          type: 'header'
+          id: "header-#{name}"
+          text: name
 
         @addNewItem item
         res.send 200, {success: true}
@@ -228,6 +242,8 @@ module.exports = (env) ->
         if not (newItems.length is jsonConfig.items.length)
           res.send 200, {success: false, message: 'items do not equal, reject order'}
           return
+        @config.items = @jsonConfig.items = newItems
+        @framework.saveConfig()
         res.send 200, {success: true}
 
       app.get '/clear-log', (req, res) =>
@@ -315,6 +331,8 @@ module.exports = (env) ->
           @getActuatorWithData(item)
         when 'sensor'
           @getSensorWithData(item)
+        when 'header'
+          Q.fcall => item
       p.then( (item) =>
         @emit 'item-add', item 
       )
@@ -350,14 +368,17 @@ module.exports = (env) ->
     getItemsWithData: () ->
       items = []
       for item in @config.items
-        switch item.type
-          when "actuator"
-            items.push @getActuatorWithData item
-          when "sensor"
-            items.push @getSensorWithData item
-          else
-            errorMsg = "Unknown item type \"#{item.type}\""
-            env.logger.error errorMsg
+        do(item) =>
+          switch item.type
+            when "actuator"
+              items.push @getActuatorWithData item
+            when "sensor"
+              items.push @getSensorWithData item
+            when "header"
+              items.push Q.fcall => item
+            else
+              errorMsg = "Unknown item type \"#{item.type}\""
+              env.logger.error errorMsg
       return Q.all items
 
     getActuatorWithData: (item) ->

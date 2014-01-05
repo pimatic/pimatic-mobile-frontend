@@ -56,6 +56,7 @@ ul#items li.sortable .handle {
   float: left;
   padding: 0 5px;
   opacity: 0.2;
+  cursor: move;
 }
 
 fieldset .ui-block-a .ui-btn{
@@ -172,7 +173,24 @@ li.sortable-placeholder{
   color: white;
 }
 
+.ui-simpledialog-controls{
+  padding: 0 6px;
+}
 
+.ui-simpledialog-input.ui-input-text{ 
+  width: 100% !important; 
+}
+
+/*.ui-simpledialog-container .ui-header:first-child {
+  -webkit-border-top-left-radius: 0;
+  border-top-left-radius: 0;
+  -webkit-border-top-right-radius: 0;
+  border-top-right-radius: 0;
+}
+*/
+.ui-simpledialog-container {
+  border: 5px solid #ccc !important;
+}
 
 
 @media (min-width:35em) {

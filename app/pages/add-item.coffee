@@ -2,7 +2,7 @@
 # ----------
 
 $(document).on "pageinit", '#add-item', (event) ->
-  $('#actuator-items').on "click", 'li', ->
+  $('#actuator-items').on "click", 'li.item', ->
     li = $ this
     if li.hasClass 'added' then return
     actuatorId = li.data('actuator-id')
@@ -13,7 +13,7 @@ $(document).on "pageinit", '#add-item', (event) ->
         li.buttonMarkup({ icon: "check" })
       ).fail(ajaxAlertFail)
 
-  $('#sensor-items').on "click", 'li', ->
+  $('#sensor-items').on "click", 'li.item', ->
     li = $ this
     if li.hasClass 'added' then return
     sensorId = li.data('sensor-id')
@@ -24,7 +24,28 @@ $(document).on "pageinit", '#add-item', (event) ->
       li.buttonMarkup({ icon: "check" })
     ).fail(ajaxAlertFail)
 
-$(document).on "pagebeforeshow", '#add-item', (event) ->
+  $('#add-other').on "click", '#add-a-header', ->
+    $("<div>").simpledialog2
+      mode: "button"
+      headerText: __("Name")
+      headerClose: true
+      buttonPrompt: __("Please enter a name")
+      buttonInput: true
+      buttons:
+        OK:
+          click: ->
+            name = $.mobile.sdLastInput
+            if name is ""
+              showToast __("Please enter a name")
+            else
+              $.get("/add-header/#{name}").done((result) =>
+                showToast __("Header added")
+              ).fail(ajaxAlertFail)
+
+
+
+
+$(document).on "pageshow", '#add-item', (event) ->
   $.get("/api/list/actuators")
     .done( (data) ->
       $('#actuator-items .item').remove()
@@ -55,3 +76,5 @@ $(document).on "pagebeforeshow", '#add-item', (event) ->
         $('#sensor-items').append li
       $('#sensor-items').listview('refresh')
     ).fail(ajaxAlertFail)
+
+
