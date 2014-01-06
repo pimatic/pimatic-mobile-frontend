@@ -3,6 +3,18 @@
 
 $.ajaxSetup timeout: 20000 #ms
 
+loadingStack = 0
+proxied = $.mobile.loading
+$.mobile.loading = (args...) ->
+  if args[0] is 'show'
+    loadingStack++
+    proxied.apply(this, args)
+  else 
+    if loadingStack > 0
+      loadingStack--
+      if loadingStack is 0
+        proxied.apply(this, args)
+
 $(document).ajaxStart ->
   $.mobile.loading "show",
     text: "Loading..."
