@@ -5,10 +5,6 @@ installedPlugins = null
 allPlugins = null
 
 $(document).on "pageinit", '#plugins', (event) ->
-  # Show that we are loading:
-  li = $ $('#loading-template').html()
-  $('#plugin-list').append(li).listview("refresh")
-  $('#plugin-browse-list').append(li)
 
   # Get all installed Plugins
   $.get("/api/plugins/installed")
@@ -21,24 +17,7 @@ $(document).on "pageinit", '#plugins', (event) ->
       addPlugin(p) for p in data.plugins
       $('#plugin-list').listview("refresh")
       $("#plugin-list input[type='checkbox']").checkboxradio()
-    ).fail( ajaxAlertFail
-    ).complete( ->
-      showToast __('Searching for plugin updates')
-      $.ajax(
-        url: "/api/plugins/search"
-        timeout: 300000 #ms
-      ).done( (data) ->
-        $('#plugin-browse-list').empty()
-        allPlugins = data.plugins
-        for p in data.plugins
-          addBrowsePlugin(p)
-          if p.isNewer
-            $("#plugin-#{p.name} .update-available").show()
-        if $('#plugin-browse-list').data('mobileListview')?
-          $('#plugin-browse-list').listview("refresh")
-        disableInstallButtons()
-      ).fail(ajaxAlertFail)
-    )
+    ).fail( ajaxAlertFail)
 
   $('#plugins').on "click", '#plugin-do-action', (event, ui) ->
     val = $('#select-plugin-action').val()
@@ -92,11 +71,7 @@ $(document).on "pagebeforeshow", '#plugins', (event) ->
 
 # plugins-browse-page
 # ---------
-
 $(document).on "pageinit", '#plugins-browse', (event) ->
-
-  $('#plugin-browse-list').listview("refresh")
-  disableInstallButtons()
 
   $('#plugin-browse-list').on "click", '#add-to-config', (event, ui) ->
     li = $(this).parent('li')
@@ -114,6 +89,23 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
         showToast text
         return
       ).fail(ajaxAlertFail)
+
+$(document).on "pageshow", '#plugins-browse', (event) ->
+  showToast __('Searching for plugin updates')
+  $.ajax(
+    url: "/api/plugins/search"
+    timeout: 300000 #ms
+  ).done( (data) ->
+    $('#plugin-browse-list').empty()
+    allPlugins = data.plugins
+    for p in data.plugins
+      addBrowsePlugin(p)
+      if p.isNewer
+        $("#plugin-#{p.name} .update-available").show()
+      $('#plugin-browse-list').listview("refresh")
+    disableInstallButtons()
+  ).fail(ajaxAlertFail)
+
 
 addBrowsePlugin = (plugin) ->
   id = "plugin-browse-#{plugin.name}"

@@ -3,26 +3,37 @@
 
 $.ajaxSetup timeout: 20000 #ms
 
-loadingStack = 0
-proxied = $.mobile.loading
-$.mobile.loading = (args...) ->
-  if args[0] is 'show'
-    loadingStack++
-    proxied.apply(this, args)
-  else 
-    if loadingStack > 0
-      loadingStack--
-      if loadingStack is 0
-        proxied.apply(this, args)
+( ->
+  loadingStack = 0
+  loadingAjax = no
+  proxied = $.mobile.loading
+  $.mobile.loading = (action, options, source) ->
+    if action is 'show'
+      loadingStack++
+      proxied.call this, action, options
+      if source is 'ajax'
+        loadingAjax = yes
+    else 
+      source = options
+      if source is 'ajax'
+        loadingAjax = no
+      if loadingStack > 0
+        loadingStack--
+      if loadingStack is 0 and loadingAjax is no
+        proxied.call this, 'hide'
+  return
+)()
+
 
 $(document).ajaxStart ->
-  $.mobile.loading "show",
+  $.mobile.loading("show",
     text: "Loading..."
     textVisible: true
     textonly: false
+  , 'ajax')
 
 $(document).ajaxStop ->
-  $.mobile.loading "hide"
+  $.mobile.loading "hide", 'ajax'
 
 
 ajaxShowToast = (data, textStatus, jqXHR) -> 
