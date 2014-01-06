@@ -19,7 +19,9 @@
       <span class="nv">conf = </span><span class="nx">convict</span> <span class="nx">require</span><span class="p">(</span><span class="s">&quot;./mobile-frontend-config-shema&quot;</span><span class="p">)</span>
       <span class="nx">conf</span><span class="p">.</span><span class="nx">load</span> <span class="nx">jsonConfig</span>
       <span class="nx">conf</span><span class="p">.</span><span class="nx">validate</span><span class="p">()</span>
-      <span class="vi">@config = </span><span class="nx">conf</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;&quot;</span>
+      <span class="vi">@config = </span><span class="nx">conf</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>do some legacy support</p></div></div><div class="code"><div class="wrapper">      <span class="k">for</span> <span class="nx">item</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span>
+        <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;actuator&#39;</span> <span class="o">or</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;sensor&#39;</span>
+          <span class="nv">item.type = </span><span class="s">&#39;device&#39;</span>
 
       <span class="nv">global.nap = </span><span class="nx">require</span> <span class="s">&#39;nap&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Returns p.min.file versions of p.file when it exist</p></div></div><div class="code"><div class="wrapper">      <span class="nv">minPath = </span><span class="nf">(p) =&gt;</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Check if a minimised version exists:</p></div></div><div class="code"><div class="wrapper">        <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> <span class="o">is</span> <span class="s">&quot;production&quot;</span>
           <span class="nv">minFile = </span><span class="nx">p</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\.[^\.]+$/</span><span class="p">,</span> <span class="s">&#39;.min$&amp;&#39;</span><span class="p">)</span>
@@ -39,10 +41,12 @@
               <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery.mobile.toast.js&quot;</span>
               <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery-ui-1.10.3.custom.js&quot;</span>
               <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery.ui.touch-punch.js&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery.mobile.simpledialog2.js&quot;</span>
             <span class="p">]</span>
             <span class="nv">main: </span><span class="p">[</span>
               <span class="s">&quot;app/scope.coffee&quot;</span>
               <span class="s">&quot;app/helper.coffee&quot;</span>
+              <span class="s">&quot;app/connection.coffee&quot;</span>
               <span class="s">&quot;app/pages/*&quot;</span>
             <span class="p">]</span>
           <span class="nv">css:</span>
@@ -50,6 +54,7 @@
               <span class="nx">minPath</span> <span class="s">&quot;app/css/theme/default/jquery.mobile-1.3.2.css&quot;</span>
               <span class="nx">minPath</span> <span class="s">&quot;app/css/themes/graphite/water/jquery.mobile-1.3.2.css&quot;</span>
               <span class="nx">minPath</span> <span class="s">&quot;app/css/jquery.mobile.toast.css&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;app/css/jquery.mobile.simpledialog.css&quot;</span>
             <span class="p">]</span>
             <span class="nv">style: </span><span class="p">[</span>
               <span class="s">&quot;app/css/style.css&quot;</span>
@@ -115,43 +120,35 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
             <span class="nv">rules: </span><span class="nx">rules</span>
         <span class="p">).</span><span class="nx">done</span><span class="p">()</span>
 
-      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-actuator/:actuatorId&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
-        <span class="nv">actuatorId = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">actuatorId</span>
-        <span class="k">if</span> <span class="o">not</span> <span class="nx">acutatorId</span><span class="o">?</span>
-          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;no id given&#39;</span><span class="p">}</span>
+      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-device/:deviceId&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
+        <span class="nv">deviceId = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">deviceId</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">deviceId</span><span class="o">?</span>
+          <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;no id given&#39;</span><span class="p">}</span>
         <span class="nv">found = </span><span class="kc">false</span>
         <span class="k">for</span> <span class="nx">item</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span>
-          <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;actuator&#39;</span> <span class="o">and</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">actuatorId</span>
+          <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;device&#39;</span> <span class="o">and</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">deviceId</span>
             <span class="nv">found = </span><span class="kc">true</span>
             <span class="k">break</span>
         <span class="k">if</span> <span class="nx">found</span> 
-          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;actuator already added&#39;</span><span class="p">}</span>
+          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;device already added&#39;</span><span class="p">}</span>
           <span class="k">return</span>
 
         <span class="nv">item = </span>
-          <span class="nv">type: </span><span class="s">&#39;actuator&#39;</span>
-          <span class="nv">id: </span><span class="nx">actuatorId</span>
+          <span class="nv">type: </span><span class="s">&#39;device&#39;</span>
+          <span class="nv">id: </span><span class="nx">deviceId</span>
 
         <span class="nx">@addNewItem</span> <span class="nx">item</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
 
 
-      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-sensor/:sensorId&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
-        <span class="nv">sensorId = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">sensorId</span>
-        <span class="k">if</span> <span class="o">not</span> <span class="nx">sensorId</span><span class="o">?</span>
-          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;no id given&#39;</span><span class="p">}</span>
-        <span class="nv">found = </span><span class="kc">false</span>
-        <span class="k">for</span> <span class="nx">item</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span>
-          <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;sensor&#39;</span> <span class="o">and</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">sensorId</span>
-            <span class="nv">found = </span><span class="kc">true</span>
-            <span class="k">break</span>
-        <span class="k">if</span> <span class="nx">found</span> 
-          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;sensor already added&#39;</span><span class="p">}</span>
-          <span class="k">return</span>
-
+      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-header/:name&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
+        <span class="nv">name = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">name</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">acutatorId</span><span class="o">?</span> <span class="o">or</span> <span class="nx">name</span> <span class="o">is</span> <span class="s">&quot;&quot;</span>
+          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;no name given&#39;</span><span class="p">}</span>
         <span class="nv">item = </span>
-          <span class="nv">type: </span><span class="s">&#39;sensor&#39;</span>
-          <span class="nv">id: </span><span class="nx">sensorId</span>
+          <span class="nv">type: </span><span class="s">&#39;header&#39;</span>
+          <span class="nv">id: </span><span class="s">&quot;header-</span><span class="si">#{</span><span class="nx">name</span><span class="si">}</span><span class="s">&quot;</span>
+          <span class="nv">text: </span><span class="nx">name</span>
 
         <span class="nx">@addNewItem</span> <span class="nx">item</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
@@ -172,6 +169,8 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">newItems</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="nx">jsonConfig</span><span class="p">.</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
           <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;items do not equal, reject order&#39;</span><span class="p">}</span>
           <span class="k">return</span>
+        <span class="vi">@config.items = @jsonConfig.items = </span><span class="nx">newItems</span>
+        <span class="nx">@framework</span><span class="p">.</span><span class="nx">saveConfig</span><span class="p">()</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
 
       <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/clear-log&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
@@ -209,9 +208,7 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
           <span class="k">for</span> <span class="nx">item</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span> 
             <span class="nx">do</span> <span class="nf">(item) =&gt;</span>
               <span class="k">switch</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
-                <span class="k">when</span> <span class="s">&quot;actuator&quot;</span> 
-                  <span class="nx">@addActuatorNotify</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">item</span>
-                <span class="k">when</span> <span class="s">&#39;sensor&#39;</span>
+                <span class="k">when</span> <span class="s">&quot;device&quot;</span> 
                   <span class="nx">@addSensorNotify</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">item</span>
 
 
@@ -247,17 +244,18 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
       <span class="nx">@framework</span><span class="p">.</span><span class="nx">saveConfig</span><span class="p">()</span>
 
       <span class="nv">p = </span><span class="k">switch</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
-        <span class="k">when</span> <span class="s">&#39;actuator&#39;</span>
-          <span class="nx">@getActuatorWithData</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
-        <span class="k">when</span> <span class="s">&#39;sensor&#39;</span>
-          <span class="nx">@getSensorWithData</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
+        <span class="k">when</span> <span class="s">&#39;device&#39;</span>
+          <span class="nx">@getDeviceWithData</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
+        <span class="k">when</span> <span class="s">&#39;header&#39;</span>
+          <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
       <span class="nx">p</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(item) =&gt;</span>
         <span class="nx">@emit</span> <span class="s">&#39;item-add&#39;</span><span class="p">,</span> <span class="nx">item</span> 
       <span class="p">)</span>
 
 
-    <span class="nv">addActuatorNotify: </span><span class="nf">(socket, item) -&gt;</span>
-      <span class="nv">actuator = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getActuatorById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
+    <span class="nv">addSwitchActuatorNotify: </span><span class="nf">(socket, item) -&gt;</span>
+      <span class="nv">actuator = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getDeviceById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
+      <span class="nx">assert</span> <span class="nx">actuator</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">SwitchActuator</span>
       <span class="k">if</span> <span class="nx">actuator</span><span class="o">?</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>First time push the state to the client</li>
 </ul></div></div><div class="code"><div class="wrapper">        <span class="nx">actuator</span><span class="p">.</span><span class="nx">getState</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(state) =&gt;</span>
@@ -273,8 +271,8 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
       <span class="k">return</span>
 
     <span class="nv">addSensorNotify: </span><span class="nf">(socket, item) -&gt;</span>
-      <span class="nv">sensor = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getSensorById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
-      <span class="k">if</span> <span class="nx">sensor</span><span class="o">?</span>
+      <span class="nv">sensor = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getDeviceById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
+      <span class="k">if</span> <span class="nx">sensor</span><span class="o">?</span> <span class="o">and</span> <span class="nx">sensor</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">Sensor</span>
         <span class="nv">names = </span><span class="nx">sensor</span><span class="p">.</span><span class="nx">getSensorValuesNames</span><span class="p">()</span>
         <span class="k">for</span> <span class="nx">name</span> <span class="k">in</span> <span class="nx">names</span> 
           <span class="nx">do</span> <span class="nf">(name) =&gt;</span>
@@ -286,90 +284,71 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
     <span class="nv">getItemsWithData: </span><span class="p">()</span> <span class="nf">-&gt;</span>
       <span class="nv">items = </span><span class="p">[]</span>
       <span class="k">for</span> <span class="nx">item</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span>
-        <span class="k">switch</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
-          <span class="k">when</span> <span class="s">&quot;actuator&quot;</span>
-            <span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">@getActuatorWithData</span> <span class="nx">item</span>
-          <span class="k">when</span> <span class="s">&quot;sensor&quot;</span>
-            <span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">@getSensorWithData</span> <span class="nx">item</span>
-          <span class="k">else</span>
-            <span class="nv">errorMsg = </span><span class="s">&quot;Unknown item type \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">type</span><span class="si">}</span><span class="s">\&quot;&quot;</span>
-            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">errorMsg</span>
+        <span class="nx">do</span><span class="nf">(item) =&gt;</span>
+          <span class="k">switch</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
+            <span class="k">when</span> <span class="s">&quot;device&quot;</span>
+              <span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">@getDeviceWithData</span> <span class="nx">item</span>
+            <span class="k">when</span> <span class="s">&quot;header&quot;</span>
+              <span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
+            <span class="k">else</span>
+              <span class="nv">errorMsg = </span><span class="s">&quot;Unknown item type \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">type</span><span class="si">}</span><span class="s">\&quot;&quot;</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">errorMsg</span>
       <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span> <span class="nx">items</span>
 
-    <span class="nv">getActuatorWithData: </span><span class="nf">(item) -&gt;</span>
+    <span class="nv">getDeviceWithData: </span><span class="nf">(item) -&gt;</span>
       <span class="nx">assert</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="o">?</span>
-      <span class="nv">actuator = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getActuatorById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
-      <span class="k">if</span> <span class="nx">actuator</span><span class="o">?</span>
+      <span class="nv">device = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getDeviceById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
+      <span class="k">if</span> <span class="nx">device</span><span class="o">?</span>
         <span class="nv">item =</span>
-          <span class="nv">type: </span><span class="s">&quot;actuator&quot;</span>
-          <span class="nv">id: </span><span class="nx">actuator</span><span class="p">.</span><span class="nx">id</span>
-          <span class="nv">name: </span><span class="nx">actuator</span><span class="p">.</span><span class="nx">name</span>
-          <span class="nv">state: </span><span class="kc">null</span>
-        <span class="k">if</span> <span class="nx">actuator</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">actuators</span><span class="p">.</span><span class="nx">SwitchActuator</span>
-          <span class="nv">item.template = </span><span class="s">&quot;switch&quot;</span>
-          <span class="k">return</span> <span class="nx">actuator</span><span class="p">.</span><span class="nx">getState</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(state) =&gt;</span>
-            <span class="nv">item.state = </span><span class="nx">state</span>
-            <span class="k">return</span> <span class="nx">item</span>
-          <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
-            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
-            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
-            <span class="k">return</span> <span class="nx">item</span>
-          <span class="p">)</span> 
-        <span class="k">else</span> 
-          <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
+          <span class="nv">type: </span><span class="s">&quot;device&quot;</span>
+          <span class="nv">id: </span><span class="nx">device</span><span class="p">.</span><span class="nx">id</span>
+          <span class="nv">name: </span><span class="nx">device</span><span class="p">.</span><span class="nx">name</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>TODO: gerneric method</p></div></div><div class="code"><div class="wrapper">        <span class="k">switch</span>
+          <span class="k">when</span> <span class="nx">device</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">SwitchActuator</span>
+            <span class="nv">item.template = </span><span class="s">&quot;switch&quot;</span>
+            <span class="k">return</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getState</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(state) =&gt;</span>
+              <span class="nv">item.state = </span><span class="nx">state</span>
+              <span class="k">return</span> <span class="nx">item</span>
+            <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
+              <span class="k">return</span> <span class="nx">item</span>
+            <span class="p">)</span> 
+          <span class="k">when</span> <span class="nx">device</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">TemperatureSensor</span>
+            <span class="nv">item.template = </span><span class="s">&quot;temperature&quot;</span>
+            <span class="nv">nameValues = </span><span class="p">[]</span>
+            <span class="k">for</span> <span class="nx">name</span> <span class="k">in</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getSensorValuesNames</span><span class="p">()</span>
+              <span class="nx">do</span> <span class="nf">(name) =&gt;</span>
+                <span class="nx">nameValues</span><span class="p">.</span><span class="nx">push</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getSensorValue</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
+                  <span class="k">return</span> <span class="nv">name: </span><span class="nx">name</span><span class="p">,</span> <span class="nv">value: </span><span class="nx">value</span>
+            <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">nameValues</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(nameValues) =&gt;</span>
+              <span class="nv">item.values = </span><span class="p">{}</span>
+              <span class="k">for</span> <span class="nx">nameValue</span> <span class="k">in</span> <span class="nx">nameValues</span>
+                <span class="nx">item</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">nameValue</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">nameValue</span><span class="p">.</span><span class="nx">value</span>
+              <span class="k">return</span> <span class="nx">item</span>
+            <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
+              <span class="k">return</span> <span class="nx">item</span>
+            <span class="p">)</span> 
+          <span class="k">when</span> <span class="nx">device</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">PresentsSensor</span>
+            <span class="nv">item.template = </span><span class="s">&quot;presents&quot;</span>
+            <span class="k">return</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getSensorValue</span><span class="p">(</span><span class="s">&#39;present&#39;</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
+              <span class="nv">item.values =</span>
+                <span class="nv">present: </span><span class="nx">value</span>
+              <span class="k">return</span> <span class="nx">item</span>
+          <span class="k">else</span> 
+            <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
       <span class="k">else</span>
-        <span class="nv">errorMsg = </span><span class="s">&quot;No actuator to display with id \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">\&quot; found&quot;</span>
+        <span class="nv">errorMsg = </span><span class="s">&quot;No device to display with id \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">\&quot; found&quot;</span>
         <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">errorMsg</span>
         <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span>
-          <span class="nv">type: </span><span class="s">&quot;actuator&quot;</span>
+          <span class="nv">type: </span><span class="s">&quot;device&quot;</span>
           <span class="nv">id: </span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
           <span class="nv">name: </span><span class="s">&quot;Unknown&quot;</span>
           <span class="nv">state: </span><span class="kc">null</span><span class="p">,</span>
           <span class="nv">error: </span><span class="nx">errorMsg</span>
 
-    <span class="nv">getSensorWithData: </span><span class="nf">(item) -&gt;</span>
-      <span class="nv">self = </span><span class="k">this</span>
-      <span class="nx">assert</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="o">?</span>
-      <span class="nv">sensor = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getSensorById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
-      <span class="k">if</span> <span class="nx">sensor</span><span class="o">?</span>
-        <span class="nv">item =</span>
-          <span class="nv">type: </span><span class="s">&quot;sensor&quot;</span>
-          <span class="nv">id: </span><span class="nx">sensor</span><span class="p">.</span><span class="nx">id</span>
-          <span class="nv">name: </span><span class="nx">sensor</span><span class="p">.</span><span class="nx">name</span>
-          <span class="nv">values: </span><span class="p">{}</span>
-        <span class="k">if</span> <span class="nx">sensor</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">sensors</span><span class="p">.</span><span class="nx">TemperatureSensor</span>
-          <span class="nv">item.template = </span><span class="s">&quot;temperature&quot;</span>
-          <span class="nv">nameValues = </span><span class="p">[]</span>
-          <span class="k">for</span> <span class="nx">name</span> <span class="k">in</span> <span class="nx">sensor</span><span class="p">.</span><span class="nx">getSensorValuesNames</span><span class="p">()</span>
-            <span class="nx">do</span> <span class="nf">(name) =&gt;</span>
-              <span class="nx">nameValues</span><span class="p">.</span><span class="nx">push</span> <span class="nx">sensor</span><span class="p">.</span><span class="nx">getSensorValue</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
-                <span class="k">return</span> <span class="nv">name: </span><span class="nx">name</span><span class="p">,</span> <span class="nv">value: </span><span class="nx">value</span>
-          <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">nameValues</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(nameValues) =&gt;</span>
-            <span class="k">for</span> <span class="nx">nameValue</span> <span class="k">in</span> <span class="nx">nameValues</span>
-              <span class="nx">item</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">nameValue</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">nameValue</span><span class="p">.</span><span class="nx">value</span>
-            <span class="k">return</span> <span class="nx">item</span>
-          <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
-            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
-            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
-            <span class="k">return</span> <span class="nx">item</span>
-          <span class="p">)</span> 
-        <span class="k">else</span> <span class="k">if</span> <span class="nx">sensor</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">sensors</span><span class="p">.</span><span class="nx">PresentsSensor</span>
-          <span class="nv">item.template = </span><span class="s">&quot;presents&quot;</span>
-          <span class="k">return</span> <span class="nx">sensor</span><span class="p">.</span><span class="nx">getSensorValue</span><span class="p">(</span><span class="s">&#39;present&#39;</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
-            <span class="nv">item.values =</span>
-              <span class="nv">present: </span><span class="nx">value</span>
-            <span class="k">return</span> <span class="nx">item</span>
-        <span class="k">else</span> 
-          <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
-      <span class="k">else</span>
-        <span class="nv">errorMsg = </span><span class="s">&quot;No sensor to display with id \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">\&quot; found&quot;</span>
-        <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">errorMsg</span>
-        <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span>
-          <span class="nv">type: </span><span class="s">&quot;sensor&quot;</span>
-          <span class="nv">id: </span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
-          <span class="nv">name: </span><span class="s">&quot;Unknown&quot;</span>
-          <span class="nv">values: </span><span class="kc">null</span><span class="p">,</span>
-          <span class="nv">error: </span><span class="nx">errorMsg</span>
+
 
     <span class="nv">emitSwitchState: </span><span class="nf">(socket, actuator, state) -&gt;</span>
       <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&quot;switch-status&quot;</span><span class="p">,</span>

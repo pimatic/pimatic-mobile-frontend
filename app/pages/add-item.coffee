@@ -2,27 +2,17 @@
 # ----------
 
 $(document).on "pageinit", '#add-item', (event) ->
-  $('#actuator-items').on "click", 'li.item', ->
+
+  $('#device-items').on "click", 'li.item', ->
     li = $ this
     if li.hasClass 'added' then return
-    actuatorId = li.data('actuator-id')
-    $.get("/add-actuator/#{actuatorId}")
+    deviceId = li.data('device-id')
+    $.get("/add-device/#{deviceId}")
       .done( (data) ->
         li.data('icon', 'check')
         li.addClass('added')
         li.buttonMarkup({ icon: "check" })
       ).fail(ajaxAlertFail)
-
-  $('#sensor-items').on "click", 'li.item', ->
-    li = $ this
-    if li.hasClass 'added' then return
-    sensorId = li.data('sensor-id')
-    $.get("/add-sensor/#{sensorId}")
-      .done( (data) ->
-      li.data('icon', 'check')
-      li.addClass('added')
-      li.buttonMarkup({ icon: "check" })
-    ).fail(ajaxAlertFail)
 
   $('#add-other').on "click", '#add-a-header', ->
     $("<div>").simpledialog2
@@ -46,35 +36,20 @@ $(document).on "pageinit", '#add-item', (event) ->
 
 
 $(document).on "pageshow", '#add-item', (event) ->
-  $.get("/api/list/actuators")
+
+  $.get("/api/devices")
     .done( (data) ->
-      $('#actuator-items .item').remove()
-      for a in data.actuators
+      $('#device-items .item').remove()
+      for d in data.devices
         li = $ $('#item-add-template').html()
-        if actuators[a.id]? 
+        if devices[d.id]? 
           li.data('icon', 'check')
           li.addClass('added')
-        li.find('label').text(a.name)
-        li.data 'actuator-id', a.id
+        li.find('label').text(d.name)
+        li.data 'device-id', d.id
         li.addClass 'item'
-        $('#actuator-items').append li
-      $('#actuator-items').listview('refresh')
-    ).fail(ajaxAlertFail)
-
-
-  $.get("/api/list/sensors")
-    .done( (data) ->
-      $('#sensor-items .item').remove()
-      for s in data.sensors
-        li = $ $('#item-add-template').html()
-        if sensors[s.id]? 
-          li.data('icon', 'check')
-          li.addClass('added')
-        li.find('label').text(s.name)
-        li.data 'sensor-id', s.id
-        li.addClass 'item'
-        $('#sensor-items').append li
-      $('#sensor-items').listview('refresh')
+        $('#device-items').append li
+      $('#device-items').listview('refresh')
     ).fail(ajaxAlertFail)
 
 

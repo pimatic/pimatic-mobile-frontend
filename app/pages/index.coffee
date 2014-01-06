@@ -22,12 +22,10 @@ $(document).on "pageinit", '#index', (event) ->
     $("#talk").show().bind "vclick", (event, ui) ->
       device.startVoiceRecognition "voiceCallback"
 
-
-
   $('#index #items').on "change", ".switch",(event, ui) ->
-    actuatorId = $(this).data('actuator-id')
-    actuatorAction = if $(this).val() is 'on' then 'turnOn' else 'turnOff'
-    $.get("/api/actuator/#{actuatorId}/#{actuatorAction}")
+    deviceId = $(this).data('device-id')
+    deviceAction = if $(this).val() is 'on' then 'turnOn' else 'turnOff'
+    $.get("/api/device/#{deviceId}/#{deviceAction}")
       .done(ajaxShowToast)
       .fail(ajaxAlertFail)
 
@@ -84,10 +82,8 @@ $(document).on "pageinit", '#index', (event) ->
         type: ui.draggable.data('item-type')
       }
       $.post 'remove-item', item: item
-      if item.type is 'actuator'
-        delete actuators[item.id]
-      if item.type is 'sensor'
-        delete sensors[item.id]
+      if item.type is 'device'
+        delete devices[item.id]
       ui.draggable.remove()
   )
   return
@@ -95,8 +91,7 @@ $(document).on "pageinit", '#index', (event) ->
 loadData = () ->
   $.get("/data.json")
     .done( (data) ->
-      actuators = []
-      sensors = []
+      devices = []
       rules = []
       $('#items .item').remove()
       addItem(item) for item in data.items
@@ -126,10 +121,8 @@ addItem = (item) ->
       when "temperature" then buildTemperature(item)
       when "presents" then buildPresents(item)
   else switch item.type
-    when 'actuator'
-      buildActuator(item)
-    when 'sensor'
-      buildSensor(item)
+    when 'device'
+      buildDevice(item)
     when 'header'
       buildHeader(item)
   li.data('item-type', item.type)
@@ -141,37 +134,29 @@ addItem = (item) ->
   </div>')
   $('#items').listview('refresh')
 
-buildSwitch = (actuator) ->
-  actuators[actuator.id] = actuator
+buildSwitch = (switchItem) ->
+  devices[switchItem.id] = switchItem
   li = $ $('#switch-template').html()
   li.find('label')
-    .attr('for', "flip-#{actuator.id}")
-    .text(actuator.name)
+    .attr('for', "flip-#{switchItem.id}")
+    .text(switchItem.name)
   select = li.find('select')
-    .attr('name', "flip-#{actuator.id}")
-    .attr('id', "flip-#{actuator.id}")             
-    .data('actuator-id', actuator.id)
-  if actuator.state?
-    val = if actuator.state then 'on' else 'off'
+    .attr('name', "flip-#{switchItem.id}")
+    .attr('id', "flip-#{switchItem.id}")             
+    .data('device-id', switchItem.id)
+  if switchItem.state?
+    val = if switchItem.state then 'on' else 'off'
     select.find("option[value=#{val}]").attr('selected', 'selected')
   select
     .slider() 
   return li
 
-buildActuator = (actuator) ->
-  actuators[actuator.id] = actuator
-  li = $ $('#actuator-template').html()
-  li.find('label').text(actuator.name)
-  if actuator.error?
-    li.find('.error').text(actuator.error)
-  return li
-
-buildSensor = (sensor) ->
-  sensors[sensor.id] = sensor
-  li = $ $('#actuator-template').html()
-  li.find('label').text(sensor.name)
-  if sensor.error?
-    li.find('.error').text(sensor.error)
+buildDevice = (device) ->
+  devices[device.id] = device
+  li = $ $('#device-template').html()
+  li.find('label').text(device.name)
+  if device.error?
+    li.find('.error').text(device.error)
   return li
 
 buildHeader = (header) ->
@@ -180,19 +165,18 @@ buildHeader = (header) ->
   return li
 
 buildTemperature = (sensor) ->
-  sensors[sensor.id] = sensor
+  devices[sensor.id] = sensor
   li = $ $('#temperature-template').html()
-  li.attr('id', "sensor-#{sensor.id}")     
+  li.attr('id', "device-#{sensor.id}")     
   li.find('label').text(sensor.name)
   li.find('.temperature .val').text(sensor.values.temperature)
   li.find('.humidity .val').text(sensor.values.humidity)
   return li
 
-
 buildPresents = (sensor) ->
-  sensors[sensor.id] = sensor
+  devices[sensor.id] = sensor
   li = $ $('#presents-template').html()
-  li.attr('id', "sensor-#{sensor.id}")     
+  li.attr('id', "device-#{sensor.id}")     
   li.find('label').text(sensor.name)
   if sensor.values.present is true
     li.find('.present .val').text('present').addClass('val-present')
@@ -201,7 +185,7 @@ buildPresents = (sensor) ->
   return li
 
 updateSensorValue = (sensorValue) ->
-  li = $("\#sensor-#{sensorValue.id}")
+  li = $("#device-#{sensorValue.id}")
   if sensorValue.name is 'present'
     if sensorValue.value is true
       li.find(".#{sensorValue.name} .val")

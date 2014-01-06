@@ -29,6 +29,11 @@ module.exports = (env) ->
       conf.validate()
       @config = conf.get ""
 
+      # do some legacy support
+      for item in @config.items
+        if item.type is 'actuator' or item.type is 'sensor'
+          item.type = 'device'
+
       global.nap = require 'nap'
 
       # Returns p.min.file versions of p.file when it exist
@@ -173,46 +178,26 @@ module.exports = (env) ->
             rules: rules
         ).done()
 
-      app.get '/add-actuator/:actuatorId', (req, res) =>
-        actuatorId = req.params.actuatorId
-        if not acutatorId?
+      app.get '/add-device/:deviceId', (req, res) =>
+        deviceId = req.params.deviceId
+        if not deviceId?
           return res.send 200, {success: false, message: 'no id given'}
         found = false
         for item in @config.items
-          if item.type is 'actuator' and item.id is actuatorId
+          if item.type is 'device' and item.id is deviceId
             found = true
             break
         if found 
-          res.send 200, {success: false, message: 'actuator already added'}
+          res.send 200, {success: false, message: 'device already added'}
           return
 
         item = 
-          type: 'actuator'
-          id: actuatorId
+          type: 'device'
+          id: deviceId
 
         @addNewItem item
         res.send 200, {success: true}
 
-
-      app.get '/add-sensor/:sensorId', (req, res) =>
-        sensorId = req.params.sensorId
-        if not sensorId?
-          return res.send 200, {success: false, message: 'no id given'}
-        found = false
-        for item in @config.items
-          if item.type is 'sensor' and item.id is sensorId
-            found = true
-            break
-        if found 
-          res.send 200, {success: false, message: 'sensor already added'}
-          return
-
-        item = 
-          type: 'sensor'
-          id: sensorId
-
-        @addNewItem item
-        res.send 200, {success: true}
 
       app.get '/add-header/:name', (req, res) =>
         name = req.params.name
@@ -289,9 +274,7 @@ module.exports = (env) ->
           for item in @config.items 
             do (item) =>
               switch item.type
-                when "actuator" 
-                  @addActuatorNotify socket, item
-                when 'sensor'
+                when "device" 
                   @addSensorNotify socket, item
 
 
@@ -327,10 +310,8 @@ module.exports = (env) ->
       @framework.saveConfig()
 
       p = switch item.type
-        when 'actuator'
-          @getActuatorWithData(item)
-        when 'sensor'
-          @getSensorWithData(item)
+        when 'device'
+          @getDeviceWithData(item)
         when 'header'
           Q.fcall => item
       p.then( (item) =>
@@ -338,8 +319,9 @@ module.exports = (env) ->
       )
 
 
-    addActuatorNotify: (socket, item) ->
-      actuator = @framework.getActuatorById item.id
+    addSwitchActuatorNotify: (socket, item) ->
+      actuator = @framework.getDeviceById item.id
+      assert actuator instanceof env.devices.SwitchActuator
       if actuator?
         # * First time push the state to the client
         actuator.getState().then( (state) =>
@@ -355,8 +337,8 @@ module.exports = (env) ->
       return
 
     addSensorNotify: (socket, item) ->
-      sensor = @framework.getSensorById item.id
-      if sensor?
+      sensor = @framework.getDeviceById item.id
+      if sensor? and sensor instanceof env.devices.Sensor
         names = sensor.getSensorValuesNames()
         for name in names 
           do (name) =>
@@ -370,10 +352,8 @@ module.exports = (env) ->
       for item in @config.items
         do(item) =>
           switch item.type
-            when "actuator"
-              items.push @getActuatorWithData item
-            when "sensor"
-              items.push @getSensorWithData item
+            when "device"
+              items.push @getDeviceWithData item
             when "header"
               items.push Q.fcall => item
             else
@@ -381,80 +361,62 @@ module.exports = (env) ->
               env.logger.error errorMsg
       return Q.all items
 
-    getActuatorWithData: (item) ->
+    getDeviceWithData: (item) ->
       assert item.id?
-      actuator = @framework.getActuatorById item.id
-      if actuator?
+      device = @framework.getDeviceById item.id
+      if device?
         item =
-          type: "actuator"
-          id: actuator.id
-          name: actuator.name
-          state: null
-        if actuator instanceof env.actuators.SwitchActuator
-          item.template = "switch"
-          return actuator.getState().then( (state) =>
-            item.state = state
-            return item
-          ).catch( (error) =>
-            env.logger.error error.message
-            env.logger.debug error.stack
-            return item
-          ) 
-        else 
-          return Q.fcall => item
+          type: "device"
+          id: device.id
+          name: device.name
+        # TODO: gerneric method
+        switch
+          when device instanceof env.devices.SwitchActuator
+            item.template = "switch"
+            return device.getState().then( (state) =>
+              item.state = state
+              return item
+            ).catch( (error) =>
+              env.logger.error error.message
+              env.logger.debug error.stack
+              return item
+            ) 
+          when device instanceof env.devices.TemperatureSensor
+            item.template = "temperature"
+            nameValues = []
+            for name in device.getSensorValuesNames()
+              do (name) =>
+                nameValues.push device.getSensorValue(name).then (value) =>
+                  return name: name, value: value
+            return Q.all(nameValues).then( (nameValues) =>
+              item.values = {}
+              for nameValue in nameValues
+                item.values[nameValue.name] = nameValue.value
+              return item
+            ).catch( (error) =>
+              env.logger.error error.message
+              env.logger.debug error.stack
+              return item
+            ) 
+          when device instanceof env.devices.PresentsSensor
+            item.template = "presents"
+            return device.getSensorValue('present').then (value) =>
+              item.values =
+                present: value
+              return item
+          else 
+            return Q.fcall => item
       else
-        errorMsg = "No actuator to display with id \"#{item.id}\" found"
+        errorMsg = "No device to display with id \"#{item.id}\" found"
         env.logger.error errorMsg
         return Q.fcall =>
-          type: "actuator"
+          type: "device"
           id: item.id
           name: "Unknown"
           state: null,
           error: errorMsg
 
-    getSensorWithData: (item) ->
-      self = this
-      assert item.id?
-      sensor = @framework.getSensorById item.id
-      if sensor?
-        item =
-          type: "sensor"
-          id: sensor.id
-          name: sensor.name
-          values: {}
-        if sensor instanceof env.sensors.TemperatureSensor
-          item.template = "temperature"
-          nameValues = []
-          for name in sensor.getSensorValuesNames()
-            do (name) =>
-              nameValues.push sensor.getSensorValue(name).then (value) =>
-                return name: name, value: value
-          return Q.all(nameValues).then( (nameValues) =>
-            for nameValue in nameValues
-              item.values[nameValue.name] = nameValue.value
-            return item
-          ).catch( (error) =>
-            env.logger.error error.message
-            env.logger.debug error.stack
-            return item
-          ) 
-        else if sensor instanceof env.sensors.PresentsSensor
-          item.template = "presents"
-          return sensor.getSensorValue('present').then (value) =>
-            item.values =
-              present: value
-            return item
-        else 
-          return Q.fcall => item
-      else
-        errorMsg = "No sensor to display with id \"#{item.id}\" found"
-        env.logger.error errorMsg
-        return Q.fcall =>
-          type: "sensor"
-          id: item.id
-          name: "Unknown"
-          values: null,
-          error: errorMsg
+
 
     emitSwitchState: (socket, actuator, state) ->
       socket.emit "switch-status",
