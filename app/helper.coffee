@@ -35,6 +35,8 @@ $(document).ajaxStart ->
 $(document).ajaxStop ->
   $.mobile.loading "hide", 'ajax'
 
+$(document).ajaxError -> #nop
+
 
 ajaxShowToast = (data, textStatus, jqXHR) -> 
   showToast (if data.message? then message else 'done')
@@ -56,6 +58,7 @@ ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
       message = textStatus
 
   alert __(message)
+  return true
 
 voiceCallback = (matches) ->
   $.get "/api/speak",

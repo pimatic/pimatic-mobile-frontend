@@ -36,6 +36,9 @@ $(document).on "pageinit", '#plugins', (event) ->
         return
       ).fail(ajaxAlertFail)
 
+  $('#plugins').on "click", '.restart-now', (event, ui) ->
+    $.get('/api/restart').fail(ajaxAlertFail)
+
 uncheckAllPlugins = () ->
   for ele in $ '#plugin-list input[type="checkbox"]'
     $(ele).prop("checked", false).checkboxradio("refresh")
@@ -73,6 +76,22 @@ $(document).on "pagebeforeshow", '#plugins', (event) ->
 # ---------
 $(document).on "pageinit", '#plugins-browse', (event) ->
 
+  showToast __('Searching for plugin updates')
+
+  $.ajax(
+    url: "/api/plugins/search"
+    timeout: 300000 #ms
+  ).done( (data) ->
+    $('#plugin-browse-list').empty()
+    allPlugins = data.plugins
+    for p in data.plugins
+      addBrowsePlugin(p)
+      if p.isNewer
+        $("#plugin-#{p.name} .update-available").show()
+      $('#plugin-browse-list').listview("refresh")
+    disableInstallButtons()
+  ).fail(ajaxAlertFail)
+
   $('#plugin-browse-list').on "click", '#add-to-config', (event, ui) ->
     li = $(this).parent('li')
     plugin = li.data('plugin')
@@ -89,22 +108,6 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
         showToast text
         return
       ).fail(ajaxAlertFail)
-
-$(document).on "pageshow", '#plugins-browse', (event) ->
-  showToast __('Searching for plugin updates')
-  $.ajax(
-    url: "/api/plugins/search"
-    timeout: 300000 #ms
-  ).done( (data) ->
-    $('#plugin-browse-list').empty()
-    allPlugins = data.plugins
-    for p in data.plugins
-      addBrowsePlugin(p)
-      if p.isNewer
-        $("#plugin-#{p.name} .update-available").show()
-      $('#plugin-browse-list').listview("refresh")
-    disableInstallButtons()
-  ).fail(ajaxAlertFail)
 
 
 addBrowsePlugin = (plugin) ->

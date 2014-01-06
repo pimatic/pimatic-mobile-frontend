@@ -6,7 +6,7 @@ pimaticUpdate = null
 
 $(document).on "pagebeforeshow", '#updates', (event) ->
   $('#updates #install-updates').hide()
-  $('#updates #restart-now').hide()
+  $('#updates .restart-now').hide()
 
 $(document).on "pageshow", '#updates', (event) ->
   searchForPimaticUpdate().done ->
@@ -27,10 +27,10 @@ $(document).on "pageshow", '#updates', (event) ->
       $('#updates #install-updates').hide()
       if data.success
         $('#updates .message').append $('<p>').text(__('Updates was successful. Please restart pimatic.'))
-        $('#updates #restart-now').show()
+        $('#updates .restart-now').show()
     ).fail(ajaxAlertFail)
 
-    $('#updates').on "click", '#restart-now', (event, ui) ->
+    $('#updates').on "click", '.restart-now', (event, ui) ->
       $.get('/api/restart').fail(ajaxAlertFail)
   
 
