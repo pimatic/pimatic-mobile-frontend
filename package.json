@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git://github.com/sweetpi/pimatic-log-mobile-frontend.git"
   },
-  "dependencies": {
+  "dependencies": { 
     "jade": "0.27.*",
     "socket.io": "0.9.*",
     "nap": "git+https://github.com/sweetpi/nap.git#master",
