@@ -1,7 +1,7 @@
 # General
 # -------
 
-$.ajaxSetup timeout: 7000 #ms
+$.ajaxSetup timeout: 20000 #ms
 
 $(document).ajaxStart ->
   $.mobile.loading "show",

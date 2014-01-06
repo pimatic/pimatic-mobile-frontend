@@ -1,6 +1,6 @@
   
 socket = io.connect("/", 
-  'connect timeout': 5000
+  'connect timeout': 20000
   'reconnection delay': 500
   'reconnection limit': 2000 # the max delay
   'max reconnection attempts': Infinity

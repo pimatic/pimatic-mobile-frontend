@@ -26,7 +26,7 @@ $(document).on "pageinit", '#plugins', (event) ->
       showToast __('Searching for plugin updates')
       $.ajax(
         url: "/api/plugins/search"
-        timeout: 30000 #ms
+        timeout: 300000 #ms
       ).done( (data) ->
         $('#plugin-browse-list').empty()
         allPlugins = data.plugins

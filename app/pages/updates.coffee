@@ -22,7 +22,7 @@ $(document).on "pageshow", '#updates', (event) ->
       url: "/api/update"
       type: 'POST'
       data: modules: modules
-      timeout: 600000 #ms
+      timeout: 300000 #ms
     ).done( (data) ->
       $('#updates #install-updates').hide()
       if data.success
@@ -39,7 +39,7 @@ searchForPimaticUpdate = ->
   $('#updates .message').text __('Searching for updates...')
   $.ajax(
     url: "/api/outdated/pimatic"
-    timeout: 30000 #ms
+    timeout: 300000 #ms
   ).done( (data) ->
     $('#updates .message').text ''
     if data.isOutdated is false
@@ -57,7 +57,7 @@ searchForPimaticUpdate = ->
 searchForOutdatedPlugins = ->
   $.ajax(
     url: "/api/outdated/plugins"
-    timeout: 30000 #ms
+    timeout: 300000 #ms
   ).done( (data) ->
     if data.outdated.length is 0
       $('#updates .message').append $('<p>').text __('All plugins are up to date')
