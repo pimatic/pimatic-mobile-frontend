@@ -11,11 +11,11 @@ Example config:
       "plugin": "mobile-frontend",
       "items": [
         {
-          "type": "actuator",
+          "type": "device",
           "id": "my-tv"
         },
         {
-          "type": "actuator",
+          "type": "device",
           "id": "my-work-lampe"
         },
         {

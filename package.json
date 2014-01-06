@@ -1,13 +1,15 @@
 {
   "name": "pimatic-mobile-frontend",
-  "description": "mobile-frontend plugin for pimatic",
+  "description": "Provides a jQuery mobile webinterface for pimatic.",
   "author": "Oliver Schneider <oliverschneider89+sweetpi@gmail.com> (http://sweetpi.de)",
   "main": "mobile-frontend.coffee",
   "files": [
+    "app",
+    "doc",
+    "public",
     "mobile-frontend.coffee",
     "mobile-frontend-config-shema.coffee",
     "coffee",
-    "public",
     "views",
     "README.md"
   ],
