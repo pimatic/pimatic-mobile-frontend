@@ -34,15 +34,19 @@ $(document).on "pageinit", '#index', (event) ->
     ruleId = $(this).data('rule-id')
     rule = rules[ruleId]
     $('#edit-rule-form').data('action', 'update')
-    $('#edit-rule-text').val("if " + rule.condition + " then " + rule.action)
+    $('#edit-rule-condition').val(rule.condition)
+    $('#edit-rule-actions').val(rule.action)
+    $('#edit-rule-active').prop "checked", rule.active
     $('#edit-rule-id').val(ruleId)
     event.stopPropagation()
     return true
 
   $('#index #rules').on "click", "#add-rule", (event, ui) ->
     $('#edit-rule-form').data('action', 'add')
-    $('#edit-rule-text').val("")
+    $('#edit-rule-condition').val("")
+    $('#edit-rule-actions').val("")
     $('#edit-rule-id').val("")
+    $('#edit-rule-active').prop "checked", true
     event.stopPropagation()
     return true
 
@@ -207,6 +211,24 @@ addRule = (rule) ->
   li.find('a').data('rule-id', rule.id)
   li.find('.condition').text(rule.condition)
   li.find('.action').text(rule.action)
+  unless rule.active
+    li.addClass('deactivated')
   li.addClass 'rule'
   $('#add-rule').before li
   $('#rules').listview('refresh')
+
+updateRule = (rule) ->
+  rules[rule.id] = rule 
+  li = $("\#rule-#{rule.id}")   
+  li.find('.condition').text(rule.condition)
+  li.find('.action').text(rule.action)
+  if rule.active
+    li.removeClass('deactivated')
+  else
+    li.addClass('deactivated')
+  $('#rules').listview('refresh')
+
+removeRule = (rule) ->
+  delete rules[rule.id]
+  $("\#rule-#{rule.id}").remove()
+  $('#rules').listview('refresh')  

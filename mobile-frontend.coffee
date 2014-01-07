@@ -172,6 +172,9 @@ module.exports = (env) ->
               id: id
               condition: rule.orgCondition
               action: rule.action
+              active: rule.active
+              valid: rule.valid
+              error: rule.error
           res.send 
             errorCount: env.logger.transports.memory.getErrorCount()
             items: items
@@ -428,6 +431,8 @@ module.exports = (env) ->
         id: rule.id
         condition: rule.orgCondition
         action: rule.action
+        active: rule.active
+        valid: rule.valid
 
     emitSensorValue: (socket, sensor, name, value) ->
       socket.emit "sensor-value",

@@ -192,6 +192,11 @@ li.sortable-placeholder{
   border: 5px solid #ccc !important;
 }
 
+.rule.deactivated a{
+  color: #A0A0A0;
+}
+
+
 
 @media (min-width:35em) {
  

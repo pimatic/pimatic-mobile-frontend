@@ -15,7 +15,15 @@ div#edit-rule(data-role='page')
   div(data-role='content')
     form#edit-rule-form
       input#edit-rule-id(type="text", placeholder="id")
-      textarea#edit-rule-text(name="", placeholder="if ... then ...")
+      fieldset
+        label(for='edit-rule-condition')='if'
+        textarea#edit-rule-condition(name="", placeholder="...")
+      fieldset
+        label(for='edit-rule-actions')='then'
+        textarea#edit-rule-actions(name="", placeholder="...")
+      fieldset(data-role='controlgroup')
+        input#edit-rule-active(type='checkbox', name='edit-rule-active')
+        label(for='edit-rule-active')=__('Enabled')
       fieldset.ui-grid-a
         div.ui-block-a
           a#edit-rule-cancel(data-icon="close", data-transition='slide', data-direction="reverse"
