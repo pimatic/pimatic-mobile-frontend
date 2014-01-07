@@ -6,30 +6,30 @@
   'max reconnection attempts': Infinity
 )
 
-@pimatic.socket.on 'log', (entry) -> 
+@pimatic.socket.on 'log', (entry) => 
   if entry.level is 'error' 
     @pimatic.errorCount++
     updateErrorCount()
   showToast entry.msg
   console.log entry
 
-@pimatic.socket.on 'reconnect', ->
+@pimatic.socket.on 'reconnect', =>
   $.mobile.loading "hide"
   loadData()
 
-@pimatic.socket.on 'disconnect', ->
+@pimatic.socket.on 'disconnect', =>
  $.mobile.loading "show",
   text: __("connection lost, retying")+'...'
   textVisible: true
   textonly: false
 
-onConnectionError = ->
+onConnectionError = =>
   $.mobile.loading "show",
     text: __("could not connect, retying")+'...'
     textVisible: true
     textonly: false
-  setTimeout ->
-    @pimatic.socket.socket.connect(->
+  setTimeout =>
+    @pimatic.socket.socket.connect( =>
       $.mobile.loading "hide"
       loadData()
     )

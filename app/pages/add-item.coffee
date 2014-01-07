@@ -3,7 +3,7 @@
 
 $(document).on "pageinit", '#add-item', (event) =>
 
-  $('#device-items').on "click", 'li.item', =>
+  $('#device-items').on "click", 'li.item', ->
     li = $ this
     if li.hasClass 'added' then return
     deviceId = li.data('device-id')
