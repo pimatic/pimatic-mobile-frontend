@@ -4,12 +4,12 @@
 installedPlugins = null
 allPlugins = null
 
-$(document).on "pageinit", '#plugins', (event) ->
+$(document).on "pageinit", '#plugins', (event) =>
 
   # Get all installed Plugins
   $.get("/api/plugins/installed")
     # when done
-    .done( (data) ->
+    .done( (data) =>
       $('#plugin-list').empty()
       # save the plugins in installedPlugins
       installedPlugins = data.plugins
@@ -19,7 +19,7 @@ $(document).on "pageinit", '#plugins', (event) ->
       $("#plugin-list input[type='checkbox']").checkboxradio()
     ).fail( ajaxAlertFail)
 
-  $('#plugins').on "click", '#plugin-do-action', (event, ui) ->
+  $('#plugins').on "click", '#plugin-do-action', (event, ui) =>
     val = $('#select-plugin-action').val()
     if val is 'select' then return alert __('Please select a action first')
     selected = []
@@ -28,7 +28,7 @@ $(document).on "pageinit", '#plugins', (event) ->
       if ele.is(':checked')
         selected.push(ele.data 'plugin-name')
     $.post("/api/plugins/#{val}", plugins: selected)
-      .done( (data) ->
+      .done( (data) =>
         past = (if val is 'add' then 'added' else 'removed')
         showToast data[past].length + __(" plugins #{past}") + "." +
          (if data[past].length > 0 then " " + __("Please restart pimatic.") else "")
@@ -36,15 +36,15 @@ $(document).on "pageinit", '#plugins', (event) ->
         return
       ).fail(ajaxAlertFail)
 
-  $('#plugins').on "click", '.restart-now', (event, ui) ->
+  $('#plugins').on "click", '.restart-now', (event, ui) =>
     $.get('/api/restart').fail(ajaxAlertFail)
 
-uncheckAllPlugins = () ->
+uncheckAllPlugins = () =>
   for ele in $ '#plugin-list input[type="checkbox"]'
     $(ele).prop("checked", false).checkboxradio("refresh")
 
 
-addPlugin = (plugin) ->
+addPlugin = (plugin) =>
   id = "plugin-#{plugin.name}"
   li = $ $('#plugin-template').html()
   li.attr('id', id)
@@ -61,27 +61,27 @@ addPlugin = (plugin) ->
   $('#plugin-list').append li
 
 
-disableInstallButtons = () ->
+disableInstallButtons = () =>
   if allPlugins?
     for p in allPlugins
       if p.installed 
         $("#plugin-browse-list #plugin-browse-#{p.name} .add-to-config").addClass('ui-disabled') 
   return
 
-$(document).on "pagebeforeshow", '#plugins', (event) ->
+$(document).on "pagebeforeshow", '#plugins', (event) =>
   $('#select-plugin-action').val('select').selectmenu('refresh')
 
 
 # plugins-browse-page
 # ---------
-$(document).on "pageinit", '#plugins-browse', (event) ->
+$(document).on "pageinit", '#plugins-browse', (event) =>
 
   showToast __('Searching for plugin updates')
 
   $.ajax(
     url: "/api/plugins/search"
     timeout: 300000 #ms
-  ).done( (data) ->
+  ).done( (data) =>
     $('#plugin-browse-list').empty()
     allPlugins = data.plugins
     for p in data.plugins
@@ -92,11 +92,11 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
     disableInstallButtons()
   ).fail(ajaxAlertFail)
 
-  $('#plugin-browse-list').on "click", '#add-to-config', (event, ui) ->
+  $('#plugin-browse-list').on "click", '#add-to-config', (event, ui) =>
     li = $(this).parent('li')
     plugin = li.data('plugin')
     $.post("/api/plugins/add", plugins: [plugin.name])
-      .done( (data) ->
+      .done( (data) =>
         text = null
         if data.added.length > 0
           text = __('Added %s to the config. Plugin will be auto installed on next start.', 
@@ -110,7 +110,7 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
       ).fail(ajaxAlertFail)
 
 
-addBrowsePlugin = (plugin) ->
+addBrowsePlugin = (plugin) =>
   id = "plugin-browse-#{plugin.name}"
   li = $ $('#plugin-browse-template').html()
   li.data('plugin', plugin)
