@@ -1,38 +1,37 @@
 # index-page
 # ----------
 
-$(document).on "pagecreate", '#index', (event) =>
+$(document).on "pagecreate", '#index', (event) ->
   loadData()
 
-  @pimatic.socket.on "switch-status", (data) =>
+  pimatic.socket.on "switch-status", (data) ->
     if data.state?
       value = (if data.state then "on" else "off")
       $("#flip-#{data.id}").val(value).slider('refresh')
 
-  @pimatic.socket.on "sensor-value", (data) => updateSensorValue data
+  pimatic.socket.on "sensor-value", (data) -> updateSensorValue data
 
-  @pimatic.socket.on "rule-add", (rule) => addRule rule
-  @pimatic.socket.on "rule-update", (rule) => updateRule rule
-  @pimatic.socket.on "rule-remove", (rule) => removeRule rule
-  @pimatic.socket.on "item-add", (item) => addItem item
+  pimatic.socket.on "rule-add", (rule) -> addRule rule
+  pimatic.socket.on "rule-update", (rule) -> updateRule rule
+  pimatic.socket.on "rule-remove", (rule) -> removeRule rule
+  pimatic.socket.on "item-add", (item) -> addItem item
   
 
-$(document).on "pageinit", '#index', (event) =>
+$(document).on "pageinit", '#index', (event) ->
   if device?
-    $("#talk").show().bind "vclick", (event, ui) =>
+    $("#talk").show().bind "vclick", (event, ui) ->
       device.startVoiceRecognition "voiceCallback"
 
-  $('#index #items').on "change", ".switch",(event, ui) =>
+  $('#index #items').on "change", ".switch",(event, ui) ->
     deviceId = $(this).data('device-id')
     deviceAction = if $(this).val() is 'on' then 'turnOn' else 'turnOff'
     $.get("/api/device/#{deviceId}/#{deviceAction}")
       .done(ajaxShowToast)
       .fail(ajaxAlertFail)
-
-
-  $('#index #rules').on "click", ".rule", (event, ui) =>
+  
+  $('#index #rules').on "click", ".rule", (event, ui) ->
     ruleId = $(this).data('rule-id')
-    rule = rules[ruleId]
+    rule = pimatic.rules[ruleId]
     $('#edit-rule-form').data('action', 'update')
     $('#edit-rule-condition').val(rule.condition)
     $('#edit-rule-actions').val(rule.action)
@@ -41,7 +40,7 @@ $(document).on "pageinit", '#index', (event) =>
     event.stopPropagation()
     return true
 
-  $('#index #rules').on "click", "#add-rule", (event, ui) =>
+  $('#index #rules').on "click", "#add-rule", (event, ui) ->
     $('#edit-rule-form').data('action', 'add')
     $('#edit-rule-condition').val("")
     $('#edit-rule-actions').val("")
@@ -58,13 +57,13 @@ $(document).on "pageinit", '#index', (event) =>
     cursor: "move"
     revert: 100
     scroll: true
-    start: (ev, ui) =>
+    start: (ev, ui) ->
       $("#delete-item").show()
       $("#add-a-item").hide()
       $('#items').listview('refresh')
       ui.item.css('border-bottom-width', '1px')
 
-    stop: (ev, ui) =>
+    stop: (ev, ui) ->
       $("#delete-item").hide()
       $("#add-a-item").show()
       $('#items').listview('refresh')
@@ -80,45 +79,45 @@ $(document).on "pageinit", '#index', (event) =>
   $("#delete-item").droppable(
     accept: "li.sortable"
     hoverClass: "ui-state-hover"
-    drop: (ev, ui) =>
+    drop: (ev, ui) ->
       item = {
         id: ui.draggable.data('item-id')
         type: ui.draggable.data('item-type')
       }
       $.post 'remove-item', item: item
       if item.type is 'device'
-        delete @pimatic.devices[item.id]
+        delete pimatic.devices[item.id]
       ui.draggable.remove()
   )
   return
 
-loadData = () =>
+loadData = () ->
   $.get("/data.json")
-    .done( (data) =>
-      @pimatic.devices = []
-      @pimatic.rules = []
+    .done( (data) ->
+      pimatic.devices = []
+      pimatic.rules = []
       $('#items .item').remove()
       addItem(item) for item in data.items
       $('#rules .rule').remove()
       addRule(rule) for rule in data.rules
-      @pimatic.errorCount = data.errorCount
+      pimatic.errorCount = data.errorCount
       updateErrorCount()
     ) #.fail(ajaxAlertFail)
 
-updateErrorCount = =>
+updateErrorCount = ->
   if $('#error-count').find('.ui-btn-text').length > 0
-    $('#error-count').find('.ui-btn-text').text(@pimatic.errorCount)
+    $('#error-count').find('.ui-btn-text').text(pimatic.errorCount)
     try
       $('#error-count').button('refresh')
     catch e
       # ignore: Uncaught Error: cannot call methods on button prior 
       # to initialization; attempted to call method 'refresh' 
   else
-    $('#error-count').text(@pimatic.errorCount)
-  if @pimatic.errorCount is 0 then $('#error-count').hide()
+    $('#error-count').text(pimatic.errorCount)
+  if pimatic.errorCount is 0 then $('#error-count').hide()
   else $('#error-count').show()
 
-addItem = (item) =>
+addItem = (item) ->
   li = if item.template?
     switch item.template 
       when "switch" then buildSwitch(item)
@@ -138,8 +137,8 @@ addItem = (item) =>
   </div>')
   $('#items').listview('refresh')
 
-buildSwitch = (switchItem) =>
-  @pimatic.devices[switchItem.id] = switchItem
+buildSwitch = (switchItem) ->
+  pimatic.devices[switchItem.id] = switchItem
   li = $ $('#switch-template').html()
   li.find('label')
     .attr('for', "flip-#{switchItem.id}")
@@ -155,21 +154,21 @@ buildSwitch = (switchItem) =>
     .slider() 
   return li
 
-buildDevice = (device) =>
-  @pimatic.devices[device.id] = device
+buildDevice = (device) ->
+  pimatic.devices[device.id] = device
   li = $ $('#device-template').html()
   li.find('label').text(device.name)
   if device.error?
     li.find('.error').text(device.error)
   return li
 
-buildHeader = (header) =>
+buildHeader = (header) ->
   li = $ $('#header-template').html()
   li.find('label').text(header.text)
   return li
 
-buildTemperature = (sensor) =>
-  @pimatic.devices[sensor.id] = sensor
+buildTemperature = (sensor) ->
+  pimatic.devices[sensor.id] = sensor
   li = $ $('#temperature-template').html()
   li.attr('id', "device-#{sensor.id}")     
   li.find('label').text(sensor.name)
@@ -177,8 +176,8 @@ buildTemperature = (sensor) =>
   li.find('.humidity .val').text(sensor.values.humidity)
   return li
 
-buildPresents = (sensor) =>
-  @pimatic.devices[sensor.id] = sensor
+buildPresents = (sensor) ->
+  pimatic.devices[sensor.id] = sensor
   li = $ $('#presents-template').html()
   li.attr('id', "device-#{sensor.id}")     
   li.find('label').text(sensor.name)
@@ -188,7 +187,7 @@ buildPresents = (sensor) =>
     li.find('.present .val').text('not present').addClass('val-not-present')
   return li
 
-updateSensorValue = (sensorValue) =>
+updateSensorValue = (sensorValue) ->
   li = $("#device-#{sensorValue.id}")
   if sensorValue.name is 'present'
     if sensorValue.value is true
@@ -204,8 +203,8 @@ updateSensorValue = (sensorValue) =>
   else
     li.find(".#{sensorValue.name} .val").text(sensorValue.value)
 
-addRule = (rule) =>
-  @pimatic.rules[rule.id] = rule 
+addRule = (rule) ->
+  pimatic.rules[rule.id] = rule 
   li = $ $('#rule-template').html()
   li.attr('id', "rule-#{rule.id}")   
   li.find('a').data('rule-id', rule.id)
@@ -217,8 +216,8 @@ addRule = (rule) =>
   $('#add-rule').before li
   $('#rules').listview('refresh')
 
-updateRule = (rule) =>
-  @pimatic.rules[rule.id] = rule 
+updateRule = (rule) ->
+  pimatic.rules[rule.id] = rule 
   li = $("\#rule-#{rule.id}")   
   li.find('.condition').text(rule.condition)
   li.find('.action').text(rule.action)
@@ -228,7 +227,7 @@ updateRule = (rule) =>
     li.addClass('deactivated')
   $('#rules').listview('refresh')
 
-removeRule = (rule) =>
-  delete @pimatic.rules[rule.id]
+removeRule = (rule) ->
+  delete pimatic.rules[rule.id]
   $("\#rule-#{rule.id}").remove()
   $('#rules').listview('refresh')  

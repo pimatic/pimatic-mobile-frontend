@@ -1,5 +1,5 @@
 
-@pimatic =
+window.pimatic =
   devices: []
   rules: []
   errorCount: 0

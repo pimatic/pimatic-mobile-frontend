@@ -1,20 +1,20 @@
 # add-item-page
 # ----------
 
-$(document).on "pageinit", '#add-item', (event) =>
+$(document).on "pageinit", '#add-item', (event) ->
 
   $('#device-items').on "click", 'li.item', ->
     li = $ this
     if li.hasClass 'added' then return
     deviceId = li.data('device-id')
     $.get("/add-device/#{deviceId}")
-      .done( (data) =>
+      .done( (data) ->
         li.data('icon', 'check')
         li.addClass('added')
         li.buttonMarkup({ icon: "check" })
       ).fail(ajaxAlertFail)
 
-  $('#add-other').on "click", '#add-a-header', =>
+  $('#add-other').on "click", '#add-a-header', ->
     $("<div>").simpledialog2
       mode: "button"
       headerText: __("Name")
@@ -23,26 +23,23 @@ $(document).on "pageinit", '#add-item', (event) =>
       buttonInput: true
       buttons:
         OK:
-          click: =>
+          click: ->
             name = $.mobile.sdLastInput
             if name is ""
               showToast __("Please enter a name")
             else
-              $.get("/add-header/#{name}").done((result) =>
+              $.get("/add-header/#{name}").done((result) ->
                 showToast __("Header added")
               ).fail(ajaxAlertFail)
 
-
-
-
-$(document).on "pageshow", '#add-item', (event) =>
+$(document).on "pageshow", '#add-item', (event) ->
 
   $.get("/api/devices")
-    .done( (data) =>
+    .done( (data) ->
       $('#device-items .item').remove()
       for d in data.devices
         li = $ $('#item-add-template').html()
-        if @pimatic.devices[d.id]? 
+        if pimatic.devices[d.id]? 
           li.data('icon', 'check')
           li.addClass('added')
         li.find('label').text(d.name)

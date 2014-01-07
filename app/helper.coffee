@@ -81,3 +81,5 @@ __ = (text, args...) ->
   for a in args
     translated = translated.replace /%s/, a
   return translated
+
+unless window.console? then window.console = { log: -> }

@@ -1,39 +1,39 @@
   
-@pimatic.socket = io.connect("/", 
+pimatic.socket = io.connect("/", 
   'connect timeout': 20000
   'reconnection delay': 500
   'reconnection limit': 2000 # the max delay
   'max reconnection attempts': Infinity
 )
 
-@pimatic.socket.on 'log', (entry) => 
+pimatic.socket.on 'log', (entry) -> 
   if entry.level is 'error' 
-    @pimatic.errorCount++
+    pimatic.errorCount++
     updateErrorCount()
   showToast entry.msg
   console.log entry
 
-@pimatic.socket.on 'reconnect', =>
+pimatic.socket.on 'reconnect', ->
   $.mobile.loading "hide"
   loadData()
 
-@pimatic.socket.on 'disconnect', =>
+pimatic.socket.on 'disconnect', ->
  $.mobile.loading "show",
   text: __("connection lost, retying")+'...'
   textVisible: true
   textonly: false
 
-onConnectionError = =>
+onConnectionError = ->
   $.mobile.loading "show",
     text: __("could not connect, retying")+'...'
     textVisible: true
     textonly: false
-  setTimeout =>
-    @pimatic.socket.socket.connect( =>
+  setTimeout ->
+    pimatic.socket.socket.connect( ->
       $.mobile.loading "hide"
       loadData()
     )
   , 2000
 
-@pimatic.socket.on 'error', onConnectionError
-@pimatic.socket.on 'connect_error', onConnectionError
+pimatic.socket.on 'error', onConnectionError
+pimatic.socket.on 'connect_error', onConnectionError

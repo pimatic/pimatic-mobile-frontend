@@ -1,8 +1,8 @@
 # edit-rule-page
 # --------------
 
-$(document).on "pageinit", '#edit-rule', (event) =>
-  $('#edit-rule').on "submit", '#edit-rule-form', =>
+$(document).on "pageinit", '#edit-rule', (event) ->
+  $('#edit-rule').on "submit", '#edit-rule-form', ->
     ruleId = $('#edit-rule-id').val()
     ruleCondition = $('#edit-rule-condition').val()
     ruleActions = $('#edit-rule-actions').val()
@@ -12,22 +12,22 @@ $(document).on "pageinit", '#edit-rule', (event) =>
     $.post("/api/rule/#{ruleId}/#{action}", 
       rule: ruleText
       active: ruleEnabled
-    ).done( (data) =>
-        if data.success then $.mobile.changePage('#index',{transition: 'slide', reverse: true})    
+    ).done( (data) ->
+        if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
         else alert data.error
       ).fail(ajaxAlertFail)
     return false
 
-  $('#edit-rule').on "click", '#edit-rule-remove', =>
+  $('#edit-rule').on "click", '#edit-rule-remove', ->
     ruleId = $('#edit-rule-id').val()
     $.get("/api/rule/#{ruleId}/remove")
-      .done( (data) =>
-        if data.success then $.mobile.changePage('#index',{transition: 'slide', reverse: true})    
+      .done( (data) ->
+        if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
         else alert data.error
       ).fail(ajaxAlertFail)
     return false
 
-  $(document).on "pagebeforeshow", '#edit-rule', (event) =>
+  $(document).on "pagebeforeshow", '#edit-rule', (event) ->
     $('#edit-rule-active').checkboxradio "refresh"
     action = $('#edit-rule-form').data('action')
     switch action
