@@ -13,7 +13,7 @@
     "views",
     "README.md"
   ],
-  "version": "0.3.2",
+  "version": "0.4.0",
   "homepage": "http://github.com/sweetpi/pimatic",
   "repository": {
     "type": "git",
@@ -26,7 +26,7 @@
     "render-appcache-manifest": "~0.3.0"
   },
   "peerDependencies": {
-    "pimatic": "~0.3.2"
+    "pimatic": "0.4.*"
   },
   "engines": {
     "node": ">0.8.x",
