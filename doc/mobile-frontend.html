@@ -114,6 +114,9 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
               <span class="nv">id: </span><span class="nx">id</span>
               <span class="nv">condition: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">orgCondition</span>
               <span class="nv">action: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">action</span>
+              <span class="nv">active: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">active</span>
+              <span class="nv">valid: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">valid</span>
+              <span class="nv">error: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">error</span>
           <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> 
             <span class="nv">errorCount: </span><span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">transports</span><span class="p">.</span><span class="nx">memory</span><span class="p">.</span><span class="nx">getErrorCount</span><span class="p">()</span>
             <span class="nv">items: </span><span class="nx">items</span>
@@ -360,6 +363,8 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="nv">id: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">id</span>
         <span class="nv">condition: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">orgCondition</span>
         <span class="nv">action: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">action</span>
+        <span class="nv">active: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">active</span>
+        <span class="nv">valid: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">valid</span>
 
     <span class="nv">emitSensorValue: </span><span class="nf">(socket, sensor, name, value) -&gt;</span>
       <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&quot;sensor-value&quot;</span><span class="p">,</span>
