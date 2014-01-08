@@ -36,7 +36,7 @@ $(document).on "pageshow", '#updates', (event) ->
 
 
 searchForPimaticUpdate = ->
-  $('#updates .message').text __('Searching for updates...')
+  $('#updates .message').text __('Searching for updates. Sorry this takes very long...')
   $.ajax(
     url: "/api/outdated/pimatic"
     timeout: 300000 #ms

@@ -76,7 +76,7 @@ $(document).on "pagebeforeshow", '#plugins', (event) ->
 # ---------
 $(document).on "pageinit", '#plugins-browse', (event) ->
 
-  showToast __('Searching for plugin updates')
+  showToast __('Searching for plugins. Sorry this takes very long...')
 
   $.ajax(
     url: "/api/plugins/search"
