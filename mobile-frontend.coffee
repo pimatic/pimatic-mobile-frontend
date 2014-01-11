@@ -14,8 +14,10 @@ module.exports = (env) ->
   coffee = env.require 'coffee-script'
   i18n = env.require 'i18n'
 
+
   # * own
   socketIo = require 'socket.io'
+  nap = require 'nap'
 
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
@@ -40,7 +42,8 @@ module.exports = (env) ->
           item.type = 'device'
 
       # * Setup jade-templates
-      app.engine 'jade', require('jade').__express
+      jade = require('jade')
+      app.engine 'jade', jade.__express
       app.set 'views', __dirname + '/views'
       app.set 'view engine', 'jade'
 
@@ -49,7 +52,19 @@ module.exports = (env) ->
 
       # * Delivers the index-page
       app.get '/', (req,res) =>
-        res.render 'layout',
+        additionalPages = ''
+        for page in @additionalAssetFiles['html']
+          page = path.resolve __dirname, '..', page
+          additionalPages += switch path.extname(page)
+            when '.jade'
+              jade.renderFile page, res
+            when '.html'
+              page
+            else
+              env.logger.error "Could not add page: #{page} unknown extension."
+              ""
+
+        res.render 'layout', additionalPages: additionalPages, nap: nap
         
       # * Delivers json-Data in the form of:
 
@@ -227,7 +242,6 @@ module.exports = (env) ->
 
     setupAssetsAndManifest: () ->
 
-      global.nap = require 'nap'
       parentDir = path.resolve __dirname, '..'
 
       # Returns p.min.file versions of p.file when it exist
