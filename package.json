@@ -20,7 +20,7 @@
     "url": "git://github.com/sweetpi/pimatic-log-mobile-frontend.git"
   },
   "dependencies": { 
-    "jade": "0.27.*",
+    "jade": "1.1.4",
     "socket.io": "0.9.*",
     "nap": "0.7.15",
     "render-appcache-manifest": "~0.3.0"
