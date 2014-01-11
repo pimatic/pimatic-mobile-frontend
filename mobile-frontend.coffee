@@ -20,10 +20,15 @@ module.exports = (env) ->
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
     pluginDependencies: ['rest-api', 'speak-api']
-    config: null
+    additionalAssetFiles:
+      'js': []
+      'css': []
+      'html': []
+    assetsPacked: no
+
 
     # ###init the frontend:
-    init: (app, @framework, @jsonConfig) ->
+    init: (@app, @framework, @jsonConfig) ->
       conf = convict require("./mobile-frontend-config-shema")
       conf.load jsonConfig
       conf.validate()
@@ -33,106 +38,6 @@ module.exports = (env) ->
       for item in @config.items
         if item.type is 'actuator' or item.type is 'sensor'
           item.type = 'device'
-
-      global.nap = require 'nap'
-
-      # Returns p.min.file versions of p.file when it exist
-      minPath = (p) => 
-        # Check if a minimised version exists:
-        if @config.mode is "production"
-          minFile = p.replace(/\.[^\.]+$/, '.min$&')
-          if fs.existsSync __dirname + "/" + minFile then return minFile
-        # in other modes or when not exist return full file:
-        return p
-
-      cwd = process.cwd()
-      #process.chdir __dirname
-
-      # Configure static assets with nap
-      nap(
-        appDir: __dirname
-        publicDir: "public"
-        mode: @config.mode
-        minify: true
-        assets:
-          js:
-            jquery: [
-              minPath "app/js/jquery-1.10.2.js"
-              minPath "app/js/jquery.mobile-1.3.2.js"
-              minPath "app/js/jquery.mobile.toast.js"
-              minPath "app/js/jquery-ui-1.10.3.custom.js"
-              minPath "app/js/jquery.ui.touch-punch.js"
-              minPath "app/js/jquery.mobile.simpledialog2.js"
-            ]
-            main: [
-              "app/scope.coffee"
-              "app/helper.coffee"
-              "app/connection.coffee"
-              "app/pages/*"
-            ]
-          css:
-            theme: [
-              minPath "app/css/theme/default/jquery.mobile-1.3.2.css"
-              minPath "app/css/themes/graphite/water/jquery.mobile-1.3.2.css"
-              minPath "app/css/jquery.mobile.toast.css"
-              minPath "app/css/jquery.mobile.simpledialog.css"
-            ]
-            style: [
-              "app/css/style.css"
-            ]
-      )
-
-      nap.preprocessors['.coffee'] = (contents, filename) ->
-        try
-          coffee.compile contents, bare: on
-        catch err
-          err.stack = "Nap error compiling #{filename}\n" + err.stack
-          throw err
-
-      # When the config mode 
-      switch @config.mode 
-        # is production
-        when "production"
-          # then pack the static assets in "public/assets/"
-          nap.package()
-
-          # function to create the app manifest
-          createAppManifest = =>
-
-            # Collect all files in "public/assets"
-            assets = ( "/assets/#{f}" for f in fs.readdirSync  __dirname + '/public/assets' )
-
-            # Render the app manifest
-            renderManifest = require "render-appcache-manifest"
-            return renderManifest(
-              cache: assets.concat [
-                '/',
-                '/socket.io/socket.io.js'
-              ]
-              network: ['*']
-              fallback: []
-              lastModified: new Date()
-            )
-
-          # Save the manifest. We don't need to generate it each request, because
-          # files shouldn't change in production mode
-          manifest = createAppManifest()
-
-          # If the app manifest is requested
-          app.get "/application.manifest", (req, res) =>
-            # then deliver it
-            res.statusCode = 200
-            res.setHeader "content-type", "text/cache-manifest"
-            res.setHeader "content-length", Buffer.byteLength(manifest)
-            res.end manifest
-
-        # if we are in development mode
-        when "development"
-          # then serve the files directly
-          app.use nap.middleware
-        else 
-          env.logger.error "Unknown mode: #{@config.mode}!"
-
 
       # * Setup jade-templates
       app.engine 'jade', require('jade').__express
@@ -180,7 +85,7 @@ module.exports = (env) ->
             items: items
             rules: rules
         ).done()
-
+    
       app.get '/add-device/:deviceId', (req, res) =>
         deviceId = req.params.deviceId
         if not deviceId?
@@ -200,8 +105,8 @@ module.exports = (env) ->
 
         @addNewItem item
         res.send 200, {success: true}
-
-
+    
+    
       app.get '/add-header/:name', (req, res) =>
         name = req.params.name
         if not acutatorId? or name is ""
@@ -213,7 +118,7 @@ module.exports = (env) ->
 
         @addNewItem item
         res.send 200, {success: true}
-
+    
       app.post '/update-order', (req, res) =>
         order = req.body.order
         unless order?
@@ -233,11 +138,11 @@ module.exports = (env) ->
         @config.items = @jsonConfig.items = newItems
         @framework.saveConfig()
         res.send 200, {success: true}
-
+    
       app.get '/clear-log', (req, res) =>
         env.logger.transports.memory.clearLog()
         res.send 200, {success: true}
-
+    
       app.post '/remove-item', (req, res) =>
         item = req.body.item
         unless item?
@@ -247,12 +152,12 @@ module.exports = (env) ->
           if it.id is item.id and it.type is item.type
             jsonConfig.items.splice i, 1
             break
-
+    
         @config.items = @jsonConfig.items
         @framework.saveConfig()
 
         res.send 200, {success: true}
-
+    
       # * Static assets
       app.use express.static(__dirname + "/public")
 
@@ -305,7 +210,122 @@ module.exports = (env) ->
             @removeListener 'item-add', addItemListener
           return
 
+      @framework.on 'after init', =>
+        # Give the other plugins some time to register asset files
+        process.nextTick => 
+          # and then setup the assets and manifest
+          @setupAssetsAndManifest()
+
       return
+
+
+    registerAssetFile: (type, file) ->
+      assert type is 'css' or type is 'js' or type is 'html'
+      assert not @assetsPacked, "Assets are already packed. Please call this function only from" +
+        "the pimatic 'after init' event."
+      @additionalAssetFiles[type].push file
+
+    setupAssetsAndManifest: () ->
+
+      global.nap = require 'nap'
+      parentDir = path.resolve __dirname, '..'
+
+      # Returns p.min.file versions of p.file when it exist
+      minPath = (p) => 
+        # Check if a minimised version exists:
+        if @config.mode is "production"
+          minFile = p.replace(/\.[^\.]+$/, '.min$&')
+          if fs.existsSync parentDir + "/" + minFile then return minFile
+        # in other modes or when not exist return full file:
+        return p
+
+      # Configure static assets with nap
+      nap(
+        appDir: parentDir
+        publicDir: "pimatic-mobile-frontend/public"
+        mode: @config.mode
+        minify: true
+        assets:
+          js:
+            jquery: [
+              minPath "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery.mobile-1.3.2.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery-ui-1.10.3.custom.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery.ui.touch-punch.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js"
+            ]
+            main: [
+              "pimatic-mobile-frontend/app/scope.coffee"
+              "pimatic-mobile-frontend/app/helper.coffee"
+              "pimatic-mobile-frontend/app/connection.coffee"
+              "pimatic-mobile-frontend/app/pages/*"
+            ] .concat (minPath(f) for f in @additionalAssetFiles['js'])
+            
+          css:
+            theme: [
+              minPath "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.3.2.css"
+              minPath "pimatic-mobile-frontend/app/css/themes/graphite/water/"+
+                      "jquery.mobile-1.3.2.css"
+              minPath "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
+              minPath "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
+            ]
+            style: [
+              "pimatic-mobile-frontend/app/css/style.css"
+            ] .concat (minPath(f) for f in @additionalAssetFiles['css'])
+      )
+
+      nap.preprocessors['.coffee'] = (contents, filename) ->
+        try
+          coffee.compile contents, bare: on
+        catch err
+          err.stack = "Nap error compiling #{filename}\n" + err.stack
+          throw err
+
+      # When the config mode 
+      switch @config.mode 
+        # is production
+        when "production"
+          # then pack the static assets in "public/assets/"
+          env.logger.info "packing static assets"
+          nap.package()
+          env.logger.info "packing static assets finished"
+          # function to create the app manifest
+          createAppManifest = =>
+
+            # Collect all files in "public/assets"
+            assets = ( "/assets/#{f}" for f in fs.readdirSync  __dirname + '/public/assets' )
+
+            # Render the app manifest
+            renderManifest = require "render-appcache-manifest"
+            return renderManifest(
+              cache: assets.concat [
+                '/',
+                '/socket.io/socket.io.js'
+              ]
+              network: ['*']
+              fallback: []
+              lastModified: new Date()
+            )
+
+          # Save the manifest. We don't need to generate it each request, because
+          # files shouldn't change in production mode
+          manifest = createAppManifest()
+
+          # If the app manifest is requested
+          @app.get "/application.manifest", (req, res) =>
+            # then deliver it
+            res.statusCode = 200
+            res.setHeader "content-type", "text/cache-manifest"
+            res.setHeader "content-length", Buffer.byteLength(manifest)
+            res.end manifest
+
+        # if we are in development mode
+        when "development"
+          # then serve the files directly
+          @app.use nap.middleware
+        else 
+          env.logger.error "Unknown mode: #{@config.mode}!"
 
     addNewItem: (item) ->
       @config.items.push item
@@ -440,4 +460,5 @@ module.exports = (env) ->
         name: name
         value: value
 
-  return new MobileFrontend
+  plugin = new MobileFrontend
+  return plugin
