@@ -16,6 +16,8 @@ pimatic.socket.on 'log', (entry) ->
 pimatic.socket.on 'reconnect', ->
   $.mobile.loading "hide"
   loadData()
+  if window.applicationCache?
+    window.applicationCache.update()
 
 pimatic.socket.on 'disconnect', ->
  $.mobile.loading "show",
@@ -32,8 +34,13 @@ onConnectionError = ->
     pimatic.socket.socket.connect( ->
       $.mobile.loading "hide"
       loadData()
+      if window.applicationCache?
+        window.applicationCache.update()
     )
   , 2000
 
+
+
+    
 pimatic.socket.on 'error', onConnectionError
 pimatic.socket.on 'connect_error', onConnectionError

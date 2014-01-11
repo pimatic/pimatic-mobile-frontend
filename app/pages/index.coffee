@@ -92,6 +92,7 @@ $(document).on "pageinit", '#index', (event) ->
   return
 
 loadData = () ->
+
   $.get("/data.json")
     .done( (data) ->
       pimatic.devices = []

@@ -37,6 +37,15 @@ $(document).ajaxStop ->
 
 $(document).ajaxError -> #nop
 
+$(document).ready => 
+  if window.applicationCache 
+    window.applicationCache.addEventListener 'updateready', (e) =>
+      if window.applicationCache.status is window.applicationCache.UPDATEREADY 
+        window.applicationCache.swapCache()
+        if confirm('A new version of this site is available. Load it?')
+          window.location.reload();
+    , false
+, false
 
 ajaxShowToast = (data, textStatus, jqXHR) -> 
   showToast (if data.message? then message else 'done')
