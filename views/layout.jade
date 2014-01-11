@@ -1,4 +1,4 @@
-doctype 5
+doctype html
 html(manifest='application.manifest')
   head
     meta(charset='utf-8')
@@ -20,5 +20,6 @@ html(manifest='application.manifest')
     include pages/log-messages
     include pages/plugins
     include pages/updates
+    !{additionalPages}
     #toast(data-role='toast')
     div.ui-loader-background  
