@@ -22,7 +22,7 @@
   "dependencies": { 
     "jade": "0.27.*",
     "socket.io": "0.9.*",
-    "nap": "git+https://github.com/sweetpi/nap.git#master",
+    "nap": "0.7.15",
     "render-appcache-manifest": "~0.3.0"
   },
   "peerDependencies": {
