@@ -48,7 +48,7 @@ $(document).ready =>
 , false
 
 ajaxShowToast = (data, textStatus, jqXHR) -> 
-  showToast (if data.message? then message else 'done')
+  showToast (if data.message? then data.message else 'done')
 
 ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   data = null
