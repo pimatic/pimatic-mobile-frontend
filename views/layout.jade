@@ -10,8 +10,7 @@ html(manifest='application.manifest')
     != nap.css('style')
     != nap.js('jquery')
     script(src='socket.io/socket.io.js')
-    script(type='text/javascript') 
-        locale = !{JSON.stringify(getCatalog())};
+    script(type='text/javascript')!="locale = " + JSON.stringify(getCatalog())
     != nap.js('main')
   body
     include pages/index
