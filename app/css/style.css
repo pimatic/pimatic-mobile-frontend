@@ -1,4 +1,4 @@
-div.ui-slider-switch {
+#index div.ui-slider-switch {
     margin: 3px 10px 10px 0 !important;
     position: absolute;
     right: 0;
@@ -16,7 +16,7 @@ div.ui-slider-switch {
   font-weight: normal;
 }
 
-span.if, span.then {
+#index span.if, span.then {
   font-weight: bold;
 }
 
@@ -195,8 +195,6 @@ li.sortable-placeholder{
 .rule.deactivated a{
   color: #A0A0A0;
 }
-
-
 
 @media (min-width:35em) {
  
