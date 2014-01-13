@@ -225,12 +225,19 @@ module.exports = (env) ->
             @removeListener 'item-add', addItemListener
           return
 
-      @framework.on 'after init', =>
+      @framework.on 'after init', (context)=>
+        deferred = Q.defer()
         # Give the other plugins some time to register asset files
         process.nextTick => 
           # and then setup the assets and manifest
-          @setupAssetsAndManifest()
-
+          try
+            @setupAssetsAndManifest()
+          catch e
+            env.logger.error "Error setting up assets in mobile-frontend: #{e.message}"
+            env.logger.debug e.stack
+          finally
+            deferred.resolve()
+        context.waitForIt deferred.promise
       return
 
 
@@ -258,7 +265,7 @@ module.exports = (env) ->
         appDir: parentDir
         publicDir: "pimatic-mobile-frontend/public"
         mode: @config.mode
-        minify: true
+        minify: false # to slow...
         assets:
           js:
             jquery: [
