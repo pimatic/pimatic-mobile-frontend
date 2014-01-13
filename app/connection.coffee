@@ -14,25 +14,25 @@ pimatic.socket.on 'log', (entry) ->
   console.log entry
 
 pimatic.socket.on 'reconnect', ->
-  $.mobile.loading "hide"
+  loading "hide"
   loadData()
   if window.applicationCache?
     window.applicationCache.update()
 
 pimatic.socket.on 'disconnect', ->
- $.mobile.loading "show",
+ loading "show",
   text: __("connection lost, retying")+'...'
   textVisible: true
   textonly: false
 
 onConnectionError = ->
-  $.mobile.loading "show",
+  loading "show",
     text: __("could not connect, retying")+'...'
     textVisible: true
     textonly: false
   setTimeout ->
     pimatic.socket.socket.connect( ->
-      $.mobile.loading "hide"
+      loading "hide"
       loadData()
       if window.applicationCache?
         window.applicationCache.update()
