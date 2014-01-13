@@ -1,16 +1,16 @@
 script#switch-template(type='text/template')
-  li.sortable(data-role="fieldcontain")
+  li.sortable.switch-device(data-role="fieldcontain")
     label
     select.switch(data-role="slider")
       option(value="off")=__('Off')
       option(value="on")=__('On')
 script#device-template(type='text/template')     
-  li.sortable(data-role="fieldcontain")
+  li.sortable.device(data-role="fieldcontain")
     label
     | 
     span.error
 script#temperature-template(type='text/template')
-  li.sortable(data-role="fieldcontain")
+  li.sortable.temperature-sensor(data-role="fieldcontain")
     label
     | 
     span.values
@@ -21,14 +21,14 @@ script#temperature-template(type='text/template')
         span.val
         span.unit %
 script#presents-template(type='text/template')
-  li.sortable(data-role="fieldcontain")
+  li.sortable.presents-sensor(data-role="fieldcontain")
     label
     | 
     span.values
       span.present
         span.val
 script#header-template(type='text/template')
-  li.sortable(data-role='list-divider')
+  li.sortable.header(data-role='list-divider')
     label
 //- Actuators and rules page
 div#index(data-role='page')
