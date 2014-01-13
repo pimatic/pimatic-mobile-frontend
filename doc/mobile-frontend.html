@@ -13,83 +13,41 @@
   <span class="nv">coffee = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span> <span class="s">&#39;coffee-script&#39;</span>
   <span class="nv">i18n = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span> <span class="s">&#39;i18n&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>own</li>
-</ul></div></div><div class="code"><div class="wrapper">  <span class="nv">socketIo = </span><span class="nx">require</span> <span class="s">&#39;socket.io&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="the-mobilefrontend">The MobileFrontend</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper">  <span class="k">class</span> <span class="nx">MobileFrontend</span> <span class="k">extends</span> <span class="nx">env</span><span class="p">.</span><span class="nx">plugins</span><span class="p">.</span><span class="nx">Plugin</span>
+</ul></div></div><div class="code"><div class="wrapper">  <span class="nv">socketIo = </span><span class="nx">require</span> <span class="s">&#39;socket.io&#39;</span>
+  <span class="nv">nap = </span><span class="nx">require</span> <span class="s">&#39;nap&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="the-mobilefrontend">The MobileFrontend</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper">  <span class="k">class</span> <span class="nx">MobileFrontend</span> <span class="k">extends</span> <span class="nx">env</span><span class="p">.</span><span class="nx">plugins</span><span class="p">.</span><span class="nx">Plugin</span>
     <span class="nv">pluginDependencies: </span><span class="p">[</span><span class="s">&#39;rest-api&#39;</span><span class="p">,</span> <span class="s">&#39;speak-api&#39;</span><span class="p">]</span>
-    <span class="nv">config: </span><span class="kc">null</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h3 id="init-the-frontend">init the frontend:</h3></div></div></div><div class="segment"><div class="code"><div class="wrapper">    <span class="nv">init: </span><span class="nf">(app, @framework, @jsonConfig) -&gt;</span>
+    <span class="nv">additionalAssetFiles:</span>
+      <span class="s">&#39;js&#39;</span><span class="o">:</span> <span class="p">[]</span>
+      <span class="s">&#39;css&#39;</span><span class="o">:</span> <span class="p">[]</span>
+      <span class="s">&#39;html&#39;</span><span class="o">:</span> <span class="p">[]</span>
+    <span class="nv">assetsPacked: </span><span class="kc">no</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h3 id="init-the-frontend">init the frontend:</h3></div></div></div><div class="segment"><div class="code"><div class="wrapper">    <span class="nv">init: </span><span class="nf">(@app, @framework, @jsonConfig) -&gt;</span>
       <span class="nv">conf = </span><span class="nx">convict</span> <span class="nx">require</span><span class="p">(</span><span class="s">&quot;./mobile-frontend-config-shema&quot;</span><span class="p">)</span>
       <span class="nx">conf</span><span class="p">.</span><span class="nx">load</span> <span class="nx">jsonConfig</span>
       <span class="nx">conf</span><span class="p">.</span><span class="nx">validate</span><span class="p">()</span>
       <span class="vi">@config = </span><span class="nx">conf</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>do some legacy support</p></div></div><div class="code"><div class="wrapper">      <span class="k">for</span> <span class="nx">item</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span>
         <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;actuator&#39;</span> <span class="o">or</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;sensor&#39;</span>
-          <span class="nv">item.type = </span><span class="s">&#39;device&#39;</span>
-
-      <span class="nv">global.nap = </span><span class="nx">require</span> <span class="s">&#39;nap&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Returns p.min.file versions of p.file when it exist</p></div></div><div class="code"><div class="wrapper">      <span class="nv">minPath = </span><span class="nf">(p) =&gt;</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Check if a minimised version exists:</p></div></div><div class="code"><div class="wrapper">        <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> <span class="o">is</span> <span class="s">&quot;production&quot;</span>
-          <span class="nv">minFile = </span><span class="nx">p</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\.[^\.]+$/</span><span class="p">,</span> <span class="s">&#39;.min$&amp;&#39;</span><span class="p">)</span>
-          <span class="k">if</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">existsSync</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="nx">minFile</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">minFile</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>in other modes or when not exist return full file:</p></div></div><div class="code"><div class="wrapper">        <span class="k">return</span> <span class="nx">p</span>
-
-      <span class="nv">cwd = </span><span class="nx">process</span><span class="p">.</span><span class="nx">cwd</span><span class="p">()</span>
-      <span class="c1">#process.chdir __dirname</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Configure static assets with nap</p></div></div><div class="code"><div class="wrapper">      <span class="nx">nap</span><span class="p">(</span>
-        <span class="nv">appDir: </span><span class="nx">__dirname</span>
-        <span class="nv">publicDir: </span><span class="s">&quot;public&quot;</span>
-        <span class="nv">mode: </span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span>
-        <span class="nv">minify: </span><span class="kc">true</span>
-        <span class="nv">assets:</span>
-          <span class="nv">js:</span>
-            <span class="nv">jquery: </span><span class="p">[</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery-1.10.2.js&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery.mobile-1.3.2.js&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery.mobile.toast.js&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery-ui-1.10.3.custom.js&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery.ui.touch-punch.js&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/js/jquery.mobile.simpledialog2.js&quot;</span>
-            <span class="p">]</span>
-            <span class="nv">main: </span><span class="p">[</span>
-              <span class="s">&quot;app/scope.coffee&quot;</span>
-              <span class="s">&quot;app/helper.coffee&quot;</span>
-              <span class="s">&quot;app/connection.coffee&quot;</span>
-              <span class="s">&quot;app/pages/*&quot;</span>
-            <span class="p">]</span>
-          <span class="nv">css:</span>
-            <span class="nv">theme: </span><span class="p">[</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/css/theme/default/jquery.mobile-1.3.2.css&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/css/themes/graphite/water/jquery.mobile-1.3.2.css&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/css/jquery.mobile.toast.css&quot;</span>
-              <span class="nx">minPath</span> <span class="s">&quot;app/css/jquery.mobile.simpledialog.css&quot;</span>
-            <span class="p">]</span>
-            <span class="nv">style: </span><span class="p">[</span>
-              <span class="s">&quot;app/css/style.css&quot;</span>
-            <span class="p">]</span>
-      <span class="p">)</span>
-
-      <span class="nx">nap</span><span class="p">.</span><span class="nx">preprocessors</span><span class="p">[</span><span class="s">&#39;.coffee&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nf">(contents, filename) -&gt;</span>
-        <span class="k">try</span>
-          <span class="nx">coffee</span><span class="p">.</span><span class="nx">compile</span> <span class="nx">contents</span><span class="p">,</span> <span class="nv">bare: </span><span class="kc">on</span>
-        <span class="k">catch</span> <span class="nx">err</span>
-          <span class="nv">err.stack = </span><span class="s">&quot;Nap error compiling </span><span class="si">#{</span><span class="nx">filename</span><span class="si">}</span><span class="s">\n&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">stack</span>
-          <span class="k">throw</span> <span class="nx">err</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>When the config mode </p></div></div><div class="code"><div class="wrapper">      <span class="k">switch</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>is production</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;production&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then pack the static assets in "public/assets/"</p></div></div><div class="code"><div class="wrapper">          <span class="nx">nap</span><span class="p">.</span><span class="nx">package</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>function to create the app manifest</p></div></div><div class="code"><div class="wrapper">          <span class="nv">createAppManifest = </span><span class="o">=&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Collect all files in "public/assets"</p></div></div><div class="code"><div class="wrapper">            <span class="nv">assets = </span><span class="p">(</span> <span class="s">&quot;/assets/</span><span class="si">#{</span><span class="nx">f</span><span class="si">}</span><span class="s">&quot;</span> <span class="k">for</span> <span class="nx">f</span> <span class="k">in</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span>  <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/public/assets&#39;</span> <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Render the app manifest</p></div></div><div class="code"><div class="wrapper">            <span class="nv">renderManifest = </span><span class="nx">require</span> <span class="s">&quot;render-appcache-manifest&quot;</span>
-            <span class="k">return</span> <span class="nx">renderManifest</span><span class="p">(</span>
-              <span class="nv">cache: </span><span class="nx">assets</span><span class="p">.</span><span class="nx">concat</span> <span class="p">[</span>
-                <span class="s">&#39;/&#39;</span><span class="p">,</span>
-                <span class="s">&#39;/socket.io/socket.io.js&#39;</span>
-              <span class="p">]</span>
-              <span class="nv">network: </span><span class="p">[</span><span class="s">&#39;*&#39;</span><span class="p">]</span>
-              <span class="nv">fallback: </span><span class="p">[]</span>
-              <span class="nv">lastModified: </span><span class="k">new</span> <span class="nb">Date</span><span class="p">()</span>
-            <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Save the manifest. We don't need to generate it each request, because
-files shouldn't change in production mode</p></div></div><div class="code"><div class="wrapper">          <span class="nv">manifest = </span><span class="nx">createAppManifest</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If the app manifest is requested</p></div></div><div class="code"><div class="wrapper">          <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;/application.manifest&quot;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then deliver it</p></div></div><div class="code"><div class="wrapper">            <span class="nv">res.statusCode = </span><span class="mi">200</span>
-            <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-type&quot;</span><span class="p">,</span> <span class="s">&quot;text/cache-manifest&quot;</span>
-            <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-length&quot;</span><span class="p">,</span> <span class="nx">Buffer</span><span class="p">.</span><span class="nx">byteLength</span><span class="p">(</span><span class="nx">manifest</span><span class="p">)</span>
-            <span class="nx">res</span><span class="p">.</span><span class="nx">end</span> <span class="nx">manifest</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if we are in development mode</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;development&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then serve the files directly</p></div></div><div class="code"><div class="wrapper">          <span class="nx">app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">nap</span><span class="p">.</span><span class="nx">middleware</span>
-        <span class="k">else</span> 
-          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="s">&quot;Unknown mode: </span><span class="si">#{</span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span><span class="si">}</span><span class="s">!&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
+          <span class="nv">item.type = </span><span class="s">&#39;device&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>Setup jade-templates</li>
-</ul></div></div><div class="code"><div class="wrapper">      <span class="nx">app</span><span class="p">.</span><span class="nx">engine</span> <span class="s">&#39;jade&#39;</span><span class="p">,</span> <span class="nx">require</span><span class="p">(</span><span class="s">&#39;jade&#39;</span><span class="p">).</span><span class="nx">__express</span>
+</ul></div></div><div class="code"><div class="wrapper">      <span class="nv">jade = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;jade&#39;</span><span class="p">)</span>
+      <span class="nx">app</span><span class="p">.</span><span class="nx">engine</span> <span class="s">&#39;jade&#39;</span><span class="p">,</span> <span class="nx">jade</span><span class="p">.</span><span class="nx">__express</span>
       <span class="nx">app</span><span class="p">.</span><span class="nx">set</span> <span class="s">&#39;views&#39;</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/views&#39;</span>
       <span class="nx">app</span><span class="p">.</span><span class="nx">set</span> <span class="s">&#39;view engine&#39;</span><span class="p">,</span> <span class="s">&#39;jade&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>app.get '/locale.json', (req,res) =>
   res.send res.getCatalog()</p></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>Delivers the index-page</li>
 </ul></div></div><div class="code"><div class="wrapper">      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="nf">(req,res) =&gt;</span>
-        <span class="nx">res</span><span class="p">.</span><span class="nx">render</span> <span class="s">&#39;layout&#39;</span><span class="p">,</span>
+        <span class="nv">additionalPages = </span><span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="nx">page</span> <span class="k">in</span> <span class="nx">@additionalAssetFiles</span><span class="p">[</span><span class="s">&#39;html&#39;</span><span class="p">]</span>
+          <span class="nv">page = </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span> <span class="nx">__dirname</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="nx">page</span>
+          <span class="nx">additionalPages</span> <span class="o">+=</span> <span class="k">switch</span> <span class="nx">path</span><span class="p">.</span><span class="nx">extname</span><span class="p">(</span><span class="nx">page</span><span class="p">)</span>
+            <span class="k">when</span> <span class="s">&#39;.jade&#39;</span>
+              <span class="nx">jade</span><span class="p">.</span><span class="nx">renderFile</span> <span class="nx">page</span><span class="p">,</span> <span class="nx">res</span>
+            <span class="k">when</span> <span class="s">&#39;.html&#39;</span>
+              <span class="nx">page</span>
+            <span class="k">else</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="s">&quot;Could not add page: </span><span class="si">#{</span><span class="nx">page</span><span class="si">}</span><span class="s"> unknown extension.&quot;</span>
+              <span class="s">&quot;&quot;</span>
+
+        <span class="nx">res</span><span class="p">.</span><span class="nx">render</span> <span class="s">&#39;layout&#39;</span><span class="p">,</span> <span class="nv">additionalPages: </span><span class="nx">additionalPages</span><span class="p">,</span> <span class="nv">nap: </span><span class="nx">nap</span>
         </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>Delivers json-Data in the form of:</li>
 </ul></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><pre><code>{
@@ -122,7 +80,7 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
             <span class="nv">items: </span><span class="nx">items</span>
             <span class="nv">rules: </span><span class="nx">rules</span>
         <span class="p">).</span><span class="nx">done</span><span class="p">()</span>
-
+    
       <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-device/:deviceId&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nv">deviceId = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">deviceId</span>
         <span class="k">if</span> <span class="o">not</span> <span class="nx">deviceId</span><span class="o">?</span>
@@ -142,8 +100,8 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
 
         <span class="nx">@addNewItem</span> <span class="nx">item</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
-
-
+    
+    
       <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-header/:name&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nv">name = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">name</span>
         <span class="k">if</span> <span class="o">not</span> <span class="nx">acutatorId</span><span class="o">?</span> <span class="o">or</span> <span class="nx">name</span> <span class="o">is</span> <span class="s">&quot;&quot;</span>
@@ -155,7 +113,7 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
 
         <span class="nx">@addNewItem</span> <span class="nx">item</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
-
+    
       <span class="nx">app</span><span class="p">.</span><span class="nx">post</span> <span class="s">&#39;/update-order&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nv">order = </span><span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">order</span>
         <span class="k">unless</span> <span class="nx">order</span><span class="o">?</span>
@@ -175,11 +133,11 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="vi">@config.items = @jsonConfig.items = </span><span class="nx">newItems</span>
         <span class="nx">@framework</span><span class="p">.</span><span class="nx">saveConfig</span><span class="p">()</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
-
+    
       <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/clear-log&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">transports</span><span class="p">.</span><span class="nx">memory</span><span class="p">.</span><span class="nx">clearLog</span><span class="p">()</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
-
+    
       <span class="nx">app</span><span class="p">.</span><span class="nx">post</span> <span class="s">&#39;/remove-item&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nv">item = </span><span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">item</span>
         <span class="k">unless</span> <span class="nx">item</span><span class="o">?</span>
@@ -189,11 +147,12 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
           <span class="k">if</span> <span class="nx">it</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span> <span class="o">and</span> <span class="nx">it</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
             <span class="nx">jsonConfig</span><span class="p">.</span><span class="nx">items</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
             <span class="k">break</span>
-
+    
         <span class="vi">@config.items = </span><span class="nx">@jsonConfig</span><span class="p">.</span><span class="nx">items</span>
         <span class="nx">@framework</span><span class="p">.</span><span class="nx">saveConfig</span><span class="p">()</span>
 
-        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
+    </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>Static assets</li>
 </ul></div></div><div class="code"><div class="wrapper">      <span class="nx">app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">express</span><span class="p">.</span><span class="nx">static</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&quot;/public&quot;</span><span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h3 id="socketio-stuff">Socket.io stuff:</h3>
 
@@ -239,7 +198,86 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
             <span class="nx">@removeListener</span> <span class="s">&#39;item-add&#39;</span><span class="p">,</span> <span class="nx">addItemListener</span>
           <span class="k">return</span>
 
+      <span class="nx">@framework</span><span class="p">.</span><span class="nx">on</span> <span class="s">&#39;after init&#39;</span><span class="p">,</span> <span class="nf">(context)=&gt;</span>
+        <span class="nv">deferred = </span><span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Give the other plugins some time to register asset files</p></div></div><div class="code"><div class="wrapper">        <span class="nx">process</span><span class="p">.</span><span class="nx">nextTick</span> <span class="o">=&gt;</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>and then setup the assets and manifest</p></div></div><div class="code"><div class="wrapper">          <span class="k">try</span>
+            <span class="nx">@setupAssetsAndManifest</span><span class="p">()</span>
+          <span class="k">catch</span> <span class="nx">e</span>
+            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="s">&quot;Error setting up assets in mobile-frontend: </span><span class="si">#{</span><span class="nx">e</span><span class="p">.</span><span class="nx">message</span><span class="si">}</span><span class="s">&quot;</span>
+            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">e</span><span class="p">.</span><span class="nx">stack</span>
+          <span class="k">finally</span>
+            <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
+        <span class="nx">context</span><span class="p">.</span><span class="nx">waitForIt</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span>
       <span class="k">return</span>
+
+
+    <span class="nv">registerAssetFile: </span><span class="nf">(type, file) -&gt;</span>
+      <span class="nx">assert</span> <span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;css&#39;</span> <span class="o">or</span> <span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;js&#39;</span> <span class="o">or</span> <span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;html&#39;</span>
+      <span class="nx">assert</span> <span class="o">not</span> <span class="nx">@assetsPacked</span><span class="p">,</span> <span class="s">&quot;Assets are already packed. Please call this function only from&quot;</span> <span class="o">+</span>
+        <span class="s">&quot;the pimatic &#39;after init&#39; event.&quot;</span>
+      <span class="nx">@additionalAssetFiles</span><span class="p">[</span><span class="nx">type</span><span class="p">].</span><span class="nx">push</span> <span class="nx">file</span>
+
+    <span class="nv">setupAssetsAndManifest: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+
+      <span class="nv">parentDir = </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span> <span class="nx">__dirname</span><span class="p">,</span> <span class="s">&#39;..&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Returns p.min.file versions of p.file when it exist</p></div></div><div class="code"><div class="wrapper">      <span class="nv">minPath = </span><span class="nf">(p) =&gt;</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Check if a minimised version exists:</p></div></div><div class="code"><div class="wrapper">        <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> <span class="o">is</span> <span class="s">&quot;production&quot;</span>
+          <span class="nv">minFile = </span><span class="nx">p</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\.[^\.]+$/</span><span class="p">,</span> <span class="s">&#39;.min$&amp;&#39;</span><span class="p">)</span>
+          <span class="k">if</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">existsSync</span> <span class="nx">parentDir</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="nx">minFile</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">minFile</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>in other modes or when not exist return full file:</p></div></div><div class="code"><div class="wrapper">        <span class="k">return</span> <span class="nx">p</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Configure static assets with nap</p></div></div><div class="code"><div class="wrapper">      <span class="nx">nap</span><span class="p">(</span>
+        <span class="nv">appDir: </span><span class="nx">parentDir</span>
+        <span class="nv">publicDir: </span><span class="s">&quot;pimatic-mobile-frontend/public&quot;</span>
+        <span class="nv">mode: </span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span>
+        <span class="nv">minify: </span><span class="kc">false</span> <span class="c1"># to slow...</span>
+        <span class="nv">assets:</span>
+          <span class="nv">js:</span>
+            <span class="nv">jquery: </span><span class="p">[</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/js/jquery-1.10.2.js&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/js/jquery.mobile-1.3.2.js&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/js/jquery.mobile.toast.js&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/js/jquery-ui-1.10.3.custom.js&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/js/jquery.ui.touch-punch.js&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js&quot;</span>
+            <span class="p">]</span>
+            <span class="nv">main: </span><span class="p">[</span>
+              <span class="s">&quot;pimatic-mobile-frontend/app/scope.coffee&quot;</span>
+              <span class="s">&quot;pimatic-mobile-frontend/app/helper.coffee&quot;</span>
+              <span class="s">&quot;pimatic-mobile-frontend/app/connection.coffee&quot;</span>
+              <span class="s">&quot;pimatic-mobile-frontend/app/pages/*&quot;</span>
+            <span class="p">]</span> <span class="p">.</span><span class="nx">concat</span> <span class="p">(</span><span class="nx">minPath</span><span class="p">(</span><span class="nx">f</span><span class="p">)</span> <span class="k">for</span> <span class="nx">f</span> <span class="k">in</span> <span class="nx">@additionalAssetFiles</span><span class="p">[</span><span class="s">&#39;js&#39;</span><span class="p">])</span>
+            
+          <span class="nv">css:</span>
+            <span class="nv">theme: </span><span class="p">[</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.3.2.css&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/css/themes/graphite/water/&quot;</span><span class="o">+</span>
+                      <span class="s">&quot;jquery.mobile-1.3.2.css&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/css/jquery.mobile.toast.css&quot;</span>
+              <span class="nx">minPath</span> <span class="s">&quot;pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css&quot;</span>
+            <span class="p">]</span>
+            <span class="nv">style: </span><span class="p">[</span>
+              <span class="s">&quot;pimatic-mobile-frontend/app/css/style.css&quot;</span>
+            <span class="p">]</span> <span class="p">.</span><span class="nx">concat</span> <span class="p">(</span><span class="nx">minPath</span><span class="p">(</span><span class="nx">f</span><span class="p">)</span> <span class="k">for</span> <span class="nx">f</span> <span class="k">in</span> <span class="nx">@additionalAssetFiles</span><span class="p">[</span><span class="s">&#39;css&#39;</span><span class="p">])</span>
+      <span class="p">)</span>
+
+      <span class="nx">nap</span><span class="p">.</span><span class="nx">preprocessors</span><span class="p">[</span><span class="s">&#39;.coffee&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nf">(contents, filename) -&gt;</span>
+        <span class="k">try</span>
+          <span class="nx">coffee</span><span class="p">.</span><span class="nx">compile</span> <span class="nx">contents</span><span class="p">,</span> <span class="nv">bare: </span><span class="kc">on</span>
+        <span class="k">catch</span> <span class="nx">err</span>
+          <span class="nv">err.stack = </span><span class="s">&quot;Nap error compiling </span><span class="si">#{</span><span class="nx">filename</span><span class="si">}</span><span class="s">\n&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">stack</span>
+          <span class="k">throw</span> <span class="nx">err</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>When the config mode </p></div></div><div class="code"><div class="wrapper">      <span class="k">switch</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>is production</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;production&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then pack the static assets in "public/assets/"</p></div></div><div class="code"><div class="wrapper">          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;packing static assets&quot;</span>
+          <span class="nx">nap</span><span class="p">.</span><span class="nx">package</span><span class="p">()</span>
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;packing static assets finished&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>function to create the app manifest</p></div></div><div class="code"><div class="wrapper">          <span class="nv">createAppManifest = </span><span class="o">=&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Collect all files in "public/assets"</p></div></div><div class="code"><div class="wrapper">            <span class="nv">assets = </span><span class="p">(</span> <span class="s">&quot;/assets/</span><span class="si">#{</span><span class="nx">f</span><span class="si">}</span><span class="s">&quot;</span> <span class="k">for</span> <span class="nx">f</span> <span class="k">in</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span>  <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/public/assets&#39;</span> <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Render the app manifest</p></div></div><div class="code"><div class="wrapper">            <span class="nv">renderManifest = </span><span class="nx">require</span> <span class="s">&quot;render-appcache-manifest&quot;</span>
+            <span class="k">return</span> <span class="nx">renderManifest</span><span class="p">(</span>
+              <span class="nv">cache: </span><span class="nx">assets</span><span class="p">.</span><span class="nx">concat</span> <span class="p">[</span>
+                <span class="s">&#39;/&#39;</span><span class="p">,</span>
+                <span class="s">&#39;/socket.io/socket.io.js&#39;</span>
+              <span class="p">]</span>
+              <span class="nv">network: </span><span class="p">[</span><span class="s">&#39;*&#39;</span><span class="p">]</span>
+              <span class="nv">fallback: </span><span class="p">[]</span>
+              <span class="nv">lastModified: </span><span class="k">new</span> <span class="nb">Date</span><span class="p">()</span>
+            <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Save the manifest. We don't need to generate it each request, because
+files shouldn't change in production mode</p></div></div><div class="code"><div class="wrapper">          <span class="nv">manifest = </span><span class="nx">createAppManifest</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If the app manifest is requested</p></div></div><div class="code"><div class="wrapper">          <span class="nx">@app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;/application.manifest&quot;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then deliver it</p></div></div><div class="code"><div class="wrapper">            <span class="nv">res.statusCode = </span><span class="mi">200</span>
+            <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-type&quot;</span><span class="p">,</span> <span class="s">&quot;text/cache-manifest&quot;</span>
+            <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-length&quot;</span><span class="p">,</span> <span class="nx">Buffer</span><span class="p">.</span><span class="nx">byteLength</span><span class="p">(</span><span class="nx">manifest</span><span class="p">)</span>
+            <span class="nx">res</span><span class="p">.</span><span class="nx">end</span> <span class="nx">manifest</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if we are in development mode</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;development&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then serve the files directly</p></div></div><div class="code"><div class="wrapper">          <span class="nx">@app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">nap</span><span class="p">.</span><span class="nx">middleware</span>
+        <span class="k">else</span> 
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="s">&quot;Unknown mode: </span><span class="si">#{</span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span><span class="si">}</span><span class="s">!&quot;</span>
 
     <span class="nv">addNewItem: </span><span class="nf">(item) -&gt;</span>
       <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">item</span>
@@ -372,4 +410,5 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="nv">name: </span><span class="nx">name</span>
         <span class="nv">value: </span><span class="nx">value</span>
 
-  <span class="k">return</span> <span class="k">new</span> <span class="nx">MobileFrontend</span></div></div></div></div></body></html>
+  <span class="nv">plugin = </span><span class="k">new</span> <span class="nx">MobileFrontend</span>
+  <span class="k">return</span> <span class="nx">plugin</span></div></div></div></div></body></html>
