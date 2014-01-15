@@ -97,15 +97,15 @@ li.sortable-placeholder{
     padding-left: 26px;
 }
 
-#items .properties{
+#items .attributes{
   float: right;
 }
 
-#items .properties > span{
+#items .attributes > span{
   margin-left: 0.5em;
 }
 
-#items .property .unit {
+#items .attribute .unit {
   color: #888888;
   margin-left: 0.1em;
 }

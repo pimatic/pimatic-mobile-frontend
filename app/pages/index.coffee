@@ -4,12 +4,12 @@
 $(document).on "pagecreate", '#index', (event) ->
   loadData()
 
-  pimatic.socket.on "device-attribute", (propEvent) -> updateDeviceAttribute propEvent
+  pimatic.socket.on "device-attribute", (attrEvent) -> updateDeviceAttribute attrEvent
 
-  pimatic.socket.on "device-attribute", (propEvent) ->
-    if propEvent.name is "state"
-      value = if propEvent.value then "on" else "off" 
-      $("#flip-#{propEvent.id}").val(value).slider('refresh')
+  pimatic.socket.on "device-attribute", (attrEvent) ->
+    if attrEvent.name is "state"
+      value = if attrEvent.value then "on" else "off" 
+      $("#flip-#{attrEvent.id}").val(value).slider('refresh')
 
   pimatic.socket.on "rule-add", (rule) -> addRule rule
   pimatic.socket.on "rule-update", (rule) -> updateRule rule
@@ -164,14 +164,13 @@ buildDevice = (device) ->
   li.find('label').text(device.name)
   if device.error?
     li.find('.error').text(device.error)
-  for propName of device.attributes
-    prop = device.attributes[propName]
+  for attrName of device.attributes
+    attr = device.attributes[attrName]
     span = $ $('.attribute-template').html()
-    console.log propName, span
-    span.addClass(propName)
-    span.attr('data-val', prop.value)
-    span.find('.val').text(propValueToText prop)
-    span.find('.unit').text(prop.unit)
+    span.addClass("attr-#{attrName}")
+    span.attr('data-val', attr.value)
+    span.find('.val').text(attrValueToText attr)
+    span.find('.unit').text(attr.unit)
     li.find('.attributes').append span
   return li
 
@@ -180,19 +179,19 @@ buildHeader = (header) ->
   li.find('label').text(header.text)
   return li
 
-propValueToText= (attribute) =>
+attrValueToText= (attribute) =>
   if attribute.type is 'Boolean'
     unless attribute.labels? then return attribute.value.toString()
     else if attribute.value is true then attribute.labels[0] else attribute.labels[1]
   else return attribute.value.toString()
 
-updateDeviceAttribute = (sensorValue) ->
-  prop = pimatic.devices[sensorValue.id].attributes[sensorValue.name]
-  prop.value = sensorValue.value
-  li = $("#device-#{sensorValue.id}")
-  li.find(".#{sensorValue.name} .val")
-  .attr('data-val', prop.value)
-
+updateDeviceAttribute = (attrEvent) ->
+  attr = pimatic.devices[attrEvent.id].attributes[attrEvent.name]
+  attr.value = attrEvent.value
+  li = $("#device-#{attrEvent.id}")
+  span = li.find(".attr-#{attrEvent.name}")
+  span.attr('data-val', attr.value)
+  span.find('.val').text(attrValueToText attr)
 
 addRule = (rule) ->
   pimatic.rules[rule.id] = rule 
