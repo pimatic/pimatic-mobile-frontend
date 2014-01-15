@@ -13,6 +13,7 @@ module.exports = (env) ->
   express = env.require "express" 
   coffee = env.require 'coffee-script'
   i18n = env.require 'i18n'
+  _ = env.require 'lodash'
 
 
   # * own
@@ -198,7 +199,7 @@ module.exports = (env) ->
             do (item) =>
               switch item.type
                 when "device" 
-                  @addSensorNotify socket, item
+                  @addPropertyNotify socket, item
 
 
           framework.ruleManager.on "add", addRuleListener = (rule) =>
@@ -362,33 +363,13 @@ module.exports = (env) ->
         @emit 'item-add', item 
       )
 
-
-    addSwitchActuatorNotify: (socket, item) ->
-      actuator = @framework.getDeviceById item.id
-      assert actuator instanceof env.devices.SwitchActuator
-      if actuator?
-        # * First time push the state to the client
-        actuator.getState().then( (state) =>
-          @emitSwitchState socket, actuator, state
-        ).catch( (error) =>
-          env.logger.error error.message
-          env.logger.debug error.stack 
-        )
-        # * Then forward following state event to the client
-        actuator.on "state", stateListener = (state) =>
-          @emitSwitchState socket, actuator, state
-        socket.on 'close', => actuator.removeListener "state", stateListener
-      return
-
-    addSensorNotify: (socket, item) ->
-      sensor = @framework.getDeviceById item.id
-      if sensor? and sensor instanceof env.devices.Sensor
-        names = sensor.getSensorValuesNames()
-        for name in names 
-          do (name) =>
-            sensor.on name, (value) =>
-              @emitSensorValue socket, sensor, name, value
-            socket.on 'close', => sensor.removeListener name, valueListener
+    addPropertyNotify: (socket, item) ->
+      device = @framework.getDeviceById item.id
+      for prop of device.properties 
+        do (prop) =>
+          device.on prop, propListener = (value) =>
+            @emitProperyValue socket, device, prop, value
+          socket.on 'close', => sensor.removeListener prop, propListener
       return
 
     getItemsWithData: () ->
@@ -413,43 +394,24 @@ module.exports = (env) ->
           type: "device"
           id: device.id
           name: device.name
-        # TODO: gerneric method
-        switch
-          when device instanceof env.devices.SwitchActuator
-            item.template = "switch"
-            return device.getState().then( (state) =>
-              item.state = state
-              return item
-            ).catch( (error) =>
-              env.logger.error error.message
-              env.logger.debug error.stack
-              return item
-            ) 
-          when device instanceof env.devices.TemperatureSensor
-            item.template = "temperature"
-            nameValues = []
-            for name in device.getSensorValuesNames()
-              do (name) =>
-                nameValues.push device.getSensorValue(name).then (value) =>
-                  return name: name, value: value
-            return Q.all(nameValues).then( (nameValues) =>
-              item.values = {}
-              for nameValue in nameValues
-                item.values[nameValue.name] = nameValue.value
-              return item
-            ).catch( (error) =>
-              env.logger.error error.message
-              env.logger.debug error.stack
-              return item
-            ) 
-          when device instanceof env.devices.PresentsSensor
-            item.template = "presents"
-            return device.getSensorValue('present').then (value) =>
-              item.values =
-                present: value
-              return item
-          else 
-            return Q.fcall => item
+          template: device.getTemplateName()
+          properties: _.cloneDeep device.properties
+
+        propValues = []
+        for propName of device.properties
+          item.properties[propName].type = device.properties[propName].type.name
+          do (propName) =>
+            propValues.push device.getProperty(propName).then (value) =>
+              return name: propName, value: value
+        return Q.all(propValues).then( (propValues) =>
+          for prop in propValues
+            item.properties[prop.name].value = prop.value
+          return item
+        ).catch( (error) =>
+          env.logger.error error.message
+          env.logger.debug error.stack
+          return item
+        ) 
       else
         errorMsg = "No device to display with id \"#{item.id}\" found"
         env.logger.error errorMsg
@@ -457,15 +419,8 @@ module.exports = (env) ->
           type: "device"
           id: item.id
           name: "Unknown"
-          state: null,
+          properties = {}
           error: errorMsg
-
-
-
-    emitSwitchState: (socket, actuator, state) ->
-      socket.emit "switch-status",
-        id: actuator.id
-        state: state
 
     emitRuleUpdate: (socket, trigger, rule) ->
       socket.emit "rule-#{trigger}",
@@ -475,9 +430,9 @@ module.exports = (env) ->
         active: rule.active
         valid: rule.valid
 
-    emitSensorValue: (socket, sensor, name, value) ->
-      socket.emit "sensor-value",
-        id: sensor.id
+    emitProperyValue: (socket, device, name, value) ->
+      socket.emit "device-property",
+        id: device.id
         name: name
         value: value
 

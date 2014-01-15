@@ -4,12 +4,12 @@
 $(document).on "pagecreate", '#index', (event) ->
   loadData()
 
-  pimatic.socket.on "switch-status", (data) ->
-    if data.state?
-      value = (if data.state then "on" else "off")
-      $("#flip-#{data.id}").val(value).slider('refresh')
+  pimatic.socket.on "device-property", (propEvent) -> updateDeviceProperty propEvent
 
-  pimatic.socket.on "sensor-value", (data) -> updateSensorValue data
+  pimatic.socket.on "device-property", (propEvent) ->
+    if propEvent.name is "state"
+      value = if propEvent.value then "on" else "off" 
+      $("#flip-#{propEvent.id}").val(value).slider('refresh')
 
   pimatic.socket.on "rule-add", (rule) -> addRule rule
   pimatic.socket.on "rule-update", (rule) -> updateRule rule
@@ -23,11 +23,15 @@ $(document).on "pageinit", '#index', (event) ->
       device.startVoiceRecognition "voiceCallback"
 
   $('#index #items').on "change", ".switch",(event, ui) ->
-    deviceId = $(this).data('device-id')
-    deviceAction = if $(this).val() is 'on' then 'turnOn' else 'turnOff'
+    ele = $(this)
+    val = ele.val()
+    deviceId = ele.data('device-id')
+    deviceAction = if val is 'on' then 'turnOn' else 'turnOff'
     $.get("/api/device/#{deviceId}/#{deviceAction}")
       .done(ajaxShowToast)
-      .fail(ajaxAlertFail)
+      .fail( ->
+        ele.val(if val is 'on' then 'off' else 'on').slider('refresh')
+      ).fail(ajaxAlertFail)
   
   $('#index #rules').on "click", ".rule", (event, ui) ->
     ruleId = $(this).data('rule-id')
@@ -122,8 +126,7 @@ addItem = (item) ->
   li = if item.template?
     switch item.template 
       when "switch" then buildSwitch(item)
-      when "temperature" then buildTemperature(item)
-      when "presents" then buildPresents(item)
+      else buildDevice(item)
   else switch item.type
     when 'device'
       buildDevice(item)
@@ -140,7 +143,7 @@ addItem = (item) ->
 
 buildSwitch = (switchItem) ->
   pimatic.devices[switchItem.id] = switchItem
-  li = $ $('#switch-template').html()
+  li = $ $('.switch-template').html()
   li.find('label')
     .attr('for', "flip-#{switchItem.id}")
     .text(switchItem.name)
@@ -157,10 +160,19 @@ buildSwitch = (switchItem) ->
 
 buildDevice = (device) ->
   pimatic.devices[device.id] = device
-  li = $ $('#device-template').html()
+  li = $ $(".#{device.template}-template").html()
   li.find('label').text(device.name)
   if device.error?
     li.find('.error').text(device.error)
+  for propName of device.properties
+    prop = device.properties[propName]
+    span = $ $('.property-template').html()
+    console.log propName, span
+    span.addClass(propName)
+    span.attr('data-val', prop.value)
+    span.find('.val').text(propValueToText prop)
+    span.find('.unit').text(prop.unit)
+    li.find('.properties').append span
   return li
 
 buildHeader = (header) ->
@@ -168,41 +180,19 @@ buildHeader = (header) ->
   li.find('label').text(header.text)
   return li
 
-buildTemperature = (sensor) ->
-  pimatic.devices[sensor.id] = sensor
-  li = $ $('#temperature-template').html()
-  li.attr('id', "device-#{sensor.id}")     
-  li.find('label').text(sensor.name)
-  li.find('.temperature .val').text(sensor.values.temperature)
-  li.find('.humidity .val').text(sensor.values.humidity)
-  return li
+propValueToText= (property) =>
+  if property.type is 'Boolean'
+    unless property.labels? then return property.value.toString()
+    else if property.value is true then property.labels[0] else property.labels[1]
+  else return property.value.toString()
 
-buildPresents = (sensor) ->
-  pimatic.devices[sensor.id] = sensor
-  li = $ $('#presents-template').html()
-  li.attr('id', "device-#{sensor.id}")     
-  li.find('label').text(sensor.name)
-  if sensor.values.present is true
-    li.find('.present .val').text('present').addClass('val-present')
-  else 
-    li.find('.present .val').text('not present').addClass('val-not-present')
-  return li
-
-updateSensorValue = (sensorValue) ->
+updateDeviceProperty = (sensorValue) ->
+  prop = pimatic.devices[sensorValue.id].properties[sensorValue.name]
+  prop.value = sensorValue.value
   li = $("#device-#{sensorValue.id}")
-  if sensorValue.name is 'present'
-    if sensorValue.value is true
-      li.find(".#{sensorValue.name} .val")
-        .text('present')
-        .addClass('val-present')
-        .removeClass('val-not-present')
-    else 
-      li.find(".#{sensorValue.name} .val")
-        .text('not present')
-        .addClass('val-not-resent')
-        .removeClass('val-present')
-  else
-    li.find(".#{sensorValue.name} .val").text(sensorValue.value)
+  li.find(".#{sensorValue.name} .val")
+  .attr('data-val', prop.value)
+
 
 addRule = (rule) ->
   pimatic.rules[rule.id] = rule 
