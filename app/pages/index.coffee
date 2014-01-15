@@ -4,9 +4,9 @@
 $(document).on "pagecreate", '#index', (event) ->
   loadData()
 
-  pimatic.socket.on "device-property", (propEvent) -> updateDeviceProperty propEvent
+  pimatic.socket.on "device-attribute", (propEvent) -> updateDeviceAttribute propEvent
 
-  pimatic.socket.on "device-property", (propEvent) ->
+  pimatic.socket.on "device-attribute", (propEvent) ->
     if propEvent.name is "state"
       value = if propEvent.value then "on" else "off" 
       $("#flip-#{propEvent.id}").val(value).slider('refresh')
@@ -164,15 +164,15 @@ buildDevice = (device) ->
   li.find('label').text(device.name)
   if device.error?
     li.find('.error').text(device.error)
-  for propName of device.properties
-    prop = device.properties[propName]
-    span = $ $('.property-template').html()
+  for propName of device.attributes
+    prop = device.attributes[propName]
+    span = $ $('.attribute-template').html()
     console.log propName, span
     span.addClass(propName)
     span.attr('data-val', prop.value)
     span.find('.val').text(propValueToText prop)
     span.find('.unit').text(prop.unit)
-    li.find('.properties').append span
+    li.find('.attributes').append span
   return li
 
 buildHeader = (header) ->
@@ -180,14 +180,14 @@ buildHeader = (header) ->
   li.find('label').text(header.text)
   return li
 
-propValueToText= (property) =>
-  if property.type is 'Boolean'
-    unless property.labels? then return property.value.toString()
-    else if property.value is true then property.labels[0] else property.labels[1]
-  else return property.value.toString()
+propValueToText= (attribute) =>
+  if attribute.type is 'Boolean'
+    unless attribute.labels? then return attribute.value.toString()
+    else if attribute.value is true then attribute.labels[0] else attribute.labels[1]
+  else return attribute.value.toString()
 
-updateDeviceProperty = (sensorValue) ->
-  prop = pimatic.devices[sensorValue.id].properties[sensorValue.name]
+updateDeviceAttribute = (sensorValue) ->
+  prop = pimatic.devices[sensorValue.id].attributes[sensorValue.name]
   prop.value = sensorValue.value
   li = $("#device-#{sensorValue.id}")
   li.find(".#{sensorValue.name} .val")

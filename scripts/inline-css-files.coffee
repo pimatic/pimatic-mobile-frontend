@@ -17,7 +17,7 @@ cssIncImages = (cssFile) ->
 walk = (dir) ->
   files = fs.readdirSync(dir)
   for i of files
-    continue  unless files.hasOwnProperty(i)
+    continue  unless files.hasOwnAttribute(i)
     name = dir + "/" + files[i]
     if fs.statSync(name).isDirectory()
       walk name

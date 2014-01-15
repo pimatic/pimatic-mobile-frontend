@@ -199,7 +199,7 @@ module.exports = (env) ->
             do (item) =>
               switch item.type
                 when "device" 
-                  @addPropertyNotify socket, item
+                  @addAttributeNotify socket, item
 
 
           framework.ruleManager.on "add", addRuleListener = (rule) =>
@@ -363,9 +363,9 @@ module.exports = (env) ->
         @emit 'item-add', item 
       )
 
-    addPropertyNotify: (socket, item) ->
+    addAttributeNotify: (socket, item) ->
       device = @framework.getDeviceById item.id
-      for prop of device.properties 
+      for prop of device.attributes 
         do (prop) =>
           device.on prop, propListener = (value) =>
             @emitProperyValue socket, device, prop, value
@@ -395,17 +395,17 @@ module.exports = (env) ->
           id: device.id
           name: device.name
           template: device.getTemplateName()
-          properties: _.cloneDeep device.properties
+          attributes: _.cloneDeep device.attributes
 
         propValues = []
-        for propName of device.properties
-          item.properties[propName].type = device.properties[propName].type.name
+        for propName of device.attributes
+          item.attributes[propName].type = device.attributes[propName].type.name
           do (propName) =>
-            propValues.push device.getProperty(propName).then (value) =>
+            propValues.push device.getAttributeValue(propName).then (value) =>
               return name: propName, value: value
         return Q.all(propValues).then( (propValues) =>
           for prop in propValues
-            item.properties[prop.name].value = prop.value
+            item.attributes[prop.name].value = prop.value
           return item
         ).catch( (error) =>
           env.logger.error error.message
@@ -419,7 +419,7 @@ module.exports = (env) ->
           type: "device"
           id: item.id
           name: "Unknown"
-          properties = {}
+          attributes = {}
           error: errorMsg
 
     emitRuleUpdate: (socket, trigger, rule) ->
@@ -431,7 +431,7 @@ module.exports = (env) ->
         valid: rule.valid
 
     emitProperyValue: (socket, device, name, value) ->
-      socket.emit "device-property",
+      socket.emit "device-attribute",
         id: device.id
         name: name
         value: value
