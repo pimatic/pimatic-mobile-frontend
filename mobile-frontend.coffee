@@ -406,7 +406,7 @@ module.exports = (env) ->
         do (attr) =>
           env.logger.debug("adding listener for #{attr} of #{device.id}") if @config.debug
           device.on attr, attrListener = (value) =>
-            env.logger.debug("got attr change for #{attr} of #{device.id}: #{value}") if @config.debug
+            env.logger.debug("attr change for #{attr} of #{device.id}: #{value}") if @config.debug
             @emitAttributeValue socket, device, attr, value
           socket.on 'disconnect', => 
             env.logger.debug("removing listener for #{attr} of #{device.id}") if @config.debug
