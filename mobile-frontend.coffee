@@ -402,6 +402,9 @@ module.exports = (env) ->
 
     addAttributeNotify: (socket, item) ->
       device = @framework.getDeviceById item.id
+      unless device? 
+        env.logger.debug "device #{item.id} not found."
+        return
       for attr of device.attributes 
         do (attr) =>
           env.logger.debug("adding listener for #{attr} of #{device.id}") if @config.debug
@@ -459,8 +462,8 @@ module.exports = (env) ->
         return Q.fcall =>
           type: "device"
           id: item.id
-          name: "Unknown"
-          attributes = {}
+          name: ""
+          attributes: {}
           error: errorMsg
 
     emitRuleUpdate: (socket, trigger, rule) ->

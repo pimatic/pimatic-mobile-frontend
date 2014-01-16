@@ -129,9 +129,11 @@ addItem = (item) ->
       else buildDevice(item)
   else switch item.type
     when 'device'
+      item.template = 'device'
       buildDevice(item)
     when 'header'
       buildHeader(item)
+    else buildDevice(item)
   li.data('item-type', item.type)
   li.data('item-id', item.id)
   li.addClass 'item'
@@ -182,12 +184,15 @@ buildHeader = (header) ->
 
 attrValueToText= (attribute) =>
   if attribute.type is 'Boolean'
-    unless attribute.labels? then return attribute.value.toString()
-    else if attribute.value is true then attribute.labels[0] else attribute.labels[1]
-  else return attribute.value.toString()
+    unless attribute.labels? then return attribute.value?.toString()
+    else if attribute.value is true then attribute.labels[0] 
+    else if attribute.value is false then attribute.labels[1]
+    else attribute.value?.toString()
+  else return attribute.value?.toString()
 
 updateDeviceAttribute = (attrEvent) ->
-  attr = pimatic.devices[attrEvent.id].attributes[attrEvent.name]
+  attr = pimatic.devices?[attrEvent.id].attributes?[attrEvent.name]
+  unless attr? then return
   attr.value = attrEvent.value
   li = $("#device-#{attrEvent.id}")
   span = li.find(".attr-#{attrEvent.name}")
