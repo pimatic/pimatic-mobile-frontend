@@ -10,3 +10,7 @@ module.exports =
     doc: "production or development mode"
     format: ["production", "development"]
     default: "production"
+  debug:
+    doc: "that to true to get additional debug outputs"
+    format: Boolean
+    default: false

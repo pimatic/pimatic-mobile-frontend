@@ -12,13 +12,14 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   express = env.require "express" 
   coffee = env.require 'coffee-script'
-  i18n = env.require 'i18n'
-  _ = env.require 'lodash'
 
+  global.i18n = env.require('i18n')
+  global.__ = i18n.__
+  _ = env.require 'lodash'
 
   # * own
   socketIo = require 'socket.io'
-  nap = require 'nap'
+  global.nap = require 'nap'
 
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
@@ -42,30 +43,6 @@ module.exports = (env) ->
         if item.type is 'actuator' or item.type is 'sensor'
           item.type = 'device'
 
-      # * Setup jade-templates
-      jade = require('jade')
-      app.engine 'jade', jade.__express
-      app.set 'views', __dirname + '/views'
-      app.set 'view engine', 'jade'
-
-      # app.get '/locale.json', (req,res) =>
-      #   res.send res.getCatalog()
-
-      # * Delivers the index-page
-      app.get '/', (req,res) =>
-        additionalPages = ''
-        for page in @additionalAssetFiles['html']
-          page = path.resolve __dirname, '..', page
-          additionalPages += switch path.extname(page)
-            when '.jade'
-              jade.renderFile page, res
-            when '.html'
-              page
-            else
-              env.logger.error "Could not add page: #{page} unknown extension."
-              ""
-
-        res.render 'layout', additionalPages: additionalPages, nap: nap
         
       # * Delivers json-Data in the form of:
 
@@ -201,7 +178,7 @@ module.exports = (env) ->
                 when "device" 
                   @addAttributeNotify socket, item
 
-
+          env.logger.debug("adding rule listerns") if @config.debug
           framework.ruleManager.on "add", addRuleListener = (rule) =>
             @emitRuleUpdate socket, "add", rule
           
@@ -211,18 +188,24 @@ module.exports = (env) ->
           framework.ruleManager.on "remove", removeRuleListener = (rule) =>
             @emitRuleUpdate socket, "remove", rule
 
+          env.logger.debug("adding log listern") if @config.debug
           memoryTransport = env.logger.transports.memory
           memoryTransport.on 'log', logListener = (entry)=>
             socket.emit 'log', entry
 
+          env.logger.debug("adding item-add listern") if @config.debug
           @on 'item-add', addItemListener = (item) =>
+            @addAttributeNotify socket, item
             socket.emit "item-add", item
 
           socket.on 'disconnect', => 
+            env.logger.debug("removing rule listerns") if @config.debug
             framework.ruleManager.removeListener "update", updateRuleListener
             framework.ruleManager.removeListener "add", addRuleListener 
             framework.ruleManager.removeListener "update", removeRuleListener
+            env.logger.debug("removing log listern") if @config.debug
             memoryTransport.removeListener 'log', logListener
+            env.logger.debug("removing item-add listerns") if @config.debug
             @removeListener 'item-add', addItemListener
           return
 
@@ -238,8 +221,62 @@ module.exports = (env) ->
             env.logger.debug e.stack
           finally
             deferred.resolve()
-        context.waitForIt deferred.promise
-      return
+
+        finished = deferred.promise.then( =>
+          # If we are ind evelopment mode then
+          if @config.mode is "development"
+            # render the index page at each load.
+            @app.get '/', (req,res) =>
+              @renderIndex().then( (html) =>
+                res.send html
+              ).catch( (error) =>
+                env.logger.error error.message
+                env.logger.debug error.stack
+                res.send error
+              ).done()
+            return Q()
+          else 
+            # In production mode render the index page on time and store it to a file
+            return @renderIndex().then( (html) =>
+              indexFile = __dirname + '/public/index.html'
+              Q.nfcall(fs.writeFile, indexFile, html)
+            )
+          )
+        context.waitForIt finished
+        return
+
+
+    renderIndex: () ->
+      env.logger.info "rendering html"
+      jade = require('jade')
+
+      renderOptions = 
+        pretty: @config.mode is "development"
+        compileDebug: @config.mode is "development"
+        globals: ["__", "nap", "i18n"]
+
+      awaitingRenders = 
+        for page in @additionalAssetFiles['html']
+          page = path.resolve __dirname, '..', page
+          switch path.extname(page)
+            when '.jade'
+              env.logger.debug("rendering: #{page}") if @config.debug
+              Q.ninvoke jade, 'renderFile', page, renderOptions
+            when '.html'
+              Q.nfcall fs.readFile, page
+            else
+              env.logger.error "Could not add page: #{page} unknown extension."
+              Q ""
+
+      Q.all(awaitingRenders).then( (htmlPages) =>
+        renderOptions.globals.additionalPages = _.reduce htmlPages, (html, page) => html + page
+        layout = path.resolve __dirname, 'app/views/layout.jade' 
+        env.logger.debug("rendering: #{layout}") if @config.debug
+        Q.ninvoke(jade, 'renderFile', layout, renderOptions).then( (html) =>
+          env.logger.info "rendering html finished"
+          return html
+        )
+      )
 
 
     registerAssetFile: (type, file) ->
@@ -365,11 +402,15 @@ module.exports = (env) ->
 
     addAttributeNotify: (socket, item) ->
       device = @framework.getDeviceById item.id
-      for prop of device.attributes 
-        do (prop) =>
-          device.on prop, propListener = (value) =>
-            @emitProperyValue socket, device, prop, value
-          socket.on 'close', => sensor.removeListener prop, propListener
+      for attr of device.attributes 
+        do (attr) =>
+          env.logger.debug("adding listener for #{attr} of #{device.id}") if @config.debug
+          device.on attr, attrListener = (value) =>
+            env.logger.debug("got attr change for #{attr} of #{device.id}: #{value}") if @config.debug
+            @emitAttributeValue socket, device, attr, value
+          socket.on 'disconnect', => 
+            env.logger.debug("removing listener for #{attr} of #{device.id}") if @config.debug
+            device.removeListener attr, attrListener
       return
 
     getItemsWithData: () ->
@@ -397,15 +438,15 @@ module.exports = (env) ->
           template: device.getTemplateName()
           attributes: _.cloneDeep device.attributes
 
-        propValues = []
-        for propName of device.attributes
-          item.attributes[propName].type = device.attributes[propName].type.name
-          do (propName) =>
-            propValues.push device.getAttributeValue(propName).then (value) =>
-              return name: propName, value: value
-        return Q.all(propValues).then( (propValues) =>
-          for prop in propValues
-            item.attributes[prop.name].value = prop.value
+        attrValues = []
+        for attrName of device.attributes
+          item.attributes[attrName].type = device.attributes[attrName].type.name
+          do (attrName) =>
+            attrValues.push device.getAttributeValue(attrName).then (value) =>
+              return name: attrName, value: value
+        return Q.all(attrValues).then( (attrValues) =>
+          for attr in attrValues
+            item.attributes[attr.name].value = attr.value
           return item
         ).catch( (error) =>
           env.logger.error error.message
@@ -430,7 +471,7 @@ module.exports = (env) ->
         active: rule.active
         valid: rule.valid
 
-    emitProperyValue: (socket, device, name, value) ->
+    emitAttributeValue: (socket, device, name, value) ->
       socket.emit "device-attribute",
         id: device.id
         name: name

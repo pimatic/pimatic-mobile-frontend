@@ -10,7 +10,7 @@ html(manifest='application.manifest')
     != nap.css('style')
     != nap.js('jquery')
     script(src='socket.io/socket.io.js')
-    script(type='text/javascript')!="locale = " + JSON.stringify(getCatalog())
+    script(type='text/javascript')!="locale = " + JSON.stringify(i18n.getCatalog()) + ";"
     != nap.js('main')
   body
     include pages/index
@@ -19,6 +19,6 @@ html(manifest='application.manifest')
     include pages/log-messages
     include pages/plugins
     include pages/updates
-    !{additionalPages}
+    |  !{additionalPages}
     #toast(data-role='toast')
     div.ui-loader-background  

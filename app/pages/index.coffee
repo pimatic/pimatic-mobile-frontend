@@ -141,18 +141,18 @@ addItem = (item) ->
   </div>')
   $('#items').listview('refresh')
 
-buildSwitch = (switchItem) ->
-  pimatic.devices[switchItem.id] = switchItem
+buildSwitch = (device) ->
+  pimatic.devices[device.id] = device
   li = $ $('.switch-template').html()
+  li.attr('id', "device-#{device.id}")
   li.find('label')
-    .attr('for', "flip-#{switchItem.id}")
-    .text(switchItem.name)
+    .attr('for', "flip-#{device.id}")
+    .text(device.name)
   select = li.find('select')
-    .attr('name', "flip-#{switchItem.id}")
-    .attr('id', "flip-#{switchItem.id}")             
-    .data('device-id', switchItem.id)
-  if switchItem.state?
-    val = if switchItem.state then 'on' else 'off'
+    .attr('name', "flip-#{device.id}")
+    .attr('id', "flip-#{device.id}")             
+    .data('device-id', device.id)
+    val = if device.attributes.state.value then 'on' else 'off'
     select.find("option[value=#{val}]").attr('selected', 'selected')
   select
     .slider() 
@@ -161,6 +161,7 @@ buildSwitch = (switchItem) ->
 buildDevice = (device) ->
   pimatic.devices[device.id] = device
   li = $ $(".#{device.template}-template").html()
+  li.attr('id', "device-#{device.id}")
   li.find('label').text(device.name)
   if device.error?
     li.find('.error').text(device.error)
