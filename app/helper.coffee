@@ -52,13 +52,6 @@ ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   alert __(message)
   return true
 
-voiceCallback = (matches) ->
-  $.get "/api/speak",
-    word: matches
-  , (data) ->
-    showToast data
-    $("#talk").blur()
-
 showToast = 
   if device? and device.showToast?
     device.showToast

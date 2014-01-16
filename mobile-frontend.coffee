@@ -23,7 +23,7 @@ module.exports = (env) ->
 
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
-    pluginDependencies: ['rest-api', 'speak-api']
+    pluginDependencies: ['rest-api']
     additionalAssetFiles:
       'js': []
       'css': []

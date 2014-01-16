@@ -19,9 +19,6 @@ $(document).on "pagecreate", '#index', (event) ->
   
 
 $(document).on "pageinit", '#index', (event) ->
-  if device?
-    $("#talk").show().bind "vclick", (event, ui) ->
-      device.startVoiceRecognition "voiceCallback"
 
   $('#index #items').on "change", ".switch", (event, ui) ->
     ele = $(this)
