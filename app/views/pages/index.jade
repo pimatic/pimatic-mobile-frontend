@@ -1,9 +1,16 @@
 script.switch-template(type='text/template')
   li.sortable.switch-device(data-role="fieldcontain")
     label
+    | 
     select.switch(data-role="slider")
       option(value="off")=__('Off')
       option(value="on")=__('On')
+script.dimmer-template(type='text/template')
+  li.sortable.dimmer-device(data-role="fieldcontain")
+    div.item-inner
+      label
+      | 
+      input.dimmer(type="range", min="0", max="100", step="5", data-highlight="true")
 script.device-template(type='text/template')     
   li.sortable.device(data-role="fieldcontain")
     label

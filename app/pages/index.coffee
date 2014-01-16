@@ -4,12 +4,13 @@
 $(document).on "pagecreate", '#index', (event) ->
   loadData()
 
-  pimatic.socket.on "device-attribute", (attrEvent) -> updateDeviceAttribute attrEvent
-
-  pimatic.socket.on "device-attribute", (attrEvent) ->
+  pimatic.socket.on "device-attribute", (attrEvent) -> 
+    updateDeviceAttribute attrEvent
     if attrEvent.name is "state"
       value = if attrEvent.value then "on" else "off" 
       $("#flip-#{attrEvent.id}").val(value).slider('refresh')
+    if attrEvent.name is "dimlevel"
+      $("#slider-#{attrEvent.id}").val(value).slider('refresh')
 
   pimatic.socket.on "rule-add", (rule) -> addRule rule
   pimatic.socket.on "rule-update", (rule) -> updateRule rule
@@ -22,7 +23,7 @@ $(document).on "pageinit", '#index', (event) ->
     $("#talk").show().bind "vclick", (event, ui) ->
       device.startVoiceRecognition "voiceCallback"
 
-  $('#index #items').on "change", ".switch",(event, ui) ->
+  $('#index #items').on "change", ".switch", (event, ui) ->
     ele = $(this)
     val = ele.val()
     deviceId = ele.data('device-id')
@@ -32,6 +33,19 @@ $(document).on "pageinit", '#index', (event) ->
       .fail( ->
         ele.val(if val is 'on' then 'off' else 'on').slider('refresh')
       ).fail(ajaxAlertFail)
+
+  sliderValBefore = 0
+  $('#index #items').on "slidestart", ".dimmer", (event, ui) ->
+    sliderValBefore = $(this).val()
+
+  $('#index #items').on "slidestop", ".dimmer", (event, ui) ->
+    ele = $(this)
+    val = ele.val()
+    deviceId = ele.data('device-id')
+    $.get("/api/device/#{deviceId}/changeDimlevelTo", dimlevel: val)
+      .done(ajaxShowToast)
+      .fail( => ele.val(sliderValBefore).slider('refresh') )
+      .fail(ajaxAlertFail)
   
   $('#index #rules').on "click", ".rule", (event, ui) ->
     ruleId = $(this).data('rule-id')
@@ -126,19 +140,19 @@ addItem = (item) ->
   li = if item.template?
     switch item.template 
       when "switch" then buildSwitch(item)
+      when "dimmer" then buildDimmer(item)
       else buildDevice(item)
   else switch item.type
     when 'device'
       item.template = 'device'
       buildDevice(item)
-    when 'header'
-      buildHeader(item)
+    when 'header' then buildHeader(item)
     else buildDevice(item)
   li.data('item-type', item.type)
   li.data('item-id', item.id)
   li.addClass 'item'
   $('#add-a-item').before li
-  li.append $('<div class="ui-icon-alt handle">
+  li.find("label").before $('<div class="ui-icon-alt handle">
     <div class="ui-icon ui-icon-bars"></div>
   </div>')
   $('#items').listview('refresh')
@@ -160,6 +174,23 @@ buildSwitch = (device) ->
     .slider() 
   return li
 
+buildDimmer = (device) ->
+  pimatic.devices[device.id] = device
+  li = $ $('.dimmer-template').html()
+  li.attr('id', "device-#{device.id}")
+  li.find('label')
+    .attr('for', "slider-#{device.id}")
+    .text(device.name)
+  input = li.find('input')
+    .attr('name', "slider-#{device.id}")
+    .attr('id', "slider-#{device.id}")             
+    .data('device-id', device.id)
+    val = device.attributes?.dimlevel?.value
+    input.val(val)
+  input
+    .slider() 
+  return li
+
 buildDevice = (device) ->
   pimatic.devices[device.id] = device
   li = $ $(".#{device.template}-template").html()
@@ -178,7 +209,7 @@ buildDevice = (device) ->
   return li
 
 buildHeader = (header) ->
-  li = $ $('#header-template').html()
+  li = $ $('.header-template').html()
   li.find('label').text(header.text)
   return li
 

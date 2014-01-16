@@ -341,22 +341,21 @@ module.exports = (env) ->
           err.stack = "Nap error compiling #{filename}\n" + err.stack
           throw err
 
+
       # When the config mode 
-      switch @config.mode 
+      manifest = (switch @config.mode 
         # is production
         when "production"
           # then pack the static assets in "public/assets/"
           env.logger.info "packing static assets"
           nap.package()
           env.logger.info "packing static assets finished"
+          renderManifest = require "render-appcache-manifest"
           # function to create the app manifest
           createAppManifest = =>
-
             # Collect all files in "public/assets"
             assets = ( "/assets/#{f}" for f in fs.readdirSync  __dirname + '/public/assets' )
-
             # Render the app manifest
-            renderManifest = require "render-appcache-manifest"
             return renderManifest(
               cache: assets.concat [
                 '/',
@@ -366,25 +365,31 @@ module.exports = (env) ->
               fallback: []
               lastModified: new Date()
             )
-
           # Save the manifest. We don't need to generate it each request, because
           # files shouldn't change in production mode
           manifest = createAppManifest()
-
-          # If the app manifest is requested
-          @app.get "/application.manifest", (req, res) =>
-            # then deliver it
-            res.statusCode = 200
-            res.setHeader "content-type", "text/cache-manifest"
-            res.setHeader "content-length", Buffer.byteLength(manifest)
-            res.end manifest
-
         # if we are in development mode
         when "development"
           # then serve the files directly
           @app.use nap.middleware
+          # and cache nothing
+          manifest = """
+            CACHE MANIFEST
+            NETWORK:
+            *
+          """
         else 
           env.logger.error "Unknown mode: #{@config.mode}!"
+          ""
+      )
+
+      # If the app manifest is requested
+      @app.get "/application.manifest", (req, res) =>
+        # then deliver it
+        res.statusCode = 200
+        res.setHeader "content-type", "text/cache-manifest"
+        res.setHeader "content-length", Buffer.byteLength(manifest)
+        res.end manifest
 
     addNewItem: (item) ->
       @config.items.push item

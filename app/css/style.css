@@ -83,6 +83,31 @@ li.sortable-placeholder{
   top: -1px;
 }
 
+
+ul#items {
+  position: relative;
+}
+
+/* dimmer */
+ul#items .ui-slider-input{
+  display: none;
+}
+
+ul#items .dimmer-device div.item-inner .ui-slider-track {
+  margin-left: 22px;
+  margin-right: 8px;
+}
+
+@media (min-width:35em) {
+  ul#items .dimmer-device .ui-slider {
+    margin: 3px 10px 10px 0 !important;
+    position: absolute;
+    right: 5px;
+    top: 2px;
+    width: 20em;
+  }
+}
+
 @media screen and (-webkit-min-device-pixel-ratio:0) {  
 /* CSS Statements that only apply on webkit-based browsers (Chrome, Safari, etc.) */  
   #error-count .ui-btn-text {
