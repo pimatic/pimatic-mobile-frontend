@@ -11,11 +11,14 @@
   <span class="nv">assert = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span> <span class="s">&#39;cassert&#39;</span>
   <span class="nv">express = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span> <span class="s">&quot;express&quot;</span> 
   <span class="nv">coffee = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span> <span class="s">&#39;coffee-script&#39;</span>
-  <span class="nv">i18n = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span> <span class="s">&#39;i18n&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
+
+  <span class="nv">global.i18n = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;i18n&#39;</span><span class="p">)</span>
+  <span class="nv">global.__ = </span><span class="nx">i18n</span><span class="p">.</span><span class="nx">__</span>
+  <span class="nv">_ = </span><span class="nx">env</span><span class="p">.</span><span class="nx">require</span> <span class="s">&#39;lodash&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>own</li>
 </ul></div></div><div class="code"><div class="wrapper">  <span class="nv">socketIo = </span><span class="nx">require</span> <span class="s">&#39;socket.io&#39;</span>
-  <span class="nv">nap = </span><span class="nx">require</span> <span class="s">&#39;nap&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="the-mobilefrontend">The MobileFrontend</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper">  <span class="k">class</span> <span class="nx">MobileFrontend</span> <span class="k">extends</span> <span class="nx">env</span><span class="p">.</span><span class="nx">plugins</span><span class="p">.</span><span class="nx">Plugin</span>
-    <span class="nv">pluginDependencies: </span><span class="p">[</span><span class="s">&#39;rest-api&#39;</span><span class="p">,</span> <span class="s">&#39;speak-api&#39;</span><span class="p">]</span>
+  <span class="nv">global.nap = </span><span class="nx">require</span> <span class="s">&#39;nap&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><h2 id="the-mobilefrontend">The MobileFrontend</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper">  <span class="k">class</span> <span class="nx">MobileFrontend</span> <span class="k">extends</span> <span class="nx">env</span><span class="p">.</span><span class="nx">plugins</span><span class="p">.</span><span class="nx">Plugin</span>
+    <span class="nv">pluginDependencies: </span><span class="p">[</span><span class="s">&#39;rest-api&#39;</span><span class="p">]</span>
     <span class="nv">additionalAssetFiles:</span>
       <span class="s">&#39;js&#39;</span><span class="o">:</span> <span class="p">[]</span>
       <span class="s">&#39;css&#39;</span><span class="o">:</span> <span class="p">[]</span>
@@ -26,28 +29,8 @@
       <span class="nx">conf</span><span class="p">.</span><span class="nx">validate</span><span class="p">()</span>
       <span class="vi">@config = </span><span class="nx">conf</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>do some legacy support</p></div></div><div class="code"><div class="wrapper">      <span class="k">for</span> <span class="nx">item</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span>
         <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;actuator&#39;</span> <span class="o">or</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&#39;sensor&#39;</span>
-          <span class="nv">item.type = </span><span class="s">&#39;device&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
-<li>Setup jade-templates</li>
-</ul></div></div><div class="code"><div class="wrapper">      <span class="nv">jade = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;jade&#39;</span><span class="p">)</span>
-      <span class="nx">app</span><span class="p">.</span><span class="nx">engine</span> <span class="s">&#39;jade&#39;</span><span class="p">,</span> <span class="nx">jade</span><span class="p">.</span><span class="nx">__express</span>
-      <span class="nx">app</span><span class="p">.</span><span class="nx">set</span> <span class="s">&#39;views&#39;</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/views&#39;</span>
-      <span class="nx">app</span><span class="p">.</span><span class="nx">set</span> <span class="s">&#39;view engine&#39;</span><span class="p">,</span> <span class="s">&#39;jade&#39;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>app.get '/locale.json', (req,res) =>
-  res.send res.getCatalog()</p></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
-<li>Delivers the index-page</li>
-</ul></div></div><div class="code"><div class="wrapper">      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="nf">(req,res) =&gt;</span>
-        <span class="nv">additionalPages = </span><span class="s">&#39;&#39;</span>
-        <span class="k">for</span> <span class="nx">page</span> <span class="k">in</span> <span class="nx">@additionalAssetFiles</span><span class="p">[</span><span class="s">&#39;html&#39;</span><span class="p">]</span>
-          <span class="nv">page = </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span> <span class="nx">__dirname</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="nx">page</span>
-          <span class="nx">additionalPages</span> <span class="o">+=</span> <span class="k">switch</span> <span class="nx">path</span><span class="p">.</span><span class="nx">extname</span><span class="p">(</span><span class="nx">page</span><span class="p">)</span>
-            <span class="k">when</span> <span class="s">&#39;.jade&#39;</span>
-              <span class="nx">jade</span><span class="p">.</span><span class="nx">renderFile</span> <span class="nx">page</span><span class="p">,</span> <span class="nx">res</span>
-            <span class="k">when</span> <span class="s">&#39;.html&#39;</span>
-              <span class="nx">page</span>
-            <span class="k">else</span>
-              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="s">&quot;Could not add page: </span><span class="si">#{</span><span class="nx">page</span><span class="si">}</span><span class="s"> unknown extension.&quot;</span>
-              <span class="s">&quot;&quot;</span>
+          <span class="nv">item.type = </span><span class="s">&#39;device&#39;</span>
 
-        <span class="nx">res</span><span class="p">.</span><span class="nx">render</span> <span class="s">&#39;layout&#39;</span><span class="p">,</span> <span class="nv">additionalPages: </span><span class="nx">additionalPages</span><span class="p">,</span> <span class="nv">nap: </span><span class="nx">nap</span>
         </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
 <li>Delivers json-Data in the form of:</li>
 </ul></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><pre><code>{
@@ -171,9 +154,9 @@
             <span class="nx">do</span> <span class="nf">(item) =&gt;</span>
               <span class="k">switch</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
                 <span class="k">when</span> <span class="s">&quot;device&quot;</span> 
-                  <span class="nx">@addSensorNotify</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">item</span>
+                  <span class="nx">@addAttributeNotify</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">item</span>
 
-
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;adding rule listerns&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
           <span class="nx">framework</span><span class="p">.</span><span class="nx">ruleManager</span><span class="p">.</span><span class="nx">on</span> <span class="s">&quot;add&quot;</span><span class="p">,</span> <span class="nv">addRuleListener = </span><span class="nf">(rule) =&gt;</span>
             <span class="nx">@emitRuleUpdate</span> <span class="nx">socket</span><span class="p">,</span> <span class="s">&quot;add&quot;</span><span class="p">,</span> <span class="nx">rule</span>
           
@@ -183,18 +166,24 @@
           <span class="nx">framework</span><span class="p">.</span><span class="nx">ruleManager</span><span class="p">.</span><span class="nx">on</span> <span class="s">&quot;remove&quot;</span><span class="p">,</span> <span class="nv">removeRuleListener = </span><span class="nf">(rule) =&gt;</span>
             <span class="nx">@emitRuleUpdate</span> <span class="nx">socket</span><span class="p">,</span> <span class="s">&quot;remove&quot;</span><span class="p">,</span> <span class="nx">rule</span>
 
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;adding log listern&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
           <span class="nv">memoryTransport = </span><span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">transports</span><span class="p">.</span><span class="nx">memory</span>
           <span class="nx">memoryTransport</span><span class="p">.</span><span class="nx">on</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="nv">logListener = </span><span class="nf">(entry)=&gt;</span>
             <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="nx">entry</span>
 
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;adding item-add listern&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
           <span class="nx">@</span><span class="kc">on</span> <span class="s">&#39;item-add&#39;</span><span class="p">,</span> <span class="nv">addItemListener = </span><span class="nf">(item) =&gt;</span>
+            <span class="nx">@addAttributeNotify</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">item</span>
             <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&quot;item-add&quot;</span><span class="p">,</span> <span class="nx">item</span>
 
           <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span> <span class="s">&#39;disconnect&#39;</span><span class="p">,</span> <span class="o">=&gt;</span> 
+            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;removing rule listerns&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
             <span class="nx">framework</span><span class="p">.</span><span class="nx">ruleManager</span><span class="p">.</span><span class="nx">removeListener</span> <span class="s">&quot;update&quot;</span><span class="p">,</span> <span class="nx">updateRuleListener</span>
             <span class="nx">framework</span><span class="p">.</span><span class="nx">ruleManager</span><span class="p">.</span><span class="nx">removeListener</span> <span class="s">&quot;add&quot;</span><span class="p">,</span> <span class="nx">addRuleListener</span> 
             <span class="nx">framework</span><span class="p">.</span><span class="nx">ruleManager</span><span class="p">.</span><span class="nx">removeListener</span> <span class="s">&quot;update&quot;</span><span class="p">,</span> <span class="nx">removeRuleListener</span>
+            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;removing log listern&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
             <span class="nx">memoryTransport</span><span class="p">.</span><span class="nx">removeListener</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="nx">logListener</span>
+            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;removing item-add listerns&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
             <span class="nx">@removeListener</span> <span class="s">&#39;item-add&#39;</span><span class="p">,</span> <span class="nx">addItemListener</span>
           <span class="k">return</span>
 
@@ -206,8 +195,57 @@
             <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">e</span><span class="p">.</span><span class="nx">stack</span>
           <span class="k">finally</span>
             <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
-        <span class="nx">context</span><span class="p">.</span><span class="nx">waitForIt</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span>
-      <span class="k">return</span>
+
+        <span class="nv">finished = </span><span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span> <span class="o">=&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If we are ind evelopment mode then</p></div></div><div class="code"><div class="wrapper">          <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> <span class="o">is</span> <span class="s">&quot;development&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>render the index page at each load.</p></div></div><div class="code"><div class="wrapper">            <span class="nx">@app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="nf">(req,res) =&gt;</span>
+              <span class="nx">@renderIndex</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(html) =&gt;</span>
+                <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="nx">html</span>
+              <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
+                <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
+                <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
+                <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="nx">error</span>
+              <span class="p">).</span><span class="nx">done</span><span class="p">()</span>
+            <span class="k">return</span> <span class="nx">Q</span><span class="p">()</span>
+          <span class="k">else</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>In production mode render the index page on time and store it to a file</p></div></div><div class="code"><div class="wrapper">            <span class="k">return</span> <span class="nx">@renderIndex</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(html) =&gt;</span>
+              <span class="nv">indexFile = </span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/public/index.html&#39;</span>
+              <span class="nx">Q</span><span class="p">.</span><span class="nx">nfcall</span><span class="p">(</span><span class="nx">fs</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">,</span> <span class="nx">indexFile</span><span class="p">,</span> <span class="nx">html</span><span class="p">)</span>
+            <span class="p">)</span>
+          <span class="p">)</span>
+        <span class="nx">context</span><span class="p">.</span><span class="nx">waitForIt</span> <span class="nx">finished</span>
+        <span class="k">return</span>
+
+
+    <span class="nv">renderIndex: </span><span class="p">()</span> <span class="nf">-&gt;</span>
+      <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;rendering html&quot;</span>
+      <span class="nv">jade = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;jade&#39;</span><span class="p">)</span>
+
+      <span class="nv">renderOptions = </span>
+        <span class="nv">pretty: </span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> <span class="o">is</span> <span class="s">&quot;development&quot;</span>
+        <span class="nv">compileDebug: </span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> <span class="o">is</span> <span class="s">&quot;development&quot;</span>
+        <span class="nv">globals: </span><span class="p">[</span><span class="s">&quot;__&quot;</span><span class="p">,</span> <span class="s">&quot;nap&quot;</span><span class="p">,</span> <span class="s">&quot;i18n&quot;</span><span class="p">]</span>
+        <span class="nv">mode: </span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span>
+
+      <span class="nv">awaitingRenders = </span>
+        <span class="k">for</span> <span class="nx">page</span> <span class="k">in</span> <span class="nx">@additionalAssetFiles</span><span class="p">[</span><span class="s">&#39;html&#39;</span><span class="p">]</span>
+          <span class="nv">page = </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span> <span class="nx">__dirname</span><span class="p">,</span> <span class="s">&#39;..&#39;</span><span class="p">,</span> <span class="nx">page</span>
+          <span class="k">switch</span> <span class="nx">path</span><span class="p">.</span><span class="nx">extname</span><span class="p">(</span><span class="nx">page</span><span class="p">)</span>
+            <span class="k">when</span> <span class="s">&#39;.jade&#39;</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;rendering: </span><span class="si">#{</span><span class="nx">page</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
+              <span class="nx">Q</span><span class="p">.</span><span class="nx">ninvoke</span> <span class="nx">jade</span><span class="p">,</span> <span class="s">&#39;renderFile&#39;</span><span class="p">,</span> <span class="nx">page</span><span class="p">,</span> <span class="nx">renderOptions</span>
+            <span class="k">when</span> <span class="s">&#39;.html&#39;</span>
+              <span class="nx">Q</span><span class="p">.</span><span class="nx">nfcall</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">,</span> <span class="nx">page</span>
+            <span class="k">else</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="s">&quot;Could not add page: </span><span class="si">#{</span><span class="nx">page</span><span class="si">}</span><span class="s"> unknown extension.&quot;</span>
+              <span class="nx">Q</span> <span class="s">&quot;&quot;</span>
+
+      <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">awaitingRenders</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(htmlPages) =&gt;</span>
+        <span class="nv">renderOptions.additionalPages = </span><span class="nx">_</span><span class="p">.</span><span class="nx">reduce</span> <span class="nx">htmlPages</span><span class="p">,</span> <span class="nf">(html, page) =&gt;</span> <span class="nx">html</span> <span class="o">+</span> <span class="nx">page</span>
+        <span class="nv">layout = </span><span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span> <span class="nx">__dirname</span><span class="p">,</span> <span class="s">&#39;app/views/layout.jade&#39;</span> 
+        <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;rendering: </span><span class="si">#{</span><span class="nx">layout</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
+        <span class="nx">Q</span><span class="p">.</span><span class="nx">ninvoke</span><span class="p">(</span><span class="nx">jade</span><span class="p">,</span> <span class="s">&#39;renderFile&#39;</span><span class="p">,</span> <span class="nx">layout</span><span class="p">,</span> <span class="nx">renderOptions</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(html) =&gt;</span>
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;rendering html finished&quot;</span>
+          <span class="k">return</span> <span class="nx">html</span>
+        <span class="p">)</span>
+      <span class="p">)</span>
 
 
     <span class="nv">registerAssetFile: </span><span class="nf">(type, file) -&gt;</span>
@@ -260,10 +298,10 @@
           <span class="nx">coffee</span><span class="p">.</span><span class="nx">compile</span> <span class="nx">contents</span><span class="p">,</span> <span class="nv">bare: </span><span class="kc">on</span>
         <span class="k">catch</span> <span class="nx">err</span>
           <span class="nv">err.stack = </span><span class="s">&quot;Nap error compiling </span><span class="si">#{</span><span class="nx">filename</span><span class="si">}</span><span class="s">\n&quot;</span> <span class="o">+</span> <span class="nx">err</span><span class="p">.</span><span class="nx">stack</span>
-          <span class="k">throw</span> <span class="nx">err</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>When the config mode </p></div></div><div class="code"><div class="wrapper">      <span class="k">switch</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>is production</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;production&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then pack the static assets in "public/assets/"</p></div></div><div class="code"><div class="wrapper">          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;packing static assets&quot;</span>
+          <span class="k">throw</span> <span class="nx">err</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>When the config mode </p></div></div><div class="code"><div class="wrapper">      <span class="nv">manifest = </span><span class="p">(</span><span class="k">switch</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>is production</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;production&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then pack the static assets in "public/assets/"</p></div></div><div class="code"><div class="wrapper">          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;packing static assets&quot;</span>
           <span class="nx">nap</span><span class="p">.</span><span class="nx">package</span><span class="p">()</span>
-          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;packing static assets finished&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>function to create the app manifest</p></div></div><div class="code"><div class="wrapper">          <span class="nv">createAppManifest = </span><span class="o">=&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Collect all files in "public/assets"</p></div></div><div class="code"><div class="wrapper">            <span class="nv">assets = </span><span class="p">(</span> <span class="s">&quot;/assets/</span><span class="si">#{</span><span class="nx">f</span><span class="si">}</span><span class="s">&quot;</span> <span class="k">for</span> <span class="nx">f</span> <span class="k">in</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span>  <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/public/assets&#39;</span> <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Render the app manifest</p></div></div><div class="code"><div class="wrapper">            <span class="nv">renderManifest = </span><span class="nx">require</span> <span class="s">&quot;render-appcache-manifest&quot;</span>
-            <span class="k">return</span> <span class="nx">renderManifest</span><span class="p">(</span>
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;packing static assets finished&quot;</span>
+          <span class="nv">renderManifest = </span><span class="nx">require</span> <span class="s">&quot;render-appcache-manifest&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>function to create the app manifest</p></div></div><div class="code"><div class="wrapper">          <span class="nv">createAppManifest = </span><span class="o">=&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Collect all files in "public/assets"</p></div></div><div class="code"><div class="wrapper">            <span class="nv">assets = </span><span class="p">(</span> <span class="s">&quot;/assets/</span><span class="si">#{</span><span class="nx">f</span><span class="si">}</span><span class="s">&quot;</span> <span class="k">for</span> <span class="nx">f</span> <span class="k">in</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span>  <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/public/assets&#39;</span> <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Render the app manifest</p></div></div><div class="code"><div class="wrapper">            <span class="k">return</span> <span class="nx">renderManifest</span><span class="p">(</span>
               <span class="nv">cache: </span><span class="nx">assets</span><span class="p">.</span><span class="nx">concat</span> <span class="p">[</span>
                 <span class="s">&#39;/&#39;</span><span class="p">,</span>
                 <span class="s">&#39;/socket.io/socket.io.js&#39;</span>
@@ -272,12 +310,18 @@
               <span class="nv">fallback: </span><span class="p">[]</span>
               <span class="nv">lastModified: </span><span class="k">new</span> <span class="nb">Date</span><span class="p">()</span>
             <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Save the manifest. We don't need to generate it each request, because
-files shouldn't change in production mode</p></div></div><div class="code"><div class="wrapper">          <span class="nv">manifest = </span><span class="nx">createAppManifest</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If the app manifest is requested</p></div></div><div class="code"><div class="wrapper">          <span class="nx">@app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;/application.manifest&quot;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then deliver it</p></div></div><div class="code"><div class="wrapper">            <span class="nv">res.statusCode = </span><span class="mi">200</span>
-            <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-type&quot;</span><span class="p">,</span> <span class="s">&quot;text/cache-manifest&quot;</span>
-            <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-length&quot;</span><span class="p">,</span> <span class="nx">Buffer</span><span class="p">.</span><span class="nx">byteLength</span><span class="p">(</span><span class="nx">manifest</span><span class="p">)</span>
-            <span class="nx">res</span><span class="p">.</span><span class="nx">end</span> <span class="nx">manifest</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if we are in development mode</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;development&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then serve the files directly</p></div></div><div class="code"><div class="wrapper">          <span class="nx">@app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">nap</span><span class="p">.</span><span class="nx">middleware</span>
+files shouldn't change in production mode</p></div></div><div class="code"><div class="wrapper">          <span class="nv">manifest = </span><span class="nx">createAppManifest</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>if we are in development mode</p></div></div><div class="code"><div class="wrapper">        <span class="k">when</span> <span class="s">&quot;development&quot;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then serve the files directly</p></div></div><div class="code"><div class="wrapper">          <span class="nx">@app</span><span class="p">.</span><span class="nx">use</span> <span class="nx">nap</span><span class="p">.</span><span class="nx">middleware</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>and cache nothing</p></div></div><div class="code"><div class="wrapper">          <span class="nv">manifest = </span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            CACHE MANIFEST</span>
+<span class="s">            NETWORK:</span>
+<span class="s">            *</span>
+<span class="s">          &quot;&quot;&quot;</span>
         <span class="k">else</span> 
           <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="s">&quot;Unknown mode: </span><span class="si">#{</span><span class="nx">@config</span><span class="p">.</span><span class="nx">mode</span><span class="si">}</span><span class="s">!&quot;</span>
+          <span class="s">&quot;&quot;</span>
+      <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If the app manifest is requested</p></div></div><div class="code"><div class="wrapper">      <span class="nx">@app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&quot;/application.manifest&quot;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>then deliver it</p></div></div><div class="code"><div class="wrapper">        <span class="nv">res.statusCode = </span><span class="mi">200</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-type&quot;</span><span class="p">,</span> <span class="s">&quot;text/cache-manifest&quot;</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">setHeader</span> <span class="s">&quot;content-length&quot;</span><span class="p">,</span> <span class="nx">Buffer</span><span class="p">.</span><span class="nx">byteLength</span><span class="p">(</span><span class="nx">manifest</span><span class="p">)</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">end</span> <span class="nx">manifest</span>
 
     <span class="nv">addNewItem: </span><span class="nf">(item) -&gt;</span>
       <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">item</span>
@@ -293,33 +337,20 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="nx">@emit</span> <span class="s">&#39;item-add&#39;</span><span class="p">,</span> <span class="nx">item</span> 
       <span class="p">)</span>
 
-
-    <span class="nv">addSwitchActuatorNotify: </span><span class="nf">(socket, item) -&gt;</span>
-      <span class="nv">actuator = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getDeviceById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
-      <span class="nx">assert</span> <span class="nx">actuator</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">SwitchActuator</span>
-      <span class="k">if</span> <span class="nx">actuator</span><span class="o">?</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
-<li>First time push the state to the client</li>
-</ul></div></div><div class="code"><div class="wrapper">        <span class="nx">actuator</span><span class="p">.</span><span class="nx">getState</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(state) =&gt;</span>
-          <span class="nx">@emitSwitchState</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">actuator</span><span class="p">,</span> <span class="nx">state</span>
-        <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
-          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
-          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span> 
-        <span class="p">)</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><ul>
-<li>Then forward following state event to the client</li>
-</ul></div></div><div class="code"><div class="wrapper">        <span class="nx">actuator</span><span class="p">.</span><span class="nx">on</span> <span class="s">&quot;state&quot;</span><span class="p">,</span> <span class="nv">stateListener = </span><span class="nf">(state) =&gt;</span>
-          <span class="nx">@emitSwitchState</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">actuator</span><span class="p">,</span> <span class="nx">state</span>
-        <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span> <span class="s">&#39;close&#39;</span><span class="p">,</span> <span class="o">=&gt;</span> <span class="nx">actuator</span><span class="p">.</span><span class="nx">removeListener</span> <span class="s">&quot;state&quot;</span><span class="p">,</span> <span class="nx">stateListener</span>
-      <span class="k">return</span>
-
-    <span class="nv">addSensorNotify: </span><span class="nf">(socket, item) -&gt;</span>
-      <span class="nv">sensor = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getDeviceById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
-      <span class="k">if</span> <span class="nx">sensor</span><span class="o">?</span> <span class="o">and</span> <span class="nx">sensor</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">Sensor</span>
-        <span class="nv">names = </span><span class="nx">sensor</span><span class="p">.</span><span class="nx">getSensorValuesNames</span><span class="p">()</span>
-        <span class="k">for</span> <span class="nx">name</span> <span class="k">in</span> <span class="nx">names</span> 
-          <span class="nx">do</span> <span class="nf">(name) =&gt;</span>
-            <span class="nx">sensor</span><span class="p">.</span><span class="nx">on</span> <span class="nx">name</span><span class="p">,</span> <span class="nf">(value) =&gt;</span>
-              <span class="nx">@emitSensorValue</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">sensor</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">value</span>
-            <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span> <span class="s">&#39;close&#39;</span><span class="p">,</span> <span class="o">=&gt;</span> <span class="nx">sensor</span><span class="p">.</span><span class="nx">removeListener</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">valueListener</span>
+    <span class="nv">addAttributeNotify: </span><span class="nf">(socket, item) -&gt;</span>
+      <span class="nv">device = </span><span class="nx">@framework</span><span class="p">.</span><span class="nx">getDeviceById</span> <span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
+      <span class="k">unless</span> <span class="nx">device</span><span class="o">?</span> 
+        <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="s">&quot;device </span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s"> not found.&quot;</span>
+        <span class="k">return</span>
+      <span class="k">for</span> <span class="nx">attr</span> <span class="k">of</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span> 
+        <span class="nx">do</span> <span class="nf">(attr) =&gt;</span>
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;adding listener for </span><span class="si">#{</span><span class="nx">attr</span><span class="si">}</span><span class="s"> of </span><span class="si">#{</span><span class="nx">device</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
+          <span class="nx">device</span><span class="p">.</span><span class="nx">on</span> <span class="nx">attr</span><span class="p">,</span> <span class="nv">attrListener = </span><span class="nf">(value) =&gt;</span>
+            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;attr change for </span><span class="si">#{</span><span class="nx">attr</span><span class="si">}</span><span class="s"> of </span><span class="si">#{</span><span class="nx">device</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">: </span><span class="si">#{</span><span class="nx">value</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
+            <span class="nx">@emitAttributeValue</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">device</span><span class="p">,</span> <span class="nx">attr</span><span class="p">,</span> <span class="nx">value</span>
+          <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span> <span class="s">&#39;disconnect&#39;</span><span class="p">,</span> <span class="o">=&gt;</span> 
+            <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;removing listener for </span><span class="si">#{</span><span class="nx">attr</span><span class="si">}</span><span class="s"> of </span><span class="si">#{</span><span class="nx">device</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
+            <span class="nx">device</span><span class="p">.</span><span class="nx">removeListener</span> <span class="nx">attr</span><span class="p">,</span> <span class="nx">attrListener</span>
       <span class="k">return</span>
 
     <span class="nv">getItemsWithData: </span><span class="p">()</span> <span class="nf">-&gt;</span>
@@ -343,58 +374,34 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="nv">item =</span>
           <span class="nv">type: </span><span class="s">&quot;device&quot;</span>
           <span class="nv">id: </span><span class="nx">device</span><span class="p">.</span><span class="nx">id</span>
-          <span class="nv">name: </span><span class="nx">device</span><span class="p">.</span><span class="nx">name</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>TODO: gerneric method</p></div></div><div class="code"><div class="wrapper">        <span class="k">switch</span>
-          <span class="k">when</span> <span class="nx">device</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">SwitchActuator</span>
-            <span class="nv">item.template = </span><span class="s">&quot;switch&quot;</span>
-            <span class="k">return</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getState</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(state) =&gt;</span>
-              <span class="nv">item.state = </span><span class="nx">state</span>
-              <span class="k">return</span> <span class="nx">item</span>
-            <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
-              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
-              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
-              <span class="k">return</span> <span class="nx">item</span>
-            <span class="p">)</span> 
-          <span class="k">when</span> <span class="nx">device</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">TemperatureSensor</span>
-            <span class="nv">item.template = </span><span class="s">&quot;temperature&quot;</span>
-            <span class="nv">nameValues = </span><span class="p">[]</span>
-            <span class="k">for</span> <span class="nx">name</span> <span class="k">in</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getSensorValuesNames</span><span class="p">()</span>
-              <span class="nx">do</span> <span class="nf">(name) =&gt;</span>
-                <span class="nx">nameValues</span><span class="p">.</span><span class="nx">push</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getSensorValue</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
-                  <span class="k">return</span> <span class="nv">name: </span><span class="nx">name</span><span class="p">,</span> <span class="nv">value: </span><span class="nx">value</span>
-            <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">nameValues</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(nameValues) =&gt;</span>
-              <span class="nv">item.values = </span><span class="p">{}</span>
-              <span class="k">for</span> <span class="nx">nameValue</span> <span class="k">in</span> <span class="nx">nameValues</span>
-                <span class="nx">item</span><span class="p">.</span><span class="nx">values</span><span class="p">[</span><span class="nx">nameValue</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">nameValue</span><span class="p">.</span><span class="nx">value</span>
-              <span class="k">return</span> <span class="nx">item</span>
-            <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
-              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
-              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
-              <span class="k">return</span> <span class="nx">item</span>
-            <span class="p">)</span> 
-          <span class="k">when</span> <span class="nx">device</span> <span class="k">instanceof</span> <span class="nx">env</span><span class="p">.</span><span class="nx">devices</span><span class="p">.</span><span class="nx">PresentsSensor</span>
-            <span class="nv">item.template = </span><span class="s">&quot;presents&quot;</span>
-            <span class="k">return</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getSensorValue</span><span class="p">(</span><span class="s">&#39;present&#39;</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
-              <span class="nv">item.values =</span>
-                <span class="nv">present: </span><span class="nx">value</span>
-              <span class="k">return</span> <span class="nx">item</span>
-          <span class="k">else</span> 
-            <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
+          <span class="nv">name: </span><span class="nx">device</span><span class="p">.</span><span class="nx">name</span>
+          <span class="nv">template: </span><span class="nx">device</span><span class="p">.</span><span class="nx">getTemplateName</span><span class="p">()</span>
+          <span class="nv">attributes: </span><span class="nx">_</span><span class="p">.</span><span class="nx">cloneDeep</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span>
+
+        <span class="nv">attrValues = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">attrName</span> <span class="k">of</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span>
+          <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nv">type = </span><span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nx">type</span><span class="p">.</span><span class="nx">name</span>
+          <span class="nx">do</span> <span class="nf">(attrName) =&gt;</span>
+            <span class="nx">attrValues</span><span class="p">.</span><span class="nx">push</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getAttributeValue</span><span class="p">(</span><span class="nx">attrName</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
+              <span class="k">return</span> <span class="nv">name: </span><span class="nx">attrName</span><span class="p">,</span> <span class="nv">value: </span><span class="nx">value</span>
+        <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">attrValues</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(attrValues) =&gt;</span>
+          <span class="k">for</span> <span class="nx">attr</span> <span class="k">in</span> <span class="nx">attrValues</span>
+            <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attr</span><span class="p">.</span><span class="nx">name</span><span class="p">].</span><span class="nv">value = </span><span class="nx">attr</span><span class="p">.</span><span class="nx">value</span>
+          <span class="k">return</span> <span class="nx">item</span>
+        <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
+          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
+          <span class="k">return</span> <span class="nx">item</span>
+        <span class="p">)</span> 
       <span class="k">else</span>
         <span class="nv">errorMsg = </span><span class="s">&quot;No device to display with id \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">\&quot; found&quot;</span>
         <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">errorMsg</span>
         <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span>
           <span class="nv">type: </span><span class="s">&quot;device&quot;</span>
           <span class="nv">id: </span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span>
-          <span class="nv">name: </span><span class="s">&quot;Unknown&quot;</span>
-          <span class="nv">state: </span><span class="kc">null</span><span class="p">,</span>
+          <span class="nv">name: </span><span class="s">&quot;&quot;</span>
+          <span class="nv">attributes: </span><span class="p">{}</span>
           <span class="nv">error: </span><span class="nx">errorMsg</span>
-
-
-
-    <span class="nv">emitSwitchState: </span><span class="nf">(socket, actuator, state) -&gt;</span>
-      <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&quot;switch-status&quot;</span><span class="p">,</span>
-        <span class="nv">id: </span><span class="nx">actuator</span><span class="p">.</span><span class="nx">id</span>
-        <span class="nv">state: </span><span class="nx">state</span>
 
     <span class="nv">emitRuleUpdate: </span><span class="nf">(socket, trigger, rule) -&gt;</span>
       <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&quot;rule-</span><span class="si">#{</span><span class="nx">trigger</span><span class="si">}</span><span class="s">&quot;</span><span class="p">,</span>
@@ -404,9 +411,9 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="nv">active: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">active</span>
         <span class="nv">valid: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">valid</span>
 
-    <span class="nv">emitSensorValue: </span><span class="nf">(socket, sensor, name, value) -&gt;</span>
-      <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&quot;sensor-value&quot;</span><span class="p">,</span>
-        <span class="nv">id: </span><span class="nx">sensor</span><span class="p">.</span><span class="nx">id</span>
+    <span class="nv">emitAttributeValue: </span><span class="nf">(socket, device, name, value) -&gt;</span>
+      <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span> <span class="s">&quot;device-attribute&quot;</span><span class="p">,</span>
+        <span class="nv">id: </span><span class="nx">device</span><span class="p">.</span><span class="nx">id</span>
         <span class="nv">name: </span><span class="nx">name</span>
         <span class="nv">value: </span><span class="nx">value</span>
 
