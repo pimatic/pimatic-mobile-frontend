@@ -9,38 +9,35 @@ pimatic.socket = io.connect("/",
 pimatic.socket.on 'log', (entry) -> 
   if entry.level is 'error' 
     pimatic.errorCount++
-    updateErrorCount()
-  showToast entry.msg
+    pimatic.pages.index.updateErrorCount()
+  pimatic.showToast entry.msg
   console.log entry
 
 pimatic.socket.on 'reconnect', ->
-  loading "hide"
-  loadData()
+  pimatic.loading "hide"
+  pimatic.pages.index.loadData()
   if window.applicationCache?
     window.applicationCache.update()
 
 pimatic.socket.on 'disconnect', ->
- loading "show",
+ pimatic.loading "show",
   text: __("connection lost, retying")+'...'
   textVisible: true
   textonly: false
 
 onConnectionError = ->
-  loading "show",
+  pimatic.loading "show",
     text: __("could not connect, retying")+'...'
     textVisible: true
     textonly: false
   setTimeout ->
     pimatic.socket.socket.connect( ->
-      loading "hide"
-      loadData()
+      pimatic.loading "hide"
+      pimatic.pages.index.loadData()
       if window.applicationCache?
         window.applicationCache.update()
     )
   , 2000
 
-
-
-    
 pimatic.socket.on 'error', onConnectionError
 pimatic.socket.on 'connect_error', onConnectionError

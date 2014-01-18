@@ -13,6 +13,7 @@ $(document).on "pageinit", '#add-item', (event) ->
         li.addClass('added')
         li.buttonMarkup({ icon: "check" })
       ).fail(ajaxAlertFail)
+    return
 
   $('#add-other').on "click", '#add-a-header', ->
     $("<div>").simpledialog2
@@ -26,14 +27,14 @@ $(document).on "pageinit", '#add-item', (event) ->
           click: ->
             name = $.mobile.sdLastInput
             if name is ""
-              showToast __("Please enter a name")
+              pimatic.showToast __("Please enter a name")
             else
               $.get("/add-header/#{name}").done((result) ->
-                showToast __("Header added")
+                pimatic.showToast __("Header added")
               ).fail(ajaxAlertFail)
+    return
 
 $(document).on "pageshow", '#add-item', (event) ->
-
   $.get("/api/devices")
     .done( (data) ->
       $('#device-items .item').remove()
@@ -48,5 +49,6 @@ $(document).on "pageshow", '#add-item', (event) ->
         $('#device-items').append li
       $('#device-items').listview('refresh')
     ).fail(ajaxAlertFail)
+  return
 
 

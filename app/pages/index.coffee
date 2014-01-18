@@ -2,20 +2,20 @@
 # ----------
 
 $(document).on "pagecreate", '#index', (event) ->
-  loadData()
+  pimatic.pages.index.loadData()
 
   pimatic.socket.on "device-attribute", (attrEvent) -> 
-    updateDeviceAttribute attrEvent
+    pimatic.pages.index.updateDeviceAttribute attrEvent
     if attrEvent.name is "state"
       value = if attrEvent.value then "on" else "off" 
       $("#flip-#{attrEvent.id}").val(value).slider('refresh')
     if attrEvent.name is "dimlevel"
       $("#slider-#{attrEvent.id}").val(value).slider('refresh')
 
-  pimatic.socket.on "rule-add", (rule) -> addRule rule
-  pimatic.socket.on "rule-update", (rule) -> updateRule rule
-  pimatic.socket.on "rule-remove", (rule) -> removeRule rule
-  pimatic.socket.on "item-add", (item) -> addItem item
+  pimatic.socket.on "rule-add", (rule) -> pimatic.pages.index.addRule rule
+  pimatic.socket.on "rule-update", (rule) -> pimatic.pages.index.updateRule rule
+  pimatic.socket.on "rule-remove", (rule) -> pimatic.pages.index.removeRule rule
+  pimatic.socket.on "item-add", (item) -> pimatic.pages.index.addItem item
   
 
 $(document).on "pageinit", '#index', (event) ->
@@ -49,7 +49,6 @@ $(document).on "pageinit", '#index', (event) ->
   $('#index #items').on "click", ".device-label", (event, ui) ->
     deviceId = $(this).parents(".item").data('item-id')
     device = pimatic.devices[deviceId]
-    console.log device
     unless device? then return
     div = $ "#device-info-popup"
     div.find('.info-id .info-val').text device.id
@@ -124,160 +123,165 @@ $(document).on "pageinit", '#index', (event) ->
   )
   return
 
-loadData = () ->
+pimatic.pages.index =
+  loadData: ->
+    $.get("/data.json")
+      .done( (data) ->
+        pimatic.devices = []
+        pimatic.rules = []
+        $('#items .item').remove()
+        pimatic.pages.index.addItem(item) for item in data.items
+        $('#rules .rule').remove()
+        pimatic.pages.index.addRule(rule) for rule in data.rules
+        pimatic.errorCount = data.errorCount
+        pimatic.pages.index.updateErrorCount()
+      ) #.fail(ajaxAlertFail)
+    return
 
-  $.get("/data.json")
-    .done( (data) ->
-      pimatic.devices = []
-      pimatic.rules = []
-      $('#items .item').remove()
-      addItem(item) for item in data.items
-      $('#rules .rule').remove()
-      addRule(rule) for rule in data.rules
-      pimatic.errorCount = data.errorCount
-      updateErrorCount()
-    ) #.fail(ajaxAlertFail)
+  updateErrorCount: ->
+    if $('#error-count').find('.ui-btn-text').length > 0
+      $('#error-count').find('.ui-btn-text').text(pimatic.errorCount)
+      try
+        $('#error-count').button('refresh')
+      catch e
+        # ignore: Uncaught Error: cannot call methods on button prior 
+        # to initialization; attempted to call method 'refresh' 
+    else
+      $('#error-count').text(pimatic.errorCount)
+    if pimatic.errorCount is 0 then $('#error-count').hide()
+    else $('#error-count').show()
+    return
 
-updateErrorCount = ->
-  if $('#error-count').find('.ui-btn-text').length > 0
-    $('#error-count').find('.ui-btn-text').text(pimatic.errorCount)
-    try
-      $('#error-count').button('refresh')
-    catch e
-      # ignore: Uncaught Error: cannot call methods on button prior 
-      # to initialization; attempted to call method 'refresh' 
-  else
-    $('#error-count').text(pimatic.errorCount)
-  if pimatic.errorCount is 0 then $('#error-count').hide()
-  else $('#error-count').show()
+  addItem: (item) ->
+    li = if item.template?
+      switch item.template 
+        when "switch" then pimatic.pages.index.buildSwitch(item)
+        when "dimmer" then pimatic.pages.index.buildDimmer(item)
+        else pimatic.pages.index.buildDevice(item)
+    else switch item.type
+      when 'device'
+        item.template = 'device'
+        pimatic.pages.index.buildDevice(item)
+      when 'header' then pimatic.pages.index.buildHeader(item)
+      else pimatic.pages.index.buildDevice(item)
+    li.data('item-type', item.type)
+    li.data('item-id', item.id)
+    li.addClass 'item'
+    $('#add-a-item').before li
+    li.find("label").before $('<div class="ui-icon-alt handle">
+      <div class="ui-icon ui-icon-bars"></div>
+    </div>')
+    $('#items').listview('refresh')
 
-addItem = (item) ->
-  li = if item.template?
-    switch item.template 
-      when "switch" then buildSwitch(item)
-      when "dimmer" then buildDimmer(item)
-      else buildDevice(item)
-  else switch item.type
-    when 'device'
-      item.template = 'device'
-      buildDevice(item)
-    when 'header' then buildHeader(item)
-    else buildDevice(item)
-  li.data('item-type', item.type)
-  li.data('item-id', item.id)
-  li.addClass 'item'
-  $('#add-a-item').before li
-  li.find("label").before $('<div class="ui-icon-alt handle">
-    <div class="ui-icon ui-icon-bars"></div>
-  </div>')
-  $('#items').listview('refresh')
+  buildSwitch: (device) ->
+    pimatic.devices[device.id] = device
+    li = $ $('.switch-template').html()
+    li.attr('id', "device-#{device.id}")
+    li.find('label')
+      .attr('for', "flip-#{device.id}")
+      .text(device.name)
+    select = li.find('select')
+      .attr('name', "flip-#{device.id}")
+      .attr('id', "flip-#{device.id}")             
+      .data('device-id', device.id)
+      val = if device.attributes.state.value then 'on' else 'off'
+      select.find("option[value=#{val}]").attr('selected', 'selected')
+    select
+      .slider() 
+    return li
 
-buildSwitch = (device) ->
-  pimatic.devices[device.id] = device
-  li = $ $('.switch-template').html()
-  li.attr('id', "device-#{device.id}")
-  li.find('label')
-    .attr('for', "flip-#{device.id}")
-    .text(device.name)
-  select = li.find('select')
-    .attr('name', "flip-#{device.id}")
-    .attr('id', "flip-#{device.id}")             
-    .data('device-id', device.id)
-    val = if device.attributes.state.value then 'on' else 'off'
-    select.find("option[value=#{val}]").attr('selected', 'selected')
-  select
-    .slider() 
-  return li
-
-buildDimmer = (device) ->
-  pimatic.devices[device.id] = device
-  li = $ $('.dimmer-template').html()
-  li.attr('id', "device-#{device.id}")
-  li.find('label')
-    .attr('for', "slider-#{device.id}")
-    .text(device.name)
-  input = li.find('input')
-    .attr('name', "slider-#{device.id}")
-    .attr('id', "slider-#{device.id}")             
-    .data('device-id', device.id)
-    val = device.attributes?.dimlevel?.value
+  buildDimmer: (device) ->
+    pimatic.devices[device.id] = device
+    li = $ $('.dimmer-template').html()
+    li.attr('id', "device-#{device.id}")
+    li.find('label')
+      .attr('for', "slider-#{device.id}")
+      .text(device.name)
+    input = li.find('input')
+      .attr('name', "slider-#{device.id}")
+      .attr('id', "slider-#{device.id}")             
+      .data('device-id', device.id)
+    val = device.attributes.dimlevel.value
     input.val(val)
-  input
-    .slider() 
-  return li
+    input.slider() 
+    return li
 
-buildDevice = (device) ->
-  pimatic.devices[device.id] = device
-  li = $ $(".#{device.template}-template").html()
-  if li.length is 0
-    console.log "Could not find template #{device.template}. Falling back to default."
-    li = $ $(".device-template").html()
-  li.attr('id', "device-#{device.id}")
-  li.find('label').text(device.name)
-  if device.error?
-    li.find('.error').text(device.error)
+  buildDevice: (device) ->
+    pimatic.devices[device.id] = device
+    li = $ $(".#{device.template}-template").html()
+    if li.length is 0
+      console.log "Could not find template #{device.template}. Falling back to default."
+      li = $ $(".device-template").html()
+    li.attr('id', "device-#{device.id}")
+    li.find('label').text(device.name)
+    if device.error?
+      li.find('.error').text(device.error)
 
-  attributesSpan = li.find('.attributes')
-  for attrName of device.attributes
-    attr = device.attributes[attrName]
-    span = $ $('.attribute-template').html()
-    span.addClass("attr-#{attrName}")
-    span.addClass("attr-type-#{attr.type}")
-    attributesSpan.addClass("contains-attr-#{attrName}")
-    attributesSpan.addClass("contains-attr-type-#{attr.type}")
+    attributesSpan = li.find('.attributes')
+    for attrName of device.attributes
+      attr = device.attributes[attrName]
+      span = $ $('.attribute-template').html()
+      span.addClass("attr-#{attrName}")
+      span.addClass("attr-type-#{attr.type}")
+      attributesSpan.addClass("contains-attr-#{attrName}")
+      attributesSpan.addClass("contains-attr-type-#{attr.type}")
+      span.attr('data-val', attr.value)
+      span.find('.val').text(pimatic.pages.index.attrValueToText attr)
+      span.find('.unit').text(attr.unit)
+      attributesSpan.append span
+    return li
+
+  buildHeader: (header) ->
+    li = $ $('.header-template').html()
+    li.find('label').text(header.text)
+    return li
+
+  attrValueToText: (attribute) ->
+    if attribute.type is 'Boolean'
+      unless attribute.labels? then return attribute.value?.toString()
+      else if attribute.value is true then attribute.labels[0] 
+      else if attribute.value is false then attribute.labels[1]
+      else attribute.value?.toString()
+    else return attribute.value?.toString()
+
+  updateDeviceAttribute: (attrEvent) ->
+    attr = pimatic.devices?[attrEvent.id].attributes?[attrEvent.name]
+    unless attr? then return
+    attr.value = attrEvent.value
+    li = $("#device-#{attrEvent.id}")
+    span = li.find(".attr-#{attrEvent.name}")
     span.attr('data-val', attr.value)
-    span.find('.val').text(attrValueToText attr)
-    span.find('.unit').text(attr.unit)
-    attributesSpan.append span
-  return li
+    span.find('.val').text(pimatic.pages.index.attrValueToText attr)
+    return
 
-buildHeader = (header) ->
-  li = $ $('.header-template').html()
-  li.find('label').text(header.text)
-  return li
+  addRule: (rule) ->
+    pimatic.rules[rule.id] = rule 
+    li = $ $('#rule-template').html()
+    li.attr('id', "rule-#{rule.id}")   
+    li.find('a').data('rule-id', rule.id)
+    li.find('.condition').text(rule.condition)
+    li.find('.action').text(rule.action)
+    unless rule.active
+      li.addClass('deactivated')
+    li.addClass 'rule'
+    $('#add-rule').before li
+    $('#rules').listview('refresh')
+    return
 
-attrValueToText= (attribute) =>
-  if attribute.type is 'Boolean'
-    unless attribute.labels? then return attribute.value?.toString()
-    else if attribute.value is true then attribute.labels[0] 
-    else if attribute.value is false then attribute.labels[1]
-    else attribute.value?.toString()
-  else return attribute.value?.toString()
+  updateRule: (rule) ->
+    pimatic.rules[rule.id] = rule 
+    li = $("\#rule-#{rule.id}")   
+    li.find('.condition').text(rule.condition)
+    li.find('.action').text(rule.action)
+    if rule.active
+      li.removeClass('deactivated')
+    else
+      li.addClass('deactivated')
+    $('#rules').listview('refresh')
+    return
 
-updateDeviceAttribute = (attrEvent) ->
-  attr = pimatic.devices?[attrEvent.id].attributes?[attrEvent.name]
-  unless attr? then return
-  attr.value = attrEvent.value
-  li = $("#device-#{attrEvent.id}")
-  span = li.find(".attr-#{attrEvent.name}")
-  span.attr('data-val', attr.value)
-  span.find('.val').text(attrValueToText attr)
-
-addRule = (rule) ->
-  pimatic.rules[rule.id] = rule 
-  li = $ $('#rule-template').html()
-  li.attr('id', "rule-#{rule.id}")   
-  li.find('a').data('rule-id', rule.id)
-  li.find('.condition').text(rule.condition)
-  li.find('.action').text(rule.action)
-  unless rule.active
-    li.addClass('deactivated')
-  li.addClass 'rule'
-  $('#add-rule').before li
-  $('#rules').listview('refresh')
-
-updateRule = (rule) ->
-  pimatic.rules[rule.id] = rule 
-  li = $("\#rule-#{rule.id}")   
-  li.find('.condition').text(rule.condition)
-  li.find('.action').text(rule.action)
-  if rule.active
-    li.removeClass('deactivated')
-  else
-    li.addClass('deactivated')
-  $('#rules').listview('refresh')
-
-removeRule = (rule) ->
-  delete pimatic.rules[rule.id]
-  $("\#rule-#{rule.id}").remove()
-  $('#rules').listview('refresh')  
+  removeRule: (rule) ->
+    delete pimatic.rules[rule.id]
+    $("\#rule-#{rule.id}").remove()
+    $('#rules').listview('refresh')
+    return
