@@ -195,14 +195,21 @@ buildDevice = (device) ->
   li.find('label').text(device.name)
   if device.error?
     li.find('.error').text(device.error)
+
+  attributesSpan = li.find('.attributes')
   for attrName of device.attributes
     attr = device.attributes[attrName]
     span = $ $('.attribute-template').html()
     span.addClass("attr-#{attrName}")
+    span.addClass("attr-type-#{attr.type}")
+    attributesSpan.addClass("contains-attr-#{attrName}")
+    attributesSpan.addClass("contains-attr-type-#{attr.type}")
     span.attr('data-val', attr.value)
     span.find('.val').text(attrValueToText attr)
     span.find('.unit').text(attr.unit)
-    li.find('.attributes').append span
+
+
+    attributesSpan.append span
   return li
 
 buildHeader = (header) ->
