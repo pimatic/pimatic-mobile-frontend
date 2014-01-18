@@ -254,6 +254,7 @@ module.exports = (env) ->
         pretty: @config.mode is "development"
         compileDebug: @config.mode is "development"
         globals: ["__", "nap", "i18n"]
+        mode: @config.mode
 
       awaitingRenders = 
         for page in @additionalAssetFiles['html']
@@ -269,7 +270,7 @@ module.exports = (env) ->
               Q ""
 
       Q.all(awaitingRenders).then( (htmlPages) =>
-        renderOptions.globals.additionalPages = _.reduce htmlPages, (html, page) => html + page
+        renderOptions.additionalPages = _.reduce htmlPages, (html, page) => html + page
         layout = path.resolve __dirname, 'app/views/layout.jade' 
         env.logger.debug("rendering: #{layout}") if @config.debug
         Q.ninvoke(jade, 'renderFile', layout, renderOptions).then( (html) =>
