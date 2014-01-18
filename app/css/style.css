@@ -139,7 +139,18 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   color: #A0A0A0;
 }
 
+/* device info */
+.info-label {
+  font-weight: bold;
+}
 
+#device-info-popup-popup ul{
+  margin: -10px;
+}
+
+#device-info-popup-popup {
+  min-width: 238px;
+}
 
 [data-role=listview].checkbox-list a.ui-link-inherit {
   padding: 0 0 0 0;

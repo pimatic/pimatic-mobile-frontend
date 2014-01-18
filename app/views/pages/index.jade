@@ -1,6 +1,6 @@
 script.switch-template(type='text/template')
   li.sortable.switch-device(data-role="fieldcontain")
-    label
+    label.device-label
     | 
     select.switch(data-role="slider")
       option(value="off")=__('Off')
@@ -8,17 +8,17 @@ script.switch-template(type='text/template')
 script.dimmer-template(type='text/template')
   li.sortable.dimmer-device(data-role="fieldcontain")
     div.item-inner
-      label
+      label.device-label
       | 
       input.dimmer(type="range", min="0", max="100", step="5", data-highlight="true")
 script.device-template(type='text/template')     
   li.sortable.device(data-role="fieldcontain")
-    label
+    label.device-label
     | 
     span.error
 script.temperature-template.presence-template(type='text/template')
   li.sortable(data-role="fieldcontain")
-    label
+    label.device-label
     | 
     span.attributes
 script.header-template(type='text/template')
@@ -55,3 +55,13 @@ div#index(data-role='page')
         a(href='#plugins')=__('Plugins') 
       li(data-theme='f')
         a(href='#updates')=__('Updates')
+  #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a", )
+    ul.ui-corner-all(data-role='listview')
+      li(data-role='list-divider')=__('Device info')
+      li.info-id
+        span.info-label=__('ID') +  ": "
+        span.info-val
+      li.info-name
+        span.info-label=__('Name') +  ": "
+        span.info-val
+      li(data-role='list-divider')=__('Attributes')

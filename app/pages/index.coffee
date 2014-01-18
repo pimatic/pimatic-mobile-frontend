@@ -30,6 +30,7 @@ $(document).on "pageinit", '#index', (event) ->
       .fail( ->
         ele.val(if val is 'on' then 'off' else 'on').slider('refresh')
       ).fail(ajaxAlertFail)
+    return
 
   sliderValBefore = 0
   $('#index #items').on "slidestart", ".dimmer", (event, ui) ->
@@ -43,6 +44,23 @@ $(document).on "pageinit", '#index', (event) ->
       .done(ajaxShowToast)
       .fail( => ele.val(sliderValBefore).slider('refresh') )
       .fail(ajaxAlertFail)
+    return
+
+  $('#index #items').on "click", ".device-label", (event, ui) ->
+    deviceId = $(this).parents(".item").data('item-id')
+    device = pimatic.devices[deviceId]
+    console.log device
+    unless device? then return
+    div = $ "#device-info-popup"
+    div.find('.info-id .info-val').text device.id
+    div.find('.info-name .info-val').text device.name
+    div.find(".info-attr").remove()
+    for attrName, attr of device.attributes
+      attr = $('<li class="info-attr">').text(attr.label)
+      div.find("ul").append attr
+    div.find('ul').listview('refresh')
+    div.popup "open"
+    return
   
   $('#index #rules').on "click", ".rule", (event, ui) ->
     ruleId = $(this).data('rule-id')
