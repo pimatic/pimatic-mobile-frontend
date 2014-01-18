@@ -209,6 +209,9 @@ buildDimmer = (device) ->
 buildDevice = (device) ->
   pimatic.devices[device.id] = device
   li = $ $(".#{device.template}-template").html()
+  if li.length is 0
+    console.log "Could not find template #{device.template}. Falling back to default."
+    li = $ $(".device-template").html()
   li.attr('id', "device-#{device.id}")
   li.find('label').text(device.name)
   if device.error?
@@ -225,8 +228,6 @@ buildDevice = (device) ->
     span.attr('data-val', attr.value)
     span.find('.val').text(attrValueToText attr)
     span.find('.unit').text(attr.unit)
-
-
     attributesSpan.append span
   return li
 

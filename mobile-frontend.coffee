@@ -447,9 +447,14 @@ module.exports = (env) ->
           template: device.getTemplateName()
           attributes: _.cloneDeep device.attributes
 
+        typeToString = (type) => 
+          if typeof type is "function" then type.name
+          else if Array.isArray type then "String"
+          else "Unknown"
+
         attrValues = []
         for attrName of device.attributes
-          item.attributes[attrName].type = device.attributes[attrName].type.name
+          item.attributes[attrName].type = typeToString device.attributes[attrName].type
           do (attrName) =>
             attrValues.push device.getAttributeValue(attrName).then (value) =>
               return name: attrName, value: value
