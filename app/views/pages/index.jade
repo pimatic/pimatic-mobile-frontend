@@ -1,0 +1,79 @@
+script.switch-template(type='text/template')
+  li.sortable.switch-device(data-role="fieldcontain")
+    label.device-label
+    | 
+    select.switch(data-role="slider")
+      option(value="off")=__('Off')
+      option(value="on")=__('On')
+script.dimmer-template(type='text/template')
+  li.sortable.dimmer-device(data-role="fieldcontain")
+    div.item-inner
+      label.device-label
+      | 
+      input.dimmer(type="range", min="0", max="100", step="5", data-highlight="true")
+script.device-template(type='text/template')     
+  li.sortable.device(data-role="fieldcontain")
+    label.device-label
+    | 
+    span.error
+    | 
+    span.attributes
+script.temperature-template.presence-template(type='text/template')
+  li.sortable(data-role="fieldcontain")
+    label.device-label
+    | 
+    span.attributes
+script.header-template(type='text/template')
+  li.sortable.header(data-role='list-divider')
+    label
+script.attribute-template(type='text/template')
+  span.attribute
+    span.val
+    span.unit
+script#rule-template(type='text/template')
+  li.rule
+    a(data-transition='slide', href='#edit-rule')
+      span.if='if'
+      | 
+      span.condition
+      | 
+      span.then='then'
+      | 
+      span.action
+//- Actuators and rules page
+div#index(data-role='page')
+  div(data-theme='a', data-role='header', data-position='fixed')
+    div(class="ui-btn-left", data-role="controlgroup", data-type="horizontal")
+      a#nav-button(data-role="button", href='#nav-panel', data-icon='bars', data-iconpos='notext')=__('Menu')
+      a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown")
+    h3 pimatic
+  div(data-role='content')
+    ul#items(data-role='listview', data-inset='true')
+      li(data-role='list-divider')=__('Devices')
+      li#add-a-item()
+        a(data-transition='slide', href='#add-item')=__('Add an item')+'...'
+      li#delete-item(data-theme='a',data-icon="delete", style="display: none;")=__('Drop here to remove item')
+    ul#rules(data-role='listview', data-inset='true')
+      li(data-role='list-divider')=__('Rules')
+      li#add-rule()
+        a(data-transition='slide', href='#edit-rule')=__('Add a new rule')+'...'
+  div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme='a')
+    ul.nav-search(data-role='listview', data-theme='a', data-divider-theme='a', style='margin-top: -16px;')
+      li(data-icon='delete', data-theme='f')
+        a(href='#', data-rel='close')=__("Close menu")
+      li(data-theme='f')
+        a(href='#log', data-transition="slide")=__('Log') 
+      li(data-theme='f')
+        a(href='#plugins', data-transition="slide")=__('Plugins') 
+      li(data-theme='f')
+        a(href='#updates', data-transition="slide")=__('Updates')
+  #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a", )
+    ul.ui-corner-all(data-role='listview')
+      li(data-role='list-divider')=__('Device info')
+      li.info-id
+        span.info-label=__('ID') +  ": "
+        span.info-val
+      li.info-name
+        span.info-label=__('Name') +  ": "
+        span.info-val
+      li(data-role='list-divider')=__('Attributes')

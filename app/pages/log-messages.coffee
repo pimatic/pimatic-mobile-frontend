@@ -1,14 +1,15 @@
 # log-page
 # ---------
 
+
 $(document).on "pageinit", '#log', (event) ->
   $.get("/api/messages")
     .done( (data) ->
       for entry in data.messages
-        addLogMessage entry
+        pimatic.pages.log.addLogMessage entry
       $('#log-messages').listview('refresh') 
       pimatic.socket.on 'log', (entry) -> 
-        addLogMessage entry
+        pimatic.pages.log.addLogMessage entry
         $('#log-messages').listview('refresh') 
     ).fail(ajaxAlertFail)
 
@@ -18,16 +19,14 @@ $(document).on "pageinit", '#log', (event) ->
         $('#log-messages').empty()
         $('#log-messages').listview('refresh') 
         pimatic.errorCount = 0
-        updateErrorCount()
+        pimatic.pages.index.updateErrorCount()
       ).fail(ajaxAlertFail)
+  return
 
-
-addLogMessage = (entry) ->
-  li = $ $('#log-message-template').html()
-  li.find('.level').text(entry.level).addClass(entry.level)
-  li.find('.msg').text(entry.msg)
-  $('#log-messages').append li
-
-
-
-
+pimatic.pages.log =
+  addLogMessage: (entry) ->
+    li = $ $('#log-message-template').html()
+    li.find('.level').text(entry.level).addClass(entry.level)
+    li.find('.msg').text(entry.msg)
+    $('#log-messages').append li
+    return

@@ -13,20 +13,20 @@
     "views",
     "README.md"
   ],
-  "version": "0.4.0",
+  "version": "0.5.0",
   "homepage": "http://github.com/sweetpi/pimatic",
   "repository": {
     "type": "git",
     "url": "git://github.com/sweetpi/pimatic-log-mobile-frontend.git"
   },
   "dependencies": { 
-    "jade": "0.27.*",
+    "jade": "1.1.4",
     "socket.io": "0.9.*",
-    "nap": "git+https://github.com/sweetpi/nap.git#master",
+    "nap": "0.7.15",
     "render-appcache-manifest": "~0.3.0"
   },
   "peerDependencies": {
-    "pimatic": "0.4.*"
+    "pimatic": "0.5.*"
   },
   "engines": {
     "node": ">0.8.x",

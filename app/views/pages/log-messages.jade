@@ -5,7 +5,8 @@ script#log-message-template(type='text/template')
     span.msg
 div#log(data-role='page')
   div(data-theme='a', data-role='header', data-position='fixed')
-    a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true')=__('Back')
+    a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
+      data-inline='true', data-transition="slide", data-direction="reverse")=__('Back')
     a#clear-log(data-role='button', data-icon='check', data-iconpos='left', data-inline='true')=__('Clear')
     h3=__('Log messages')
   div(data-role='content')

@@ -1,45 +1,36 @@
 # General
 # -------
 
+pimatic.loading = (what, options) ->
+  setTimeout ->
+    $.mobile.loading(what, options)
+  , 1
+
 $.ajaxSetup timeout: 20000 #ms
 
-( ->
-  loadingStack = 0
-  loadingAjax = no
-  proxied = $.mobile.loading
-  $.mobile.loading = (action, options, source) ->
-    if action is 'show'
-      loadingStack++
-      proxied.call this, action, options
-      if source is 'ajax'
-        loadingAjax = yes
-    else 
-      source = options
-      if source is 'ajax'
-        loadingAjax = no
-      if loadingStack > 0
-        loadingStack--
-      if loadingStack is 0 and loadingAjax is no
-        proxied.call this, 'hide'
-  return
-)()
-
-
 $(document).ajaxStart ->
-  $.mobile.loading("show",
+  pimatic.loading "show",
     text: "Loading..."
     textVisible: true
     textonly: false
-  , 'ajax')
 
 $(document).ajaxStop ->
-  $.mobile.loading "hide", 'ajax'
+  pimatic.loading "hide"
 
 $(document).ajaxError -> #nop
 
+$(document).ready => 
+  if window.applicationCache 
+    window.applicationCache.addEventListener 'updateready', (e) =>
+      if window.applicationCache.status is window.applicationCache.UPDATEREADY 
+        window.applicationCache.swapCache()
+        if confirm('A new version of this site is available. Load it?')
+          window.location.reload();
+    , false
+, false
 
 ajaxShowToast = (data, textStatus, jqXHR) -> 
-  showToast (if data.message? then message else 'done')
+  pimatic.showToast (if data.message? then data.message else 'done')
 
 ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   data = null
@@ -60,14 +51,7 @@ ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   alert __(message)
   return true
 
-voiceCallback = (matches) ->
-  $.get "/api/speak",
-    word: matches
-  , (data) ->
-    showToast data
-    $("#talk").blur()
-
-showToast = 
+pimatic.showToast = 
   if device? and device.showToast?
     device.showToast
   else
@@ -81,5 +65,19 @@ __ = (text, args...) ->
   for a in args
     translated = translated.replace /%s/, a
   return translated
+
+( ->
+
+  lastTickTime = new Date().getTime()
+  tick = ->
+    now = new Date().getTime()
+    if now - lastTickTime > 5000
+      # the tick should be triggerd every 2000 seconds, so the device must be in standby
+      # so do a refresh
+      pimatic.pages.index.loadData()
+    lastTickTime = now
+    setTimeout tick, 2000
+  tick()
+)()
 
 unless window.console? then window.console = { log: -> }
