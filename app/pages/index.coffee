@@ -18,8 +18,6 @@ $(document).on "pagecreate", '#index', (event) ->
   pimatic.socket.on "item-add", (item) -> pimatic.pages.index.addItem item
   
 
-$(document).on "pageinit", '#index', (event) ->
-
   $('#index #items').on "change", ".switch", (event, ui) ->
     ele = $(this)
     val = ele.val()
@@ -61,7 +59,7 @@ $(document).on "pageinit", '#index', (event) ->
     div.popup "open"
     return
   
-  $('#index #rules').on "click", ".rule", (event, ui) ->
+  $('#index #rules').on "click", ".rule a", (event, ui) ->
     ruleId = $(this).data('rule-id')
     rule = pimatic.rules[ruleId]
     $('#edit-rule-form').data('action', 'update')
@@ -69,15 +67,15 @@ $(document).on "pageinit", '#index', (event) ->
     $('#edit-rule-actions').val(rule.action)
     $('#edit-rule-active').prop "checked", rule.active
     $('#edit-rule-id').val(ruleId)
-    return true
+    return
 
-  $('#index #rules').on "click", "#add-rule", (event, ui) ->
+  $('#index #rules').on "click", "#add-rule a", (event, ui) ->
     $('#edit-rule-form').data('action', 'add')
     $('#edit-rule-condition').val("")
     $('#edit-rule-actions').val("")
     $('#edit-rule-id').val("")
     $('#edit-rule-active').prop "checked", true
-    return true
+    return
 
   $("#items").sortable(
     items: "li.sortable"
@@ -122,7 +120,12 @@ $(document).on "pageinit", '#index', (event) ->
   return
 
 pimatic.pages.index =
+  loading: no
+
   loadData: ->
+    # already loading?
+    if pimatic.pages.index.loading then return
+    pimatic.pages.index.loading = yes
     $.get("/data.json")
       .done( (data) ->
         pimatic.devices = []
@@ -133,6 +136,7 @@ pimatic.pages.index =
         pimatic.pages.index.addRule(rule) for rule in data.rules
         pimatic.errorCount = data.errorCount
         pimatic.pages.index.updateErrorCount()
+        pimatic.pages.index.loading = no
       ) #.fail(ajaxAlertFail)
     return
 
@@ -243,7 +247,7 @@ pimatic.pages.index =
     else return attribute.value?.toString()
 
   updateDeviceAttribute: (attrEvent) ->
-    attr = pimatic.devices?[attrEvent.id].attributes?[attrEvent.name]
+    attr = pimatic.devices[attrEvent.id]?.attributes?[attrEvent.name]
     unless attr? then return
     attr.value = attrEvent.value
     li = $("#device-#{attrEvent.id}")
