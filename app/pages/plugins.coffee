@@ -59,7 +59,7 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
     pimatic.pages.plugins.disableInstallButtons()
   ).fail(ajaxAlertFail)
 
-  $('#plugin-browse-list').on "click", '#add-to-config', (event, ui) ->
+  $('#plugin-browse-list').on "click", '.add-to-config', (event, ui) ->
     li = $(this).parent('li')
     plugin = li.data('plugin')
     $.post("/api/plugins/add", plugins: [plugin.name])
@@ -75,6 +75,7 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
         pimatic.showToast text
         return
       ).fail(ajaxAlertFail)
+    return
 
 pimatic.pages.plugins =
   installedPlugins: null
