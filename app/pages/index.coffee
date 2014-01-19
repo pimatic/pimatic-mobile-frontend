@@ -69,7 +69,6 @@ $(document).on "pageinit", '#index', (event) ->
     $('#edit-rule-actions').val(rule.action)
     $('#edit-rule-active').prop "checked", rule.active
     $('#edit-rule-id').val(ruleId)
-    event.stopPropagation()
     return true
 
   $('#index #rules').on "click", "#add-rule", (event, ui) ->
@@ -78,7 +77,6 @@ $(document).on "pageinit", '#index', (event) ->
     $('#edit-rule-actions').val("")
     $('#edit-rule-id').val("")
     $('#edit-rule-active').prop "checked", true
-    event.stopPropagation()
     return true
 
   $("#items").sortable(

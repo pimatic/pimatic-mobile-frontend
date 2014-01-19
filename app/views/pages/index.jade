@@ -30,12 +30,22 @@ script.attribute-template(type='text/template')
   span.attribute
     span.val
     span.unit
+script#rule-template(type='text/template')
+  li
+    a.rule(data-transition='slide', href='#edit-rule')
+      span.if='if'
+      | 
+      span.condition
+      | 
+      span.then='then'
+      | 
+      span.action
 //- Actuators and rules page
 div#index(data-role='page')
   div(data-theme='a', data-role='header', data-position='fixed')
     div(class="ui-btn-left", data-role="controlgroup", data-type="horizontal")
       a#nav-button(data-role="button", href='#nav-panel', data-icon='bars', data-iconpos='notext')=__('Menu')
-      a#error-count(data-role="button",href='#log', data-icon="alert")
+      a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown")
     h3 pimatic
   div(data-role='content')
     ul#items(data-role='listview', data-inset='true')
@@ -52,11 +62,11 @@ div#index(data-role='page')
       li(data-icon='delete', data-theme='f')
         a(href='#', data-rel='close')=__("Close menu")
       li(data-theme='f')
-        a(href='#log')=__('Log') 
+        a(href='#log', data-transition="slide")=__('Log') 
       li(data-theme='f')
-        a(href='#plugins')=__('Plugins') 
+        a(href='#plugins', data-transition="slide")=__('Plugins') 
       li(data-theme='f')
-        a(href='#updates')=__('Updates')
+        a(href='#updates', data-transition="slide")=__('Updates')
   #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a", )
     ul.ui-corner-all(data-role='listview')
       li(data-role='list-divider')=__('Device info')
