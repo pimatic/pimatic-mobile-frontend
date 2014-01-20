@@ -245,7 +245,6 @@ module.exports = (env) ->
         context.waitForIt finished
         return
 
-
     renderIndex: () ->
       env.logger.info "rendering html"
       jade = require('jade')

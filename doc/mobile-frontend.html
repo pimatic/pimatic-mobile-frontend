@@ -213,7 +213,6 @@
         <span class="nx">context</span><span class="p">.</span><span class="nx">waitForIt</span> <span class="nx">finished</span>
         <span class="k">return</span>
 
-
     <span class="nv">renderIndex: </span><span class="p">()</span> <span class="nf">-&gt;</span>
       <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;rendering html&quot;</span>
       <span class="nv">jade = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;jade&#39;</span><span class="p">)</span>
@@ -378,9 +377,14 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
           <span class="nv">template: </span><span class="nx">device</span><span class="p">.</span><span class="nx">getTemplateName</span><span class="p">()</span>
           <span class="nv">attributes: </span><span class="nx">_</span><span class="p">.</span><span class="nx">cloneDeep</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span>
 
+        <span class="nv">typeToString = </span><span class="nf">(type) =&gt;</span> 
+          <span class="k">if</span> <span class="k">typeof</span> <span class="nx">type</span> <span class="o">is</span> <span class="s">&quot;function&quot;</span> <span class="k">then</span> <span class="nx">type</span><span class="p">.</span><span class="nx">name</span>
+          <span class="k">else</span> <span class="k">if</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span> <span class="nx">type</span> <span class="k">then</span> <span class="s">&quot;String&quot;</span>
+          <span class="k">else</span> <span class="s">&quot;Unknown&quot;</span>
+
         <span class="nv">attrValues = </span><span class="p">[]</span>
         <span class="k">for</span> <span class="nx">attrName</span> <span class="k">of</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span>
-          <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nv">type = </span><span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nx">type</span><span class="p">.</span><span class="nx">name</span>
+          <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nv">type = </span><span class="nx">typeToString</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nx">type</span>
           <span class="nx">do</span> <span class="nf">(attrName) =&gt;</span>
             <span class="nx">attrValues</span><span class="p">.</span><span class="nx">push</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getAttributeValue</span><span class="p">(</span><span class="nx">attrName</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
               <span class="k">return</span> <span class="nv">name: </span><span class="nx">attrName</span><span class="p">,</span> <span class="nv">value: </span><span class="nx">value</span>
