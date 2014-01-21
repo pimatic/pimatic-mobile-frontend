@@ -2,6 +2,8 @@
 # -------
 
 pimatic.loading = (what, options) ->
+  if what is "hide" and pimatic.pages.index.loading
+    return
   setTimeout ->
     $.mobile.loading(what, options)
   , 1
