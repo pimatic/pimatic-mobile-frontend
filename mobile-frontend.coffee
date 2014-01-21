@@ -455,17 +455,14 @@ module.exports = (env) ->
         for attrName of device.attributes
           item.attributes[attrName].type = typeToString device.attributes[attrName].type
           do (attrName) =>
-            attrValues.push device.getAttributeValue(attrName).then (value) =>
-              return name: attrName, value: value
-        return Q.all(attrValues).then( (attrValues) =>
-          for attr in attrValues
-            item.attributes[attr.name].value = attr.value
-          return item
-        ).catch( (error) =>
-          env.logger.error error.message
-          env.logger.debug error.stack
-          return item
-        ) 
+            attrValues.push device.getAttributeValue(attrName).timeout(2000).then( (value) =>
+              item.attributes[attrName].value = value
+            ).catch( (error) => 
+              item.attributes[attrName].value = undefined
+              env.logger.warn "Error getting #{attrName} of item.id: #{error.message}"
+              env.logger.debug error.stack
+            )
+        return Q.all(attrValues).then( -> return item)
       else
         errorMsg = "No device to display with id \"#{item.id}\" found"
         env.logger.error errorMsg
