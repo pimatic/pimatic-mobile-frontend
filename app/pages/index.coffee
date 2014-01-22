@@ -239,12 +239,15 @@ pimatic.pages.index =
     return li
 
   attrValueToText: (attribute) ->
+    console.log attribute
+    if attribute.value is null or not attribute.value?
+      return __("unknown")
     if attribute.type is 'Boolean'
-      unless attribute.labels? then return attribute.value?.toString()
+      unless attribute.labels? then return attribute.value.toString()
       else if attribute.value is true then attribute.labels[0] 
       else if attribute.value is false then attribute.labels[1]
-      else attribute.value?.toString()
-    else return attribute.value?.toString()
+      else attribute.value.toString()
+    else return attribute.value.toString()
 
   updateDeviceAttribute: (attrEvent) ->
     attr = pimatic.devices[attrEvent.id]?.attributes?[attrEvent.name]
