@@ -213,7 +213,6 @@
         <span class="nx">context</span><span class="p">.</span><span class="nx">waitForIt</span> <span class="nx">finished</span>
         <span class="k">return</span>
 
-
     <span class="nv">renderIndex: </span><span class="p">()</span> <span class="nf">-&gt;</span>
       <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">info</span> <span class="s">&quot;rendering html&quot;</span>
       <span class="nv">jade = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;jade&#39;</span><span class="p">)</span>
@@ -387,17 +386,14 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
         <span class="k">for</span> <span class="nx">attrName</span> <span class="k">of</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span>
           <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nv">type = </span><span class="nx">typeToString</span> <span class="nx">device</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nx">type</span>
           <span class="nx">do</span> <span class="nf">(attrName) =&gt;</span>
-            <span class="nx">attrValues</span><span class="p">.</span><span class="nx">push</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getAttributeValue</span><span class="p">(</span><span class="nx">attrName</span><span class="p">).</span><span class="nx">then</span> <span class="nf">(value) =&gt;</span>
-              <span class="k">return</span> <span class="nv">name: </span><span class="nx">attrName</span><span class="p">,</span> <span class="nv">value: </span><span class="nx">value</span>
-        <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">attrValues</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(attrValues) =&gt;</span>
-          <span class="k">for</span> <span class="nx">attr</span> <span class="k">in</span> <span class="nx">attrValues</span>
-            <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attr</span><span class="p">.</span><span class="nx">name</span><span class="p">].</span><span class="nv">value = </span><span class="nx">attr</span><span class="p">.</span><span class="nx">value</span>
-          <span class="k">return</span> <span class="nx">item</span>
-        <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span>
-          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">error</span><span class="p">.</span><span class="nx">message</span>
-          <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
-          <span class="k">return</span> <span class="nx">item</span>
-        <span class="p">)</span> 
+            <span class="nx">attrValues</span><span class="p">.</span><span class="nx">push</span> <span class="nx">device</span><span class="p">.</span><span class="nx">getAttributeValue</span><span class="p">(</span><span class="nx">attrName</span><span class="p">).</span><span class="nx">timeout</span><span class="p">(</span><span class="mi">2000</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(value) =&gt;</span>
+              <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nv">value = </span><span class="nx">value</span>
+            <span class="p">).</span><span class="nx">catch</span><span class="p">(</span> <span class="nf">(error) =&gt;</span> 
+              <span class="nx">item</span><span class="p">.</span><span class="nx">attributes</span><span class="p">[</span><span class="nx">attrName</span><span class="p">].</span><span class="nv">value = </span><span class="kc">null</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">warn</span> <span class="s">&quot;Error getting </span><span class="si">#{</span><span class="nx">attrName</span><span class="si">}</span><span class="s"> of </span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">: </span><span class="si">#{</span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="si">}</span><span class="s">&quot;</span>
+              <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="nx">error</span><span class="p">.</span><span class="nx">stack</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">attrValues</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span> <span class="nf">-&gt;</span> <span class="k">return</span> <span class="nx">item</span><span class="p">)</span>
       <span class="k">else</span>
         <span class="nv">errorMsg = </span><span class="s">&quot;No device to display with id \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">\&quot; found&quot;</span>
         <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">errorMsg</span>
