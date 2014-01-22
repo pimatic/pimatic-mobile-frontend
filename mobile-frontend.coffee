@@ -458,8 +458,8 @@ module.exports = (env) ->
             attrValues.push device.getAttributeValue(attrName).timeout(2000).then( (value) =>
               item.attributes[attrName].value = value
             ).catch( (error) => 
-              item.attributes[attrName].value = undefined
-              env.logger.warn "Error getting #{attrName} of item.id: #{error.message}"
+              item.attributes[attrName].value = null
+              env.logger.warn "Error getting #{attrName} of #{item.id}: #{error.message}"
               env.logger.debug error.stack
             )
         return Q.all(attrValues).then( -> return item)
