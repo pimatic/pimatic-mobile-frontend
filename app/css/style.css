@@ -42,6 +42,17 @@
     top: 0;
 }
 
+#index li.button fieldset {
+  margin: 3px 10px 10px 0 !important;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+#index li.button fieldset a{
+  margin-top: 1px;
+  font-weight: bold;
+}
 
 /* index-page */
 #index span.if, span.then {

@@ -26,6 +26,11 @@ script.temperature-template.presence-template(type='text/template')
 script.header-template(type='text/template')
   li.sortable.header(data-role='list-divider')
     label
+script.button-template(type='text/template')
+  li.sortable.button(data-role="fieldcontain")
+    label &nbsp;
+    fieldset(data-role='fieldcontain')
+      a(data-role="button", data-mini="true")
 script.attribute-template(type='text/template')
   span.attribute
     span.val
@@ -45,8 +50,8 @@ div#index.unlocked(data-role='page')
   div(data-theme='a', data-role='header', data-position='fixed')
     div(class="ui-btn-left", data-role="controlgroup", data-type="horizontal")
       a#nav-button(data-role="button", href='#nav-panel', data-icon='bars', data-iconpos='notext')=__('Menu')
-      a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown")
       a#lock-button(data-role="button",data-icon="check", data-iconpos='notext')
+      a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown")
     h3 pimatic
   div(data-role='content')
     ul#items(data-role='listview', data-inset='true')

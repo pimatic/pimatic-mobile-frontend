@@ -34,6 +34,26 @@ $(document).on "pageinit", '#add-item', (event) ->
               ).fail(ajaxAlertFail)
     return
 
+  $('#add-other').on "click", '#add-a-button', ->
+    $("<div>").simpledialog2
+      mode: "button"
+      headerText: __("Name")
+      headerClose: true
+      buttonPrompt: __("Please enter a name")
+      buttonInput: true
+      buttons:
+        OK:
+          click: ->
+            name = $.mobile.sdLastInput
+            if name is ""
+              pimatic.showToast __("Please enter a name")
+            else
+              $.get("/add-button/#{name}").done((result) ->
+                pimatic.showToast __("Button added")
+              ).fail(ajaxAlertFail)
+    return
+  return
+
 $(document).on "pageshow", '#add-item', (event) ->
   $.get("/api/devices")
     .done( (data) ->

@@ -58,6 +58,12 @@ $(document).on "pagecreate", '#index', (event) ->
     div.find('ul').listview('refresh')
     div.popup "open"
     return
+
+  $('#index #items').on "click", ".button a", (event, ui) ->
+    ele = $(this).parents('.item')
+    name = ele.data('name')
+    $.get("/button-pressed/#{name}").fail(ajaxAlertFail)
+    return
   
   $('#index #rules').on "click", ".rule a", (event, ui) ->
     ruleId = $(this).data('rule-id')
@@ -174,6 +180,7 @@ pimatic.pages.index =
         item.template = 'device'
         pimatic.pages.index.buildDevice(item)
       when 'header' then pimatic.pages.index.buildHeader(item)
+      when 'button' then pimatic.pages.index.buildButton(item)
       else pimatic.pages.index.buildDevice(item)
     li.data('item-type', item.type)
     li.data('item-id', item.id)
@@ -247,8 +254,14 @@ pimatic.pages.index =
     li.find('label').text(header.text)
     return li
 
+  buildButton: (button) ->
+    li = $ $('.button-template').html()
+    li.data('name', button.text)
+    li.find('label').text(__("%s button", button.text))
+    li.find('a').text(button.text).button()
+    return li
+
   attrValueToText: (attribute) ->
-    console.log attribute
     if attribute.value is null or not attribute.value?
       return __("unknown")
     if attribute.type is 'Boolean'

@@ -102,11 +102,25 @@ module.exports = (env) ->
     
       app.get '/add-header/:name', (req, res) =>
         name = req.params.name
-        if not acutatorId? or name is ""
+        if name is ""
           res.send 200, {success: false, message: 'no name given'}
+          return
         item = 
           type: 'header'
           id: "header-#{name}"
+          text: name
+
+        @addNewItem item
+        res.send 200, {success: true}
+
+      app.get '/add-button/:name', (req, res) =>
+        name = req.params.name
+        if name is ""
+          res.send 200, {success: false, message: 'no name given'}
+          return
+        item = 
+          type: 'button'
+          id: "button-#{name}"
           text: name
 
         @addNewItem item
@@ -134,6 +148,19 @@ module.exports = (env) ->
     
       app.get '/clear-log', (req, res) =>
         env.logger.transports.memory.clearLog()
+        res.send 200, {success: true}
+
+
+      app.get '/button-pressed/:name', (req, res) =>
+        name = req.params.name
+        item = null
+        for it in @config.items
+          if it.type is "button" and it.text is name
+            item = it
+            break
+        unless item?
+          res.send 200, {success: false, message: 'could not find the button'}
+        @emit "button pressed", item
         res.send 200, {success: true}
     
       app.post '/remove-item', (req, res) =>
@@ -208,6 +235,10 @@ module.exports = (env) ->
             env.logger.debug("removing item-add listerns") if @config.debug
             @removeListener 'item-add', addItemListener
           return
+
+      # register the predicate provider
+      ButtonPredicateProvider = require('./button-predicates') env
+      @framework.ruleManager.addPredicateProvider(new ButtonPredicateProvider(this))
 
       @framework.on 'after init', (context)=>
         deferred = Q.defer()
@@ -399,8 +430,8 @@ module.exports = (env) ->
       p = switch item.type
         when 'device'
           @getDeviceWithData(item)
-        when 'header'
-          Q.fcall => item
+        when 'header', 'button'
+          Q(item)
       p.then( (item) =>
         @emit 'item-add', item 
       )
@@ -428,8 +459,8 @@ module.exports = (env) ->
           switch item.type
             when "device"
               items.push @getDeviceWithData item
-            when "header"
-              items.push Q.fcall => item
+            when "header", 'button'
+              items.push Q(item)
             else
               errorMsg = "Unknown item type \"#{item.type}\""
               env.logger.error errorMsg
