@@ -89,7 +89,7 @@ module.exports = (env) ->
             found = true
             break
         if found 
-          res.send 200, {success: false, message: 'device already added'}
+          res.send 200, {success: false, message: __('Device was already added.') }
           return
 
         item = 
@@ -97,7 +97,7 @@ module.exports = (env) ->
           id: deviceId
 
         @addNewItem item
-        res.send 200, {success: true}
+        res.send 200, {success: true, message: __("Added %s to the list.", deviceId) }
     
     
       app.get '/add-header/:name', (req, res) =>

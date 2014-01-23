@@ -12,7 +12,7 @@ $(document).on "pageinit", '#add-item', (event) ->
         li.data('icon', 'check')
         li.addClass('added')
         li.buttonMarkup({ icon: "check" })
-      ).fail(ajaxAlertFail)
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
     return
 
   $('#add-other').on "click", '#add-a-header', ->
