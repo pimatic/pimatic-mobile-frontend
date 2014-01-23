@@ -77,6 +77,15 @@ $(document).on "pagecreate", '#index', (event) ->
     $('#edit-rule-active').prop "checked", true
     return
 
+  $('#index').on "click", "#lock-button", (event, ui) ->
+    if $('#index').hasClass('locked')
+      $('#index').removeClass('locked').addClass('unlocked')
+      $('#lock-button').buttonMarkup(icon: 'check')
+    else 
+      $('#index').addClass('locked').removeClass('unlocked')
+      $('#lock-button').buttonMarkup(icon: 'gear')
+    return
+
   $("#items").sortable(
     items: "li.sortable"
     forcePlaceholderSize: true

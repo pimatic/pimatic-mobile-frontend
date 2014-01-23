@@ -49,7 +49,7 @@
 }
 
 
-ul#items li.sortable {
+.unlocked ul#items li.sortable {
   padding-left: 0px;
 }
 
@@ -58,6 +58,14 @@ ul#items li.sortable .handle {
   padding: 0 5px;
   opacity: 0.2;
   cursor: move;
+}
+
+.locked ul#items li.sortable .handle{
+  display: none;
+}
+
+.locked #add-a-item {
+  display: none;
 }
 
 fieldset .ui-block-a .ui-btn{
