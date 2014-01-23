@@ -65,6 +65,27 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
           "foldPrefix": "^",
           "name": "CoffeeScript"
         },
+        "sourcePath": "/home/h3llfire/Projektesammlung/2013_pimatic/node_modules/pimatic-mobile-frontend/button-predicates.coffee",
+        "projectPath": "button-predicates.coffee",
+        "targetPath": "button-predicates",
+        "pageTitle": "button-predicates",
+        "title": "button-predicates"
+      },
+      "depth": 1,
+      "outline": []
+    }, {
+      "type": "file",
+      "data": {
+        "language": {
+          "nameMatchers": [".coffee", "Cakefile"],
+          "pygmentsLexer": "coffee-script",
+          "multiLineComment": ["###*", " *", " ###", "###", "#", "###", "###*", "#", "###"],
+          "strictMultiLineEnd": false,
+          "singleLineComment": ["#"],
+          "ignorePrefix": "}",
+          "foldPrefix": "^",
+          "name": "CoffeeScript"
+        },
         "sourcePath": "/home/h3llfire/Projektesammlung/2013_pimatic/node_modules/pimatic-mobile-frontend/mobile-frontend.coffee",
         "projectPath": "mobile-frontend.coffee",
         "targetPath": "mobile-frontend",

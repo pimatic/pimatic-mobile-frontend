@@ -60,8 +60,10 @@
               <span class="nv">error: </span><span class="nx">rule</span><span class="p">.</span><span class="nx">error</span>
           <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> 
             <span class="nv">errorCount: </span><span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">transports</span><span class="p">.</span><span class="nx">memory</span><span class="p">.</span><span class="nx">getErrorCount</span><span class="p">()</span>
+            <span class="nv">enabledEditing: </span><span class="nx">@config</span><span class="p">.</span><span class="nx">enabledEditing</span>
             <span class="nv">items: </span><span class="nx">items</span>
             <span class="nv">rules: </span><span class="nx">rules</span>
+            
         <span class="p">).</span><span class="nx">done</span><span class="p">()</span>
     
       <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-device/:deviceId&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
@@ -74,7 +76,7 @@
             <span class="nv">found = </span><span class="kc">true</span>
             <span class="k">break</span>
         <span class="k">if</span> <span class="nx">found</span> 
-          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;device already added&#39;</span><span class="p">}</span>
+          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="nx">__</span><span class="p">(</span><span class="s">&#39;Device was already added.&#39;</span><span class="p">)</span> <span class="p">}</span>
           <span class="k">return</span>
 
         <span class="nv">item = </span>
@@ -82,16 +84,30 @@
           <span class="nv">id: </span><span class="nx">deviceId</span>
 
         <span class="nx">@addNewItem</span> <span class="nx">item</span>
-        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">,</span> <span class="nv">message: </span><span class="nx">__</span><span class="p">(</span><span class="s">&quot;Added %s to the list.&quot;</span><span class="p">,</span> <span class="nx">deviceId</span><span class="p">)</span> <span class="p">}</span>
     
     
       <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-header/:name&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nv">name = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">name</span>
-        <span class="k">if</span> <span class="o">not</span> <span class="nx">acutatorId</span><span class="o">?</span> <span class="o">or</span> <span class="nx">name</span> <span class="o">is</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nx">name</span> <span class="o">is</span> <span class="s">&quot;&quot;</span>
           <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;no name given&#39;</span><span class="p">}</span>
+          <span class="k">return</span>
         <span class="nv">item = </span>
           <span class="nv">type: </span><span class="s">&#39;header&#39;</span>
           <span class="nv">id: </span><span class="s">&quot;header-</span><span class="si">#{</span><span class="nx">name</span><span class="si">}</span><span class="s">&quot;</span>
+          <span class="nv">text: </span><span class="nx">name</span>
+
+        <span class="nx">@addNewItem</span> <span class="nx">item</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
+
+      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/add-button/:name&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
+        <span class="nv">name = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">name</span>
+        <span class="k">if</span> <span class="nx">name</span> <span class="o">is</span> <span class="s">&quot;&quot;</span>
+          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;no name given&#39;</span><span class="p">}</span>
+          <span class="k">return</span>
+        <span class="nv">item = </span>
+          <span class="nv">type: </span><span class="s">&#39;button&#39;</span>
+          <span class="nv">id: </span><span class="s">&quot;button-</span><span class="si">#{</span><span class="nx">name</span><span class="si">}</span><span class="s">&quot;</span>
           <span class="nv">text: </span><span class="nx">name</span>
 
         <span class="nx">@addNewItem</span> <span class="nx">item</span>
@@ -120,6 +136,33 @@
       <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/clear-log&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">transports</span><span class="p">.</span><span class="nx">memory</span><span class="p">.</span><span class="nx">clearLog</span><span class="p">()</span>
         <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
+
+
+      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/button-pressed/:name&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
+        <span class="nv">name = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">name</span>
+        <span class="nv">item = </span><span class="kc">null</span>
+        <span class="k">for</span> <span class="nx">it</span> <span class="k">in</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">items</span>
+          <span class="k">if</span> <span class="nx">it</span><span class="p">.</span><span class="nx">type</span> <span class="o">is</span> <span class="s">&quot;button&quot;</span> <span class="o">and</span> <span class="nx">it</span><span class="p">.</span><span class="nx">text</span> <span class="o">is</span> <span class="nx">name</span>
+            <span class="nv">item = </span><span class="nx">it</span>
+            <span class="k">break</span>
+        <span class="k">unless</span> <span class="nx">item</span><span class="o">?</span>
+          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">false</span><span class="p">,</span> <span class="nv">message: </span><span class="s">&#39;could not find the button&#39;</span><span class="p">}</span>
+        <span class="nx">@emit</span> <span class="s">&quot;button pressed&quot;</span><span class="p">,</span> <span class="nx">item</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nv">success: </span><span class="kc">true</span><span class="p">}</span>
+
+      <span class="nx">app</span><span class="p">.</span><span class="nx">get</span> <span class="s">&#39;/enabledEditing/:state&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
+        <span class="nv">state = </span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">state</span>
+        <span class="nv">state = </span><span class="p">(</span><span class="nx">state</span> <span class="o">is</span> <span class="s">&quot;true&quot;</span><span class="p">)</span>
+        <span class="vi">@config.enabledEditing = </span><span class="nx">state</span>
+        <span class="vi">@jsonConfig.enabledEditing = </span><span class="nx">state</span>
+        <span class="nx">@framework</span><span class="p">.</span><span class="nx">saveConfig</span><span class="p">()</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span> <span class="mi">200</span><span class="p">,</span> <span class="p">{</span>
+          <span class="nv">success: </span><span class="kc">true</span> 
+          <span class="nv">message: </span><span class="p">(</span>
+            <span class="k">if</span> <span class="nx">state</span> <span class="k">then</span> <span class="nx">__</span><span class="p">(</span><span class="s">&quot;You can now edit your list.&quot;</span><span class="p">)</span> 
+            <span class="k">else</span> <span class="nx">__</span><span class="p">(</span><span class="s">&quot;The list is now locked.&quot;</span><span class="p">)</span>
+          <span class="p">)</span>
+        <span class="p">}</span>
     
       <span class="nx">app</span><span class="p">.</span><span class="nx">post</span> <span class="s">&#39;/remove-item&#39;</span><span class="p">,</span> <span class="nf">(req, res) =&gt;</span>
         <span class="nv">item = </span><span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">item</span>
@@ -185,7 +228,8 @@
             <span class="nx">memoryTransport</span><span class="p">.</span><span class="nx">removeListener</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="nx">logListener</span>
             <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span><span class="p">(</span><span class="s">&quot;removing item-add listerns&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@config</span><span class="p">.</span><span class="nx">debug</span>
             <span class="nx">@removeListener</span> <span class="s">&#39;item-add&#39;</span><span class="p">,</span> <span class="nx">addItemListener</span>
-          <span class="k">return</span>
+          <span class="k">return</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>register the predicate provider</p></div></div><div class="code"><div class="wrapper">      <span class="nv">ButtonPredicateProvider = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;./button-predicates&#39;</span><span class="p">)</span> <span class="nx">env</span>
+      <span class="nx">@framework</span><span class="p">.</span><span class="nx">ruleManager</span><span class="p">.</span><span class="nx">addPredicateProvider</span><span class="p">(</span><span class="k">new</span> <span class="nx">ButtonPredicateProvider</span><span class="p">(</span><span class="k">this</span><span class="p">))</span>
 
       <span class="nx">@framework</span><span class="p">.</span><span class="nx">on</span> <span class="s">&#39;after init&#39;</span><span class="p">,</span> <span class="nf">(context)=&gt;</span>
         <span class="nv">deferred = </span><span class="nx">Q</span><span class="p">.</span><span class="nx">defer</span><span class="p">()</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Give the other plugins some time to register asset files</p></div></div><div class="code"><div class="wrapper">        <span class="nx">process</span><span class="p">.</span><span class="nx">nextTick</span> <span class="o">=&gt;</span> </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>and then setup the assets and manifest</p></div></div><div class="code"><div class="wrapper">          <span class="k">try</span>
@@ -330,8 +374,8 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
       <span class="nv">p = </span><span class="k">switch</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
         <span class="k">when</span> <span class="s">&#39;device&#39;</span>
           <span class="nx">@getDeviceWithData</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
-        <span class="k">when</span> <span class="s">&#39;header&#39;</span>
-          <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
+        <span class="k">when</span> <span class="s">&#39;header&#39;</span><span class="p">,</span> <span class="s">&#39;button&#39;</span>
+          <span class="nx">Q</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
       <span class="nx">p</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span> <span class="nf">(item) =&gt;</span>
         <span class="nx">@emit</span> <span class="s">&#39;item-add&#39;</span><span class="p">,</span> <span class="nx">item</span> 
       <span class="p">)</span>
@@ -359,8 +403,8 @@ files shouldn't change in production mode</p></div></div><div class="code"><div 
           <span class="k">switch</span> <span class="nx">item</span><span class="p">.</span><span class="nx">type</span>
             <span class="k">when</span> <span class="s">&quot;device&quot;</span>
               <span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">@getDeviceWithData</span> <span class="nx">item</span>
-            <span class="k">when</span> <span class="s">&quot;header&quot;</span>
-              <span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">Q</span><span class="p">.</span><span class="nx">fcall</span> <span class="o">=&gt;</span> <span class="nx">item</span>
+            <span class="k">when</span> <span class="s">&quot;header&quot;</span><span class="p">,</span> <span class="s">&#39;button&#39;</span>
+              <span class="nx">items</span><span class="p">.</span><span class="nx">push</span> <span class="nx">Q</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
             <span class="k">else</span>
               <span class="nv">errorMsg = </span><span class="s">&quot;Unknown item type \&quot;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">type</span><span class="si">}</span><span class="s">\&quot;&quot;</span>
               <span class="nx">env</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">error</span> <span class="nx">errorMsg</span>
