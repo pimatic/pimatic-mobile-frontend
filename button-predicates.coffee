@@ -23,14 +23,12 @@ module.exports = (env) ->
         buttonName = matches[1]
         for item in @mobile.config.items
           if item.type is "button"
-            console.log item.text
-            console.log buttonName
             if @_matchesIdOrName item.text, buttonName
               return info =
                 itemId: item.id
 
-    # Checks if `find` matches the id or name of the button lower case ignoring "the " prefixes in the search 
-    # string and name.
+    # Checks if `find` matches the id or name of the button lower case ignoring "the " prefixes 
+    # in the search string and name.
     _matchesIdOrName: (name, find) ->
       cleanFind = find.toLowerCase().replace('the ', '').trim()
       cleanName = name.toLowerCase().replace('the ', '').trim()
@@ -51,7 +49,7 @@ module.exports = (env) ->
 
       @_listener[id] =
         itemId: info.itemId
-        destroy: -> @mobile.removeListener 'button pressed', buttonPressedListener
+        destroy: => @mobile.removeListener 'button pressed', buttonPressedListener
 
     cancelNotify: (id) ->
       listener = @_listener[id]
