@@ -76,7 +76,7 @@ ul#items li.sortable .handle {
 }
 
 .locked #add-a-item {
-  display: none;
+  display: none !important;
 }
 
 fieldset .ui-block-a .ui-btn{
