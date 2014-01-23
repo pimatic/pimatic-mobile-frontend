@@ -14,3 +14,7 @@ module.exports =
     doc: "that to true to get additional debug outputs"
     format: Boolean
     default: false
+  enabledEditing:
+    doc: "enabled or disabled the drag and drop of items"
+    format: Boolean
+    default: true

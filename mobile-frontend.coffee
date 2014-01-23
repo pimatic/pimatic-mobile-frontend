@@ -75,8 +75,10 @@ module.exports = (env) ->
               error: rule.error
           res.send 
             errorCount: env.logger.transports.memory.getErrorCount()
+            enabledEditing: @config.enabledEditing
             items: items
             rules: rules
+            
         ).done()
     
       app.get '/add-device/:deviceId', (req, res) =>
@@ -162,6 +164,20 @@ module.exports = (env) ->
           res.send 200, {success: false, message: 'could not find the button'}
         @emit "button pressed", item
         res.send 200, {success: true}
+
+      app.get '/enabledEditing/:state', (req, res) =>
+        state = req.params.state
+        state = (state is "true")
+        @config.enabledEditing = state
+        @jsonConfig.enabledEditing = state
+        @framework.saveConfig()
+        res.send 200, {
+          success: true 
+          message: (
+            if state then __("You can now edit your list.") 
+            else __("The list is now locked.")
+          )
+        }
     
       app.post '/remove-item', (req, res) =>
         item = req.body.item

@@ -84,13 +84,10 @@ $(document).on "pagecreate", '#index', (event) ->
     return
 
   $('#index').on "click", "#lock-button", (event, ui) ->
-    if $('#index').hasClass('locked')
-      $('#index').removeClass('locked').addClass('unlocked')
-      $('#lock-button').buttonMarkup(icon: 'check')
-    else 
-      $('#index').addClass('locked').removeClass('unlocked')
-      $('#lock-button').buttonMarkup(icon: 'gear')
-    return
+    enabled = not pimatic.pages.index.editingMode
+    pimatic.pages.index.changeEditingMode(enabled)
+    $.get("/enabledEditing/#{enabled}")
+      .done(ajaxShowToast)
 
   $("#items").sortable(
     items: "li.sortable"
@@ -136,6 +133,7 @@ $(document).on "pagecreate", '#index', (event) ->
 
 pimatic.pages.index =
   loading: no
+  editingMode: yes
 
   loadData: ->
     # already loading?
@@ -152,6 +150,7 @@ pimatic.pages.index =
         pimatic.errorCount = data.errorCount
         pimatic.pages.index.updateErrorCount()
         pimatic.pages.index.loading = no
+        pimatic.pages.index.changeEditingMode data.enabledEditing
       ) #.fail(ajaxAlertFail)
     return
 
@@ -167,6 +166,16 @@ pimatic.pages.index =
       $('#error-count').text(pimatic.errorCount)
     if pimatic.errorCount is 0 then $('#error-count').hide()
     else $('#error-count').show()
+    return
+
+  changeEditingMode: (enabled) ->
+    pimatic.pages.index.editingMode = enabled
+    if enabled
+      $('#index').removeClass('locked').addClass('unlocked')
+      $('#lock-button').buttonMarkup(icon: 'check')
+    else 
+      $('#index').addClass('locked').removeClass('unlocked')
+      $('#lock-button').buttonMarkup(icon: 'gear')
     return
 
   addItem: (item) ->
