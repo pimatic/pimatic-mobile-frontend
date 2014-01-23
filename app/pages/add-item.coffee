@@ -32,6 +32,7 @@ $(document).on "pageinit", '#add-item', (event) ->
               $.get("/add-header/#{name}").done((result) ->
                 pimatic.showToast __("Header added")
               ).fail(ajaxAlertFail)
+    setTimeout ( -> $('.ui-simpledialog-input').focus() ), 1
     return
 
   $('#add-other').on "click", '#add-a-button', ->
@@ -51,6 +52,7 @@ $(document).on "pageinit", '#add-item', (event) ->
               $.get("/add-button/#{name}").done((result) ->
                 pimatic.showToast __("Button added")
               ).fail(ajaxAlertFail)
+    setTimeout ( -> $('.ui-simpledialog-input').focus() ), 1
     return
   return
 
