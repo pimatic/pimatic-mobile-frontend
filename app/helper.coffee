@@ -53,11 +53,15 @@ ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   alert __(message)
   return true
 
-pimatic.showToast = 
-  if device? and device.showToast?
-    device.showToast
-  else
-    (msg) -> $('#toast').text(msg).toast().toast('show')
+$(document).ready => 
+
+  pimatic.showToast = (
+    if device? and device.showToast?
+      device.showToast
+    else
+      $('#toast').toast()
+      (msg) -> $('#toast').text(msg).toast('show')
+  )
 
 __ = (text, args...) -> 
   translated = text

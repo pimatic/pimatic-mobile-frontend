@@ -32,11 +32,15 @@ $.widget( "mobile.toast", $.mobile.widget, {
 	  
 		var $el = this.element
 		
+		$el.css('top', '0px')
+		$el.css('left', '0px')
+
+		$el.show();
 		var bw = $('body').width()
 		var bh = $('body').height()
 		
 		var top = (bh*3/4) - $el.height()/2
-		var left = bw/2 - $el.width()/2
+		var left = bw/2 - $el.outerWidth()/2
 		
 		$el.css('top', top+'px')
 		$el.css('left', left+'px')
