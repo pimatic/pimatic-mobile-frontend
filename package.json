@@ -7,6 +7,7 @@
     "app",
     "doc",
     "public",
+    "button-predicates.coffee",
     "mobile-frontend.coffee",
     "mobile-frontend-config-shema.coffee",
     "coffee",
