@@ -146,6 +146,7 @@ module.exports = (env) ->
           return
         @config.items = @jsonConfig.items = newItems
         @framework.saveConfig()
+        @emit 'item-order', order
         res.send 200, {success: true}
     
       app.get '/clear-log', (req, res) =>
@@ -192,7 +193,9 @@ module.exports = (env) ->
         @config.items = @jsonConfig.items
         @framework.saveConfig()
 
+        @emit 'item-remove', item 
         res.send 200, {success: true}
+
     
       # * Static assets
       app.use express.static(__dirname + "/public")
@@ -236,10 +239,17 @@ module.exports = (env) ->
           memoryTransport.on 'log', logListener = (entry)=>
             socket.emit 'log', entry
 
-          env.logger.debug("adding item-add listern") if @config.debug
+          env.logger.debug("adding item listers") if @config.debug
+
           @on 'item-add', addItemListener = (item) =>
             @addAttributeNotify socket, item
             socket.emit "item-add", item
+
+          @on 'item-remove', removeItemListener = (item) =>
+            socket.emit "item-remove", item
+            
+          @on 'item-order', orderItemListener = (order) =>
+            socket.emit "item-order", order
 
           socket.on 'disconnect', => 
             env.logger.debug("removing rule listerns") if @config.debug
@@ -250,6 +260,8 @@ module.exports = (env) ->
             memoryTransport.removeListener 'log', logListener
             env.logger.debug("removing item-add listerns") if @config.debug
             @removeListener 'item-add', addItemListener
+            @removeListener 'item-remove', removeItemListener
+            @removeListener 'item-order', orderItemListener
           return
 
       # register the predicate provider

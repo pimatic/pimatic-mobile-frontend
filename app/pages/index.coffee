@@ -2,8 +2,6 @@
 # ----------
 
 $(document).on "pagecreate", '#index', (event) ->
-  console.log "pagecreate index"
-
   pimatic.socket.on "device-attribute", (attrEvent) -> 
     pimatic.pages.index.updateDeviceAttribute attrEvent
     if attrEvent.name is "state"
@@ -16,7 +14,8 @@ $(document).on "pagecreate", '#index', (event) ->
   pimatic.socket.on "rule-update", (rule) -> pimatic.pages.index.updateRule rule
   pimatic.socket.on "rule-remove", (rule) -> pimatic.pages.index.removeRule rule
   pimatic.socket.on "item-add", (item) -> pimatic.pages.index.addItem item
-  
+  pimatic.socket.on "item-remove", (item) -> pimatic.pages.index.removeItem item
+  pimatic.socket.on "item-order", (order) -> pimatic.pages.index.reorderItems order
 
   $('#index #items').on "change", ".switch", (event, ui) ->
     ele = $(this)
@@ -124,10 +123,12 @@ $(document).on "pagecreate", '#index', (event) ->
         id: ui.draggable.data('item-id')
         type: ui.draggable.data('item-type')
       }
-      $.post 'remove-item', item: item
-      if item.type is 'device'
-        delete pimatic.devices[item.id]
-      ui.draggable.remove()
+      $.post('remove-item', item: item).done( (data) ->
+        if data.success
+          if item.type is 'device'
+             delete pimatic.devices[item.id]
+          ui.draggable.remove()
+      ).fail(ajaxAlertFail)
   )
   return
 
@@ -200,6 +201,26 @@ pimatic.pages.index =
       <div class="ui-icon ui-icon-bars"></div>
     </div>')
     $('#items').listview('refresh')
+
+  removeItem: (item) ->
+    for li in $('#items .item')
+      li = $ li
+      if item.id is li.data('item-id')
+        li.remove()
+    if item.type is 'device'
+      delete pimatic.devices[item.id]
+
+  reorderItems: (order) ->
+    #detactch all items
+    items = $('#items .item')
+    items.detach()
+    for o in order
+      # find the matching item
+      for i in items
+        i = $ i
+        # reappend it
+        if i.data('item-id') is o.id
+          i.insertBefore('#add-a-item')
 
   buildSwitch: (device) ->
     pimatic.devices[device.id] = device
