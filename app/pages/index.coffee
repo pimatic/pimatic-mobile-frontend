@@ -2,7 +2,7 @@
 # ----------
 
 $(document).on "pagecreate", '#index', (event) ->
-  pimatic.pages.index.loadData()
+  console.log "pagecreate index"
 
   pimatic.socket.on "device-attribute", (attrEvent) -> 
     pimatic.pages.index.updateDeviceAttribute attrEvent
@@ -149,9 +149,10 @@ pimatic.pages.index =
         pimatic.pages.index.addRule(rule) for rule in data.rules
         pimatic.errorCount = data.errorCount
         pimatic.pages.index.updateErrorCount()
-        pimatic.pages.index.loading = no
         pimatic.pages.index.changeEditingMode data.enabledEditing
-      ) #.fail(ajaxAlertFail)
+      ).always( ->
+        pimatic.pages.index.loading = no
+      )
     return
 
   updateErrorCount: ->

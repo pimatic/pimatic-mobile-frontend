@@ -1,23 +1,53 @@
 # General
 # -------
 
-pimatic.loading = (what, options) ->
-  if what is "hide" and pimatic.pages.index.loading
+# scope this function
+( ->
+  pendingLoadings = {}
+
+  pimatic.loading = (context, action, options) ->
+    switch action
+      when 'show'
+        # add the message to the pending loadings
+        pendingLoadings[context] = options
+
+        # build a string containing all loading messages
+        mobileLoadingOptions = {
+          text: ''
+          textVisible: true
+          textonly: false
+        }
+        for k, options of pendingLoadings
+          if options.text?
+            if mobileLoadingOptions.text.length isnt 0
+              mobileLoadingOptions.text += ', '
+            mobileLoadingOptions.text += options.text
+        if mobileLoadingOptions.text.length isnt 0
+          mobileLoadingOptions.text += '...'
+        else
+          mobileLoadingOptions.textVisible = no
+
+        # and show the loading indicator
+        setTimeout ->
+          $.mobile.loading('show', mobileLoadingOptions)
+        , 1
+      when 'hide'
+        # delete the context
+        delete pendingLoadings[context]
+        # hide the loading indicator if we have nothing to load anymore
+        if (k for k of pendingLoadings).length is 0
+          $.mobile.loading('hide')
     return
-  setTimeout ->
-    $.mobile.loading(what, options)
-  , 1
+)()
 
 $.ajaxSetup timeout: 20000 #ms
 
 $(document).ajaxStart ->
-  pimatic.loading "show",
+  pimatic.loading "ajax", "show",
     text: "Loading..."
-    textVisible: true
-    textonly: false
 
 $(document).ajaxStop ->
-  pimatic.loading "hide"
+  pimatic.loading "ajax", "hide"
 
 $(document).ajaxError -> #nop
 

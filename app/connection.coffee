@@ -12,10 +12,11 @@ $(document).on "pagecreate", '#index', (event) ->
       pimatic.errorCount++
       pimatic.pages.index.updateErrorCount()
     pimatic.showToast entry.msg
-    console.log entry
+    #console.log entry
+
 
   pimatic.socket.on 'connect', ->
-    pimatic.loading "hide"
+    pimatic.loading "socket", "hide"
     pimatic.pages.index.loadData()
     if window.applicationCache?
       try
@@ -23,15 +24,34 @@ $(document).on "pagecreate", '#index', (event) ->
       catch e
         console.log e
 
+  ###
+    unused socket events:
+  ###
+
+  pimatic.socket.on 'connecting', ->
+    pimatic.loading "socket", "show",
+      text: __("connecting")
+
+
+  # pimatic.socket.on 'connect_failed', ->
+  #   console.log "connect_failed"
+
+  # pimatic.socket.on 'reconnect_failed', ->
+  #   console.log "reconnect_failed"
+
+  # pimatic.socket.on 'reconnect', ->
+  #   console.log "reconnect"
+
+  # pimatic.socket.on 'reconnecting', ->
+  #   console.log "reconnecting"
+
   pimatic.socket.on 'disconnect', ->
-   pimatic.loading "show",
-    text: __("connection lost, retying")+'...'
-    textVisible: true
-    textonly: false
+    pimatic.loading "socket", "show",
+      text: __("connection lost, retying")
 
   onConnectionError = ->
-    pimatic.loading "show",
-      text: __("could not connect, retying")+'...'
+    pimatic.loading "socket", "show",
+      text: __("could not connect, retying")
       textVisible: true
       textonly: false
     setTimeout ->
