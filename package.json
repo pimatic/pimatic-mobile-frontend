@@ -9,7 +9,7 @@
     "public",
     "button-predicates.coffee",
     "mobile-frontend.coffee",
-    "mobile-frontend-config-shema.coffee",
+    "mobile-frontend-config-schema.coffee",
     "coffee",
     "views",
     "README.md"

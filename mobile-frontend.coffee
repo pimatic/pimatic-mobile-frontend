@@ -33,7 +33,7 @@ module.exports = (env) ->
 
     # ###init the frontend:
     init: (@app, @framework, @jsonConfig) ->
-      conf = convict require("./mobile-frontend-config-shema")
+      conf = convict require("./mobile-frontend-config-schema")
       conf.load jsonConfig
       conf.validate()
       @config = conf.get ""
