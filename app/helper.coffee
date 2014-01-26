@@ -44,7 +44,7 @@ $.ajaxSetup timeout: 20000 #ms
 
 $(document).ajaxStart ->
   pimatic.loading "ajax", "show",
-    text: "Loading..."
+    text: "Loading"
 
 $(document).ajaxStop ->
   pimatic.loading "ajax", "hide"
