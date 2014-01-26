@@ -1,6 +1,6 @@
 # #mobile-frontend configuration options
 
-# Defines a `node-convict` config-shema and exports it.
+# Defines a `node-convict` config-schema and exports it.
 module.exports =
   items:
     doc: "The items to display"
