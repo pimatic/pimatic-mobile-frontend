@@ -163,7 +163,7 @@
       /**
        * Show autocomplete list next to the caret.
        */
-      renderList: function (data) {
+      renderList: function (term, data) {
         if (this.clearAtNext) {
           this.listView.clear();
           this.clearAtNext = false;
@@ -171,7 +171,7 @@
         if (data.length) {
           if (!this.listView.shown) {
             this.listView
-                .setPosition(this.getCaretPosition())
+                .setPosition(this.getCaretPosition(term))
                 .clear()
                 .activate();
             this.listView.strategy = this.strategy;
@@ -185,10 +185,10 @@
         }
       },
 
-      searchCallbackFactory: function (free) {
+      searchCallbackFactory: function (term, free) {
         var self = this;
         return function (data, keep) {
-          self.renderList(data);
+          self.renderList(term, data);
           if (!keep) {
             // This is the last callback for this search.
             free();
@@ -237,7 +237,7 @@
       /**
        * Returns caret's relative coordinates from textarea's left top corner.
        */
-      getCaretPosition: function () {
+      getCaretPosition: function (term) {
         // Browser native API does not provide the way to know the position of
         // caret in pixels, so that here we use a kind of hack to accomplish
         // the aim. First of all it puts a div element and completely copies
@@ -245,8 +245,8 @@
         // span element into the textarea.
         // Consequently, the span element's position is the thing what we want.
 
-        if (this.el.selectionEnd === 0) return;
-        var properties, css, $div, $span, position;
+        //if (this.el.selectionEnd === 0) return;
+        var properties, css, $div, $span, position, text;
 
         properties = ['border-width', 'font-family', 'font-size', 'font-style',
           'font-variant', 'font-weight', 'height', 'letter-spacing',
@@ -263,7 +263,13 @@
           left: -9999
         }, getStyles(this.$el, properties));
 
-        $div = $('<div></div>').css(css).text(this.getTextFromHeadToCaret());
+        text = this.getTextFromHeadToCaret();
+
+        if(text.length >= term.length) {
+          text = text.substring(0, text.length-term.length);
+        }
+
+        $div = $('<div></div>').css(css).text(text);
         $span = $('<span></span>').text('&nbsp;').appendTo($div);
         this.$el.before($div);
         position = $span.position();
@@ -307,7 +313,7 @@
         var term, strategy;
         this.strategy = searchQuery[0];
         term = searchQuery[1];
-        this.strategy.search(term, this.searchCallbackFactory(free));
+        this.strategy.search(term, this.searchCallbackFactory(term, free));
       })
     });
 

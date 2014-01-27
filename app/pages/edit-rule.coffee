@@ -34,7 +34,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
       $.post('parseCondition',
         condition: term
       ).done( (data) =>
-        console.log term, data
+        #console.log term, data
         autocomplete = data.context?.autocomplete or []
         if data.message?
           pimatic.showToast data.message

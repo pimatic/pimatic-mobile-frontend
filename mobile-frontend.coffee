@@ -212,6 +212,8 @@ module.exports = (env) ->
           @framework.ruleManager.parseRuleCondition("id", conditionString)
           res.send 200, {success: true}
         catch error
+          console.log error.message
+          console.log error.stack
           res.send 200, {success: true, context: error.context}
     
       # * Static assets
