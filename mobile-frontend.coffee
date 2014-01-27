@@ -196,6 +196,14 @@ module.exports = (env) ->
         @emit 'item-remove', item 
         res.send 200, {success: true}
 
+
+      app.post '/parseAction', (req, res) =>
+        actionString = req.body.action
+        @framework.ruleManager.executeAction(actionString, true).then( (message) ->
+          res.send 200, {success: true, message: message}
+        ).catch( (error) ->
+          res.send 200, {success: true, context: error.context}
+        ).done()
     
       # * Static assets
       app.use express.static(__dirname + "/public")
@@ -372,6 +380,7 @@ module.exports = (env) ->
               minPath "pimatic-mobile-frontend/app/js/jquery-ui-1.10.3.custom.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.ui.touch-punch.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -387,6 +396,7 @@ module.exports = (env) ->
                       "jquery.mobile-1.3.2.css"
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
+              minPath "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
             ]
             style: [
               "pimatic-mobile-frontend/app/css/style.css"

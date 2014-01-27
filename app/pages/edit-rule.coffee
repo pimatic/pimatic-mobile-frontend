@@ -27,6 +27,25 @@ $(document).on "pageinit", '#edit-rule', (event) ->
       ).fail(ajaxAlertFail)
     return false
 
+  # https://github.com/yuku-t/jquery-textcomplete
+  $("#edit-rule-actions").textcomplete([
+    match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.+)$/
+    search: (term, callback) ->
+      $.post('parseAction',
+        action: term
+      ).done( (data)->
+        console.log term, data
+        autocomplete = data.context?.autocomplete or []
+        callback autocomplete
+        if data.message?
+          pimatic.showToast data.message 
+      ).fail( -> callback [] )
+
+    index: 2
+    replace: (value) -> "$1#{value}"
+  ])
+
+
   $(document).on "pagebeforeshow", '#edit-rule', (event) ->
     $('#edit-rule-active').checkboxradio "refresh"
     action = $('#edit-rule-form').data('action')
