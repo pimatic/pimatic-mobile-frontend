@@ -29,17 +29,22 @@ $(document).on "pageinit", '#edit-rule', (event) ->
 
   # https://github.com/yuku-t/jquery-textcomplete
   $("#edit-rule-actions").textcomplete([
-    match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.+)$/
+    match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.*)$/
     search: (term, callback) ->
       $.post('parseAction',
         action: term
-      ).done( (data)->
+      ).done( (data) =>
         console.log term, data
         autocomplete = data.context?.autocomplete or []
-        callback autocomplete
         if data.message?
-          pimatic.showToast data.message 
-      ).fail( -> callback [] )
+          pimatic.showToast data.message
+          # # predicate was parsed and just added a space?
+          # if term.trim() is @lastTerm.trim()
+          #   autocomplete.push "and "
+        @lastTerm = term
+        callback autocomplete
+      ).fail( => callback [] )
+
 
     index: 2
     replace: (value) -> "$1#{value}"
