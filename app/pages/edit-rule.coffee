@@ -28,6 +28,26 @@ $(document).on "pageinit", '#edit-rule', (event) ->
     return false
 
   # https://github.com/yuku-t/jquery-textcomplete
+  $("#edit-rule-condition").textcomplete([
+    match: /^((?:[^"]*"[^"]*")*[^"]*(?:\sand\s|\sor\s|\)|\())*(.*)$/
+    search: (term, callback) ->
+      $.post('parseCondition',
+        condition: term
+      ).done( (data) =>
+        console.log term, data
+        autocomplete = data.context?.autocomplete or []
+        if data.message?
+          pimatic.showToast data.message
+          # # predicate was parsed and just added a space?
+          # if term.trim() is @lastTerm.trim()
+          #   autocomplete.push "and "
+        @lastTerm = term
+        callback autocomplete
+      ).fail( => callback [] )
+    index: 2
+    replace: (value) -> "$1#{value}"
+  ])
+
   $("#edit-rule-actions").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.*)$/
     search: (term, callback) ->
@@ -44,8 +64,6 @@ $(document).on "pageinit", '#edit-rule', (event) ->
         @lastTerm = term
         callback autocomplete
       ).fail( => callback [] )
-
-
     index: 2
     replace: (value) -> "$1#{value}"
   ])
@@ -56,10 +74,10 @@ $(document).on "pageinit", '#edit-rule', (event) ->
     action = $('#edit-rule-form').data('action')
     switch action
       when 'add'
-        $('#edit-rule h3').text __('Edit rule')
+        $('#edit-rule h3').text __('Add new rule')
         $('#edit-rule-id').textinput('enable')
         $('#edit-rule-advanced').hide()
       when 'update'
-        $('#edit-rule h3').text __('Add new rule')
+        $('#edit-rule h3').text __('Edit rule')        
         $('#edit-rule-id').textinput('disable')
         $('#edit-rule-advanced').show()

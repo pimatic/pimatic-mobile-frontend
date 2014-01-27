@@ -204,6 +204,15 @@ module.exports = (env) ->
         ).catch( (error) ->
           res.send 200, {success: true, context: error.context}
         ).done()
+
+
+      app.post '/parseCondition', (req, res) =>
+        conditionString = req.body.condition
+        try
+          @framework.ruleManager.parseRuleCondition("id", conditionString)
+          res.send 200, {success: true}
+        catch error
+          res.send 200, {success: true, context: error.context}
     
       # * Static assets
       app.use express.static(__dirname + "/public")
