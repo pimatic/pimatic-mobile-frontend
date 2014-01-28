@@ -1,13 +1,16 @@
 /* Sample */
 
 .dropdown-menu {
-    border: 1px solid #ddd;
+    border: 2px solid rgb(238, 238, 238);
     background-color: white;
+    -webkit-border-radius: 0.2em;
+    border-radius:  0.2em;
 }
 
 .dropdown-menu li {
     border-top: 1px solid #ddd;
-    padding: 2px 5px;
+    padding: 5px 8px;
+    background-color: white;
 }
 
 .dropdown-menu li:first-child {
