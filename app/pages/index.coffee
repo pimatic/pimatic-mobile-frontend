@@ -8,7 +8,7 @@ $(document).on "pagecreate", '#index', (event) ->
       value = if attrEvent.value then "on" else "off" 
       $("#flip-#{attrEvent.id}").val(value).slider('refresh')
     if attrEvent.name is "dimlevel"
-      $("#slider-#{attrEvent.id}").val(value).slider('refresh')
+      $("#slider-#{attrEvent.id}").val(attrEvent.value).slider('refresh')
 
   pimatic.socket.on "rule-add", (rule) -> pimatic.pages.index.addRule rule
   pimatic.socket.on "rule-update", (rule) -> pimatic.pages.index.updateRule rule

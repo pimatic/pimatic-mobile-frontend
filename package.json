@@ -14,13 +14,13 @@
     "views",
     "README.md"
   ],
-  "version": "0.5.3",
+  "version": "0.5.4",
   "homepage": "http://github.com/pimatic/pimatic",
   "repository": {
     "type": "git",
     "url": "git://github.com/pimatic/pimatic-log-mobile-frontend.git"
   },
-  "bundledDepencies": ["jade", "socket.io", "nap", "render-appcache-manifest"],
+  "bundledDependencies": ["jade", "socket.io", "nap", "render-appcache-manifest"],
   "dependencies": { 
     "ws": "0.4.31",
     "jade": "1.1.4",
