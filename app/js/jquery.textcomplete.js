@@ -169,9 +169,9 @@
           this.clearAtNext = false;
         }
         if (data.length) {
+          this.listView.setPosition(this.getCaretPosition(data));
           if (!this.listView.shown) {
             this.listView
-                .setPosition(this.getCaretPosition(term))
                 .clear()
                 .activate();
             this.listView.strategy = this.strategy;
@@ -219,13 +219,7 @@
         var pre, post, newSubStr;
         pre = this.getTextFromHeadToCaret();
         post = this.el.value.substring(this.el.selectionEnd);
-
-        newSubStr = this.strategy.replace(value);
-        if ($.isArray(newSubStr)) {
-          post = newSubStr[1] + post;
-          newSubStr = newSubStr[0];
-        }
-        pre = pre.replace(this.strategy.match, newSubStr);
+        pre = this.strategy.replace(pre, value);
         this.$el.val(pre + post);
         this.el.focus();
         this.el.selectionStart = this.el.selectionEnd = pre.length;
@@ -237,7 +231,7 @@
       /**
        * Returns caret's relative coordinates from textarea's left top corner.
        */
-      getCaretPosition: function (term) {
+      getCaretPosition: function (data) {
         // Browser native API does not provide the way to know the position of
         // caret in pixels, so that here we use a kind of hack to accomplish
         // the aim. First of all it puts a div element and completely copies
@@ -265,8 +259,37 @@
 
         text = this.getTextFromHeadToCaret();
 
-        if(text.length >= term.length) {
-          text = text.substring(0, text.length-term.length);
+        function findLongestPrefix(list) {
+            var prefix = list[0];
+            var prefixLen = prefix.length;
+            for (var i = 1; i < list.length && prefixLen > 0; i++) {
+                var word = list[i];
+                // The next line assumes 1st char of word and prefix always match.
+                // Initialize matchLen to -1 to test entire word.
+                var matchLen = 0;
+                var maxMatchLen = Math.min(word.length, prefixLen);
+                while (++matchLen < maxMatchLen) {
+                    if (word.charAt(matchLen) != prefix.charAt(matchLen)) {
+                        break;
+                    }
+                }
+                prefixLen = matchLen;
+            }
+            return prefix.substring(0, prefixLen);
+        }
+
+        var s = findLongestPrefix(data);
+        var i = Math.min(s.length, text.length);
+        while(i >= 0) {
+          var search = s.substring(0, i);
+          if(text.lastIndexOf(search) === text.length - search.length) {
+            break;
+          } else {
+            i--;
+          }
+        }
+        if(text.length >= i) {
+          text = text.substring(0, text.length-i);
         }
 
         $div = $('<div></div>').css(css).text(text);

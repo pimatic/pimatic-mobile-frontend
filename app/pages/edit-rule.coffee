@@ -27,6 +27,18 @@ $(document).on "pageinit", '#edit-rule', (event) ->
       ).fail(ajaxAlertFail)
     return false
 
+  customReplace = (pre, value) -> 
+    # find the longest common string wich is suffix of pre and prefix of value
+    i = Math.min(pre.length, value.length)
+    while i >= 0
+      search = value.substring(0, i)
+      if pre.lastIndexOf(search) is pre.length - search.length
+        break
+      else i--
+    # skip the common part from value
+    return pre + value.substring(i, value.length)
+
+
   # https://github.com/yuku-t/jquery-textcomplete
   $("#edit-rule-condition").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*(?:\sand\s|\sor\s|\)|\())*(.*)$/
@@ -45,7 +57,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
         callback autocomplete
       ).fail( => callback [] )
     index: 2
-    replace: (value) -> "$1#{value}"
+    replace: customReplace
   ])
 
   $("#edit-rule-actions").textcomplete([
@@ -54,7 +66,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
       $.post('parseAction',
         action: term
       ).done( (data) =>
-        console.log term, data
+        #console.log term, data
         autocomplete = data.context?.autocomplete or []
         if data.message?
           pimatic.showToast data.message
@@ -65,7 +77,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
         callback autocomplete
       ).fail( => callback [] )
     index: 2
-    replace: (value) -> "$1#{value}"
+    replace: customReplace
   ])
 
 
