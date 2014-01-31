@@ -41,8 +41,10 @@ $(document).on "pageinit", '#edit-rule', (event) ->
   $("#edit-rule-condition").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*(?:\sand\s|\sor\s|\)|\())*(.*)$/
     search: (term, callback) ->
-      $.post('parseCondition',
-        condition: term
+      $.ajax('parseCondition',
+        type: 'POST'
+        data: {condition: term}
+        global: false
       ).done( (data) =>
         #console.log term, data
         autocomplete = data.context?.autocomplete or []
@@ -63,7 +65,9 @@ $(document).on "pageinit", '#edit-rule', (event) ->
     match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.*)$/
     search: (term, callback) ->
       $.post('parseAction',
-        action: term
+        type: 'POST'
+        data: {action: term}
+        global: false
       ).done( (data) =>
         #console.log term, data
         autocomplete = data.context?.autocomplete or []
