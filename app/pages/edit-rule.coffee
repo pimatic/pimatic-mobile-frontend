@@ -28,15 +28,13 @@ $(document).on "pageinit", '#edit-rule', (event) ->
     return false
 
   customReplace = (pre, value) -> 
-    # find the longest common string wich is suffix of pre and prefix of value
-    i = Math.min(pre.length, value.length)
-    while i >= 0
-      search = value.substring(0, i)
-      if pre.lastIndexOf(search) is pre.length - search.length
-        break
-      else i--
-    # skip the common part from value
-    return pre + value.substring(i, value.length)
+    commonPart = this.ac.getCommonPart(pre, value)
+    return pre + value.substring(commonPart.length, value.length)
+
+  customTemplate = (value) ->
+    commonPart = this.ac.getCommonPart(@lastTerm, value)
+    remainder = value.substring(commonPart.length, value.length)
+    return "<strong>#{commonPart}</strong>#{remainder}"
 
 
   # https://github.com/yuku-t/jquery-textcomplete
@@ -58,6 +56,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
       ).fail( => callback [] )
     index: 2
     replace: customReplace
+    template: customTemplate
   ])
 
   $("#edit-rule-actions").textcomplete([
@@ -78,6 +77,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
       ).fail( => callback [] )
     index: 2
     replace: customReplace
+    template: customTemplate
   ])
 
 

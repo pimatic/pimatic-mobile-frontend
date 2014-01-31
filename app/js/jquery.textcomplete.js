@@ -66,7 +66,7 @@
         $.each(properties, function (i, property) {
           styles[property] = $el.css(property);
         });
-        return styles
+        return styles;
       };
     }
   })();
@@ -163,13 +163,14 @@
       /**
        * Show autocomplete list next to the caret.
        */
-      renderList: function (term, data) {
-        if (this.clearAtNext) {
-          this.listView.clear();
-          this.clearAtNext = false;
-        }
+      renderList: function (term, lastText, data) {
+        this.listView.clear();
+
+        this.lastData = data;
+        data = this.filterData(term, data);
+
         if (data.length) {
-          this.listView.setPosition(this.getCaretPosition(data));
+          this.listView.setPosition(this.getCaretPosition(term, lastText, data));
           if (!this.listView.shown) {
             this.listView
                 .clear()
@@ -187,12 +188,14 @@
 
       searchCallbackFactory: function (term, free) {
         var self = this;
+        var text = self.getTextFromHeadToCaret();
         return function (data, keep) {
-          self.renderList(term, data);
+          self.renderList(term, text, data);
           if (!keep) {
             // This is the last callback for this search.
             free();
             self.clearAtNext = true;
+            self.onKeyup(); 
           }
         };
       },
@@ -200,14 +203,13 @@
       /**
        * Keyup event handler.
        */
-      onKeyup: function (e) {
+      onKeyup: function (e, force) {
         var searchQuery, term;
 
         searchQuery = this.extractSearchQuery(this.getTextFromHeadToCaret());
         if (searchQuery.length) {
           term = searchQuery[1];
-          if (this.term === term) return; // Ignore shift-key or something.
-          this.term = term;
+          if (!force && this.term === term) return; // Ignore shift-key or something.
           this.search(searchQuery);
         } else {
           this.term = null;
@@ -223,6 +225,21 @@
         this.$el.val(pre + post);
         this.el.focus();
         this.el.selectionStart = this.el.selectionEnd = pre.length;
+        this.onKeyup(null, true);
+      },
+
+      getCommonPart: function(trigger, suggestion) {
+        var i, search;
+        i = Math.min(trigger.length, suggestion.length);
+        while (i >= 0) {
+          search = suggestion.substring(0, i);
+          if (trigger.lastIndexOf(search) === trigger.length - search.length) {
+            break;
+          } else {
+            i--;
+          }
+        }
+        return suggestion.substring(0, i);
       },
 
       // Helper methods
@@ -231,7 +248,7 @@
       /**
        * Returns caret's relative coordinates from textarea's left top corner.
        */
-      getCaretPosition: function (data) {
+      getCaretPosition: function (term, text, data) {
         // Browser native API does not provide the way to know the position of
         // caret in pixels, so that here we use a kind of hack to accomplish
         // the aim. First of all it puts a div element and completely copies
@@ -257,8 +274,6 @@
           left: -9999
         }, getStyles(this.$el, properties));
 
-        text = this.getTextFromHeadToCaret();
-
         function findLongestPrefix(list) {
             var prefix = list[0];
             var prefixLen = prefix.length;
@@ -279,17 +294,10 @@
         }
 
         var s = findLongestPrefix(data);
-        var i = Math.min(s.length, text.length);
-        while(i >= 0) {
-          var search = s.substring(0, i);
-          if(text.lastIndexOf(search) === text.length - search.length) {
-            break;
-          } else {
-            i--;
-          }
-        }
-        if(text.length >= i) {
-          text = text.substring(0, text.length-i);
+        var temp = this.getCommonPart(text, s);
+
+        if(text.length >= temp.length) {
+          text = text.substring(0, text.length-temp.length);
         }
 
         $div = $('<div></div>').css(css).text(text);
@@ -315,6 +323,21 @@
         return text;
       },
 
+      filterData: function(term, data) {
+        var text = this.getTextFromHeadToCaret();
+        var newPart = text.substring(term.length, text.length);
+        if(newPart.lenght > 0) {
+          var newData = [];
+          for(var i=0; i < data.length; i++) {
+            if(data[i].substring(0, newPart.lenght) === newPart) {
+              newData.push(data[i]);
+            }
+          }
+          return newData;
+        }
+        return data;
+      },
+
       /**
        * Parse the value of textarea and extract search query.
        */
@@ -326,18 +349,30 @@
         var i, l, strategy, match;
         for (i = 0, l = this.strategies.length; i < l; i++) {
           strategy = this.strategies[i];
+          strategy.ac = this;
           match = text.match(strategy.match);
           if (match) { return [strategy, match[strategy.index]]; }
         }
         return [];
       },
 
-      search: lock(function (free, searchQuery) {
+      search: function(searchQuery) {
         var term, strategy;
         this.strategy = searchQuery[0];
         term = searchQuery[1];
+        // prerender it with last data
+        //if(this.lastData) {
+        //  this.renderList(term, text, this.lastData);
+        //}
+        return this.searchOnline(term);
+      },
+
+      searchOnline: lock(function (free, term) {
+        this.term = term;
         this.strategy.search(term, this.searchCallbackFactory(term, free));
       })
+
+
     });
 
     /**
@@ -381,7 +416,7 @@
           html += '</a></li>';
           if (this.data.length === this.strategy.maxCount) break;
         }
-        this.$el.append(html)
+        this.$el.append(html);
         if (!this.data.length) {
           this.deactivate();
         } else {
