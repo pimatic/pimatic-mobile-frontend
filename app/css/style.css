@@ -253,6 +253,8 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   color: #A0A0A0;
 }
 
+.textcomplete-item a {white-space: nowrap;}
+
 @media (min-width:35em) {
  
   /* wrap on wide viewports once open */

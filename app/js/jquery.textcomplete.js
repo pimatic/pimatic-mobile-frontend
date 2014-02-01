@@ -299,7 +299,6 @@
         if(text.length >= temp.length) {
           text = text.substring(0, text.length-temp.length);
         }
-
         $div = $('<div></div>').css(css).text(text);
         $span = $('<span></span>').text('&nbsp;').appendTo($div);
         this.$el.before($div);
@@ -435,6 +434,7 @@
         var $item;
         this.$el.find('.active').removeClass('active');
         this.getActiveItem().addClass('active');
+        this.reposition();
       },
 
       getActiveItem: function () {
@@ -466,6 +466,21 @@
       select: function (index) {
         this.completer.onSelect(this.data[index]);
         this.deactivate();
+      },
+
+      reposition: function() {
+        var $wrapper = $('.textcomplete-wrapper')
+        var rightOffset = this.$el.offset().left + this.$el.outerWidth();
+        var bottomOffset = this.$el.offset().top + this.$el.outerHeight();
+        var textareaRight = $wrapper.offset().left + $wrapper.outerWidth();
+        var textareaBottom = $wrapper.offset().left + $wrapper.outerWidth();
+        if(rightOffset > textareaRight) {
+          var rel = rightOffset - textareaRight;
+          var left = parseInt(this.$el.css('left').replace('px',''), 10);
+          console.log("old", this.$el.css('left'));
+          this.$el.css('left', left - rel);
+          console.log("new", this.$el.css('left'));
+        }
       },
 
       onKeydown: function (e) {
