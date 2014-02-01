@@ -199,13 +199,14 @@ module.exports = (env) ->
 
       app.post '/parseAction', (req, res) =>
         actionString = req.body.action
-        @framework.ruleManager.executeAction(actionString, true).then( (message) ->
-          res.send 200, {success: true, message: message}
+        context = @framework.ruleManager.createParseContext()
+        @framework.ruleManager.executeAction(actionString, true, context).then( (message) ->
+          res.send 200, {success: true, message: message, context: context}
         ).catch( (error) ->
-          res.send 200, {success: true, context: error.context}
+          res.send 200, {success: false, error: error}
         ).done()
 
-      app.post '/parseCondition', (req, res) =>
+      app.post '/parsePredicate', (req, res) =>
         conditionString = req.body.condition
         try
           context = @framework.ruleManager.createParseContext()

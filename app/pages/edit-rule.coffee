@@ -41,18 +41,13 @@ $(document).on "pageinit", '#edit-rule', (event) ->
   $("#edit-rule-condition").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*(?:\sand\s|\sor\s|\)|\())*(.*)$/
     search: (term, callback) ->
-      $.ajax('parseCondition',
+      $.ajax('parsePredicate',
         type: 'POST'
         data: {condition: term}
         global: false
       ).done( (data) =>
-        #console.log term, data
         autocomplete = data.context?.autocomplete or []
-        if data.message?
-          pimatic.showToast data.message
-          # # predicate was parsed and just added a space?
-          # if term.trim() is @lastTerm.trim()
-          #   autocomplete.push "and "
+        if data.error then console.log data.error
         @lastTerm = term
         callback autocomplete
       ).fail( => callback [] )
@@ -69,13 +64,10 @@ $(document).on "pageinit", '#edit-rule', (event) ->
         data: {action: term}
         global: false
       ).done( (data) =>
-        #console.log term, data
         autocomplete = data.context?.autocomplete or []
-        if data.message?
-          pimatic.showToast data.message
-          # # predicate was parsed and just added a space?
-          # if term.trim() is @lastTerm.trim()
-          #   autocomplete.push "and "
+        if data.message? and data.message.length > 0
+          pimatic.showToast data.message[0]
+        if data.error then console.log data.error
         @lastTerm = term
         callback autocomplete
       ).fail( => callback [] )
