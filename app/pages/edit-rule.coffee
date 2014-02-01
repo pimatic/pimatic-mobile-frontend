@@ -64,7 +64,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
   $("#edit-rule-actions").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.*)$/
     search: (term, callback) ->
-      $.post('parseAction',
+      $.ajax('parseAction',
         type: 'POST'
         data: {action: term}
         global: false

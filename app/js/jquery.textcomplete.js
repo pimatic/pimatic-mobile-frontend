@@ -195,7 +195,7 @@
             // This is the last callback for this search.
             free();
             self.clearAtNext = true;
-            self.onKeyup(); 
+            self.onKeyup();
           }
         };
       },
