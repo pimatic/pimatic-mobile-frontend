@@ -1,14 +1,16 @@
 
 
-pimatic.socket = io.connect("/", 
-  'connect timeout': 20000
-  'reconnection delay': 500
-  'reconnection limit': 2000 # the max delay
-  'max reconnection attempts': Infinity
-)
+$(document).on "pagebeforecreate", ->
+  if pimatic.inited then return
+  pimatic.inited = yes
 
+  pimatic.socket = io.connect("/", 
+    'connect timeout': 20000
+    'reconnection delay': 500
+    'reconnection limit': 2000 # the max delay
+    'max reconnection attempts': Infinity
+  )
 
-$(document).ready ->
 
   pimatic.socket.on 'log', (entry) -> 
     if entry.level is 'error' 
@@ -29,6 +31,7 @@ $(document).ready ->
   ###
 
   pimatic.socket.on 'connecting', ->
+    #console.log "connecting"
     pimatic.loading "socket", "show",
       text: __("connecting")
 
@@ -46,6 +49,7 @@ $(document).ready ->
   #   console.log "reconnecting"
 
   pimatic.socket.on 'disconnect', ->
+    #console.log "disconnect"
     pimatic.loading "socket", "show",
       text: __("connection lost, retying")
 
