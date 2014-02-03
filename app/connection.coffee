@@ -1,23 +1,23 @@
-  
-$(document).on "pagecreate", '#index', (event) ->
-  pimatic.socket = io.connect("/", 
-    'connect timeout': 20000
-    'reconnection delay': 500
-    'reconnection limit': 2000 # the max delay
-    'max reconnection attempts': Infinity
-  )
+
+
+pimatic.socket = io.connect("/", 
+  'connect timeout': 20000
+  'reconnection delay': 500
+  'reconnection limit': 2000 # the max delay
+  'max reconnection attempts': Infinity
+)
+
+
+$(document).ready ->
 
   pimatic.socket.on 'log', (entry) -> 
     if entry.level is 'error' 
       pimatic.errorCount++
-      pimatic.pages.index.updateErrorCount()
     pimatic.showToast entry.msg
     #console.log entry
 
-
   pimatic.socket.on 'connect', ->
     pimatic.loading "socket", "hide"
-    pimatic.pages.index.loadData()
     if window.applicationCache?
       try
         window.applicationCache.update()

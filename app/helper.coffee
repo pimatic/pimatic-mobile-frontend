@@ -36,7 +36,9 @@
         delete pendingLoadings[context]
         # hide the loading indicator if we have nothing to load anymore
         if (k for k of pendingLoadings).length is 0
-          $.mobile.loading('hide')
+          setTimeout ->
+            $.mobile.loading('hide')
+          , 1
     return
 )()
 

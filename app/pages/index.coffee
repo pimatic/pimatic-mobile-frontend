@@ -130,7 +130,15 @@ $(document).on "pagecreate", '#index', (event) ->
           ui.draggable.remove()
       ).fail(ajaxAlertFail)
   )
-  return
+
+  pimatic.socket.on 'connect', ->
+    pimatic.pages.index.loadData()
+
+  pimatic.socket.on 'log', (entry) -> 
+    if entry.level is 'error' 
+      pimatic.pages.index.updateErrorCount()
+
+  pimatic.pages.index.loadData()
 
 pimatic.pages.index =
   loading: no
