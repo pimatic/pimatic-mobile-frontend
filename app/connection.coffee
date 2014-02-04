@@ -1,5 +1,9 @@
-  
-$(document).on "pagecreate", '#index', (event) ->
+
+
+$(document).on "pagebeforecreate", ->
+  if pimatic.inited then return
+  pimatic.inited = yes
+
   pimatic.socket = io.connect("/", 
     'connect timeout': 20000
     'reconnection delay': 500
@@ -7,17 +11,15 @@ $(document).on "pagecreate", '#index', (event) ->
     'max reconnection attempts': Infinity
   )
 
+
   pimatic.socket.on 'log', (entry) -> 
     if entry.level is 'error' 
       pimatic.errorCount++
-      pimatic.pages.index.updateErrorCount()
     pimatic.showToast entry.msg
     #console.log entry
 
-
   pimatic.socket.on 'connect', ->
     pimatic.loading "socket", "hide"
-    pimatic.pages.index.loadData()
     if window.applicationCache?
       try
         window.applicationCache.update()
@@ -29,6 +31,7 @@ $(document).on "pagecreate", '#index', (event) ->
   ###
 
   pimatic.socket.on 'connecting', ->
+    #console.log "connecting"
     pimatic.loading "socket", "show",
       text: __("connecting")
 
@@ -46,6 +49,7 @@ $(document).on "pagecreate", '#index', (event) ->
   #   console.log "reconnecting"
 
   pimatic.socket.on 'disconnect', ->
+    #console.log "disconnect"
     pimatic.loading "socket", "show",
       text: __("connection lost, retying")
 

@@ -5,38 +5,58 @@
 ( ->
   pendingLoadings = {}
 
-  pimatic.loading = (context, action, options) ->
-    switch action
-      when 'show'
-        # add the message to the pending loadings
-        pendingLoadings[context] = options
-
-        # build a string containing all loading messages
-        mobileLoadingOptions = {
-          text: ''
-          textVisible: true
-          textonly: false
-        }
-        for k, options of pendingLoadings
-          if options.text?
-            if mobileLoadingOptions.text.length isnt 0
-              mobileLoadingOptions.text += ', '
-            mobileLoadingOptions.text += options.text
+  # build a string containing all loading messages
+  buildLoadingMessage = ->
+    mobileLoadingOptions = {
+      text: ''
+      textVisible: true
+      textonly: false
+    }
+    for k, options of pendingLoadings
+      if options.text?
         if mobileLoadingOptions.text.length isnt 0
-          mobileLoadingOptions.text += '...'
-        else
-          mobileLoadingOptions.textVisible = no
+          mobileLoadingOptions.text += ', '
+        mobileLoadingOptions.text += options.text
+    if mobileLoadingOptions.text.length isnt 0
+      mobileLoadingOptions.text += '...'
+    else
+      mobileLoadingOptions.textVisible = no
+    return mobileLoadingOptions
 
-        # and show the loading indicator
-        setTimeout ->
+
+  pimatic.loading = (context, action, options) ->
+    ###
+    There is aproblem showing the loading indicater in pageinit. It doesn't get showen if 
+    $.mobile.loading is called directly. Wrapping the call in setTimeut seems to fix the issue
+    ###
+    setTimeout( ->
+      switch action
+        when 'show'
+          # add the message to the pending loadings
+          pendingLoadings[context] = options
+          # build a string containing all loading messages
+          mobileLoadingOptions = buildLoadingMessage()
+          # and show the loading indicator
           $.mobile.loading('show', mobileLoadingOptions)
-        , 1
-      when 'hide'
-        # delete the context
-        delete pendingLoadings[context]
-        # hide the loading indicator if we have nothing to load anymore
-        if (k for k of pendingLoadings).length is 0
-          $.mobile.loading('hide')
+        when 'hide'
+          # delete the context
+          delete pendingLoadings[context]
+          # hide the loading indicator if we have nothing to load anymore
+          if (k for k of pendingLoadings).length is 0
+            $.mobile.loading('hide') 
+    , 1)
+    return
+
+  ###
+  jQuery mobile hides the loading indicater at page change. So we reshow it if we have pending 
+  requests
+  ###
+  $(document).on "pagechange", (event) ->  
+    setTimeout( ->
+      if (k for k of pendingLoadings).length isnt 0
+        mobileLoadingOptions = buildLoadingMessage()
+        $.mobile.loading('show', mobileLoadingOptions)
+    , 1)
     return
 )()
 

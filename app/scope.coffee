@@ -4,4 +4,5 @@ window.pimatic =
   rules: []
   errorCount: 0
   socket: null
+  inited: no
   pages: {}
