@@ -85,8 +85,9 @@ $(document).on "pagecreate", '#index', (event) ->
   $('#index').on "click", "#lock-button", (event, ui) ->
     enabled = not pimatic.pages.index.editingMode
     pimatic.pages.index.changeEditingMode(enabled)
-    $.get("/enabledEditing/#{enabled}")
-      .done(ajaxShowToast)
+    $.ajax("/enabledEditing/#{enabled}",
+      global: false # don't show loading indicator
+    ).done(ajaxShowToast)
 
   $("#items").sortable(
     items: "li.sortable"
@@ -113,7 +114,19 @@ $(document).on "pagecreate", '#index', (event) ->
       $.post "update-order", order: order
   )
 
-  $("#items .handle").disableSelection()
+  $("#rules").sortable(
+    items: "li.sortable"
+    forcePlaceholderSize: true
+    placeholder: "sortable-placeholder"
+    handle: ".handle"
+    cursor: "move"
+    revert: 100
+    scroll: true
+    start: (ev, ui) ->
+    stop: (ev, ui) ->
+  )
+
+  $("#items .handle, #rules .handle").disableSelection()
 
   $("#delete-item").droppable(
     accept: "li.sortable"
@@ -330,6 +343,9 @@ pimatic.pages.index =
     unless rule.active
       li.addClass('deactivated')
     li.addClass 'rule'
+    li.find("a").before $('<div class="ui-icon-alt handle">
+      <div class="ui-icon ui-icon-bars"></div>
+    </div>')
     $('#add-rule').before li
     $('#rules').listview('refresh')
     return
