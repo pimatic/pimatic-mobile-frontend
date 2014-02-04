@@ -167,10 +167,12 @@ $(document).on "pagecreate", '#index', (event) ->
 
 pimatic.pages.index =
   loading: no
+  hasData: no
   editingMode: yes
 
   loadData: ->
     # already loading?
+    pimatic.loading "datadelay", "hide"
     if pimatic.pages.index.loading then return
     pimatic.pages.index.loading = yes
     $.get("/data.json")
@@ -184,8 +186,19 @@ pimatic.pages.index =
         pimatic.errorCount = data.errorCount
         pimatic.pages.index.updateErrorCount()
         pimatic.pages.index.changeEditingMode data.enabledEditing
+        pimatic.pages.index.hasData = yes
       ).always( ->
         pimatic.pages.index.loading = no
+      ).fail( ->
+        # if we are connectiing to the socket, the data gets refrashed anyway so don't get it
+        # else try again after a delay 
+        unless pimatic.loading.pendingLoadings['socket']? 
+          pimatic.loading("datadelay", "show",
+            text: __("could not load data, retrying in %s seconds", "5")
+          )
+        setTimeout( ->
+          pimatic.pages.index.loadData()
+        , 5000)
       )
     return
 

@@ -26,15 +26,14 @@ $(document).on "pagebeforecreate", ->
       catch e
         console.log e
 
-  ###
-    unused socket events:
-  ###
-
   pimatic.socket.on 'connecting', ->
     #console.log "connecting"
     pimatic.loading "socket", "show",
       text: __("connecting")
 
+  ###
+    unused socket events:
+  ###
 
   # pimatic.socket.on 'connect_failed', ->
   #   console.log "connect_failed"

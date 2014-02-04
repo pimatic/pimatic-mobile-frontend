@@ -35,17 +35,21 @@
           # add the message to the pending loadings
           pendingLoadings[context] = options
           # build a string containing all loading messages
-          mobileLoadingOptions = buildLoadingMessage()
           # and show the loading indicator
-          $.mobile.loading('show', mobileLoadingOptions)
+          $.mobile.loading('show', buildLoadingMessage())
         when 'hide'
           # delete the context
           delete pendingLoadings[context]
           # hide the loading indicator if we have nothing to load anymore
           if (k for k of pendingLoadings).length is 0
-            $.mobile.loading('hide') 
+            $.mobile.loading('hide')
+          else
+            #update the message
+            $.mobile.loading('show', buildLoadingMessage())
     , 1)
     return
+
+  pimatic.loading.pendingLoadings = pendingLoadings
 
   ###
   jQuery mobile hides the loading indicater at page change. So we reshow it if we have pending 
@@ -64,7 +68,7 @@ $.ajaxSetup timeout: 20000 #ms
 
 $(document).ajaxStart ->
   pimatic.loading "ajax", "show",
-    text: "Loading"
+    text: "loading"
 
 $(document).ajaxStop ->
   pimatic.loading "ajax", "hide"
