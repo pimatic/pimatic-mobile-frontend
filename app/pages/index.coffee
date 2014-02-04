@@ -190,15 +190,15 @@ pimatic.pages.index =
       ).always( ->
         pimatic.pages.index.loading = no
       ).fail( ->
-        # if we are connectiing to the socket, the data gets refrashed anyway so don't get it
+        # if we are not connected to the socket, the data gets refrashed anyway so don't get it
         # else try again after a delay 
-        unless pimatic.loading.pendingLoadings['socket']? 
+        if pimatic.socket.socket.connected
           pimatic.loading("datadelay", "show",
             text: __("could not load data, retrying in %s seconds", "5")
           )
-        setTimeout( ->
-          pimatic.pages.index.loadData()
-        , 5000)
+          setTimeout( ->
+            pimatic.pages.index.loadData()
+          , 5000)
       )
     return
 
