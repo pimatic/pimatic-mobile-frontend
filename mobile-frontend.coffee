@@ -63,16 +63,27 @@ module.exports = (env) ->
       # 
       app.get '/data.json', (req, res) =>
         @getItemsWithData().then( (items) =>
+          # additional get all rules
           rules = []
           for id of framework.ruleManager.rules
             rule = framework.ruleManager.rules[id]
-            rules.push
+            rules.push {
               id: id
               condition: rule.orgCondition
               action: rule.action
               active: rule.active
               valid: rule.valid
               error: rule.error
+            }
+  
+          # sort rules by ordering in config
+          order = _(@config.rules).map( (r) => r.id )
+          rules = _(rules).sortBy( (r) => 
+            index = order.indexOf r.id
+            # push it to the end if not found
+            return if index is -1 then 99999 else index 
+          ).value()
+
           res.send 
             errorCount: env.logger.transports.memory.getErrorCount()
             enabledEditing: @config.enabledEditing
@@ -128,7 +139,7 @@ module.exports = (env) ->
         @addNewItem item
         res.send 200, {success: true}
     
-      app.post '/update-order', (req, res) =>
+      app.post '/update-item-order', (req, res) =>
         order = req.body.order
         unless order?
           res.send 200, {success: false, message: 'no order given'}
@@ -147,6 +158,16 @@ module.exports = (env) ->
         @config.items = @jsonConfig.items = newItems
         @framework.saveConfig()
         @emit 'item-order', order
+        res.send 200, {success: true}
+
+      app.post '/update-rule-order', (req, res) =>
+        order = req.body.order
+        unless order?
+          res.send 200, {success: false, message: 'no order given'}
+          return
+        @config.rules = @jsonConfig.rules = _(order).map( (id)=> {id: id}).value()
+        @framework.saveConfig()
+        @emit 'rule-order', order
         res.send 200, {success: true}
     
       app.get '/clear-log', (req, res) =>
@@ -251,6 +272,9 @@ module.exports = (env) ->
           @on 'item-order', orderItemListener = (order) =>
             socket.emit "item-order", order
 
+          @on 'rule-order', orderRuleListener = (order) =>
+            socket.emit "rule-order", order
+
           socket.on 'disconnect', => 
             env.logger.debug("removing rule listerns") if @config.debug
             framework.ruleManager.removeListener "update", updateRuleListener
@@ -262,6 +286,7 @@ module.exports = (env) ->
             @removeListener 'item-add', addItemListener
             @removeListener 'item-remove', removeItemListener
             @removeListener 'item-order', orderItemListener
+            @removeListener 'rule-order', orderRuleListener
           return
 
       # register the predicate provider

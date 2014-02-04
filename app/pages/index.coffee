@@ -16,6 +16,7 @@ $(document).on "pagecreate", '#index', (event) ->
   pimatic.socket.on "item-add", (item) -> pimatic.pages.index.addItem item
   pimatic.socket.on "item-remove", (item) -> pimatic.pages.index.removeItem item
   pimatic.socket.on "item-order", (order) -> pimatic.pages.index.reorderItems order
+  pimatic.socket.on "rule-order", (order) -> pimatic.pages.index.reorderRules order
 
   $('#index #items').on "change", ".switch", (event, ui) ->
     ele = $(this)
@@ -111,7 +112,11 @@ $(document).on "pagecreate", '#index', (event) ->
       order = for item in $("#items li.sortable")
         item = $ item
         type: item.data('item-type'), id: item.data('item-id')
-      $.post "update-order", order: order
+      $.ajax("update-item-order", 
+        type: "POST"
+        global: false
+        data: {order: order}
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
   $("#rules").sortable(
@@ -124,6 +129,13 @@ $(document).on "pagecreate", '#index', (event) ->
     scroll: true
     start: (ev, ui) ->
     stop: (ev, ui) ->
+      $('#rules').listview('refresh')
+      order = ($(item).data('rule-id') for item in $("#rules .rule a"))
+      $.ajax("update-rule-order",
+        type: "POST"
+        global: false
+        data: {order: order}
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
   $("#items .handle, #rules .handle").disableSelection()
@@ -367,3 +379,17 @@ pimatic.pages.index =
     $("\#rule-#{rule.id}").remove()
     $('#rules').listview('refresh')
     return
+
+  reorderRules: (order) ->
+    #detactch all items
+    rules = $('#rules .rule')
+    rules.detach()
+    for o in order
+      # find the matching item
+      for r,i in rules
+        r = $ r
+        # reappend it
+        if r.find('a').data('rule-id') is o
+          r.insertBefore('#add-rule')
+          rules.splice(i, 1)
+          break

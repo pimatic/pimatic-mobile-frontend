@@ -18,3 +18,7 @@ module.exports =
     doc: "enabled or disabled the drag and drop of items"
     format: Boolean
     default: true
+  rules:
+    doc: "order of the rules"
+    format: Array
+    default: [] 
