@@ -84,6 +84,11 @@ li.sortable .handle{
   display: none !important;
 }
 
+#delete-item {
+  background-color: #CC0000;
+  border-color: #AA0000;
+}
+
 fieldset .ui-block-a .ui-btn{
     margin-left: 0px;
 }
@@ -95,6 +100,7 @@ li.sortable-placeholder{
   /*height: 20px;*/
   border-style: dashed;
   border-width: 1px;
+  background-color: rgb(51, 51, 51);
 }
 
 #index .ui-header .ui-btn .ui-btn-inner {
@@ -108,11 +114,8 @@ li.sortable-placeholder{
 }
 
 
-ul#items ul#rules{
+ul#items, ul#rules{
   position: relative;
-}
-
-ul#rules {
   background-color: rgb(51, 51, 51);
 }
 
@@ -265,7 +268,7 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
 .drag-message {
   /*display: none;*/
   position: absolute;
-  padding: 0 15px;
+  padding: 0 10px;
   font-weight: bold;
   z-index: 99;
   color: white;
