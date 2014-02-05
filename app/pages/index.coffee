@@ -127,7 +127,7 @@ $(document).on "pagecreate", '#index', (event) ->
     cursor: "move"
     revert: 100
     scroll: true
-    start: (ev, ui) ->
+    start: (ev, ui) -> console.log "start sorting"
     stop: (ev, ui) ->
       $('#rules').listview('refresh')
       order = ($(item).data('rule-id') for item in $("#rules .rule a"))
@@ -371,6 +371,49 @@ pimatic.pages.index =
     li.find("a").before $('<div class="ui-icon-alt handle">
       <div class="ui-icon ui-icon-bars"></div>
     </div>')
+
+    action = null
+
+    showDragMessage = (msg) =>
+      $('.drag-message')
+      .text(msg)
+      .css(
+        top: li.position().top
+        height: li.outerHeight()
+        'line-height': li.outerHeight() + "px"
+      ).fadeIn(500)
+
+
+    li.draggable(
+      axis: "x"
+      revert: true
+      distance: 50
+      handle: 'a'
+      zIndex: 100
+      start: => console.log "start dragging"
+      drag: ( event, ui ) => 
+        # offset of the helper is 15 at start
+        offsetX = ui.offset.left-15
+        if offsetX < -120
+          unless action is "enable"
+            showDragMessage(__('disable rule')).addClass('disable').removeClass('enable')
+            action = "enable"
+        else if offsetX > 120
+          unless action is "disable"
+            showDragMessage(__('enable rule')).addClass('enable').removeClass('disable')
+            action = "disable"
+        else
+          if action?
+            console.log "hide"
+            $('.drag-message').fadeOut(500)
+            action = null
+
+      stop: => 
+        $('.drag-message').text('').fadeOut().removeClass('enable').removeClass('disable')
+        if action in ['enable', 'disable']
+          $.post("/api/rule/#{rule.id}/#{action}")
+    )
+
     $('#add-rule').before li
     $('#rules').listview('refresh')
     return

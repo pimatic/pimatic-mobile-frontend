@@ -112,6 +112,10 @@ ul#items ul#rules{
   position: relative;
 }
 
+ul#rules {
+  background-color: rgb(51, 51, 51);
+}
+
 /* dimmer */
 ul#items .ui-slider-input{
   display: none;
@@ -256,6 +260,25 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
 
 .rule.deactivated a{
   color: #A0A0A0;
+}
+
+.drag-message {
+  /*display: none;*/
+  position: absolute;
+  padding: 0 15px;
+  font-weight: bold;
+  z-index: 99;
+  color: white;
+}
+
+.drag-message.disable {
+  /*color: #CC0000;*/
+  right: 15px;
+}
+
+.drag-message.enable {
+  /*color: #339900;*/
+  left: 15px;
 }
 
 /* two page view */
