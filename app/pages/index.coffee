@@ -2,6 +2,36 @@
 # ----------
 
 $(document).on "pagecreate", '#index', (event) ->
+
+  console.log "aaaaaaaaaaaa"
+
+  # 
+
+  # pointerEnabled = window.navigator.pointerEnabled or window.navigator.msPointerEnabled
+
+
+  # isRule = (event) => $(event.currentTarget).hasClass('rule') or $(event.currentTarget).attr('id') is "rules"
+
+  # lastTouchStartEvent = null
+  _touchStart = $.ui.mouse.prototype._touchStart
+  $.ui.mouse.prototype._touchStart = (event) ->
+    console.log "touch start"
+    _touchStart.apply(this, [event]) 
+
+  _touchMove = $.ui.mouse.prototype._touchMove
+  $.ui.mouse.prototype._touchMove = (event) ->
+    console.log "touch move"
+    _touchMove.apply(this, [event]) 
+
+  _touchEnd = $.ui.mouse.prototype._touchEnd
+  $.ui.mouse.prototype._touchEnd = (event) ->
+    console.log "touch end"
+    _touchEnd.apply(this, [event]) 
+
+
+
+
+
   pimatic.socket.on "device-attribute", (attrEvent) -> 
     pimatic.pages.index.updateDeviceAttribute attrEvent
     if attrEvent.name is "state"
@@ -372,6 +402,53 @@ pimatic.pages.index =
       <div class="ui-icon ui-icon-bars"></div>
     </div>')
 
+
+
+    dragging = no
+    touchStartEvent = null
+    li.on('touchstart', (event) =>
+      touchStartEvent = event
+    )
+
+    li.on('touchmove', (event) =>
+      console.log "move: ", dragging
+      if dragging then $.ui.mouse.prototype._touchMove event
+    )
+
+    # li.on('touchend', (event) =>
+    #   if dragging then $.ui.mouse.prototype._touchEnd event
+    #   dragging = no
+    # )
+
+
+    vmouseDown = null
+    li.on('vmousedown', (event) =>
+      vmouseDown = event
+      #console.log "mousedown", event
+    )
+
+
+    li.on('vmousemove', (event) =>
+      #console.log "mousemove", event
+      unless vmouseDown is null
+        deltaX = Math.abs(event.pageX - vmouseDown.pageX)
+        deltaY = Math.abs(event.pageY - vmouseDown.pageY)
+        console.log deltaX, deltaY
+        if deltaX > deltaY
+          console.log "starting"
+          pimatic.pages.index.handleRuleDrag(rule, li)
+          $.ui.mouse.prototype._touchStart touchStartEvent
+          vmouseDown = null
+          dragging = yes
+
+      #console.log deltaX, deltaY
+    )
+
+    $('#add-rule').before li
+    $('#rules').listview('refresh')
+    return
+
+  handleRuleDrag: (rule, li) =>
     action = null
 
     showDragMessage = (msg) =>
@@ -387,7 +464,7 @@ pimatic.pages.index =
     li.draggable(
       axis: "x"
       revert: true
-      distance: 50
+      #distance: 50
       handle: 'a'
       zIndex: 100
       start: => console.log "start dragging"
@@ -413,10 +490,6 @@ pimatic.pages.index =
         if action in ['enable', 'disable']
           $.post("/api/rule/#{rule.id}/#{action}")
     )
-
-    $('#add-rule').before li
-    $('#rules').listview('refresh')
-    return
 
   updateRule: (rule) ->
     pimatic.rules[rule.id] = rule 
