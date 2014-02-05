@@ -16,6 +16,7 @@ $(document).on "pagecreate", '#index', (event) ->
   pimatic.socket.on "item-add", (item) -> pimatic.pages.index.addItem item
   pimatic.socket.on "item-remove", (item) -> pimatic.pages.index.removeItem item
   pimatic.socket.on "item-order", (order) -> pimatic.pages.index.reorderItems order
+  pimatic.socket.on "rule-order", (order) -> pimatic.pages.index.reorderRules order
 
   $('#index #items').on "change", ".switch", (event, ui) ->
     ele = $(this)
@@ -85,8 +86,9 @@ $(document).on "pagecreate", '#index', (event) ->
   $('#index').on "click", "#lock-button", (event, ui) ->
     enabled = not pimatic.pages.index.editingMode
     pimatic.pages.index.changeEditingMode(enabled)
-    $.get("/enabledEditing/#{enabled}")
-      .done(ajaxShowToast)
+    $.ajax("/enabledEditing/#{enabled}",
+      global: false # don't show loading indicator
+    ).done(ajaxShowToast)
 
   $("#items").sortable(
     items: "li.sortable"
@@ -110,10 +112,33 @@ $(document).on "pagecreate", '#index', (event) ->
       order = for item in $("#items li.sortable")
         item = $ item
         type: item.data('item-type'), id: item.data('item-id')
-      $.post "update-order", order: order
+      $.ajax("update-item-order", 
+        type: "POST"
+        global: false
+        data: {order: order}
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
-  $("#items .handle").disableSelection()
+  $("#rules").sortable(
+    items: "li.sortable"
+    forcePlaceholderSize: true
+    placeholder: "sortable-placeholder"
+    handle: ".handle"
+    cursor: "move"
+    revert: 100
+    scroll: true
+    start: (ev, ui) ->
+    stop: (ev, ui) ->
+      $('#rules').listview('refresh')
+      order = ($(item).data('rule-id') for item in $("#rules .rule a"))
+      $.ajax("update-rule-order",
+        type: "POST"
+        global: false
+        data: {order: order}
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
+  )
+
+  $("#items .handle, #rules .handle").disableSelection()
 
   $("#delete-item").droppable(
     accept: "li.sortable"
@@ -142,10 +167,12 @@ $(document).on "pagecreate", '#index', (event) ->
 
 pimatic.pages.index =
   loading: no
+  hasData: no
   editingMode: yes
 
   loadData: ->
     # already loading?
+    pimatic.loading "datadelay", "hide"
     if pimatic.pages.index.loading then return
     pimatic.pages.index.loading = yes
     $.get("/data.json")
@@ -159,8 +186,19 @@ pimatic.pages.index =
         pimatic.errorCount = data.errorCount
         pimatic.pages.index.updateErrorCount()
         pimatic.pages.index.changeEditingMode data.enabledEditing
+        pimatic.pages.index.hasData = yes
       ).always( ->
         pimatic.pages.index.loading = no
+      ).fail( ->
+        # if we are not connected to the socket, the data gets refrashed anyway so don't get it
+        # else try again after a delay 
+        if pimatic.socket.socket.connected
+          pimatic.loading("datadelay", "show",
+            text: __("could not load data, retrying in %s seconds", "5")
+          )
+          setTimeout( ->
+            pimatic.pages.index.loadData()
+          , 5000)
       )
     return
 
@@ -330,6 +368,9 @@ pimatic.pages.index =
     unless rule.active
       li.addClass('deactivated')
     li.addClass 'rule'
+    li.find("a").before $('<div class="ui-icon-alt handle">
+      <div class="ui-icon ui-icon-bars"></div>
+    </div>')
     $('#add-rule').before li
     $('#rules').listview('refresh')
     return
@@ -351,3 +392,17 @@ pimatic.pages.index =
     $("\#rule-#{rule.id}").remove()
     $('#rules').listview('refresh')
     return
+
+  reorderRules: (order) ->
+    #detactch all items
+    rules = $('#rules .rule')
+    rules.detach()
+    for o in order
+      # find the matching item
+      for r,i in rules
+        r = $ r
+        # reappend it
+        if r.find('a').data('rule-id') is o
+          r.insertBefore('#add-rule')
+          rules.splice(i, 1)
+          break

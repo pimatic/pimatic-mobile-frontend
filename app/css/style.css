@@ -60,18 +60,23 @@
 }
 
 
-.unlocked ul#items li.sortable {
-  padding-left: 0px;
+.unlocked ul#items li.sortable,
+.unlocked ul#rules li.sortable a {
+  padding-left: 28px;
 }
 
-ul#items li.sortable .handle {
+li.sortable .handle{
   float: left;
-  padding: 0 5px;
+  padding: 5px;
   opacity: 0.2;
   cursor: move;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  margin-top: -14px;
 }
 
-.locked ul#items li.sortable .handle{
+.locked li.sortable .handle{
   display: none;
 }
 
@@ -103,7 +108,7 @@ li.sortable-placeholder{
 }
 
 
-ul#items {
+ul#items ul#rules{
   position: relative;
 }
 
@@ -254,6 +259,23 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
 }
 
 .textcomplete-item a {white-space: nowrap;}
+
+/* two page view */
+/*.pageOne {
+    display: block !important;
+    width: 50% !important;
+    float: left !important;
+    background: yellow !important;
+    position: relative !important;
+}
+
+.pageTwo {
+    display: inline-block !important;
+    width: 50% !important;
+    float: right !important;
+    background: green !important;
+    position: relative !important;
+}*/
 
 @media (min-width:35em) {
  
