@@ -97,10 +97,10 @@ fieldset .ui-block-b .ui-btn{
 }
 
 li.sortable-placeholder{
-  /*height: 20px;*/
   border-style: dashed;
   border-width: 1px;
   background-color: rgb(51, 51, 51);
+  border-color: rgb(204, 204, 204);
 }
 
 #index .ui-header .ui-btn .ui-btn-inner {
