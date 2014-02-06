@@ -5,30 +5,31 @@ $(document).on "pagecreate", '#index', (event) ->
 
   console.log "aaaaaaaaaaaa"
 
-  # 
 
-  # pointerEnabled = window.navigator.pointerEnabled or window.navigator.msPointerEnabled
-
-
-  # isRule = (event) => $(event.currentTarget).hasClass('rule') or $(event.currentTarget).attr('id') is "rules"
-
-  # lastTouchStartEvent = null
+  lastTouchStartEvent = null
   _touchStart = $.ui.mouse.prototype._touchStart
   $.ui.mouse.prototype._touchStart = (event) ->
-    console.log "touch start"
+    # Just alter behavior if the event is triggered on an draggable
+    if this._isDragging?
+      if this._isDragging is no
+        # we are not dragging so allow scrolling
+        return
     _touchStart.apply(this, [event]) 
 
   _touchMove = $.ui.mouse.prototype._touchMove
   $.ui.mouse.prototype._touchMove = (event) ->
-    console.log "touch move"
+    if this._isDragging?
+      unless this._isDragging is yes
+        # discard the event to not prevent defaults
+        return
     _touchMove.apply(this, [event]) 
 
   _touchEnd = $.ui.mouse.prototype._touchEnd
   $.ui.mouse.prototype._touchEnd = (event) ->
-    console.log "touch end"
+    if this._isDragging?
+      # stop dragging
+      this._isDragging = no
     _touchEnd.apply(this, [event]) 
-
-
 
 
 
@@ -149,24 +150,24 @@ $(document).on "pagecreate", '#index', (event) ->
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
-  $("#rules").sortable(
-    items: "li.sortable"
-    forcePlaceholderSize: true
-    placeholder: "sortable-placeholder"
-    handle: ".handle"
-    cursor: "move"
-    revert: 100
-    scroll: true
-    start: (ev, ui) -> console.log "start sorting"
-    stop: (ev, ui) ->
-      $('#rules').listview('refresh')
-      order = ($(item).data('rule-id') for item in $("#rules .rule a"))
-      $.ajax("update-rule-order",
-        type: "POST"
-        global: false
-        data: {order: order}
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
-  )
+  # $("#rules").sortable(
+  #   items: "li.sortable"
+  #   forcePlaceholderSize: true
+  #   placeholder: "sortable-placeholder"
+  #   handle: ".handle"
+  #   cursor: "move"
+  #   revert: 100
+  #   scroll: true
+  #   start: (ev, ui) -> console.log "start sorting"
+  #   stop: (ev, ui) ->
+  #     $('#rules').listview('refresh')
+  #     order = ($(item).data('rule-id') for item in $("#rules .rule a"))
+  #     $.ajax("update-rule-order",
+  #       type: "POST"
+  #       global: false
+  #       data: {order: order}
+  #     ).done(ajaxShowToast).fail(ajaxAlertFail)
+  # )
 
   $("#items .handle, #rules .handle").disableSelection()
 
@@ -404,45 +405,41 @@ pimatic.pages.index =
 
 
 
-    dragging = no
-    touchStartEvent = null
-    li.on('touchstart', (event) =>
-      touchStartEvent = event
-    )
+    pimatic.pages.index.handleRuleDrag(rule, li)
+    ###
+      Some realy dirty hacks to allow vertival scralling
+    ###
 
-    li.on('touchmove', (event) =>
-      console.log "move: ", dragging
-      if dragging then $.ui.mouse.prototype._touchMove event
-    )
+    uiDraggable = li.data('uiDraggable')
 
-    # li.on('touchend', (event) =>
-    #   if dragging then $.ui.mouse.prototype._touchEnd event
-    #   dragging = no
-    # )
-
-
-    vmouseDown = null
+    # Capture the last mousedown/touchstart event
+    uiDraggable.lastVmouseDown = null
     li.on('vmousedown', (event) =>
-      vmouseDown = event
-      #console.log "mousedown", event
+      uiDraggable.lastVmouseDown = event
     )
 
-
+    uiDraggable._isDragging = no
+    uiDraggable.startEvent = null
+    # If the mouse
     li.on('vmousemove', (event) =>
-      #console.log "mousemove", event
-      unless vmouseDown is null
-        deltaX = Math.abs(event.pageX - vmouseDown.pageX)
-        deltaY = Math.abs(event.pageY - vmouseDown.pageY)
+      console.log "vmousemove: ", uiDraggable._isDragging
+      unless uiDraggable.lastVmouseDown is null
+        deltaX = Math.abs(event.pageX - uiDraggable.lastVmouseDown.pageX)
+        deltaY = Math.abs(event.pageY - uiDraggable.lastVmouseDown.pageY)
         console.log deltaX, deltaY
-        if deltaX > deltaY
-          console.log "starting"
-          pimatic.pages.index.handleRuleDrag(rule, li)
-          $.ui.mouse.prototype._touchStart touchStartEvent
-          vmouseDown = null
-          dragging = yes
-
+        if deltaX > deltaY and deltaX > 5 and not uiDraggable._isDragging
+          event.originalEvent.preventDefault();
+          originalEvent = uiDraggable.lastVmouseDown.originalEvent
+          uiDraggable._isDragging = yes
+          $.ui.mouse.prototype._touchStart.apply(
+            uiDraggable, [originalEvent]
+          )
+          uiDraggable.lastVmouseDown = null
+         
       #console.log deltaX, deltaY
     )
+
+
 
     $('#add-rule').before li
     $('#rules').listview('refresh')
