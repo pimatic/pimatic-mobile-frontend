@@ -150,24 +150,24 @@ $(document).on "pagecreate", '#index', (event) ->
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
-  # $("#rules").sortable(
-  #   items: "li.sortable"
-  #   forcePlaceholderSize: true
-  #   placeholder: "sortable-placeholder"
-  #   handle: ".handle"
-  #   cursor: "move"
-  #   revert: 100
-  #   scroll: true
-  #   start: (ev, ui) -> console.log "start sorting"
-  #   stop: (ev, ui) ->
-  #     $('#rules').listview('refresh')
-  #     order = ($(item).data('rule-id') for item in $("#rules .rule a"))
-  #     $.ajax("update-rule-order",
-  #       type: "POST"
-  #       global: false
-  #       data: {order: order}
-  #     ).done(ajaxShowToast).fail(ajaxAlertFail)
-  # )
+  $("#rules").sortable(
+    items: "li.sortable"
+    forcePlaceholderSize: true
+    placeholder: "sortable-placeholder"
+    handle: ".handle"
+    cursor: "move"
+    revert: 100
+    scroll: true
+    start: (ev, ui) -> console.log "start sorting"
+    stop: (ev, ui) ->
+      $('#rules').listview('refresh')
+      order = ($(item).data('rule-id') for item in $("#rules .rule a"))
+      $.ajax("update-rule-order",
+        type: "POST"
+        global: false
+        data: {order: order}
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
+  )
 
   $("#items .handle, #rules .handle").disableSelection()
 
@@ -413,33 +413,31 @@ pimatic.pages.index =
     uiDraggable = li.data('uiDraggable')
 
     # Capture the last mousedown/touchstart event
-    uiDraggable.lastVmouseDown = null
+    lastVmouseDown = null
     li.on('vmousedown', (event) =>
-      uiDraggable.lastVmouseDown = event
+      if $(event.target).parent('.handle').length then return
+      lastVmouseDown = event
     )
 
     uiDraggable._isDragging = no
     uiDraggable.startEvent = null
     # If the mouse
     li.on('vmousemove', (event) =>
-      console.log "vmousemove: ", uiDraggable._isDragging
-      unless uiDraggable.lastVmouseDown is null
-        deltaX = Math.abs(event.pageX - uiDraggable.lastVmouseDown.pageX)
-        deltaY = Math.abs(event.pageY - uiDraggable.lastVmouseDown.pageY)
-        console.log deltaX, deltaY
+      if $(event.target).parent('.handle').length then return
+      unless lastVmouseDown is null
+        deltaX = Math.abs(event.pageX - lastVmouseDown.pageX)
+        deltaY = Math.abs(event.pageY - lastVmouseDown.pageY)
+        # detect horizontal drag
         if deltaX > deltaY and deltaX > 5 and not uiDraggable._isDragging
+          # https://code.google.com/p/android/issues/detail?id=19827
           event.originalEvent.preventDefault();
-          originalEvent = uiDraggable.lastVmouseDown.originalEvent
+          originalEvent = lastVmouseDown.originalEvent
           uiDraggable._isDragging = yes
           $.ui.mouse.prototype._touchStart.apply(
             uiDraggable, [originalEvent]
           )
-          uiDraggable.lastVmouseDown = null
-         
-      #console.log deltaX, deltaY
+          lastVmouseDown = null
     )
-
-
 
     $('#add-rule').before li
     $('#rules').listview('refresh')
@@ -464,6 +462,7 @@ pimatic.pages.index =
       #distance: 50
       handle: 'a'
       zIndex: 100
+      scroll: false
       start: => console.log "start dragging"
       drag: ( event, ui ) => 
         # offset of the helper is 15 at start
