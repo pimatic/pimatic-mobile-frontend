@@ -3,36 +3,6 @@
 
 $(document).on "pagecreate", '#index', (event) ->
 
-  console.log "aaaaaaaaaaaa"
-
-
-  lastTouchStartEvent = null
-  _touchStart = $.ui.mouse.prototype._touchStart
-  $.ui.mouse.prototype._touchStart = (event) ->
-    # Just alter behavior if the event is triggered on an draggable
-    if this._isDragging?
-      if this._isDragging is no
-        # we are not dragging so allow scrolling
-        return
-    _touchStart.apply(this, [event]) 
-
-  _touchMove = $.ui.mouse.prototype._touchMove
-  $.ui.mouse.prototype._touchMove = (event) ->
-    if this._isDragging?
-      unless this._isDragging is yes
-        # discard the event to not prevent defaults
-        return
-    _touchMove.apply(this, [event]) 
-
-  _touchEnd = $.ui.mouse.prototype._touchEnd
-  $.ui.mouse.prototype._touchEnd = (event) ->
-    if this._isDragging?
-      # stop dragging
-      this._isDragging = no
-    _touchEnd.apply(this, [event]) 
-
-
-
   pimatic.socket.on "device-attribute", (attrEvent) -> 
     pimatic.pages.index.updateDeviceAttribute attrEvent
     if attrEvent.name is "state"
@@ -195,6 +165,7 @@ $(document).on "pagecreate", '#index', (event) ->
       pimatic.pages.index.updateErrorCount()
 
   pimatic.pages.index.loadData()
+  pimatic.pages.index.fixScrollOverDraggableRule()
 
 pimatic.pages.index =
   loading: no
@@ -403,9 +374,55 @@ pimatic.pages.index =
       <div class="ui-icon ui-icon-bars"></div>
     </div>')
 
+    pimatic.pages.index.addRuleDragslide(rule, li)
+
+    $('#add-rule').before li
+    $('#rules').listview('refresh')
+    return
+
+  addRuleDragslide: (rule, li) =>
+    action = null
+
+    showDragMessage = (msg) =>
+      $('.drag-message')
+      .text(msg)
+      .css(
+        top: li.position().top
+        height: li.outerHeight()
+        'line-height': li.outerHeight() + "px"
+      ).fadeIn(500)
 
 
-    pimatic.pages.index.handleRuleDrag(rule, li)
+    li.draggable(
+      axis: "x"
+      revert: true
+      handle: 'a'
+      zIndex: 100
+      scroll: false
+      revertDuration: 200
+      start: => 
+      drag: ( event, ui ) => 
+        # offset of the helper is 15 at start
+        offsetX = ui.offset.left-15
+        if offsetX < -120
+          unless action is "enable"
+            showDragMessage(__('disable rule')).addClass('disable').removeClass('enable')
+            action = "enable"
+        else if offsetX > 120
+          unless action is "disable"
+            showDragMessage(__('enable rule')).addClass('enable').removeClass('disable')
+            action = "disable"
+        else
+          if action?
+            $('.drag-message').fadeOut(500)
+            action = null
+
+      stop: => 
+        $('.drag-message').text('').fadeOut().removeClass('enable').removeClass('disable')
+        if action in ['enable', 'disable']
+          $.post("/api/rule/#{rule.id}/#{action}")
+    )
+
     ###
       Some realy dirty hacks to allow vertival scralling
     ###
@@ -420,7 +437,6 @@ pimatic.pages.index =
     )
 
     uiDraggable._isDragging = no
-    uiDraggable.startEvent = null
     # If the mouse
     li.on('vmousemove', (event) =>
       if $(event.target).parent('.handle').length then return
@@ -437,54 +453,6 @@ pimatic.pages.index =
             uiDraggable, [originalEvent]
           )
           lastVmouseDown = null
-    )
-
-    $('#add-rule').before li
-    $('#rules').listview('refresh')
-    return
-
-  handleRuleDrag: (rule, li) =>
-    action = null
-
-    showDragMessage = (msg) =>
-      $('.drag-message')
-      .text(msg)
-      .css(
-        top: li.position().top
-        height: li.outerHeight()
-        'line-height': li.outerHeight() + "px"
-      ).fadeIn(500)
-
-
-    li.draggable(
-      axis: "x"
-      revert: true
-      #distance: 50
-      handle: 'a'
-      zIndex: 100
-      scroll: false
-      start: => console.log "start dragging"
-      drag: ( event, ui ) => 
-        # offset of the helper is 15 at start
-        offsetX = ui.offset.left-15
-        if offsetX < -120
-          unless action is "enable"
-            showDragMessage(__('disable rule')).addClass('disable').removeClass('enable')
-            action = "enable"
-        else if offsetX > 120
-          unless action is "disable"
-            showDragMessage(__('enable rule')).addClass('enable').removeClass('disable')
-            action = "disable"
-        else
-          if action?
-            console.log "hide"
-            $('.drag-message').fadeOut(500)
-            action = null
-
-      stop: => 
-        $('.drag-message').text('').fadeOut().removeClass('enable').removeClass('disable')
-        if action in ['enable', 'disable']
-          $.post("/api/rule/#{rule.id}/#{action}")
     )
 
   updateRule: (rule) ->
@@ -518,3 +486,28 @@ pimatic.pages.index =
           r.insertBefore('#add-rule')
           rules.splice(i, 1)
           break
+
+  fixScrollOverDraggableRule: ->
+    _touchStart = $.ui.mouse.prototype._touchStart
+    $.ui.mouse.prototype._touchStart = (event) ->
+      # Just alter behavior if the event is triggered on an draggable
+      if this._isDragging?
+        if this._isDragging is no
+          # we are not dragging so allow scrolling
+          return
+      _touchStart.apply(this, [event]) 
+
+    _touchMove = $.ui.mouse.prototype._touchMove
+    $.ui.mouse.prototype._touchMove = (event) ->
+      if this._isDragging?
+        unless this._isDragging is yes
+          # discard the event to not prevent defaults
+          return
+      _touchMove.apply(this, [event]) 
+
+    _touchEnd = $.ui.mouse.prototype._touchEnd
+    $.ui.mouse.prototype._touchEnd = (event) ->
+      if this._isDragging?
+        # stop dragging
+        this._isDragging = no
+      _touchEnd.apply(this, [event]) 
