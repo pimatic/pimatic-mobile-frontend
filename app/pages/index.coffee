@@ -405,22 +405,24 @@ pimatic.pages.index =
         # offset of the helper is 15 at start
         offsetX = ui.offset.left-15
         if offsetX < -120
-          unless action is "enable"
-            showDragMessage(__('disable rule')).addClass('disable').removeClass('enable')
-            action = "enable"
+          unless action is "deactivate"
+            showDragMessage(__('deactivate rule')).addClass('deactivate').removeClass('activate')
+            action = "deactivate"
         else if offsetX > 120
-          unless action is "disable"
-            showDragMessage(__('enable rule')).addClass('enable').removeClass('disable')
-            action = "disable"
+          unless action is "activate"
+            showDragMessage(__('activate rule')).addClass('activate').removeClass('deactivate')
+            action = "activate"
         else
           if action?
             $('.drag-message').fadeOut(500)
             action = null
 
       stop: => 
-        $('.drag-message').text('').fadeOut().removeClass('enable').removeClass('disable')
-        if action in ['enable', 'disable']
-          $.post("/api/rule/#{rule.id}/#{action}")
+        $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
+        if action?
+          $.ajax("/api/rule/#{rule.id}/#{action}",
+            global: false
+          ).done(ajaxShowToast).fail(ajaxAlertFail)
     )
 
     ###
