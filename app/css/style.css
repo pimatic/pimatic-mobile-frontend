@@ -265,6 +265,10 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   color: #A0A0A0;
 }
 
+#edit-rule .ui-content {
+  /* no idea why this is necessary to display full y when autocomplete is visible*/
+  overflow-x: visible !important;
+}
 
 .textcomplete-item a {white-space: nowrap;}
 
