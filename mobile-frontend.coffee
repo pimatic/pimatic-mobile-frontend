@@ -12,6 +12,7 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   express = env.require "express" 
   coffee = env.require 'coffee-script'
+  M = env.matcher
 
   global.i18n = env.require('i18n')
   global.__ = i18n.__
@@ -222,6 +223,10 @@ module.exports = (env) ->
         actionString = req.body.action
         context = @framework.ruleManager.createParseContext()
         @framework.ruleManager.executeAction(actionString, true, context).then( (message) ->
+          unless context.hasErrors()
+            # just to add autocomplete
+            M("", context).match([' and '])
+          context.finalize()
           res.send 200, {success: true, message: message, context: context}
         ).catch( (error) ->
           res.send 200, {success: false, error: error}
@@ -231,11 +236,13 @@ module.exports = (env) ->
         conditionString = req.body.condition
         try
           context = @framework.ruleManager.createParseContext()
-          @framework.ruleManager.parsePredicate("id", conditionString, context)
-          res.send 200, {success: true, context: context}
+          predicate = @framework.ruleManager.parsePredicate("id", conditionString, context)
+          unless context.hasErrors()
+            # just to add autocomplete
+            M("", context).match([' and ', ' or '])
+          context.finalize()
+          res.send 200, {success: true, message: predicate.token, context: context}
         catch error
-          console.log error.message
-          console.log error.stack
           res.send 200, {success: false, error: error}
     
       # * Static assets
