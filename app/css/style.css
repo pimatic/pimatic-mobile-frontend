@@ -23,6 +23,10 @@
   top: auto;
 }
 
+.ui-loader-verbose h1 {
+  font-weight: normal;
+}
+
 /* button display enhancements */
 .ui-focus,
 .ui-btn:focus {
