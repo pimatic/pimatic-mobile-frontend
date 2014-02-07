@@ -164,12 +164,14 @@ $(document).on "pagecreate", '#index', (event) ->
     if entry.level is 'error' 
       pimatic.pages.index.updateErrorCount()
 
+  pimatic.pages.index.pageCreated = yes
   pimatic.pages.index.loadData()
   pimatic.pages.index.fixScrollOverDraggableRule()
 
 pimatic.pages.index =
   loading: no
   hasData: no
+  pageCreated: false
   editingMode: yes
 
   loadData: ->
@@ -207,11 +209,7 @@ pimatic.pages.index =
   updateErrorCount: ->
     if $('#error-count').find('.ui-btn-text').length > 0
       $('#error-count').find('.ui-btn-text').text(pimatic.errorCount)
-      try
-        $('#error-count').button('refresh')
-      catch e
-        # ignore: Uncaught Error: cannot call methods on button prior 
-        # to initialization; attempted to call method 'refresh' 
+      $('#error-count').button('refresh') if pimatic.pages.index.pageCreated
     else
       $('#error-count').text(pimatic.errorCount)
     if pimatic.errorCount is 0 then $('#error-count').hide()
@@ -248,7 +246,7 @@ pimatic.pages.index =
     li.find("label").before $('<div class="ui-icon-alt handle">
       <div class="ui-icon ui-icon-bars"></div>
     </div>')
-    $('#items').listview('refresh')
+    $('#items').listview('refresh') if pimatic.pages.index.pageCreated
 
   removeItem: (item) ->
     for li in $('#items .item')
@@ -377,7 +375,7 @@ pimatic.pages.index =
     pimatic.pages.index.addRuleDragslide(rule, li)
 
     $('#add-rule').before li
-    $('#rules').listview('refresh')
+    $('#rules').listview('refresh') if pimatic.pages.index.pageCreated
     return
 
   addRuleDragslide: (rule, li) =>
@@ -428,34 +426,34 @@ pimatic.pages.index =
     ###
       Some realy dirty hacks to allow vertival scralling
     ###
+    if $.ui.mouse.prototype._touchStart?
+      uiDraggable = li.data('uiDraggable')
 
-    uiDraggable = li.data('uiDraggable')
+      # Capture the last mousedown/touchstart event
+      lastVmouseDown = null
+      li.on('vmousedown', (event) =>
+        if $(event.target).parent('.handle').length then return
+        lastVmouseDown = event
+      )
 
-    # Capture the last mousedown/touchstart event
-    lastVmouseDown = null
-    li.on('vmousedown', (event) =>
-      if $(event.target).parent('.handle').length then return
-      lastVmouseDown = event
-    )
-
-    uiDraggable._isDragging = no
-    # If the mouse
-    li.on('vmousemove', (event) =>
-      if $(event.target).parent('.handle').length then return
-      unless lastVmouseDown is null
-        deltaX = Math.abs(event.pageX - lastVmouseDown.pageX)
-        deltaY = Math.abs(event.pageY - lastVmouseDown.pageY)
-        # detect horizontal drag
-        if deltaX > deltaY and deltaX > 5 and not uiDraggable._isDragging
-          # https://code.google.com/p/android/issues/detail?id=19827
-          event.originalEvent.preventDefault();
-          originalEvent = lastVmouseDown.originalEvent
-          uiDraggable._isDragging = yes
-          $.ui.mouse.prototype._touchStart.apply(
-            uiDraggable, [originalEvent]
-          )
-          lastVmouseDown = null
-    )
+      uiDraggable._isDragging = no
+      # If the mouse
+      li.on('vmousemove', (event) =>
+        if $(event.target).parent('.handle').length then return
+        unless lastVmouseDown is null
+          deltaX = Math.abs(event.pageX - lastVmouseDown.pageX)
+          deltaY = Math.abs(event.pageY - lastVmouseDown.pageY)
+          # detect horizontal drag
+          if deltaX > deltaY and deltaX > 5 and not uiDraggable._isDragging
+            # https://code.google.com/p/android/issues/detail?id=19827
+            event.originalEvent.preventDefault();
+            originalEvent = lastVmouseDown.originalEvent
+            uiDraggable._isDragging = yes
+            $.ui.mouse.prototype._touchStart.apply(
+              uiDraggable, [originalEvent]
+            )
+            lastVmouseDown = null
+      )
 
   updateRule: (rule) ->
     pimatic.rules[rule.id] = rule 
@@ -490,26 +488,28 @@ pimatic.pages.index =
           break
 
   fixScrollOverDraggableRule: ->
+
     _touchStart = $.ui.mouse.prototype._touchStart
-    $.ui.mouse.prototype._touchStart = (event) ->
-      # Just alter behavior if the event is triggered on an draggable
-      if this._isDragging?
-        if this._isDragging is no
-          # we are not dragging so allow scrolling
-          return
-      _touchStart.apply(this, [event]) 
+    if _touchStart?
+      $.ui.mouse.prototype._touchStart = (event) ->
+        # Just alter behavior if the event is triggered on an draggable
+        if this._isDragging?
+          if this._isDragging is no
+            # we are not dragging so allow scrolling
+            return
+        _touchStart.apply(this, [event]) 
 
-    _touchMove = $.ui.mouse.prototype._touchMove
-    $.ui.mouse.prototype._touchMove = (event) ->
-      if this._isDragging?
-        unless this._isDragging is yes
-          # discard the event to not prevent defaults
-          return
-      _touchMove.apply(this, [event]) 
+      _touchMove = $.ui.mouse.prototype._touchMove
+      $.ui.mouse.prototype._touchMove = (event) ->
+        if this._isDragging?
+          unless this._isDragging is yes
+            # discard the event to not prevent defaults
+            return
+        _touchMove.apply(this, [event]) 
 
-    _touchEnd = $.ui.mouse.prototype._touchEnd
-    $.ui.mouse.prototype._touchEnd = (event) ->
-      if this._isDragging?
-        # stop dragging
-        this._isDragging = no
-      _touchEnd.apply(this, [event]) 
+      _touchEnd = $.ui.mouse.prototype._touchEnd
+      $.ui.mouse.prototype._touchEnd = (event) ->
+        if this._isDragging?
+          # stop dragging
+          this._isDragging = no
+        _touchEnd.apply(this, [event]) 
