@@ -1,6 +1,8 @@
 module.exports = (env) ->
 
   Q = env.require 'q'
+  _ = env.require 'lodash'
+  M = env.matcher
 
   class ButtonPredicateProvider extends env.predicates.PredicateProvider
 
@@ -8,34 +10,34 @@ module.exports = (env) ->
 
     constructor: (@mobile) ->
 
-    _parsePredicate: (predicate) ->
-      # Just to be sure convert the predicate to lower case.
-      predicate = predicate.toLowerCase()
-      # Then try to match:
-      matches = predicate.match ///
-        ^(.+?) # the button name
-        (?:\s+button)? # optional button
-        (?:\s+is\s+|\s+) # followed by a whitespace or "is "
-        pressed$ # and ends with pressed
-      ///
+    _parsePredicate: (predicate, context) ->
 
-      if matches?
-        buttonName = matches[1]
-        for item in @mobile.config.items
-          if item.type is "button"
-            if @_matchesIdOrName item.text, buttonName
-              return info =
-                itemId: item.id
+      matchCount = 0
+      matchingButton = 0
+      end = () => matchCount++
+      onButtonMatch = (m, button) => matchingButton = button
 
-    # Checks if `find` matches the id or name of the button lower case ignoring "the " prefixes 
-    # in the search string and name.
-    _matchesIdOrName: (name, find) ->
-      cleanFind = find.toLowerCase().replace('the ', '').trim()
-      cleanName = name.toLowerCase().replace('the ', '').trim()
-      return cleanFind is cleanName
+      allButtons = _(@mobile.config.items)
+        .filter((i) => i.type is "button")
+        .map((i) => [i, i.text]).value()
 
-    canDecide: (predicate) ->
-      info = @_parsePredicate predicate
+      M(predicate, context)
+        .match('the ', optional: true)
+        .match(allButtons, onButtonMatch)
+        .match(' button', optional: true)
+        .match(' is', optional: true)
+        .match(' pressed')
+        .onEnd(end)
+
+      if matchCount is 1
+        return info =
+          itemId: matchingButton.id
+      else if matchCount > 1
+        context?.addError(""""#{predicate.trim()}" is ambiguous.""")
+      return null
+
+    canDecide: (predicate, context) ->
+      info = @_parsePredicate predicate, context
       return if info? then 'event' else no
 
     isTrue: (predicate) -> Q false
