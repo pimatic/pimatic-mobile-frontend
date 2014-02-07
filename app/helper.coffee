@@ -12,15 +12,27 @@
       textVisible: true
       textonly: false
     }
+    blocking = no
     for k, options of pendingLoadings
       if options.text?
         if mobileLoadingOptions.text.length isnt 0
           mobileLoadingOptions.text += ', '
         mobileLoadingOptions.text += options.text
+      if options.blocking is yes
+        blocking = yes
     if mobileLoadingOptions.text.length isnt 0
       mobileLoadingOptions.text += '...'
     else
       mobileLoadingOptions.textVisible = no
+    if blocking
+      $('body').addClass('ui-loading-blocking')
+    else 
+      $('body').removeClass('ui-loading-blocking')
+      mobileLoadingOptions.textVisible = yes
+      mobileLoadingOptions.textonly = yes
+      if mobileLoadingOptions.text.length is 0
+        mobileLoadingOptions.text = __('Loading') + '...'
+
     return mobileLoadingOptions
 
 
@@ -43,6 +55,7 @@
           # hide the loading indicator if we have nothing to load anymore
           if (k for k of pendingLoadings).length is 0
             $.mobile.loading('hide')
+            $('body').removeClass('ui-loading-blocking')
           else
             #update the message
             $.mobile.loading('show', buildLoadingMessage())
@@ -69,6 +82,7 @@ $.ajaxSetup timeout: 20000 #ms
 $(document).ajaxStart ->
   pimatic.loading "ajax", "show",
     text: "loading"
+    blocking: yes
 
 $(document).ajaxStop ->
   pimatic.loading "ajax", "hide"

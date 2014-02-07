@@ -30,6 +30,7 @@ $(document).on "pagebeforecreate", ->
     #console.log "connecting"
     pimatic.loading "socket", "show",
       text: __("connecting")
+      blocking: yes
 
   ###
     unused socket events:
@@ -51,12 +52,12 @@ $(document).on "pagebeforecreate", ->
     #console.log "disconnect"
     pimatic.loading "socket", "show",
       text: __("connection lost, retying")
+      blocking: not pimatic.pages.index.hasData
 
   onConnectionError = ->
     pimatic.loading "socket", "show",
       text: __("could not connect, retying")
-      textVisible: true
-      textonly: false
+      blocking: not pimatic.pages.index.hasData
     setTimeout ->
       pimatic.socket.socket.connect()
     , 2000

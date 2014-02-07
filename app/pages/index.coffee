@@ -179,8 +179,19 @@ pimatic.pages.index =
     pimatic.loading "datadelay", "hide"
     if pimatic.pages.index.loading then return
     pimatic.pages.index.loading = yes
-    $.get("/data.json")
-      .done( (data) ->
+
+    if pimatic.pages.index.hasData
+      pimatic.loading "loadingdata", "show",
+        text: __("Refreshing") 
+
+    else
+      pimatic.loading "loadingdata", "show",
+        text: __("Loading")
+        blocking: yes
+
+    $.ajax("/data.json"
+      global: no
+    ).done( (data) ->
         pimatic.devices = []
         pimatic.rules = []
         $('#items .item').remove()
@@ -191,6 +202,7 @@ pimatic.pages.index =
         pimatic.pages.index.updateErrorCount()
         pimatic.pages.index.changeEditingMode data.enabledEditing
         pimatic.pages.index.hasData = yes
+        pimatic.loading "loadingdata", "hide"
       ).always( ->
         pimatic.pages.index.loading = no
       ).fail( ->

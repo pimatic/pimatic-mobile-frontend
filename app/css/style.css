@@ -12,8 +12,15 @@
     z-index:1001;
 }
 
-.ui-loading .ui-loader-background {
-    display:block;
+.ui-loading-blocking .ui-loader-background {
+  display: block;
+}
+
+.ui-loader-textonly {
+  padding: 7px;
+  margin-top: -32px;
+  bottom: 10px;
+  top: auto;
 }
 
 /* button display enhancements */
