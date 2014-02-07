@@ -272,6 +272,12 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
 
 .textcomplete-item a {white-space: nowrap;}
 
+.textcomplete-more select{
+  margin: 0;
+  background-color: white;
+  border: none;
+}
+
 .drag-message {
   /*display: none;*/
   position: absolute;

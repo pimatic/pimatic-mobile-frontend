@@ -36,12 +36,15 @@ $(document).on "pageinit", '#edit-rule', (event) ->
     remainder = value.substring(commonPart.length, value.length)
     return "<strong>#{commonPart}</strong>#{remainder}"
 
+  editRulePage = pimatic.pages.editRule
+
 
   # https://github.com/yuku-t/jquery-textcomplete
   $("#edit-rule-condition").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*(?:\sand\s|\sor\s|\)|\())*(.*)$/
     search: (term, callback) ->
-      $.ajax('parsePredicate',
+      editRulePage.autocompleteAjax?.abort()
+      editRulePage.autocompleteAjax = $.ajax('parsePredicate',
         type: 'POST'
         data: {condition: term}
         global: false
@@ -59,7 +62,8 @@ $(document).on "pageinit", '#edit-rule', (event) ->
   $("#edit-rule-actions").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.*)$/
     search: (term, callback) ->
-      $.ajax('parseAction',
+      editRulePage.autocompleteAjax?.abort()
+      editRulePage.autocompleteAjax = $.ajax('parseAction',
         type: 'POST'
         data: {action: term}
         global: false
@@ -89,3 +93,10 @@ $(document).on "pageinit", '#edit-rule', (event) ->
         $('#edit-rule h3').text __('Edit rule')        
         $('#edit-rule-id').textinput('disable')
         $('#edit-rule-advanced').show()
+
+  $(document).on "pagebeforehide", '#edit-rule', (event) ->
+    pimatic.pages.editRule.autocompleteAjax?.abort()
+
+
+pimatic.pages.editRule = 
+  autocompleteAjax: null

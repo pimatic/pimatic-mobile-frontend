@@ -177,7 +177,6 @@
                 .activate();
             this.listView.strategy = this.strategy;
           }
-          data = data.slice(0, this.strategy.maxCount);
           this.listView.render(data);
         }
         
@@ -396,6 +395,7 @@
       this.completer = completer;
 
       this.$el.on('click', 'li.textcomplete-item', bind(this.onClick, this));
+      this.$el.on('change', 'select', bind(this.onChange, this));
     }
 
     $.extend(ListView.prototype, {
@@ -403,6 +403,11 @@
 
       render: function (data) {
         var html, i, l, index, val;
+
+        var displayCount = this.strategy.maxCount;
+        if (data.length > this.strategy.maxCount) {
+          displayCount--;
+        }
 
         html = '';
         for (i = 0, l = data.length; i < l; i++) {
@@ -413,8 +418,27 @@
           html += '<li class="textcomplete-item" data-index="' + index + '"><a>';
           html +=   this.strategy.template(val);
           html += '</a></li>';
-          if (this.data.length === this.strategy.maxCount) break;
+          if (this.data.length === displayCount) break;
         }
+        if (data.length > displayCount) {
+          html += '<li class="textcomplete-more" data-index="' + displayCount + '">';
+          html += '<select>';
+          html += '<option value="more">...</option>';
+          for (i = displayCount, l = data.length; i < l; i++) {
+            val = data[i];
+            if (include(this.data, val)) continue;
+            index = this.data.length;
+            this.data.push(val);
+            html += '<option data-index="' + index + '" value="' + index + '">' + val + '</option>';
+          }
+          html += '</select">';
+          html += '</li>';
+          //count select
+          displayCount++;
+        }
+
+        this.displayCount = displayCount;
+
         this.$el.append(html);
         if (!this.data.length) {
           this.deactivate();
@@ -469,7 +493,7 @@
       },
 
       reposition: function() {
-        var $wrapper = $('.textcomplete-wrapper')
+        var $wrapper = $('.textcomplete-wrapper');
         var rightOffset = this.$el.offset().left + this.$el.outerWidth();
         var bottomOffset = this.$el.offset().top + this.$el.outerHeight();
         var textareaRight = $wrapper.offset().left + $wrapper.outerWidth();
@@ -491,22 +515,29 @@
         } else if (e.keyCode === 38) {         // UP
           e.preventDefault();
           if (this.index === 0) {
-            this.index = this.data.length-1;
+            this.index = this.displayCount-1;
           } else {
             this.index -= 1;
           }
           this.activateIndexedItem();
         } else if (e.keyCode === 40) {  // DOWN
           e.preventDefault();
-          if (this.index === this.data.length - 1) {
+          if (this.index === this.displayCount-1) {
             this.index = 0;
           } else {
             this.index += 1;
           }
           this.activateIndexedItem();
         } else if (e.keyCode === 13 || e.keyCode === 9) {  // ENTER or TAB
-          e.preventDefault();
-          this.select(parseInt(this.getActiveItem().data('index')));
+          var activeItem = this.getActiveItem();
+          var index = parseInt(activeItem.data('index'));
+          //unless more is selected
+          if(activeItem.hasClass('textcomplete-more')) {
+            activeItem.find('select').focus();
+          } else {
+            e.preventDefault();
+            this.select(index);
+          }
         }
       },
 
@@ -517,6 +548,11 @@
           $e = $e.parents('li.textcomplete-item');
         }
         this.select(parseInt($e.data('index')));
+      },
+
+      onChange: function (e) {
+        var $e = $(e.target);
+        this.select(parseInt($e.val()));
       }
     });
 
