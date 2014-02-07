@@ -87,8 +87,11 @@ $(document).on "pagecreate", '#index', (event) ->
   $('#index').on "click", "#lock-button", (event, ui) ->
     enabled = not pimatic.pages.index.editingMode
     pimatic.pages.index.changeEditingMode(enabled)
+    pimatic.loading "enableediting", "show", text: __('Saving')
     $.ajax("/enabledEditing/#{enabled}",
       global: false # don't show loading indicator
+    ).done( ->
+      pimatic.loading "enableediting", "hide"
     ).done(ajaxShowToast)
 
   $("#items").sortable(
@@ -113,10 +116,13 @@ $(document).on "pagecreate", '#index', (event) ->
       order = for item in $("#items li.sortable")
         item = $ item
         type: item.data('item-type'), id: item.data('item-id')
+      pimatic.loading "itemorder", "show", text: __('Saving')
       $.ajax("update-item-order", 
         type: "POST"
         global: false
         data: {order: order}
+      ).done( ->
+        pimatic.loading "itemorder", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
@@ -132,10 +138,13 @@ $(document).on "pagecreate", '#index', (event) ->
     stop: (ev, ui) ->
       $('#rules').listview('refresh')
       order = ($(item).data('rule-id') for item in $("#rules .rule a"))
+      pimatic.loading "ruleorder", "show", text: __('Saving')
       $.ajax("update-rule-order",
         type: "POST"
         global: false
         data: {order: order}
+      ).done( ->
+        pimatic.loading "ruleorder", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
@@ -149,12 +158,15 @@ $(document).on "pagecreate", '#index', (event) ->
         id: ui.draggable.data('item-id')
         type: ui.draggable.data('item-type')
       }
+      pimatic.loading "deleteitem", "show", text: __('Saving')
       $.post('remove-item', item: item).done( (data) ->
         if data.success
           if item.type is 'device'
              delete pimatic.devices[item.id]
           ui.draggable.remove()
-      ).fail(ajaxAlertFail)
+      ).done( -> 
+        pimatic.loading "deleteitem", "hide"
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
   pimatic.socket.on 'connect', ->
@@ -181,13 +193,9 @@ pimatic.pages.index =
     pimatic.pages.index.loading = yes
 
     if pimatic.pages.index.hasData
-      pimatic.loading "loadingdata", "show",
-        text: __("Refreshing") 
-
+      pimatic.loading "loadingdata", "show", text: __("Refreshing") 
     else
-      pimatic.loading "loadingdata", "show",
-        text: __("Loading")
-        blocking: yes
+      pimatic.loading "loadingdata", "show", { text: __("Loading"), blocking: yes }
 
     $.ajax("/data.json"
       global: no
@@ -433,8 +441,11 @@ pimatic.pages.index =
       stop: => 
         $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
         if action?
+          pimatic.loading "saveactivate", "show", text: __(action)
           $.ajax("/api/rule/#{rule.id}/#{action}",
             global: false
+          ).done( ->
+            pimatic.loading "saveactivate", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)
     )
 
