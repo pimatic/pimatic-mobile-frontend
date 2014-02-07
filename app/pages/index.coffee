@@ -209,7 +209,10 @@ pimatic.pages.index =
   updateErrorCount: ->
     if $('#error-count').find('.ui-btn-text').length > 0
       $('#error-count').find('.ui-btn-text').text(pimatic.errorCount)
-      $('#error-count').button('refresh') if pimatic.pages.index.pageCreated
+      try
+        $('#error-count').button('refresh')
+      catch e
+        # ignore button not initialised
     else
       $('#error-count').text(pimatic.errorCount)
     if pimatic.errorCount is 0 then $('#error-count').hide()
@@ -464,13 +467,13 @@ pimatic.pages.index =
       li.removeClass('deactivated')
     else
       li.addClass('deactivated')
-    $('#rules').listview('refresh')
+    $('#rules').listview('refresh') if pimatic.pages.index.pageCreated
     return
 
   removeRule: (rule) ->
     delete pimatic.rules[rule.id]
     $("\#rule-#{rule.id}").remove()
-    $('#rules').listview('refresh')
+    $('#rules').listview('refresh') if pimatic.pages.index.pageCreated
     return
 
   reorderRules: (order) ->
