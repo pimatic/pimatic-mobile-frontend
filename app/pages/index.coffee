@@ -197,8 +197,9 @@ pimatic.pages.index =
     else
       pimatic.loading "loadingdata", "show", { text: __("Loading"), blocking: yes }
 
-    $.ajax("/data.json"
+    $.ajax("/data.json",
       global: no
+      data: 'noAuthPromp=true'
     ).done( (data) ->
         pimatic.devices = []
         pimatic.rules = []
@@ -215,7 +216,9 @@ pimatic.pages.index =
         pimatic.pages.index.loading = no
         if pimatic.pages.index.hasData is yes
           pimatic.loading "loadingdata", "hide"
-      ).fail( ->
+      ).fail( (jqXHR)->
+        if jqXHR.status is 401 then return window.location.reload();
+
         # if we are not connected to the socket, the data gets refrashed anyway so don't get it
         # else try again after a delay 
         if pimatic.socket.socket.connected
