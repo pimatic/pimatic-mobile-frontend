@@ -114,11 +114,14 @@ ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
     else if errorThrown? and errorThrown != ""
       message = errorThrown
     else if textStatus is 'error'
-      message = 'no connection'
+      message = __('No connection')
     else
       message = textStatus
 
-  alert __(message)
+  # Give other events time to process
+  setTimeout( ->
+    alert __(message)
+  , 1)
   return true
 
 $(document).ready => 

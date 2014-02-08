@@ -19,16 +19,24 @@ $(document).on "pagecreate", '#index', (event) ->
   pimatic.socket.on "item-order", (order) -> pimatic.pages.index.reorderItems order
   pimatic.socket.on "rule-order", (order) -> pimatic.pages.index.reorderRules order
 
-  $('#index #items').on "change", ".switch", (event, ui) ->
+  $('#index #items').on "slidestop", ".switch", (event, ui) ->
     ele = $(this)
+    console.log "change", ele.prop('disabled')
     val = ele.val()
     deviceId = ele.data('device-id')
     deviceAction = if val is 'on' then 'turnOn' else 'turnOff'
-    $.get("/api/device/#{deviceId}/#{deviceAction}")
-      .done(ajaxShowToast)
-      .fail( ->
-        ele.val(if val is 'on' then 'off' else 'on').slider('refresh')
-      ).fail(ajaxAlertFail)
+    ele.slider('disable')
+    pimatic.loading "switch-on-#{deviceId}", "show", text: __("switching #{val}")
+    $.ajax("/api/device/#{deviceId}/#{deviceAction}",
+      global: no
+    ).done(
+      ajaxShowToast
+    ).fail( 
+      -> ele.val(if val is 'on' then 'off' else 'on').slider('refresh')
+    ).always(-> 
+      ele.slider('enable')
+      pimatic.loading "switch-on-#{deviceId}", "hide"
+    ).fail(ajaxAlertFail)
     return
 
   sliderValBefore = 0
