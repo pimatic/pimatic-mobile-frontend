@@ -90,7 +90,7 @@ $(document).on "pagecreate", '#index', (event) ->
     pimatic.loading "enableediting", "show", text: __('Saving')
     $.ajax("/enabledEditing/#{enabled}",
       global: false # don't show loading indicator
-    ).done( ->
+    ).always( ->
       pimatic.loading "enableediting", "hide"
     ).done(ajaxShowToast)
 
@@ -121,7 +121,7 @@ $(document).on "pagecreate", '#index', (event) ->
         type: "POST"
         global: false
         data: {order: order}
-      ).done( ->
+      ).always( ->
         pimatic.loading "itemorder", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
@@ -143,7 +143,7 @@ $(document).on "pagecreate", '#index', (event) ->
         type: "POST"
         global: false
         data: {order: order}
-      ).done( ->
+      ).always( ->
         pimatic.loading "ruleorder", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
@@ -164,7 +164,7 @@ $(document).on "pagecreate", '#index', (event) ->
           if item.type is 'device'
              delete pimatic.devices[item.id]
           ui.draggable.remove()
-      ).done( -> 
+      ).always( -> 
         pimatic.loading "deleteitem", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
@@ -213,6 +213,8 @@ pimatic.pages.index =
         pimatic.loading "loadingdata", "hide"
       ).always( ->
         pimatic.pages.index.loading = no
+        if pimatic.pages.index.hasData is yes
+          pimatic.loading "loadingdata", "hide"
       ).fail( ->
         # if we are not connected to the socket, the data gets refrashed anyway so don't get it
         # else try again after a delay 
@@ -444,7 +446,7 @@ pimatic.pages.index =
           pimatic.loading "saveactivate", "show", text: __(action)
           $.ajax("/api/rule/#{rule.id}/#{action}",
             global: false
-          ).done( ->
+          ).always( ->
             pimatic.loading "saveactivate", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)
     )
