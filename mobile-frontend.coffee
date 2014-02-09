@@ -448,7 +448,7 @@ module.exports = (env) ->
           css:
             theme: [
               minPath "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.3.2.css"
-            ] .concat minPath( t for t in themeCss ) .concat [
+            ] .concat ( minPath t for t in themeCss ) .concat [
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
               minPath "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
