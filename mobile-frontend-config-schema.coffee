@@ -10,6 +10,13 @@ module.exports =
     doc: "production or development mode"
     format: ["production", "development"]
     default: "production"
+  theme:
+    doc: """jQuery Mobile theme to use. If classic then jQuery Mobiles default theme is used, 
+      else the graphite theme with the corresponding color theme is used.
+      """
+    # http://driftyco.github.io/graphite/
+    format: ["classic", "aloe", "candy", "melon", "mint", "royal", "sand", "slate", "water"]
+    default: 'water'
   debug:
     doc: "that to true to get additional debug outputs"
     format: Boolean

@@ -409,6 +409,17 @@ module.exports = (env) ->
         # in other modes or when not exist return full file:
         return p
 
+
+
+      themeCss = (
+        if @config.theme is 'classic'
+          [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.3.2.css",
+            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.theme-1.3.2.css" ]
+        else
+          [ "pimatic-mobile-frontend/app/css/themes/graphite/#{@config.theme}/" +
+            "jquery.mobile-1.3.2.css" ]
+      )
+
       # Configure static assets with nap
       nap(
         appDir: parentDir
@@ -436,12 +447,11 @@ module.exports = (env) ->
           css:
             theme: [
               minPath "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.3.2.css"
-              minPath "pimatic-mobile-frontend/app/css/themes/graphite/water/"+
-                      "jquery.mobile-1.3.2.css"
+            ] .concat minPath( t for t in themeCss ) .concat [
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
               minPath "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
-            ]
+            ] 
             style: [
               "pimatic-mobile-frontend/app/css/style.css"
             ] .concat (minPath(f) for f in @additionalAssetFiles['css'])
