@@ -436,6 +436,7 @@ module.exports = (env) ->
               minPath "pimatic-mobile-frontend/app/js/jquery.ui.touch-punch.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
