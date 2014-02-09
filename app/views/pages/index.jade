@@ -74,6 +74,14 @@ div#index(data-role='page')
         a(href='#plugins', data-transition="slide")=__('Plugins') 
       li(data-theme='f')
         a(href='#updates', data-transition="slide")=__('Updates')
+      li(data-theme='f').rememberme
+        label
+          span=__('Remember me')
+          input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
+            data-theme="f", data-overlay-theme="b") 
+          
+
+
   #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a", )
     ul.ui-corner-all(data-role='listview')
       li(data-role='list-divider')=__('Device info')

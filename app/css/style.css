@@ -181,6 +181,33 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   color: #A0A0A0;
 }
 
+
+li.rememberme, li.rememberme label{
+  padding: 0 !important;
+  margin: 0 !important;
+  border-width: 0;
+}
+
+li.rememberme label span {
+  font-size: 16px;
+}
+
+li.rememberme label .ui-icon-checkbox-off, li.rememberme label .ui-icon-checkbox-on {
+  left: 15px !important;
+}
+
+li.rememberme .ui-btn-inner  {
+  border-top-width: 1px;
+  padding: 1.0em 15px;
+  padding-left: 43px !important;
+}
+
+
+
+#rememberme {
+  opacity: 0;
+}
+
 /* device info */
 .info-label {
   font-weight: bold;
