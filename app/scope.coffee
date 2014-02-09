@@ -6,3 +6,5 @@ window.pimatic =
   socket: null
   inited: no
   pages: {}
+  rememberMe: no
+  storage: null

@@ -21,7 +21,6 @@ $(document).on "pagecreate", '#index', (event) ->
 
   $('#index #items').on "slidestop", ".switch", (event, ui) ->
     ele = $(this)
-    console.log "change", ele.prop('disabled')
     val = ele.val()
     deviceId = ele.data('device-id')
     deviceAction = if val is 'on' then 'turnOn' else 'turnOff'
@@ -177,12 +176,35 @@ $(document).on "pagecreate", '#index', (event) ->
       ).done(ajaxShowToast).fail(ajaxAlertFail)
   )
 
+
+  $('#nav-panel').on "change", '#rememberme', (event, ui) ->
+    rememberMe = $(this).is(':checked')
+    if pimatic.storage.rememberMe is rememberMe then return
+    # get data and empty storage
+    pmData = pimatic.storage.get('pmData')
+    pimatic.storage.removeAll()
+    pimatic.rememberMe = rememberMe
+    pmData.rememberMe = rememberMe
+    # swap storage
+    if rememberMe
+      pimatic.storage = $.localStorage
+    else
+      pimatic.storage = $.sessionStorage
+    pimatic.storage.set('pmData', pmData)
+
+  $('#rememberme').prop('checked', pimatic.rememberMe)
+
   pimatic.socket.on 'connect', ->
     pimatic.pages.index.loadData()
 
   pimatic.socket.on 'log', (entry) -> 
     if entry.level is 'error' 
       pimatic.pages.index.updateErrorCount()
+
+  unless pimatic.pages.index.hasData
+    data = pimatic.storage.get('pmData.data')
+    console.log data
+    if data? then pimatic.pages.index.buildAll(data)
 
   pimatic.pages.index.pageCreated = yes
   pimatic.pages.index.loadData()
@@ -209,16 +231,7 @@ pimatic.pages.index =
       global: no
       data: 'noAuthPromp=true'
     ).done( (data) ->
-        pimatic.devices = []
-        pimatic.rules = []
-        $('#items .item').remove()
-        pimatic.pages.index.addItem(item) for item in data.items
-        $('#rules .rule').remove()
-        pimatic.pages.index.addRule(rule) for rule in data.rules
-        pimatic.errorCount = data.errorCount
-        pimatic.pages.index.updateErrorCount()
-        pimatic.pages.index.changeEditingMode data.enabledEditing
-        pimatic.pages.index.hasData = yes
+        pimatic.pages.index.buildAll(data)
         pimatic.loading "loadingdata", "hide"
       ).always( ->
         pimatic.pages.index.loading = no
@@ -239,6 +252,19 @@ pimatic.pages.index =
       )
     return
 
+  buildAll: (data) ->
+    pimatic.devices = []
+    pimatic.rules = []
+    $('#items .item').remove()
+    pimatic.pages.index.addItem(item) for item in data.items
+    $('#rules .rule').remove()
+    pimatic.pages.index.addRule(rule) for rule in data.rules
+    pimatic.errorCount = data.errorCount
+    pimatic.pages.index.updateErrorCount()
+    pimatic.pages.index.changeEditingMode data.enabledEditing
+    pimatic.pages.index.hasData = yes
+    pimatic.storage.set('pmData.data', data)
+
   updateErrorCount: ->
     if $('#error-count').find('.ui-btn-text').length > 0
       $('#error-count').find('.ui-btn-text').text(pimatic.errorCount)
@@ -254,12 +280,17 @@ pimatic.pages.index =
 
   changeEditingMode: (enabled) ->
     pimatic.pages.index.editingMode = enabled
+    icon = null
     if enabled
       $('#index').removeClass('locked').addClass('unlocked')
-      $('#lock-button').buttonMarkup(icon: 'check')
+      icon = 'check'
     else 
       $('#index').addClass('locked').removeClass('unlocked')
-      $('#lock-button').buttonMarkup(icon: 'gear')
+      icon = 'gear'
+    if pimatic.pages.index.pageCreated
+      $('#lock-button').buttonMarkup(icon: icon)
+    else
+      $('#lock-button').attr('data-icon', icon)
     return
 
   addItem: (item) ->

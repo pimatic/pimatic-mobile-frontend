@@ -2,6 +2,7 @@
 
 $(document).on "pagebeforecreate", ->
   if pimatic.inited then return
+
   pimatic.inited = yes
 
   pimatic.socket = io.connect("/", 
@@ -10,7 +11,6 @@ $(document).on "pagebeforecreate", ->
     'reconnection limit': 2000 # the max delay
     'max reconnection attempts': Infinity
   )
-
 
   pimatic.socket.on 'log', (entry) -> 
     if entry.level is 'error' 
@@ -64,3 +64,14 @@ $(document).on "pagebeforecreate", ->
 
   pimatic.socket.on 'error', onConnectionError
   pimatic.socket.on 'connect_error', onConnectionError
+
+  pmData = $.localStorage.get('pmData')
+  unless pmData? then pmData = {}
+  pimatic.rememberMe = (if pmData?.rememberMe then yes else no)
+  pmData.rememberMe = pimatic.rememberMe
+  if pimatic.rememberMe
+    pimatic.storage = $.localStorage 
+  else
+    pimatic.storage = $.sessionStorage 
+    $.localStorage.removeAll()
+  pimatic.storage.set('pmData', pmData)
