@@ -490,9 +490,17 @@ module.exports = (env) ->
           renderManifest = require "render-appcache-manifest"
           # function to create the app manifest
           createAppManifest = =>
-            # Collect all files in "public/assets"
-            assets = ( "/assets/#{f}" for f in fs.readdirSync  __dirname + '/public/assets' )
-            # Render the app manifest
+            # Collect all files in "public"
+            assets = []
+            for f in fs.readdirSync  __dirname + '/public/assets'
+              assets.push "/assets/#{f}"
+            for f in fs.readdirSync  __dirname + '/public'
+              console.log "#{__dirname}/public/#{f}"
+              if not (f in ['index.html.', 'info.md']) and
+              fs.lstatSync("#{__dirname}/public/#{f}").isFile()
+                assets.push "/#{f}"
+
+            # render the app manifest
             return renderManifest(
               cache: assets.concat [
                 '/',
