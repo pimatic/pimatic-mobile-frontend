@@ -201,6 +201,19 @@ module.exports = (env) ->
             else __("The list is now locked.")
           )
         }
+
+      app.get '/remember', (req, res) =>
+        rememberMe = req.query.rememberMe
+        # rememberMe is handled by the framework, so see if it was picked up:
+        if rememberMe is 'true' then rememberMe = yes
+        if rememberMe is 'false' then rememberMe = no
+
+        if req.session.rememberMe is rememberMe
+          res.send 200, { success: true,  message: 'done' }
+        else 
+          res.send 200, {success: false, message: 'illegal param'}
+        return
+        
     
       app.post '/remove-item', (req, res) =>
         item = req.body.item

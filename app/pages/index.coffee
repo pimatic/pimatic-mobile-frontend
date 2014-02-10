@@ -180,17 +180,24 @@ $(document).on "pagecreate", '#index', (event) ->
   $('#nav-panel').on "change", '#rememberme', (event, ui) ->
     rememberMe = $(this).is(':checked')
     if pimatic.storage.rememberMe is rememberMe then return
-    # get data and empty storage
-    pmData = pimatic.storage.get('pmData')
-    pimatic.storage.removeAll()
-    pimatic.rememberMe = rememberMe
-    pmData.rememberMe = rememberMe
-    # swap storage
-    if rememberMe
-      pimatic.storage = $.localStorage
-    else
-      pimatic.storage = $.sessionStorage
-    pimatic.storage.set('pmData', pmData)
+    $.get("remember", rememberMe: rememberMe)
+      .done(ajaxShowToast)
+      .fail(ajaxAlertFail)
+      .done( (data) =>
+        unless data.success then return
+        # get data and empty storage
+        pmData = pimatic.storage.get('pmData')
+        pimatic.storage.removeAll()
+        pimatic.rememberMe = rememberMe
+        pmData.rememberMe = rememberMe
+        # swap storage
+        if rememberMe
+          pimatic.storage = $.localStorage
+        else
+          pimatic.storage = $.sessionStorage
+        pimatic.storage.set('pmData', pmData)
+      )
+    return
 
   $('#rememberme').prop('checked', pimatic.rememberMe)
 
