@@ -51,12 +51,12 @@ $(document).on "pagebeforecreate", ->
   pimatic.socket.on 'disconnect', ->
     #console.log "disconnect"
     pimatic.loading "socket", "show",
-      text: __("connection lost, retying")
+      text: __("connection lost, retrying")
       blocking: not pimatic.pages.index.hasData
 
   onConnectionError = ->
     pimatic.loading "socket", "show",
-      text: __("could not connect, retying")
+      text: __("could not connect, retrying")
       blocking: not pimatic.pages.index.hasData
     setTimeout ->
       pimatic.socket.socket.connect()
