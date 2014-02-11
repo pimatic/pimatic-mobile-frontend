@@ -54,9 +54,11 @@ $(document).on "pagebeforecreate", ->
       text: __("connection lost, retrying")
       blocking: not pimatic.pages.index.hasData
 
-  onConnectionError = ->
+  onConnectionError = (reason) ->
+    if reason? then reason = ": #{reason}"
+    else reason = ''
     pimatic.loading "socket", "show",
-      text: __("could not connect, retrying")
+      text: __("could not connect%s, retrying", reason)
       blocking: not pimatic.pages.index.hasData
     setTimeout ->
       pimatic.socket.socket.connect()
