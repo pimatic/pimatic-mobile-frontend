@@ -504,7 +504,7 @@ module.exports = (env) ->
             for f in fs.readdirSync  __dirname + '/public/assets'
               assets.push "/assets/#{f}"
             for f in fs.readdirSync  __dirname + '/public'
-              if not (f in ['index.html.', 'info.md']) and
+              if not (f in ['index.html', 'info.md']) and
               fs.lstatSync("#{__dirname}/public/#{f}").isFile()
                 assets.push "/#{f}"
 
