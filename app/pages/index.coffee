@@ -210,7 +210,6 @@ $(document).on "pagecreate", '#index', (event) ->
 
   unless pimatic.pages.index.hasData
     data = pimatic.storage.get('pmData.data')
-    console.log data
     if data? then pimatic.pages.index.buildAll(data)
 
   pimatic.pages.index.pageCreated = yes
