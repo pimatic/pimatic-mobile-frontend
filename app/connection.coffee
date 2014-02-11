@@ -55,6 +55,9 @@ $(document).on "pagebeforecreate", ->
       blocking: not pimatic.pages.index.hasData
 
   onConnectionError = (reason) ->
+    if reason is 'handshake unauthorized'
+      # trigger a reload of the data here to force getting the auth dialog
+      return pimatic.pages.index.toLoginPage()
     if reason? then reason = ": #{reason}"
     else reason = ''
     pimatic.loading "socket", "show",

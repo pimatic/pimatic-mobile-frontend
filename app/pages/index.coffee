@@ -249,11 +249,7 @@ pimatic.pages.index =
           we redirect to a not offline avilable page, where he can enter
           the auth information and is then redirected back here
         ###
-        if jqXHR.status is 401 
-          prot = window.location.protocol
-          host = window.location.host
-          urlEncoded = encodeURIComponent(window.location)
-          return window.location = "#{prot}//user:pw@#{host}/login?url=#{urlEncoded}" 
+        if jqXHR.status is 401 then pimatic.pages.index.toLoginPage()
         # if we are not connected to the socket, the data gets refrashed anyway so don't get it
         # else try again after a delay 
         if pimatic.socket.socket.connected
@@ -265,6 +261,12 @@ pimatic.pages.index =
           , 5000)
       )
     return
+
+  toLoginPage: ->
+    prot = window.location.protocol
+    host = window.location.host
+    urlEncoded = encodeURIComponent(window.location)
+    window.location = "#{prot}//user:pw@#{host}/login?url=#{urlEncoded}" 
 
   buildAll: (data) ->
     pimatic.devices = []

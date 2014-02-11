@@ -292,12 +292,15 @@ module.exports = (env) ->
           if handshakeData.headers.cookie
             ioCookieParser(handshakeData, null, =>
               sessionCookie = handshakeData.signedCookies?[sessionOptions.key]
-              if sessionCookie? then accept(null, true)
-              else return accept("Cookie is invalid.", false)
+              if sessionCookie?
+                return accept(null, true)
+              else 
+                env.logger.debug "socket.io: Cookie is invalid."
+                return accept(null, false)
             )
           else
-            return accept("No cookie transmitted.", false)
-          
+            env.logger.warn "No cookie transmitted."
+            return accept(null, false)      
         )
 
         # When a new client connects
