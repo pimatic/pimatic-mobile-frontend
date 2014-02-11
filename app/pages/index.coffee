@@ -245,8 +245,15 @@ pimatic.pages.index =
         if pimatic.pages.index.hasData is yes
           pimatic.loading "loadingdata", "hide"
       ).fail( (jqXHR)->
-        if jqXHR.status is 401 then return window.location.reload();
-
+        ###
+          We don't want the user get spammed with browser http basic auth dialogs so
+          we redirect to a not offline avilable page, where he can enter
+          the auth information and is then redirected back here
+        ###
+        if jqXHR.status is 401 
+          prot = window.location.protocol
+          host = window.location.host
+          return window.location = "#{prot}//user:pw@#{host}/login"
         # if we are not connected to the socket, the data gets refrashed anyway so don't get it
         # else try again after a delay 
         if pimatic.socket.socket.connected

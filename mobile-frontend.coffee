@@ -257,6 +257,12 @@ module.exports = (env) ->
           res.send 200, {success: true, message: predicate.token, context: context}
         catch error
           res.send 200, {success: false, error: error}
+
+      app.get '/login', (req, res) =>
+        ###
+        auth is checked by the framework, so we just redirect to the index
+        ###
+        res.redirect 302, '/'
     
       # * Static assets
       app.use express.static(__dirname + "/public")
@@ -495,7 +501,6 @@ module.exports = (env) ->
             for f in fs.readdirSync  __dirname + '/public/assets'
               assets.push "/assets/#{f}"
             for f in fs.readdirSync  __dirname + '/public'
-              console.log "#{__dirname}/public/#{f}"
               if not (f in ['index.html.', 'info.md']) and
               fs.lstatSync("#{__dirname}/public/#{f}").isFile()
                 assets.push "/#{f}"
