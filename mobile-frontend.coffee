@@ -285,6 +285,21 @@ module.exports = (env) ->
             error: (args...) -> this.log('error', args...)
         }
 
+        sessionOptions = app.cookieSessionOptions
+        ioCookieParser = express.cookieParser(sessionOptions.secret)
+        # See http://howtonode.org/socket-io-auth for details
+        io.set("authorization", (handshakeData, accept) ->
+          if handshakeData.headers.cookie
+            ioCookieParser(handshakeData, null, =>
+              sessionCookie = handshakeData.signedCookies?[sessionOptions.key]
+              if sessionCookie? then accept(null, true)
+              else return accept("Cookie is invalid.", false)
+            )
+          else
+            return accept("No cookie transmitted.", false)
+          
+        )
+
         # When a new client connects
         io.sockets.on 'connection', (socket) =>
 
