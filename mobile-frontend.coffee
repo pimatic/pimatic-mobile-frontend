@@ -260,9 +260,12 @@ module.exports = (env) ->
 
       app.get '/login', (req, res) =>
         ###
-        auth is checked by the framework, so we just redirect to the index
+        auth is checked by the framework, so we just redirect to the gicen url.
+        Don't use only `'/'` here, because we want remove `user@pw` from the url 
         ###
-        res.redirect 302, '/'
+        url = req.query.url
+        unless url then url = "#{req.protocol}://#{req.host}/"
+        res.redirect 302, url
     
       # * Static assets
       app.use express.static(__dirname + "/public")
