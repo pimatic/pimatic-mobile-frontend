@@ -2,6 +2,7 @@
 # ----------
 
 $(document).on "pagecreate", '#index', (event) ->
+  pimatic.pages.index.fixScrollOverDraggableRule()
 
   pimatic.socket.on "device-attribute", (attrEvent) -> 
     pimatic.pages.index.updateDeviceAttribute attrEvent
@@ -214,7 +215,12 @@ $(document).on "pagecreate", '#index', (event) ->
 
   pimatic.pages.index.pageCreated = yes
   pimatic.pages.index.loadData()
-  pimatic.pages.index.fixScrollOverDraggableRule()
+
+
+$(document).on "pageinit", '#index', (event) ->
+  $('#items').listview('refresh')
+  $('#rules').listview('refresh')
+  return
 
 pimatic.pages.index =
   loading: no
