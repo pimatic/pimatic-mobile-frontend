@@ -28,5 +28,6 @@ pimatic.pages.log =
     li = $ $('#log-message-template').html()
     li.find('.level').text(entry.level).addClass(entry.level)
     li.find('.msg').text(entry.msg)
+    li.find('.time').text(entry.time)
     $('#log-messages').append li
     return
