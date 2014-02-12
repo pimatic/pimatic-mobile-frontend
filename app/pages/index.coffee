@@ -218,8 +218,7 @@ $(document).on "pagecreate", '#index', (event) ->
 
 
 $(document).on "pageinit", '#index', (event) ->
-  $('#items').listview('refresh')
-  $('#rules').listview('refresh')
+  $('#items [data-role="button"]').button('refresh');
   return
 
 pimatic.pages.index =
