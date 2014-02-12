@@ -216,11 +216,6 @@ $(document).on "pagecreate", '#index', (event) ->
   pimatic.pages.index.pageCreated = yes
   pimatic.pages.index.loadData()
 
-
-$(document).on "pageinit", '#index', (event) ->
-  $('#items [data-role="button"]').button('refresh');
-  return
-
 pimatic.pages.index =
   loading: no
   hasData: no
