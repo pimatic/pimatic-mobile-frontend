@@ -59,7 +59,7 @@ $.widget( "mobile.toast", $.mobile.widget, {
 	 */
 	cancel: function() {
 	  var $el = this.element;
-    $el.stop(true).hide()
+    $el.stop(true, true).hide()
 	}
 });
   
