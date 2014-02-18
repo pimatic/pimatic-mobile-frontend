@@ -420,6 +420,7 @@
           html += '</a></li>';
           if (this.data.length === displayCount) break;
         }
+        this.displayCount = this.data.length;
         if (data.length > displayCount) {
           html += '<li class="textcomplete-more" data-index="' + displayCount + '">';
           html += '<select>';
@@ -434,10 +435,8 @@
           html += '</select">';
           html += '</li>';
           //count select
-          displayCount++;
+          this.displayCount++;
         }
-
-        this.displayCount = displayCount;
 
         this.$el.append(html);
         if (!this.data.length) {
@@ -508,6 +507,7 @@
       },
 
       onKeydown: function (e) {
+        console.log(this.displayCount);
         var $item;
         if (!this.shown) return;
         if (e.keyCode === 27) {         // ESC
