@@ -2,14 +2,14 @@ div#edit-rule(data-role='page')
   div(data-theme='a', data-role='header', data-position='fixed')
     h3
   div(data-role='content')
-    form#edit-rule-form
+    form#edit-rule-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       input#edit-rule-id(type="text", placeholder="id")
       fieldset
         label(for='edit-rule-condition')='if'
-        textarea#edit-rule-condition(name="", placeholder="...")
+        textarea#edit-rule-condition(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       fieldset
         label(for='edit-rule-actions')='then'
-        textarea#edit-rule-actions(name="", placeholder="...")
+        textarea#edit-rule-actions(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       fieldset(data-role='controlgroup')
         input#edit-rule-active(type='checkbox', name='edit-rule-active')
         label(for='edit-rule-active')=__('Enabled')
