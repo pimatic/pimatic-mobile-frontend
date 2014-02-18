@@ -280,6 +280,7 @@ pimatic.pages.index =
     pimatic.pages.index.changeEditingMode data.enabledEditing
     pimatic.pages.index.hasData = yes
     pimatic.storage.set('pmData.data', data)
+    $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
 
   updateErrorCount: ->
     if $('#error-count').find('.ui-btn-text').length > 0
