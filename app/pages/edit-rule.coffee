@@ -93,6 +93,9 @@ $(document).on "pageinit", '#edit-rule', (event) ->
         $('#edit-rule h3').text __('Edit rule')        
         $('#edit-rule-id').textinput('disable')
         $('#edit-rule-advanced').show()
+    # refrash height the dirty way
+    $("#edit-rule-form textarea").css("height", 0).keyup()
+
 
   $(document).on "pagebeforehide", '#edit-rule', (event) ->
     pimatic.pages.editRule.autocompleteAjax?.abort()
