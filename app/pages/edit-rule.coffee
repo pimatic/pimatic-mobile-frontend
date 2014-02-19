@@ -44,16 +44,18 @@ $(document).on "pageinit", '#edit-rule', (event) ->
     match: /^((?:[^"]*"[^"]*")*[^"]*(?:\sand\s|\sor\s|\)|\())*(.*)$/
     search: (term, callback) ->
       editRulePage.autocompleteAjax?.abort()
-      editRulePage.autocompleteAjax = $.ajax('parsePredicate',
-        type: 'POST'
-        data: {condition: term}
-        global: false
-      ).done( (data) =>
-        autocomplete = data.context?.autocomplete or []
-        if data.error then console.log data.error
-        @lastTerm = term
-        callback autocomplete
-      ).fail( => callback [] )
+      if pimatic.pages.editRule.autocompleEnabled
+        editRulePage.autocompleteAjax = $.ajax('parsePredicate',
+          type: 'POST'
+          data: {condition: term}
+          global: false
+        ).done( (data) =>
+          autocomplete = data.context?.autocomplete or []
+          if data.error then console.log data.error
+          @lastTerm = term
+          callback autocomplete
+        ).fail( => callback [] )
+      else callback []
     index: 2
     replace: customReplace
     template: customTemplate
@@ -62,19 +64,21 @@ $(document).on "pageinit", '#edit-rule', (event) ->
   $("#edit-rule-actions").textcomplete([
     match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.*)$/
     search: (term, callback) ->
-      editRulePage.autocompleteAjax?.abort()
-      editRulePage.autocompleteAjax = $.ajax('parseAction',
-        type: 'POST'
-        data: {action: term}
-        global: false
-      ).done( (data) =>
-        autocomplete = data.context?.autocomplete or []
-        if data.message? and data.message.length > 0
-          pimatic.showToast data.message[0]
-        if data.error then console.log data.error
-        @lastTerm = term
-        callback autocomplete
-      ).fail( => callback [] )
+      if pimatic.pages.editRule.autocompleEnabled
+        editRulePage.autocompleteAjax?.abort()
+        editRulePage.autocompleteAjax = $.ajax('parseAction',
+          type: 'POST'
+          data: {action: term}
+          global: false
+        ).done( (data) =>
+          autocomplete = data.context?.autocomplete or []
+          if data.message? and data.message.length > 0
+            pimatic.showToast data.message[0]
+          if data.error then console.log data.error
+          @lastTerm = term
+          callback autocomplete
+        ).fail( => callback [] )
+      else callback []
     index: 2
     replace: customReplace
     template: customTemplate
@@ -94,7 +98,9 @@ $(document).on "pageinit", '#edit-rule', (event) ->
         $('#edit-rule-id').textinput('disable')
         $('#edit-rule-advanced').show()
     # refrash height the dirty way
-    $("#edit-rule-form textarea").css("height", 0).keyup()
+    pimatic.pages.editRule.autocompleEnabled = no
+    $("#edit-rule-form textarea").css("height", 50).keyup()
+    pimatic.pages.editRule.autocompleEnabled = yes
 
 
   $(document).on "pagebeforehide", '#edit-rule', (event) ->
@@ -103,3 +109,4 @@ $(document).on "pageinit", '#edit-rule', (event) ->
 
 pimatic.pages.editRule = 
   autocompleteAjax: null
+  autocompleEnabled: no
