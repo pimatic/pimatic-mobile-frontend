@@ -99,6 +99,12 @@ $(document).ready =>
     , false
 , false
 
+pimatic.try = (call) => 
+  try
+    call()
+  catch e
+    console.log "ignoring error: ", e 
+
 ajaxShowToast = (data, textStatus, jqXHR) -> 
   pimatic.showToast (if data.message? then data.message else 'done')
 

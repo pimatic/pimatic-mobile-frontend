@@ -34,8 +34,9 @@ $(document).on "pagecreate", '#index', (event) ->
     ).fail( 
       -> ele.val(if val is 'on' then 'off' else 'on').slider('refresh')
     ).always(-> 
-      ele.slider('enable')
       pimatic.loading "switch-on-#{deviceId}", "hide"
+      # element could be not existing anymore
+      pimatic.try => ele.slider('enable')
     ).fail(ajaxAlertFail)
     return
 
@@ -49,8 +50,9 @@ $(document).on "pagecreate", '#index', (event) ->
     deviceId = ele.data('device-id')
     $.get("/api/device/#{deviceId}/changeDimlevelTo", dimlevel: val)
       .done(ajaxShowToast)
-      .fail( => ele.val(sliderValBefore).slider('refresh') )
-      .fail(ajaxAlertFail)
+      .fail( => 
+        pimatic.try => ele.val(sliderValBefore).slider('refresh') 
+      ).fail(ajaxAlertFail)
     return
 
   $('#index #items').on "click", ".device-label", (event, ui) ->
