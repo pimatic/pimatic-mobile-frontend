@@ -75,6 +75,11 @@
         $.mobile.loading('show', mobileLoadingOptions)
     , 1)
     return
+
+  $(document).on "vclick", ".ui-loader", =>
+    pimatic.pages.index.toLoginPage()
+
+
 )()
 
 $.ajaxSetup timeout: 20000 #ms
