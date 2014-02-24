@@ -265,10 +265,8 @@ pimatic.pages.index =
     return
 
   toLoginPage: ->
-    prot = window.location.protocol
-    host = window.location.host
-    urlEncoded = encodeURIComponent(window.location)
-    window.location = "#{prot}//user:pw@#{host}/login?url=#{urlEncoded}" 
+    urlEncoded = encodeURIComponent(window.location.href)
+    window.location.href = "/login?url=#{urlEncoded}" 
 
   buildAll: (data) ->
     pimatic.devices = []
