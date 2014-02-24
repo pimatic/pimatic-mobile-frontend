@@ -251,7 +251,12 @@ pimatic.pages.index =
           we redirect to a not offline avilable page, where he can enter
           the auth information and is then redirected back here
         ###
-        if jqXHR.status is 401 then return pimatic.pages.index.toLoginPage()
+        if jqXHR.status is 401
+          # https://github.com/pimatic/pimatic/issues/69
+          setTimeout( ->
+            pimatic.pages.index.toLoginPage()
+          , 1)
+          return
         # if we are not connected to the socket, the data gets refrashed anyway so don't get it
         # else try again after a delay 
         if pimatic.socket.socket.connected
