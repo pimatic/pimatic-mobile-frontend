@@ -16,6 +16,7 @@ $(document).on "pageshow", '#updates', (event) ->
 $(document).on "pagecreate", '#updates', (event) ->
   
   $('#updates').on "click", '#install-updates', (event, ui) ->
+    updatesPage = pimatic.pages.updates
     modules = (if updatesPage.pimaticUpdate then ['pimatic'] else [])
     modules = modules.concat (p.plugin for p in updatesPage.outdatedPlugins)
 
