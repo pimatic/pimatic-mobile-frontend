@@ -12,6 +12,9 @@ $(document).on "pageshow", '#updates', (event) ->
       if updatesPage.pimaticUpdate isnt false or updatesPage.outdatedPlugins.length isnt 0
         $('#install-updates').show()
 
+
+$(document).on "pagecreate", '#updates', (event) ->
+  
   $('#updates').on "click", '#install-updates', (event, ui) ->
     modules = (if updatesPage.pimaticUpdate then ['pimatic'] else [])
     modules = modules.concat (p.plugin for p in updatesPage.outdatedPlugins)
@@ -29,8 +32,8 @@ $(document).on "pageshow", '#updates', (event) ->
         $('#updates .restart-now').show()
     ).fail(ajaxAlertFail)
 
-    $('#updates').on "click", '.restart-now', (event, ui) ->
-      $.get('/api/restart').fail(ajaxAlertFail)
+  $('#updates').on "click", '.restart-now', (event, ui) ->
+    $.get('/api/restart').fail(ajaxAlertFail)
   
 pimatic.pages.updates =
   outdatedPlugins: null
