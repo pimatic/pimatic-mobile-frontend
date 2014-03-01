@@ -124,6 +124,11 @@ li.sortable-placeholder{
   top: -1px;
 }
 
+.ui-header .ui-controlgroup .ui-shadow:not(.ui-focus){
+  -moz-box-shadow: 0 1px 0      rgba(255,255,255,.3);
+  -webkit-box-shadow: 0 1px 0   rgba(255,255,255,.3);
+  box-shadow: 0 1px 0           rgba(255,255,255,.3);
+}
 
 ul#items, ul#rules{
   position: relative;
