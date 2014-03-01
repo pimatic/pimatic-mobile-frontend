@@ -43,7 +43,7 @@ $(document).on "pagebeforeshow", '#plugins', (event) ->
 # ---------
 $(document).on "pageinit", '#plugins-browse', (event) ->
 
-  pimatic.showToast __('Searching for plugins. Sorry this takes very long...')
+  pimatic.showToast __('pimatic is searching for plugins for you...')
 
   $.ajax(
     url: "/api/plugins/search"
