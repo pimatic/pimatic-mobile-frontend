@@ -29,7 +29,7 @@ $(document).on "pagebeforecreate", ->
   pimatic.socket.on 'connecting', ->
     #console.log "connecting"
     pimatic.loading "socket", "show",
-      text: __("connecting")
+      text: (if pimatic.pages.index.hasData then __("refreshing") else __("connecting"))
       blocking: (not pimatic.pages.index.hasData)
 
   ###
@@ -72,6 +72,7 @@ $(document).on "pagebeforecreate", ->
   pimatic.socket.on 'connect_error', onConnectionError
 
   pmData = $.localStorage.get('pmData')
+  unless pmData? then pmData = $.sessionStorage.get('pmData')
   unless pmData? then pmData = {}
   pimatic.rememberMe = (if pmData?.rememberMe then yes else no)
   pmData.rememberMe = pimatic.rememberMe

@@ -12,15 +12,10 @@ $(document).on "pagecreate", '#index', (event) ->
     if attrEvent.name is "dimlevel"
       $("#slider-#{attrEvent.id}").val(attrEvent.value).slider('refresh')
 
-  if pimatic.pages.index.hasData
-    pimatic.loading "loadingdata", "show", text: __("Refreshing") 
-  else
-    pimatic.loading "loadingdata", "show", { text: __("Loading"), blocking: yes }
-
+  pimatic.pages.index.loading = yes
   pimatic.socket.on "welcome", (data) ->
     pimatic.pages.index.buildAll(data)
     pimatic.pages.index.loading = no
-    pimatic.loading "loadingdata", "hide"
 
   pimatic.socket.on "rule-add", (rule) -> pimatic.pages.index.addRule rule
   pimatic.socket.on "rule-update", (rule) -> pimatic.pages.index.updateRule rule
@@ -220,6 +215,7 @@ $(document).on "pagecreate", '#index', (event) ->
 
   unless pimatic.pages.index.hasData
     data = pimatic.storage.get('pmData.data')
+    console.log data
     if data? then pimatic.pages.index.buildAll(data)
 
   pimatic.pages.index.pageCreated = yes
@@ -246,6 +242,7 @@ pimatic.pages.index =
     pimatic.pages.index.changeEditingMode data.enabledEditing
     pimatic.pages.index.hasData = yes
     pimatic.storage.set('pmData.data', data)
+    console.log "setting data", data
     $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
 
   updateErrorCount: ->
