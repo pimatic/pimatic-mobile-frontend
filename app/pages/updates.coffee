@@ -24,12 +24,12 @@ $(document).on "pagecreate", '#updates', (event) ->
       url: "/api/update"
       type: 'POST'
       data: modules: modules
-      timeout: 300000 #ms
+      timeout: 1000000 #ms
     ).done( (data) ->
       $('#updates #install-updates').hide()
       if data.success
         $('#updates .message').append $('<p>')
-          .text(__('Updates was successful. Please restart pimatic.'))
+          .text(__('Updates were successful. Please restart pimatic.'))
         $('#updates .restart-now').show()
     ).fail(ajaxAlertFail)
 
@@ -41,7 +41,7 @@ pimatic.pages.updates =
   pimaticUpdate: null
 
   searchForPimaticUpdate: ->
-    $('#updates .message').text __('Searching for updates. Sorry this takes very long...')
+    $('#updates .message').text __('pimatic is searching for updates...')
     return $.ajax(
       url: "/api/outdated/pimatic"
       timeout: 300000 #ms
