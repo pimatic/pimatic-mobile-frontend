@@ -284,7 +284,6 @@ module.exports = (env) ->
                   @addAttributeNotify socket, item
 
           @getInitalClientData().then( (data) =>
-            console.log "emitting welcome"
             socket.emit "welcome", data
 
             env.logger.debug("adding rule listerns") if @config.debug

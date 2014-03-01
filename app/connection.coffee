@@ -29,7 +29,7 @@ $(document).on "pagebeforecreate", ->
   pimatic.socket.on 'connecting', ->
     #console.log "connecting"
     pimatic.loading "socket", "show",
-      text: (if pimatic.pages.index.hasData then __("refreshing") else __("connecting"))
+      text: __("connecting")
       blocking: (not pimatic.pages.index.hasData)
 
   ###

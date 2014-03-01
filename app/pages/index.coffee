@@ -215,7 +215,6 @@ $(document).on "pagecreate", '#index', (event) ->
 
   unless pimatic.pages.index.hasData
     data = pimatic.storage.get('pmData.data')
-    console.log data
     if data? then pimatic.pages.index.buildAll(data)
 
   pimatic.pages.index.pageCreated = yes
@@ -234,16 +233,16 @@ pimatic.pages.index =
     pimatic.devices = []
     pimatic.rules = []
     $('#items .item').remove()
-    pimatic.pages.index.addItem(item) for item in data.items
+    pimatic.pages.index.addItem(item, false) for item in data.items
     $('#rules .rule').remove()
-    pimatic.pages.index.addRule(rule) for rule in data.rules
+    pimatic.pages.index.addRule(rule, false) for rule in data.rules
     pimatic.errorCount = data.errorCount
     pimatic.pages.index.updateErrorCount()
     pimatic.pages.index.changeEditingMode data.enabledEditing
     pimatic.pages.index.hasData = yes
     pimatic.storage.set('pmData.data', data)
-    console.log "setting data", data
     $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
+    $('#items, #rules').listview('refresh') if pimatic.pages.index.pageCreated
 
   updateErrorCount: ->
     if $('#error-count').find('.ui-btn-text').length > 0
@@ -273,7 +272,7 @@ pimatic.pages.index =
       $('#lock-button').attr('data-icon', icon)
     return
 
-  addItem: (item) ->
+  addItem: (item, refresh = true) ->
     li = if item.template?
       switch item.template 
         when "switch" then pimatic.pages.index.buildSwitch(item)
@@ -293,7 +292,7 @@ pimatic.pages.index =
     li.find("label").before $('<div class="ui-icon-alt handle">
       <div class="ui-icon ui-icon-bars"></div>
     </div>')
-    $('#items').listview('refresh') if pimatic.pages.index.pageCreated
+    $('#items').listview('refresh') if pimatic.pages.index.pageCreated and refresh
 
   removeItem: (item) ->
     for li in $('#items .item')
@@ -405,7 +404,7 @@ pimatic.pages.index =
     span.find('.val').text(pimatic.pages.index.attrValueToText attr)
     return
 
-  addRule: (rule) ->
+  addRule: (rule, refresh = true) ->
     pimatic.rules[rule.id] = rule 
     li = $ $('#rule-template').html()
     li.attr('id', "rule-#{rule.id}")   
@@ -422,7 +421,7 @@ pimatic.pages.index =
     pimatic.pages.index.addRuleDragslide(rule, li)
 
     $('#add-rule').before li
-    $('#rules').listview('refresh') if pimatic.pages.index.pageCreated
+    $('#rules').listview('refresh') if pimatic.pages.index.pageCreated and refresh
     return
 
   addRuleDragslide: (rule, li) =>
