@@ -63,34 +63,8 @@ module.exports = (env) ->
       #     }
       # 
       app.get '/data.json', (req, res) =>
-        @getItemsWithData().then( (items) =>
-          # additional get all rules
-          rules = []
-          for id of framework.ruleManager.rules
-            rule = framework.ruleManager.rules[id]
-            rules.push {
-              id: id
-              condition: rule.orgCondition
-              action: rule.action
-              active: rule.active
-              valid: rule.valid
-              error: rule.error
-            }
-  
-          # sort rules by ordering in config
-          order = _(@config.rules).map( (r) => r.id )
-          rules = _(rules).sortBy( (r) => 
-            index = order.indexOf r.id
-            # push it to the end if not found
-            return if index is -1 then 99999 else index 
-          ).value()
-
-          res.send 
-            errorCount: env.logger.transports.memory.getErrorCount()
-            enabledEditing: @config.enabledEditing
-            items: items
-            rules: rules
-            
+        @getInitalClientData().then( (data) =>
+          res.send data
         ).done()
     
       app.get '/add-device/:deviceId', (req, res) =>
@@ -259,12 +233,8 @@ module.exports = (env) ->
           res.send 200, {success: false, error: error}
 
       app.get '/login', (req, res) =>
-        ###
-        auth is checked by the framework, so we just redirect to the gicen url.
-        Don't use only `'/'` here, because we want remove `user@pw` from the url 
-        ###
         url = req.query.url
-        unless url then url = "#{req.protocol}://#{req.host}/"
+        unless url then url = "/"
         res.redirect 302, url
     
       # * Static assets
@@ -288,11 +258,12 @@ module.exports = (env) ->
         sessionOptions = app.cookieSessionOptions
         ioCookieParser = express.cookieParser(sessionOptions.secret)
         # See http://howtonode.org/socket-io-auth for details
-        io.set("authorization", (handshakeData, accept) ->
+        io.set("authorization", (handshakeData, accept) =>
           if handshakeData.headers.cookie
             ioCookieParser(handshakeData, null, =>
               sessionCookie = handshakeData.signedCookies?[sessionOptions.key]
-              if sessionCookie?
+              auth = @framework.config.settings.authentication
+              if sessionCookie? and sessionCookie.username is auth.username
                 return accept(null, true)
               else 
                 env.logger.debug "socket.io: Cookie is invalid."
@@ -312,48 +283,55 @@ module.exports = (env) ->
                 when "device" 
                   @addAttributeNotify socket, item
 
-          env.logger.debug("adding rule listerns") if @config.debug
-          framework.ruleManager.on "add", addRuleListener = (rule) =>
-            @emitRuleUpdate socket, "add", rule
-          
-          framework.ruleManager.on "update", updateRuleListener = (rule) =>
-            @emitRuleUpdate socket, "update", rule
-         
-          framework.ruleManager.on "remove", removeRuleListener = (rule) =>
-            @emitRuleUpdate socket, "remove", rule
+          @getInitalClientData().then( (data) =>
+            console.log "emitting welcome"
+            socket.emit "welcome", data
 
-          env.logger.debug("adding log listern") if @config.debug
-          memoryTransport = env.logger.transports.memory
-          memoryTransport.on 'log', logListener = (entry)=>
-            socket.emit 'log', entry
-
-          env.logger.debug("adding item listers") if @config.debug
-
-          @on 'item-add', addItemListener = (item) =>
-            @addAttributeNotify socket, item
-            socket.emit "item-add", item
-
-          @on 'item-remove', removeItemListener = (item) =>
-            socket.emit "item-remove", item
+            env.logger.debug("adding rule listerns") if @config.debug
+            framework.ruleManager.on "add", addRuleListener = (rule) =>
+              @emitRuleUpdate socket, "add", rule
             
-          @on 'item-order', orderItemListener = (order) =>
-            socket.emit "item-order", order
+            framework.ruleManager.on "update", updateRuleListener = (rule) =>
+              @emitRuleUpdate socket, "update", rule
+           
+            framework.ruleManager.on "remove", removeRuleListener = (rule) =>
+              @emitRuleUpdate socket, "remove", rule
 
-          @on 'rule-order', orderRuleListener = (order) =>
-            socket.emit "rule-order", order
+            env.logger.debug("adding log listern") if @config.debug
+            memoryTransport = env.logger.transports.memory
+            memoryTransport.on 'log', logListener = (entry)=>
+              socket.emit 'log', entry
 
-          socket.on 'disconnect', => 
-            env.logger.debug("removing rule listerns") if @config.debug
-            framework.ruleManager.removeListener "update", updateRuleListener
-            framework.ruleManager.removeListener "add", addRuleListener 
-            framework.ruleManager.removeListener "update", removeRuleListener
-            env.logger.debug("removing log listern") if @config.debug
-            memoryTransport.removeListener 'log', logListener
-            env.logger.debug("removing item-add listerns") if @config.debug
-            @removeListener 'item-add', addItemListener
-            @removeListener 'item-remove', removeItemListener
-            @removeListener 'item-order', orderItemListener
-            @removeListener 'rule-order', orderRuleListener
+            env.logger.debug("adding item listers") if @config.debug
+
+            @on 'item-add', addItemListener = (item) =>
+              @addAttributeNotify socket, item
+              socket.emit "item-add", item
+
+            @on 'item-remove', removeItemListener = (item) =>
+              socket.emit "item-remove", item
+              
+            @on 'item-order', orderItemListener = (order) =>
+              socket.emit "item-order", order
+
+            @on 'rule-order', orderRuleListener = (order) =>
+              socket.emit "rule-order", order
+
+            socket.on 'disconnect', => 
+              env.logger.debug("removing rule listerns") if @config.debug
+              framework.ruleManager.removeListener "update", updateRuleListener
+              framework.ruleManager.removeListener "add", addRuleListener 
+              framework.ruleManager.removeListener "update", removeRuleListener
+              env.logger.debug("removing log listern") if @config.debug
+              memoryTransport.removeListener 'log', logListener
+              env.logger.debug("removing item-add listerns") if @config.debug
+              @removeListener 'item-add', addItemListener
+              @removeListener 'item-remove', removeItemListener
+              @removeListener 'item-order', orderItemListener
+              @removeListener 'rule-order', orderRuleListener
+
+          )
+
           return
 
       # register the predicate provider
@@ -643,6 +621,37 @@ module.exports = (env) ->
           name: ""
           attributes: {}
           error: errorMsg
+
+    getRules: () =>
+      rules = []
+      for id of @framework.ruleManager.rules
+        rule = @framework.ruleManager.rules[id]
+        rules.push {
+          id: id
+          condition: rule.orgCondition
+          action: rule.action
+          active: rule.active
+          valid: rule.valid
+          error: rule.error
+        }
+
+      # sort rules by ordering in config
+      order = _(@config.rules).map( (r) => r.id )
+      rules = _(rules).sortBy( (r) => 
+        index = order.indexOf r.id
+        # push it to the end if not found
+        return if index is -1 then 99999 else index 
+      ).value()
+
+    getInitalClientData: () ->
+      @getItemsWithData().then( (items) =>
+        return {
+            errorCount: env.logger.transports.memory.getErrorCount()
+            enabledEditing: @config.enabledEditing
+            items: items
+            rules: @getRules()
+        }      
+      )
 
     emitRuleUpdate: (socket, trigger, rule) ->
       socket.emit "rule-#{trigger}",

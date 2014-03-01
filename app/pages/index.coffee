@@ -12,6 +12,16 @@ $(document).on "pagecreate", '#index', (event) ->
     if attrEvent.name is "dimlevel"
       $("#slider-#{attrEvent.id}").val(attrEvent.value).slider('refresh')
 
+  if pimatic.pages.index.hasData
+    pimatic.loading "loadingdata", "show", text: __("Refreshing") 
+  else
+    pimatic.loading "loadingdata", "show", { text: __("Loading"), blocking: yes }
+
+  pimatic.socket.on "welcome", (data) ->
+    pimatic.pages.index.buildAll(data)
+    pimatic.pages.index.loading = no
+    pimatic.loading "loadingdata", "hide"
+
   pimatic.socket.on "rule-add", (rule) -> pimatic.pages.index.addRule rule
   pimatic.socket.on "rule-update", (rule) -> pimatic.pages.index.updateRule rule
   pimatic.socket.on "rule-remove", (rule) -> pimatic.pages.index.removeRule rule
@@ -204,9 +214,6 @@ $(document).on "pagecreate", '#index', (event) ->
 
   $('#rememberme').prop('checked', pimatic.rememberMe)
 
-  pimatic.socket.on 'connect', ->
-    pimatic.pages.index.loadData()
-
   pimatic.socket.on 'log', (entry) -> 
     if entry.level is 'error' 
       pimatic.pages.index.updateErrorCount()
@@ -216,58 +223,12 @@ $(document).on "pagecreate", '#index', (event) ->
     if data? then pimatic.pages.index.buildAll(data)
 
   pimatic.pages.index.pageCreated = yes
-  pimatic.pages.index.loadData()
 
 pimatic.pages.index =
   loading: no
   hasData: no
   pageCreated: false
   editingMode: yes
-
-  loadData: ->
-    # already loading?
-    pimatic.loading "datadelay", "hide"
-    if pimatic.pages.index.loading then return
-    pimatic.pages.index.loading = yes
-
-    if pimatic.pages.index.hasData
-      pimatic.loading "loadingdata", "show", text: __("Refreshing") 
-    else
-      pimatic.loading "loadingdata", "show", { text: __("Loading"), blocking: yes }
-
-    $.ajax("/data.json",
-      global: no
-      data: 'noAuthPromp=true'
-    ).done( (data) ->
-        pimatic.pages.index.buildAll(data)
-        pimatic.loading "loadingdata", "hide"
-      ).always( ->
-        pimatic.pages.index.loading = no
-        if pimatic.pages.index.hasData is yes
-          pimatic.loading "loadingdata", "hide"
-      ).fail( (jqXHR)->
-        ###
-          We don't want the user get spammed with browser http basic auth dialogs so
-          we redirect to a not offline avilable page, where he can enter
-          the auth information and is then redirected back here
-        ###
-        if jqXHR.status is 401
-          # https://github.com/pimatic/pimatic/issues/69
-          setTimeout( ->
-            pimatic.pages.index.toLoginPage()
-          , 1)
-          return
-        # if we are not connected to the socket, the data gets refrashed anyway so don't get it
-        # else try again after a delay 
-        if pimatic.socket.socket.connected
-          pimatic.loading("datadelay", "show",
-            text: __("could not load data, retrying in %s seconds", "5")
-          )
-          setTimeout( ->
-            pimatic.pages.index.loadData()
-          , 5000)
-      )
-    return
 
   toLoginPage: ->
     urlEncoded = encodeURIComponent(window.location.href)

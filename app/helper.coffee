@@ -154,18 +154,4 @@ __ = (text, args...) ->
     translated = translated.replace /%s/, a
   return translated
 
-( ->
-
-  lastTickTime = new Date().getTime()
-  tick = ->
-    now = new Date().getTime()
-    if now - lastTickTime > 5000
-      # the tick should be triggerd every 2000 seconds, so the device must be in standby
-      # so do a refresh
-      pimatic.pages.index.loadData()
-    lastTickTime = now
-    setTimeout tick, 2000
-  tick()
-)()
-
 unless window.console? then window.console = { log: -> }

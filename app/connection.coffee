@@ -56,8 +56,9 @@ $(document).on "pagebeforecreate", ->
 
   onConnectionError = (reason) ->
     if reason is 'handshake unauthorized'
-      # trigger a reload of the data here to force getting the auth dialog
-      return pimatic.pages.index.toLoginPage()
+      # wrap inside setTimeout because stange iphone behavior
+      # https://github.com/pimatic/pimatic/issues/69 
+      setTimeout(pimatic.pages.index.toLoginPage, 10)
     if reason? and reason.length isnt 0 then reason = ": #{reason}"
     else reason = ''
     pimatic.loading "socket", "show",
