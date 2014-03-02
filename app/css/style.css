@@ -54,10 +54,11 @@
 }
 
 #index li.button fieldset {
-  margin: 3px 10px 10px 0 !important;
+  margin: 3px 10px 3px 0 !important;
   position: absolute;
   right: 0;
   top: 0;
+  padding: 0;
 }
 
 #index li.button fieldset a{
@@ -159,14 +160,8 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
 /* CSS Statements that only apply on webkit-based browsers (Chrome, Safari, etc.) */  
   #error-count .ui-btn-text {
     font-weight: bold;
-    top: 1px;
+    top: -1px;
   }
-}
-
-
-
-#error-count .ui-btn-inner {
-    padding-left: 26px;
 }
 
 #items .attributes{

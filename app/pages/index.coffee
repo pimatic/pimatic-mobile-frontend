@@ -554,7 +554,13 @@ pimatic.pages.index =
           unless this._isDragging is yes
             # discard the event to not prevent defaults
             return
-        _touchMove.apply(this, [event]) 
+        _touchMove.apply(this, [event])
+        # Sometimes the rule item seems to keep highlighted
+        # so clear hover/down state manualy
+        $('#rules li.ui-btn-down-c')
+          .removeClass("ui-btn-down-c")
+          .removeClass('ui-btn-hover-c')
+          .addClass("ui-btn-up-c")
 
       _touchEnd = $.ui.mouse.prototype._touchEnd
       $.ui.mouse.prototype._touchEnd = (event) ->
