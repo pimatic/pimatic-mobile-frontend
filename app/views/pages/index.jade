@@ -66,7 +66,7 @@ div#index(data-role='page')
         a(data-transition='slide', href='#edit-rule')=__('Add a new rule')+'...'
       div.drag-message
   div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme='a')
-    ul.nav-search(data-role='listview', data-theme='a', data-divider-theme='a', style='margin-top: -16px;')
+    ul.nav-panel-menu(data-role='listview', data-theme='a', data-divider-theme='a', style='margin-top: -16px;')
       li(data-icon='delete', data-theme='f')
         a(href='#', data-rel='close')=__("Close menu")
       li(data-theme='f')
@@ -75,6 +75,8 @@ div#index(data-role='page')
         a(href='#plugins', data-transition="slide")=__('Plugins') 
       li(data-theme='f')
         a(href='#updates', data-transition="slide")=__('Updates')
+      li#import-ca-cert(data-theme='f')
+        a(href='root-ca-cert.crt')=__('Show root CA Cert')
       //- Not yet implemented:
       //- li(data-theme='f')
       //-   a(href='#', data-transition="slide")=__('Logout')

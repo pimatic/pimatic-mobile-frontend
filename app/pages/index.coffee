@@ -244,6 +244,11 @@ pimatic.pages.index =
     $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
     $('#items, #rules').listview('refresh') if pimatic.pages.index.pageCreated
 
+    if data.hasRootCACert
+      $('#import-ca-cert').show()
+    else
+      $('#import-ca-cert').hide()
+
   updateErrorCount: ->
     if $('#error-count').find('.ui-btn-text').length > 0
       $('#error-count').find('.ui-btn-text').text(pimatic.errorCount)

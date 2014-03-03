@@ -236,6 +236,16 @@ module.exports = (env) ->
         url = req.query.url
         unless url then url = "/"
         res.redirect 302, url
+
+      certFile =  path.resolve(
+        @framework.maindir, 
+        '../..', 
+        @framework.config.settings.httpsServer.rootCertFile
+      )
+      fs.exists certFile, (exists) => @hasRootCACert = exists
+      app.get '/root-ca-cert.crt', (req, res) =>
+        res.sendfile(certFile)
+
     
       # * Static assets
       app.use express.static(__dirname + "/public")
@@ -645,10 +655,11 @@ module.exports = (env) ->
     getInitalClientData: () ->
       @getItemsWithData().then( (items) =>
         return {
-            errorCount: env.logger.transports.memory.getErrorCount()
-            enabledEditing: @config.enabledEditing
-            items: items
-            rules: @getRules()
+          errorCount: env.logger.transports.memory.getErrorCount()
+          enabledEditing: @config.enabledEditing
+          hasRootCACert: @hasRootCACert
+          items: items
+          rules: @getRules()
         }      
       )
 
