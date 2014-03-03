@@ -24,10 +24,16 @@ $(document).on "pageinit", '#log', (event) ->
   return
 
 pimatic.pages.log =
+  lastEntry: null
   addLogMessage: (entry) ->
     li = $ $('#log-message-template').html()
     li.find('.level').text(entry.level).addClass(entry.level)
     li.find('.msg').text(entry.msg)
-    li.find('.time').text(entry.time)
+    lastDate = pimatic.pages.log.lastEntry?.time.substring(0, 10)
+    newDate = entry.time.substring(0, 10)
+    li.find('.time').text(
+      (if lastDate isnt newDate then entry.time else entry.time.substring 11, 19) + " "
+    )
+    pimatic.pages.log.lastEntry = entry
     $('#log-messages').append li
     return

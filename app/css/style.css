@@ -229,7 +229,15 @@ li.rememberme .ui-btn-inner  {
 }
 
 #log-messages li {
-    padding: 0.2em 15px;
+  padding: 0.2em 15px;
+  line-height: 1.5em;
+}
+
+#log-messages .time {
+  color: gray;
+  display: block;
+  float: right;
+  padding-left: 10px;
 }
 
 .level.info {
