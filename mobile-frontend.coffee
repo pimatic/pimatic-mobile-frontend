@@ -244,6 +244,7 @@ module.exports = (env) ->
       )
       fs.exists certFile, (exists) => @hasRootCACert = exists
       app.get '/root-ca-cert.crt', (req, res) =>
+        res.setHeader('content-type', 'application/x-x509-ca-cert')
         res.sendfile(certFile)
 
     

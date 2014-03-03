@@ -77,7 +77,7 @@ div#index(data-role='page')
       li(data-theme='f')
         a(href='#updates', data-transition="slide")=__('Updates')
       li#import-ca-cert(data-theme='f')
-        a(href='root-ca-cert.crt')=__('Show root CA Cert')
+        a(href='root-ca-cert.crt', data-ajax="false")=__('Show CA root certificate')
       //- Not yet implemented:
       //- li(data-theme='f')
       //-   a(href='#', data-transition="slide")=__('Logout')
