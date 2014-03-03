@@ -99,9 +99,10 @@ $(document).on "pagecreate", '#index', (event) ->
     $('#edit-rule-active').prop "checked", true
     return
 
-  $('#index').on "click", "#lock-button", (event, ui) ->
+  $('#index').on "click", ".lock-button", (event, ui) ->
     enabled = not pimatic.pages.index.editingMode
     pimatic.pages.index.changeEditingMode(enabled)
+    $('#items').listview('refresh')
     pimatic.loading "enableediting", "show", text: __('Saving')
     $.ajax("/enabledEditing/#{enabled}",
       global: false # don't show loading indicator
@@ -272,9 +273,9 @@ pimatic.pages.index =
       $('#index').addClass('locked').removeClass('unlocked')
       icon = 'gear'
     if pimatic.pages.index.pageCreated
-      $('#lock-button').buttonMarkup(icon: icon)
+      $('.lock-button').buttonMarkup(icon: icon)
     else
-      $('#lock-button').attr('data-icon', icon)
+      $('.lock-button').attr('data-icon', icon)
     return
 
   addItem: (item, refresh = true) ->

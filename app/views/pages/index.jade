@@ -50,18 +50,19 @@ div#index(data-role='page')
   div(data-theme='a', data-role='header', data-position='fixed')
     div(class="ui-btn-left", data-role="controlgroup", data-type="horizontal")
       a#nav-button(data-role="button", href='#nav-panel', data-icon='bars', data-iconpos='notext')=__('Menu')
-      a#lock-button(data-role="button",data-icon="check", data-iconpos='notext')
     h3 pimatic
     div(class="ui-btn-right", data-role="controlgroup", data-type="horizontal")
       a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown")
   div(data-role='content')
     ul#items(data-role='listview', data-inset='true')
-      li(data-role='list-divider')=__('Devices')
+      li.with-button(data-role='list-divider')=__('Devices')
+        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a")
       li#add-a-item()
         a(data-transition='slide', href='#add-item')=__('Add an item')+'...'
       li#delete-item(data-theme='a',data-icon="delete", style="display: none;")=__('Drop here to remove item')
     ul#rules(data-role='listview', data-inset='true')
-      li(data-role='list-divider')=__('Rules')
+      li.with-button(data-role='list-divider')=__('Rules')
+        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a")
       li#add-rule()
         a(data-transition='slide', href='#edit-rule')=__('Add a new rule')+'...'
       div.drag-message

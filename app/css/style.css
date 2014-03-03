@@ -352,6 +352,24 @@ li.rememberme .ui-btn-inner  {
     position: relative !important;
 }*/
 
+li.with-button {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+}
+
+li.with-button a.ui-btn {
+  position: absolute;
+  top: -2px;
+  right: 8px;
+}
+
+.ui-btn.round {
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+}
+
 @media (min-width:35em) {
  
   /* wrap on wide viewports once open */
