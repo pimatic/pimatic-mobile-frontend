@@ -10,7 +10,7 @@ module.exports = (env) ->
 
     constructor: (@mobile) ->
 
-    _parsePredicate: (predicate, context) ->
+    parsePredicate: (predicate, context) ->
 
       matchCount = 0
       matchingButton = 0
@@ -21,42 +21,37 @@ module.exports = (env) ->
         .filter((i) => i.type is "button")
         .map((i) => [i, i.text]).value()
 
-      M(predicate, context)
+      m = M(predicate, context)
         .match('the ', optional: true)
         .match(allButtons, onButtonMatch)
         .match(' button', optional: true)
         .match(' is', optional: true)
         .match(' pressed')
-        .onEnd(end)
+      matchCount = m.getMatchCount()
 
       if matchCount is 1
-        return info =
-          itemId: matchingButton.id
+        match = m.getFullMatches()[0]
+        return {
+          token: match
+          nextInput: m.inputs[0]
+          predicateHandler: new ButtonPredicateHandler(matchingButton.id)
+        }
       else if matchCount > 1
         context?.addError(""""#{predicate.trim()}" is ambiguous.""")
       return null
 
-    canDecide: (predicate, context) ->
-      info = @_parsePredicate predicate, context
-      return if info? then 'event' else no
 
-    isTrue: (predicate) -> Q false
 
-    notifyWhen: (id, predicate, callback) ->
-      info = @_parsePredicate predicate
-      unless info? then throw new Error "Can not decide #{predicate}."
 
-      @mobile.on 'button pressed', buttonPressedListener = (item) =>
-        if item.id is info.itemId then callback('event') 
+  class ButtonPredicateHandler extends env.predicates.PredicateHandler
 
-      @_listener[id] =
-        itemId: info.itemId
-        destroy: => @mobile.removeListener 'button pressed', buttonPressedListener
+    constructor: (@itemId) ->
+      @buttonPressedListener = (item) => if item.id is @itemId then @emit('change', 'event')
+      @mobile.on 'button pressed', @buttonPressedListener
 
-    cancelNotify: (id) ->
-      listener = @_listener[id]
-      if listener?
-        listener.destroy()
-      delete @_listener[id]
+    getValue: -> Q(false)
+    destroy: -> @mobile.removeListener 'button pressed', @buttonPressedListener
+    getType: -> 'event'
+
 
   return ButtonPredicateProvider
