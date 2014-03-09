@@ -41,11 +41,11 @@ $(document).on "pageinit", '#edit-rule', (event) ->
 
   # https://github.com/yuku-t/jquery-textcomplete
   $("#edit-rule-condition").textcomplete([
-    match: /^((?:[^"]*"[^"]*")*[^"]*(?:\sand\s|\sor\s|\)|\())*(.*)$/
+    match: /^(.*)$/
     search: (term, callback) ->
       editRulePage.autocompleteAjax?.abort()
       if pimatic.pages.editRule.autocompleEnabled
-        editRulePage.autocompleteAjax = $.ajax('parsePredicate',
+        editRulePage.autocompleteAjax = $.ajax('parseCondition',
           type: 'POST'
           data: {condition: term}
           global: false
@@ -56,7 +56,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
           callback autocomplete
         ).fail( => callback [] )
       else callback []
-    index: 2
+    index: 1
     replace: customReplace
     template: customTemplate
   ])

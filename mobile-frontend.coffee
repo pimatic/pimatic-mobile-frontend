@@ -219,18 +219,28 @@ module.exports = (env) ->
           res.send 200, {success: false, error: error}
         ).done()
 
-      app.post '/parsePredicate', (req, res) =>
+      app.post '/parseCondition', (req, res) =>
         conditionString = req.body.condition
+        error = null
+        context =  null
+        result = null
         try
           context = @framework.ruleManager.createParseContext()
-          predicate = @framework.ruleManager.parsePredicate("id", conditionString, context)
-          unless context.hasErrors()
-            # just to add autocomplete
-            M("", context).match([' and ', ' or '])
+          result = @framework.ruleManager.parseRuleCondition("id", conditionString, context)
           context.finalize()
-          res.send 200, {success: true, message: predicate.token, context: context}
-        catch error
-          res.send 200, {success: false, error: error}
+        catch e
+          error = e
+          res.send 200, {success: false, error: error.message}
+        unless error?
+          for p in result.predicates
+            delete p.handler
+          res.send 200, {
+            success: true
+            tokens: result.tokens
+            predicates: result.predicates
+            context
+          }
+
 
       app.get '/login', (req, res) =>
         url = req.query.url
