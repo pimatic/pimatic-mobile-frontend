@@ -43,11 +43,15 @@ module.exports = (env) ->
   class ButtonPredicateHandler extends env.predicates.PredicateHandler
 
     constructor: (@provider, @itemId) ->
+
+    setup: ->
       @buttonPressedListener = (item) => if item.id is @itemId then @emit('change', 'event')
       @provider.mobile.on 'button pressed', @buttonPressedListener
-
+      super()
     getValue: -> Q(false)
-    destroy: -> @mobile.removeListener 'button pressed', @buttonPressedListener
+    destroy: -> 
+      @mobile.removeListener 'button pressed', @buttonPressedListener
+      super()
     getType: -> 'event'
 
 
