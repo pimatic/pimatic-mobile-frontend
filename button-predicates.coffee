@@ -10,7 +10,7 @@ module.exports = (env) ->
 
     constructor: (@mobile) ->
 
-    parsePredicate: (predicate, context) ->
+    parsePredicate: (input, context) ->
 
       matchCount = 0
       matchingButton = 0
@@ -21,7 +21,7 @@ module.exports = (env) ->
         .filter((i) => i.type is "button")
         .map((i) => [i, i.text]).value()
 
-      m = M(predicate, context)
+      m = M(input, context)
         .match('the ', optional: true)
         .match(allButtons, onButtonMatch)
         .match(' button', optional: true)
@@ -33,21 +33,18 @@ module.exports = (env) ->
         match = m.getFullMatches()[0]
         return {
           token: match
-          nextInput: m.inputs[0]
-          predicateHandler: new ButtonPredicateHandler(matchingButton.id)
+          nextInput: input.substring(match.length)
+          predicateHandler: new ButtonPredicateHandler(this, matchingButton.id)
         }
       else if matchCount > 1
         context?.addError(""""#{predicate.trim()}" is ambiguous.""")
       return null
 
-
-
-
   class ButtonPredicateHandler extends env.predicates.PredicateHandler
 
-    constructor: (@itemId) ->
+    constructor: (@provider, @itemId) ->
       @buttonPressedListener = (item) => if item.id is @itemId then @emit('change', 'event')
-      @mobile.on 'button pressed', @buttonPressedListener
+      @provider.mobile.on 'button pressed', @buttonPressedListener
 
     getValue: -> Q(false)
     destroy: -> @mobile.removeListener 'button pressed', @buttonPressedListener
