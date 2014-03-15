@@ -648,8 +648,8 @@ module.exports = (env) ->
         rule = @framework.ruleManager.rules[id]
         rules.push {
           id: id
-          condition: rule.orgCondition
-          action: rule.action
+          condition: rule.conditionToken
+          action: rule.actionsToken
           active: rule.active
           valid: rule.valid
           error: rule.error
