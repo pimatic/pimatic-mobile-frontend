@@ -231,8 +231,8 @@ pimatic.pages.index =
     window.location.href = "/login?url=#{urlEncoded}" 
 
   buildAll: (data) ->
-    pimatic.devices = []
-    pimatic.rules = []
+    pimatic.devices = {}
+    pimatic.rules = {}
     $('#items .item').remove()
     pimatic.pages.index.addItem(item, false) for item in data.items
     $('#rules .rule').remove()

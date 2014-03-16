@@ -1,7 +1,7 @@
 
 window.pimatic =
-  devices: []
-  rules: []
+  devices: {}
+  rules: {}
   errorCount: 0
   socket: null
   inited: no
