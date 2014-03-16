@@ -62,11 +62,11 @@ $(document).on "pageinit", '#edit-rule', (event) ->
   ])
 
   $("#edit-rule-actions").textcomplete([
-    match: /^((?:[^"]*"[^"]*")*[^"]*\sand\s)*(.*)$/
+    match: /^(.*)$/
     search: (term, callback) ->
       if pimatic.pages.editRule.autocompleEnabled
         editRulePage.autocompleteAjax?.abort()
-        editRulePage.autocompleteAjax = $.ajax('parseAction',
+        editRulePage.autocompleteAjax = $.ajax('parseActions',
           type: 'POST'
           data: {action: term}
           global: false
@@ -79,7 +79,7 @@ $(document).on "pageinit", '#edit-rule', (event) ->
           callback autocomplete
         ).fail( => callback [] )
       else callback []
-    index: 2
+    index: 1
     replace: customReplace
     template: customTemplate
   ])

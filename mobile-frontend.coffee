@@ -206,18 +206,27 @@ module.exports = (env) ->
         res.send 200, {success: true}
 
 
-      app.post '/parseAction', (req, res) =>
+      app.post '/parseActions', (req, res) =>
         actionString = req.body.action
-        context = @framework.ruleManager.createParseContext()
-        @framework.ruleManager.executeAction(actionString, true, context).then( (message) ->
-          unless context.hasErrors()
-            # just to add autocomplete
-            M("", context).match([' and '])
+        error = null
+        context =  null
+        result = null
+        try
+          context = @framework.ruleManager.createParseContext()
+          result = @framework.ruleManager.parseRuleActions("id", actionString, context)
           context.finalize()
-          res.send 200, {success: true, message: message, context: context}
-        ).catch( (error) ->
-          res.send 200, {success: false, error: error}
-        ).done()
+        catch e
+          error = e
+          res.send 200, {success: false, error: error.message}
+        unless error?
+          for a in result.actions
+            delete a.handler
+          res.send 200, {
+            success: true
+            tokens: result.tokens
+            actions: result.actions
+            context
+          }
 
       app.post '/parseCondition', (req, res) =>
         conditionString = req.body.condition
