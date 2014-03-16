@@ -305,64 +305,71 @@ module.exports = (env) ->
         )
 
         # When a new client connects
-        io.sockets.on 'connection', (socket) =>
+        io.sockets.on('connection', (socket) =>
 
-          for item in @config.items 
+          initData = @getInitalClientData()
+          socket.emit "welcome", initData
+
+          for item in initData.items 
             do (item) =>
               switch item.type
                 when "device" 
+                  device = @framework.getDeviceById item.id
                   @addAttributeNotify socket, item
+                  for attrName of item.attributes
+                    do (attrName) =>
+                      device.getAttributeValue(attrName).timeout(10000).then( (value) =>
+                        @emitAttributeValue(socket, device, attrName, value)
+                      ).catch( (error) => 
+                        env.logger.warn "Error getting #{attrName} of #{item.id}: #{error.message}"
+                        env.logger.debug error.stack
+                      )
 
-          @getInitalClientData().then( (data) =>
-            socket.emit "welcome", data
 
-            env.logger.debug("adding rule listerns") if @config.debug
-            framework.ruleManager.on "add", addRuleListener = (rule) =>
-              @emitRuleUpdate socket, "add", rule
+          env.logger.debug("adding rule listerns") if @config.debug
+          framework.ruleManager.on "add", addRuleListener = (rule) =>
+            @emitRuleUpdate socket, "add", rule
+          
+          framework.ruleManager.on "update", updateRuleListener = (rule) =>
+            @emitRuleUpdate socket, "update", rule
+         
+          framework.ruleManager.on "remove", removeRuleListener = (rule) =>
+            @emitRuleUpdate socket, "remove", rule
+
+          env.logger.debug("adding log listern") if @config.debug
+          memoryTransport = env.logger.transports.memory
+          memoryTransport.on 'log', logListener = (entry)=>
+            socket.emit 'log', entry
+
+          env.logger.debug("adding item listers") if @config.debug
+
+          @on 'item-add', addItemListener = (item) =>
+            @addAttributeNotify socket, item
+            socket.emit "item-add", item
+
+          @on 'item-remove', removeItemListener = (item) =>
+            socket.emit "item-remove", item
             
-            framework.ruleManager.on "update", updateRuleListener = (rule) =>
-              @emitRuleUpdate socket, "update", rule
-           
-            framework.ruleManager.on "remove", removeRuleListener = (rule) =>
-              @emitRuleUpdate socket, "remove", rule
+          @on 'item-order', orderItemListener = (order) =>
+            socket.emit "item-order", order
 
-            env.logger.debug("adding log listern") if @config.debug
-            memoryTransport = env.logger.transports.memory
-            memoryTransport.on 'log', logListener = (entry)=>
-              socket.emit 'log', entry
+          @on 'rule-order', orderRuleListener = (order) =>
+            socket.emit "rule-order", order
 
-            env.logger.debug("adding item listers") if @config.debug
-
-            @on 'item-add', addItemListener = (item) =>
-              @addAttributeNotify socket, item
-              socket.emit "item-add", item
-
-            @on 'item-remove', removeItemListener = (item) =>
-              socket.emit "item-remove", item
-              
-            @on 'item-order', orderItemListener = (order) =>
-              socket.emit "item-order", order
-
-            @on 'rule-order', orderRuleListener = (order) =>
-              socket.emit "rule-order", order
-
-            socket.on 'disconnect', => 
-              env.logger.debug("removing rule listerns") if @config.debug
-              framework.ruleManager.removeListener "update", updateRuleListener
-              framework.ruleManager.removeListener "add", addRuleListener 
-              framework.ruleManager.removeListener "update", removeRuleListener
-              env.logger.debug("removing log listern") if @config.debug
-              memoryTransport.removeListener 'log', logListener
-              env.logger.debug("removing item-add listerns") if @config.debug
-              @removeListener 'item-add', addItemListener
-              @removeListener 'item-remove', removeItemListener
-              @removeListener 'item-order', orderItemListener
-              @removeListener 'rule-order', orderRuleListener
-
-          )
-
+          socket.on 'disconnect', => 
+            env.logger.debug("removing rule listerns") if @config.debug
+            framework.ruleManager.removeListener "update", updateRuleListener
+            framework.ruleManager.removeListener "add", addRuleListener 
+            framework.ruleManager.removeListener "update", removeRuleListener
+            env.logger.debug("removing log listern") if @config.debug
+            memoryTransport.removeListener 'log', logListener
+            env.logger.debug("removing item-add listerns") if @config.debug
+            @removeListener 'item-add', addItemListener
+            @removeListener 'item-remove', removeItemListener
+            @removeListener 'item-order', orderItemListener
+            @removeListener 'rule-order', orderRuleListener
           return
-
+        )
       # register the predicate provider
       ButtonPredicateProvider = require('./button-predicates') env
       @framework.ruleManager.addPredicateProvider(new ButtonPredicateProvider(this))
@@ -484,6 +491,7 @@ module.exports = (env) ->
               minPath "pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
+              minPath "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -574,14 +582,13 @@ module.exports = (env) ->
       @jsonConfig.items = @config.items
       @framework.saveConfig()
 
-      p = switch item.type
-        when 'device'
-          @getDeviceWithData(item)
-        when 'header', 'button'
-          Q(item)
-      p.then( (item) =>
-        @emit 'item-add', item 
+      item = (
+        switch item.type
+          when 'device' then @getDeviceWithData(item)
+          when 'header', 'button' then item
       )
+
+      @emit 'item-add', item 
 
     addAttributeNotify: (socket, item) ->
       device = @framework.getDeviceById item.id
@@ -602,16 +609,16 @@ module.exports = (env) ->
     getItemsWithData: () ->
       items = []
       for item in @config.items
-        do(item) =>
+        do (item) =>
           switch item.type
             when "device"
-              items.push @getDeviceWithData item
+              items.push @getDeviceWithData(item)
             when "header", 'button'
-              items.push Q(item)
+              items.push item
             else
               errorMsg = "Unknown item type \"#{item.type}\""
               env.logger.error errorMsg
-      return Q.all items
+      return items
 
     getDeviceWithData: (item) ->
       assert item.id?
@@ -629,27 +636,19 @@ module.exports = (env) ->
           else if Array.isArray type then "String"
           else "Unknown"
 
-        attrValues = []
         for attrName of device.attributes
-          item.attributes[attrName].type = typeToString device.attributes[attrName].type
-          do (attrName) =>
-            attrValues.push device.getAttributeValue(attrName).timeout(2000).then( (value) =>
-              item.attributes[attrName].value = value
-            ).catch( (error) => 
-              item.attributes[attrName].value = null
-              env.logger.warn "Error getting #{attrName} of #{item.id}: #{error.message}"
-              env.logger.debug error.stack
-            )
-        return Q.all(attrValues).then( -> return item)
+          item.attributes[attrName].type = typeToString(device.attributes[attrName].type)
+        return item
       else
         errorMsg = "No device to display with id \"#{item.id}\" found"
         env.logger.error errorMsg
-        return Q.fcall =>
+        return item = {
           type: "device"
           id: item.id
           name: ""
           attributes: {}
           error: errorMsg
+        }
 
     getRules: () =>
       rules = []
@@ -673,15 +672,13 @@ module.exports = (env) ->
       ).value()
 
     getInitalClientData: () ->
-      @getItemsWithData().then( (items) =>
-        return {
-          errorCount: env.logger.transports.memory.getErrorCount()
-          enabledEditing: @config.enabledEditing
-          hasRootCACert: @hasRootCACert
-          items: items
-          rules: @getRules()
-        }      
-      )
+      return {
+        errorCount: env.logger.transports.memory.getErrorCount()
+        enabledEditing: @config.enabledEditing
+        hasRootCACert: @hasRootCACert
+        items: @getItemsWithData()
+        rules: @getRules()
+      }      
 
     emitRuleUpdate: (socket, trigger, rule) ->
       socket.emit "rule-#{trigger}",
