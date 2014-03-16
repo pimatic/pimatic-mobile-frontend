@@ -677,8 +677,8 @@ module.exports = (env) ->
     emitRuleUpdate: (socket, trigger, rule) ->
       socket.emit "rule-#{trigger}",
         id: rule.id
-        condition: rule.orgCondition
-        action: rule.action
+        condition: rule.conditionToken
+        action: rule.actionsToken
         active: rule.active
         valid: rule.valid
 
