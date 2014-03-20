@@ -12,6 +12,7 @@ module.exports = (env) ->
   assert = env.require 'cassert'
   express = env.require "express" 
   coffee = env.require 'coffee-script'
+  S = env.require 'string'
   M = env.matcher
 
   global.i18n = env.require('i18n')
@@ -31,19 +32,31 @@ module.exports = (env) ->
       'html': []
     assetsPacked: no
 
-
     # ###init the frontend:
     init: (@app, @framework, @jsonConfig) ->
       conf = convict require("./mobile-frontend-config-schema")
-      conf.load jsonConfig
-      conf.validate()
-      @config = conf.get ""
 
       # do some legacy support
-      for item in @config.items
+      for item in @jsonConfig.items
         if item.type is 'actuator' or item.type is 'sensor'
           item.type = 'device'
+        switch item.type
+          when "device"
+            unless item.itemId
+              item.itemId = @genItemId(item.type, item.id, @jsonConfig.items)
+            if item.id and (not item.deviceId?)
+              item.deviceId = item.id
+            delete item.id
+          when "header", 'button'
+            unless item.itemId
+              item.itemId = @genItemId(item.type, item.text, @jsonConfig.items)
+            delete item.id
+            if item.type is 'button' and not item.buttonId?
+              item.buttonId = item.itemId.replace('button-', '')
 
+      conf.load @jsonConfig
+      conf.validate()
+      @config = conf.get ""
         
       # * Delivers json-Data in the form of:
 
@@ -67,75 +80,110 @@ module.exports = (env) ->
           res.send data
         ).done()
     
-      app.get '/add-device/:deviceId', (req, res) =>
+      ###
+      Handle get request for add a device to the item list.
+      ###
+      app.get('/add-device/:deviceId', (req, res) =>
         deviceId = req.params.deviceId
+        # If no id is given then send an error.
         if not deviceId?
-          return res.send 200, {success: false, message: 'no id given'}
-        found = false
-        for item in @config.items
-          if item.type is 'device' and item.id is deviceId
-            found = true
-            break
-        if found 
-          res.send 200, {success: false, message: __('Device was already added.') }
+          return res.send(200, {success: false, message: 'no id given'})
+        # If the item does not exists then send an error
+        found = _(@config.items).find({type: 'device', deviceId: deviceId})
+        if found?
+          res.send(200, {success: false, message: __('Device was already added.')})
           return
-
-        item = 
-          type: 'device'
-          id: deviceId
-
-        @addNewItem item
-        res.send 200, {success: true, message: __("Added %s to the list.", deviceId) }
+        # else add the item to the item list and send success
+        @addNewItem({
+            itemId: @genItemId('device', deviceId)
+            type: 'device'
+            deviceId: deviceId
+        })
+        res.send(200, {success: true, message: __("Added %s to the list.", deviceId)})
+      )
     
-    
-      app.get '/add-header/:name', (req, res) =>
-        name = req.params.name
-        if name is ""
-          res.send 200, {success: false, message: 'no name given'}
-          return
-        item = 
+      ###
+      Handle get request for add a header to the item list.
+      ###
+      app.get('/add-header/:text', (req, res) =>
+        text = req.params.text
+        # If no text is given then send an error.
+        if text is ""
+          return res.send(200, {success: false, message: 'no text given'})
+        # else add the item to the item list and send success
+        @addNewItem({
+          itemId: @genItemId('header', text)
           type: 'header'
-          id: "header-#{name}"
-          text: name
+          text: text
+        })
+        res.send(200, {success: true})
+      )
 
-        @addNewItem item
-        res.send 200, {success: true}
-
-      app.get '/add-button/:name', (req, res) =>
-        name = req.params.name
-        if name is ""
-          res.send 200, {success: false, message: 'no name given'}
-          return
-        item = 
+      ###
+      Handle get request for add a button to the item list.
+      ###
+      app.get('/add-button/:text', (req, res) =>
+        text = req.params.text
+        # If no text is given then send an error.
+        if text is ""
+          return res.send(200, {success: false, message: 'no text given'})
+        # else add the item to the item list and send success
+        itemId = @genItemId('button', text)
+        @addNewItem({
+          itemId: itemId
+          buttonId: itemId.replace('button-', '')
           type: 'button'
-          id: "button-#{name}"
-          text: name
+          text: text
+        })
+        res.send(200, {success: true})
+      )
 
-        @addNewItem item
-        res.send 200, {success: true}
-    
-      app.post '/update-item-order', (req, res) =>
+      ###
+      Handle post request for removing an item.
+      ###
+      app.post('/remove-item', (req, res) =>
+        itemId = req.body.itemId
+        unless itemId?
+          return res.send(200, {success: false, message: 'no itemId given'})
+
+        item = _(@jsonConfig.items).first({itemId: itemId})
+        unless item?
+          return res.send(200, {success: false, message: 'could not find item'})
+
+        _(@jsonConfig.items).remove({itemId: itemId})
+        @config.items = @jsonConfig.items
+        @framework.saveConfig()
+
+        @emit('item-remove', item)
+        res.send(200, {success: true})
+      )
+
+      ###
+      Handle post request for updating the item list ordering.
+      ###
+      #TODO: probably fix!
+      app.post('/update-item-order', (req, res) =>
         order = req.body.order
+        # If no order is given then send and error.
         unless order?
-          res.send 200, {success: false, message: 'no order given'}
-          return
-        newItems = []
-        for orderItem in order
-          assert orderItem.type?
-          assert orderItem.id?
-          for item in jsonConfig.items
-            if item.id is orderItem.id and item.type is orderItem.type
-              newItems.push item
-              break
-        if not (newItems.length is jsonConfig.items.length)
-          res.send 200, {success: false, message: 'items do not equal, reject order'}
-          return
-        @config.items = @jsonConfig.items = newItems
+          return res.send(200, {success: false, message: 'no order given'})
+
+        # sort items by given order
+        @jsonConfig.items = _(@jsonConfig.items).sortBy( (item) => 
+          index = order.indexOf item.itemId
+          # push it to the end if not found
+          return if index is -1 then 99999 else index 
+        ).value()
+        @config.items = @jsonConfig.items
         @framework.saveConfig()
         @emit 'item-order', order
         res.send 200, {success: true}
+      )
 
-      app.post '/update-rule-order', (req, res) =>
+      ###
+      Handle post request for updating the rule list sorting.
+      ###
+      app.post('/update-rule-order', (req, res) =>
         order = req.body.order
         unless order?
           res.send 200, {success: false, message: 'no order given'}
@@ -144,23 +192,27 @@ module.exports = (env) ->
         @framework.saveConfig()
         @emit 'rule-order', order
         res.send 200, {success: true}
+      )
     
-      app.get '/clear-log', (req, res) =>
+      ###
+      Handle get request for clearing the log
+      ###
+      app.get('/clear-log', (req, res) =>
         env.logger.transports.memory.clearLog()
-        res.send 200, {success: true}
+        res.send(200, {success: true})
+      )
 
-
-      app.get '/button-pressed/:name', (req, res) =>
-        name = req.params.name
-        item = null
-        for it in @config.items
-          if it.type is "button" and it.text is name
-            item = it
-            break
+      ###
+      Handle get request for button press
+      ###
+      app.get('/button-pressed/:buttonId', (req, res) =>
+        buttonId = req.params.buttonId
+        item = _(@config.items).first({type: 'button', buttonId: buttonId})
         unless item?
-          res.send 200, {success: false, message: 'could not find the button'}
+          return res.send(200, {success: false, message: 'could not find the button'})
         @emit "button pressed", item
-        res.send 200, {success: true}
+        res.send(200, {success: true})
+      )
 
       app.get '/enabledEditing/:state', (req, res) =>
         state = req.params.state
@@ -188,25 +240,7 @@ module.exports = (env) ->
           res.send 200, {success: false, message: 'illegal param'}
         return
         
-    
-      app.post '/remove-item', (req, res) =>
-        item = req.body.item
-        unless item?
-          res.send 200, {success: false, message: 'no item given'}
-          return
-        for it, i in jsonConfig.items
-          if it.id is item.id and it.type is item.type
-            jsonConfig.items.splice i, 1
-            break
-    
-        @config.items = @jsonConfig.items
-        @framework.saveConfig()
-
-        @emit 'item-remove', item 
-        res.send 200, {success: true}
-
-
-      app.post '/parseActions', (req, res) =>
+      app.post('/parseActions', (req, res) =>
         actionString = req.body.action
         error = null
         context =  null
@@ -227,8 +261,9 @@ module.exports = (env) ->
             actions: result.actions
             context
           }
+      )
 
-      app.post '/parseCondition', (req, res) =>
+      app.post('/parseCondition', (req, res) =>
         conditionString = req.body.condition
         error = null
         context =  null
@@ -249,12 +284,14 @@ module.exports = (env) ->
             predicates: result.predicates
             context
           }
+      )
 
 
-      app.get '/login', (req, res) =>
+      app.get('/login', (req, res) =>
         url = req.query.url
         unless url then url = "/"
         res.redirect 302, url
+      )
 
       certFile =  path.resolve(
         @framework.maindir, 
@@ -308,20 +345,21 @@ module.exports = (env) ->
         io.sockets.on('connection', (socket) =>
 
           initData = @getInitalClientData()
+          console.log "initData: ", util.inspect(initData, { showHidden: true, depth: null })
           socket.emit "welcome", initData
 
           for item in initData.items 
             do (item) =>
               switch item.type
                 when "device" 
-                  device = @framework.getDeviceById item.id
-                  @addAttributeNotify socket, item
-                  for attrName of item.attributes
-                    do (attrName) =>
-                      device.getAttributeValue(attrName).timeout(10000).then( (value) =>
-                        @emitAttributeValue(socket, device, attrName, value)
+                  device = @framework.getDeviceById(item.deviceId)
+                  @addAttributeNotify(socket, item)
+                  for attr in item.attributes
+                    do (attr) =>
+                      device.getAttributeValue(attr.name).timeout(10000).then( (value) =>
+                        @emitAttributeValue(socket, device, attr.name, value)
                       ).catch( (error) => 
-                        env.logger.warn "Error getting #{attrName} of #{item.id}: #{error.message}"
+                        env.logger.warn "Error getting #{attr.name} of #{item.id}: #{error.message}"
                         env.logger.debug error.stack
                       )
 
@@ -344,17 +382,17 @@ module.exports = (env) ->
           env.logger.debug("adding item listers") if @config.debug
 
           @on 'item-add', addItemListener = (item) =>
-            @addAttributeNotify socket, item
-            socket.emit "item-add", item
+            @addAttributeNotify(socket, item)
+            socket.emit("item-add", item)
 
           @on 'item-remove', removeItemListener = (item) =>
-            socket.emit "item-remove", item
+            socket.emit("item-remove", item.itemId)
             
           @on 'item-order', orderItemListener = (order) =>
-            socket.emit "item-order", order
+            socket.emit("item-order", order)
 
           @on 'rule-order', orderRuleListener = (order) =>
-            socket.emit "rule-order", order
+            socket.emit("rule-order", order)
 
           socket.on 'disconnect', => 
             env.logger.debug("removing rule listerns") if @config.debug
@@ -497,6 +535,7 @@ module.exports = (env) ->
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
               "pimatic-mobile-frontend/app/helper.coffee"
+              "pimatic-mobile-frontend/app/knockout-custom-bindings.coffee"
               "pimatic-mobile-frontend/app/connection.coffee"
               "pimatic-mobile-frontend/app/pages/*"
             ] .concat (minPath(f) for f in @additionalAssetFiles['js'])
@@ -586,25 +625,27 @@ module.exports = (env) ->
       item = (
         switch item.type
           when 'device' then @getDeviceWithData(item)
-          when 'header', 'button' then item
+          when 'header', 'button'
+            item.template = item.type
+            item
       )
 
       @emit 'item-add', item 
 
     addAttributeNotify: (socket, item) ->
-      device = @framework.getDeviceById item.id
+      device = @framework.getDeviceById item.deviceId
       unless device? 
-        env.logger.debug "device #{item.id} not found."
+        env.logger.debug "device #{item.deviceId} not found."
         return
-      for attr of device.attributes 
+      for attr in device.attributes 
         do (attr) =>
-          env.logger.debug("adding listener for #{attr} of #{device.id}") if @config.debug
-          device.on attr, attrListener = (value) =>
-            env.logger.debug("attr change for #{attr} of #{device.id}: #{value}") if @config.debug
-            @emitAttributeValue socket, device, attr, value
+          env.logger.debug("adding listener for #{attr.name} of #{device.id}") if @config.debug
+          device.on attr.name, attrListener = (value) =>
+            env.logger.debug("attr change for #{attr.name} of #{device.id}: #{value}") if @config.debug
+            @emitAttributeValue socket, device, attr.name, value
           socket.on 'disconnect', => 
             env.logger.debug("removing listener for #{attr} of #{device.id}") if @config.debug
-            device.removeListener attr, attrListener
+            device.removeListener attr.name, attrListener
       return
 
     getItemsWithData: () ->
@@ -613,8 +654,10 @@ module.exports = (env) ->
         do (item) =>
           switch item.type
             when "device"
-              items.push @getDeviceWithData(item)
+              item = @getDeviceWithData(item)
+              items.push item
             when "header", 'button'
+              item.template = item.type
               items.push item
             else
               errorMsg = "Unknown item type \"#{item.type}\""
@@ -622,32 +665,39 @@ module.exports = (env) ->
       return items
 
     getDeviceWithData: (item) ->
-      assert item.id?
-      device = @framework.getDeviceById item.id
+      assert item.type is "device"
+      assert item.deviceId?
+      device = @framework.getDeviceById item.deviceId
       if device?
         item =
+          itemId: item.itemId
           type: "device"
-          id: device.id
+          deviceId: device.id
           name: device.name
           template: device.getTemplateName()
-          attributes: _.cloneDeep device.attributes
+          attributes: []
 
         typeToString = (type) => 
-          if typeof type is "function" then type.name
-          else if Array.isArray type then "String"
-          else "Unknown"
+          if typeof type is "function" then type.name.toLowerCase()
+          else if Array.isArray type then "string"
+          else "unknown"
 
-        for attrName of device.attributes
-          item.attributes[attrName].type = typeToString(device.attributes[attrName].type)
+        for name, attr of device.attributes
+          itemAttribute = _.cloneDeep(attr)
+          itemAttribute.name = name
+          itemAttribute.type = typeToString(attr.type)
+          item.attributes.push itemAttribute
+
         return item
       else
-        errorMsg = "No device to display with id \"#{item.id}\" found"
+        errorMsg = "No device to display with id \"#{item.deviceId}\" found"
         env.logger.error errorMsg
         return item = {
           type: "device"
-          id: item.id
+          deviceId: item.deviceId
           name: ""
-          attributes: {}
+          template: "device"
+          attributes: []
           error: errorMsg
         }
 
@@ -694,6 +744,17 @@ module.exports = (env) ->
         id: device.id
         name: name
         value: value
+
+    genItemId: (prefix, baseText, existingItems = @config.items) ->
+      existingIds = _(existingItems).map( (item) => item.itemId ).filter( (id) => id? ).value()
+      newId = prefix + "-" + S(baseText).slugify().s
+      unless newId in existingIds then return newId
+      num = 2
+      newIdWithNum = newId + num
+      while newIdWitNum in existingIds
+        num++
+        newIdWithNum = newId + num
+      return newIdWitNum
 
   plugin = new MobileFrontend
   return plugin

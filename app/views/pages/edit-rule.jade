@@ -1,17 +1,17 @@
 div#edit-rule(data-role='page')
   div(data-theme='a', data-role='header', data-position='fixed')
-    h3
+    h3(data-bind="text: pageTitle()")
   div(data-role='content')
     form#edit-rule-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
-      input#edit-rule-id(type="text", placeholder="id")
+      input#edit-rule-id(type="text", placeholder="id" data-bind="value: ruleId")
       fieldset
         label(for='edit-rule-condition')='if'
-        textarea#edit-rule-condition(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
+        textarea#edit-rule-condition(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleCondition")
       fieldset
         label(for='edit-rule-actions')='then'
-        textarea#edit-rule-actions(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
+        textarea#edit-rule-actions(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleActions")
       fieldset(data-role='controlgroup')
-        input#edit-rule-active(type='checkbox', name='edit-rule-active')
+        input#edit-rule-active(type='checkbox', name='edit-rule-active', data-bind="checked: ruleEnabled")
         label(for='edit-rule-active')=__('Enabled')
       fieldset.ui-grid-a
         div.ui-block-a

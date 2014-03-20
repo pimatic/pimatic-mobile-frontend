@@ -1,18 +1,58 @@
 # add-item-page
 # ----------
 
-$(document).on "pageinit", '#add-item', (event) ->
+
+class DeviceEntry
+
+  constructor: (data) ->
+    @id = data.id
+    @name = ko.observable(data.name)
+    @isAdded = ko.computed( =>
+      items = pimatic.pages.index.items()
+      match = ko.utils.arrayFirst(items, (item) =>
+        return item.type is 'device' and item.deviceId is @id
+      )
+      return match?
+    )
+    @icon = ko.computed( => if @isAdded() then 'check' else 'plus' )
+
+  update: (data) ->
+    @name(data.name)
+
+class AddItemViewModel
+  devices: ko.observableArray([])
+
+  constructor: ->
+    @refreshListView = ko.computed( =>
+      @devices()
+      $('#device-items').listview('refresh')
+    ).extend(rateLimit: {timeout: 10, method: "notifyWhenChangesStop"})
+
+  updateDevicesFromJs: (devices) ->
+    mapping = {
+      create: ({data, parent, skip}) => new DeviceEntry(data)
+      update: ({data, parent, target}) =>
+        target.update(data)
+        return target
+      key: (data) => data.id
+    }
+    ko.mapping.fromJS(devices, mapping, @devices)
+
+  addDeviceToIndexPage: (device) ->
+    if device.isAdded() then return
+    $.get("/add-device/#{device.id}")
+      .done(ajaxShowToast)
+      .fail(ajaxAlertFail)
+
+
+pimatic.pages.addItem = new AddItemViewModel()
+
+$(document).on "pagecreate", '#add-item', (event) ->
+  ko.applyBindings(pimatic.pages.addItem, $('#add-item')[0])
 
   $('#device-items').on "click", 'li.item', ->
-    li = $ this
-    if li.hasClass 'added' then return
-    deviceId = li.data('device-id')
-    $.get("/add-device/#{deviceId}")
-      .done( (data) ->
-        li.data('icon', 'check')
-        li.addClass('added')
-        li.buttonMarkup({ icon: "check" })
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
+    li = $(this)
+    pimatic.pages.addItem.addDeviceToIndexPage(ko.dataFor(li[0]))
     return
 
   $('#add-other').on "click", '#add-a-header', ->
@@ -57,20 +97,15 @@ $(document).on "pageinit", '#add-item', (event) ->
   return
 
 $(document).on "pageshow", '#add-item', (event) ->
+
   $.get("/api/devices")
-    .done( (data) ->
-      $('#device-items .item').remove()
-      for d in data.devices
-        li = $ $('#item-add-template').html()
-        if pimatic.devices[d.id]? 
-          li.data('icon', 'check')
-          li.addClass('added')
-        li.find('label').text(d.name)
-        li.data 'device-id', d.id
-        li.addClass 'item'
-        $('#device-items').append li
-      $('#device-items').listview('refresh')
+    .done( (data) -> 
+      pimatic.pages.addItem.updateDevicesFromJs(data.devices) 
     ).fail(ajaxAlertFail)
   return
+
+
+
+
 
 

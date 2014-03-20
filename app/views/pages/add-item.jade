@@ -1,8 +1,3 @@
-script#item-add-template(type='text/template')
-  li.item(data-role="fieldcontain", data-icon="plus", data-iconpos="left")
-    a(href="")
-      label
-
 //- Actuators and rules page
 div#add-item(data-role='page')
   div(data-theme='a', data-role='header', data-position='fixed')
@@ -12,6 +7,11 @@ div#add-item(data-role='page')
   div(data-role='content')
     ul#device-items(data-role='listview', data-inset='true')
       li(data-role='list-divider')=__('Devices')
+      <!-- ko foreach: devices -->
+      li.item(data-role="fieldcontain", data-iconpos="left", data-icon="plus", data-bind="jqmlistitem: {icon: icon()}, css: {added: isAdded()}")
+        a(href="")
+          label(data-bind="text: name")
+      <!-- /ko -->
     ul#add-other(data-role='listview', data-inset='true')
       li(data-role='list-divider')=__('Other')
       li(data-role="fieldcontain", data-icon="plus", data-iconpos="left")

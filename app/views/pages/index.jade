@@ -1,70 +1,71 @@
-script.switch-template(type='text/template')
+script#switch-template(type='text/template')
   li.sortable.switch-device(data-role="fieldcontain")
-    label.device-label
+    label.device-label(data-bind="text: name, attr: { for: switchId }")
     | 
-    select.switch(data-role="slider")
+    select.switch(data-role="slider", 
+      data-bind="attr: { id: switchId }, event: { slidestop: onSwitchChange }, value: switchState")
       option(value="off")=__('Off')
       option(value="on")=__('On')
-script.dimmer-template(type='text/template')
+script#dimmer-template(type='text/template')
   li.sortable.dimmer-device(data-role="fieldcontain")
     div.item-inner
-      label.device-label
+      label.device-label(data-bind="text: name")
       | 
-      input.dimmer(type="range", min="0", max="100", step="5", data-highlight="true")
-script.device-template(type='text/template')     
+      input.dimmer(type="range", min="0", max="100", step="5", data-highlight="true",
+        data-bind="attr: { id: sliderId }, event: { slidestop: onSliderStop }, value: sliderValue")
+script#device-template(type='text/template')     
   li.sortable.device(data-role="fieldcontain")
-    label.device-label
+    label.device-label(data-bind="text: name")
     | 
     span.error
     | 
-    span.attributes
-script.temperature-template.presence-template(type='text/template')
-  li.sortable(data-role="fieldcontain")
-    label.device-label
-    | 
-    span.attributes
-script.header-template(type='text/template')
+    span.attributes(data-bind="template: { name: 'attribute-template', foreach: attributes, afterRender: $data.afterAttributeRender }")
+script#header-template(type='text/template')
   li.sortable.header(data-role='list-divider')
-    label
-script.button-template(type='text/template')
+    label(data-bind="text: text")
+script#button-template(type='text/template')
   li.sortable.button(data-role="fieldcontain")
-    label
+    label()=__('Button')
     fieldset(data-role='fieldcontain')
-      a(data-role="button", data-mini="true")
-script.attribute-template(type='text/template')
+      a(data-role="button", data-mini="true", data-bind="jqmbutton: {text: text}, click: onButtonPress")
+script#attribute-template(type='text/template')
   span.attribute
-    span.val
-    span.unit
+    span.val(data-bind="text: valueText")
+    span.unit(data-bind="text: unitText") 
 script#rule-template(type='text/template')
-  li.rule.sortable
-    a(data-transition='slide', href='#edit-rule', style="white-space: normal")
+  li.rule.sortable(data-bind="css: {deactivated: !active()}")
+    a(data-transition='slide', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
       span.if='if'
       | 
-      span.condition
+      span.condition(data-bind="text: condition")
       | 
       span.then='then'
       | 
-      span.action
+      span.action(data-bind="text: action")
 //- Actuators and rules page
-div#index(data-role='page')
+div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
   div(data-theme='a', data-role='header', data-position='fixed')
     div(class="ui-btn-left", data-role="controlgroup", data-type="horizontal")
       a#nav-button(data-role="button", href='#nav-panel', data-icon='bars', data-iconpos='notext')=__('Menu')
     h3 pimatic
     div(class="ui-btn-right", data-role="controlgroup", data-type="horizontal")
-      a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown")
+      a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
   div(data-role='content')
-    ul#items(data-role='listview', data-inset='true')
+    ul#items(data-role='listview', data-inset='true', data-bind="sortable: {data: items, options: {stop: onItemsSorted}, indexOffset: 1, isSorting: isSortingItems}")
       li.with-button(data-role='list-divider')=__('Devices')
-        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a")
-      li#add-a-item()
+        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a", data-bind="jqmbutton: lockButton(), click: toggleEditing")
+      <!-- ko template: { name: getItemTemplate, foreach: items, afterRender: afterRenderItem } -->
+      <!-- /ko -->
+      li#add-a-item(data-bind="visible: enabledEditing() && !isSortingItems() ")
         a(data-transition='slide', href='#add-item')=__('Add an item')+'...'
-      li#delete-item(data-theme='a',data-icon="delete", style="display: none;")=__('Drop here to remove item')
-    ul#rules(data-role='listview', data-inset='true')
+      li#delete-item(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems(), droppable: {options: {drop: onDropItemOnTrash}}")=__('Drop here to remove item')
+    ul#rules(data-role='listview', data-inset='true', data-bind="sortable: {data: rules, options: {stop: onRulesSorted}, indexOffset: 1, isSorting: isSortingRules}")
       li.with-button(data-role='list-divider')=__('Rules')
-        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a")
+        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a", data-bind="jqmbutton: lockButton(), click: toggleEditing")
+      <!-- ko template: { name: 'rule-template', foreach: rules, afterRender: afterRenderRule } -->
+      <!-- /ko -->     
       li#add-rule()
-        a(data-transition='slide', href='#edit-rule')=__('Add a new rule')+'...'
+        a(data-transition='slide', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
       div.drag-message
   div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme='a')
     ul.nav-panel-menu(data-role='listview', data-theme='a', data-divider-theme='a', style='margin-top: -16px;')
@@ -77,7 +78,7 @@ div#index(data-role='page')
       li(data-theme='f')
         a(href='#updates', data-transition="slide")=__('Updates')
       li#import-ca-cert(data-theme='f')
-        a(href='root-ca-cert.crt', data-ajax="false")=__('Show CA root certificate')
+        a(href='root-ca-cert.crt', data-ajax="false", data-bind="visible: hasRootCACert")=__('Show CA root certificate')
       //- Not yet implemented:
       //- li(data-theme='f')
       //-   a(href='#', data-transition="slide")=__('Logout')
@@ -85,7 +86,7 @@ div#index(data-role='page')
         label
           span=__('Remember me')
           input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
-            data-theme="f", data-overlay-theme="b")
+            data-theme="f", data-overlay-theme="b" data-bind="checked: rememberme")
           
   #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a", )
     ul.ui-corner-all(data-role='listview')
