@@ -1,22 +1,18 @@
 //- Actuators and rules page
 div#add-item(data-role='page')
-  div(data-theme='a', data-role='header', data-position='fixed')
-    a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
-      data-inline='true', data-transition="slide", data-direction="reverse")=__('Back')
+  div(data-theme='b', data-role='header', data-position='fixed')
+    a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slide", data-direction="reverse")=__('Back')
     h3=__('Add an item')
-  div(data-role='content')
-    ul#device-items(data-role='listview', data-inset='true')
+  div.ui-content
+    ul#device-items(data-role='listview', data-inset='true', data-theme="b")
       li(data-role='list-divider')=__('Devices')
       <!-- ko foreach: devices -->
-      li.item(data-role="fieldcontain", data-iconpos="left", data-icon="plus", data-bind="jqmlistitem: {icon: icon()}, css: {added: isAdded()}")
-        a(href="")
-          label(data-bind="text: name")
+      li.item(data-theme="a")
+        a(href="", data-bind="text: name, jqmlistitem: {icon: icon()}, css: {added: isAdded()}")
       <!-- /ko -->
-    ul#add-other(data-role='listview', data-inset='true')
+    ul#add-other(data-role='listview', data-inset='true', data-theme="b")
       li(data-role='list-divider')=__('Other')
-      li(data-role="fieldcontain", data-icon="plus", data-iconpos="left")
-        a#add-a-header()
-          label=__('Add a group header')
-      li(data-role="fieldcontain", data-icon="plus", data-iconpos="left")
-        a#add-a-button()
-          label=__('Add a custom button')
+      li(data-role="fieldcontain", data-theme="a", data-icon="plus", data-iconpos="left")
+        a#add-a-header()=__('Add a group header')
+      li(data-role="fieldcontain", data-theme="a", data-icon="plus", data-iconpos="left")
+        a#add-a-button()=__('Add a button')

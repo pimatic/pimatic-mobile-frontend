@@ -1,17 +1,17 @@
 script#switch-template(type='text/template')
-  li.sortable.switch-device(data-role="fieldcontain")
+  li.sortable.switch-device
     label.device-label(data-bind="text: name, attr: { for: switchId }")
     | 
-    select.switch(data-role="slider", 
+    select.switch(
       data-bind="attr: { id: switchId }, event: { slidestop: onSwitchChange }, value: switchState")
       option(value="off")=__('Off')
       option(value="on")=__('On')
 script#dimmer-template(type='text/template')
-  li.sortable.dimmer-device(data-role="fieldcontain")
+  li.sortable.dimmer-device
     div.item-inner
       label.device-label(data-bind="text: name")
       | 
-      input.dimmer(type="range", min="0", max="100", step="5", data-highlight="true",
+      input.dimmer(min="0", max="100", step="5", data-highlight="true",
         data-bind="attr: { id: sliderId }, event: { slidestop: onSliderStop }, value: sliderValue")
 script#device-template(type='text/template')     
   li.sortable.device(data-role="fieldcontain")
@@ -21,19 +21,18 @@ script#device-template(type='text/template')
     | 
     span.attributes(data-bind="template: { name: 'attribute-template', foreach: attributes, afterRender: $data.afterAttributeRender }")
 script#header-template(type='text/template')
-  li.sortable.header(data-role='list-divider')
+  li.sortable.header(data-role='list-divider', data-theme="b")
     label(data-bind="text: text")
 script#button-template(type='text/template')
-  li.sortable.button(data-role="fieldcontain")
+  li.sortable.button
     label()=__('Button')
-    fieldset(data-role='fieldcontain')
-      a(data-role="button", data-mini="true", data-bind="jqmbutton: {text: text}, click: onButtonPress")
+      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: text}, click: onButtonPress")
 script#attribute-template(type='text/template')
   span.attribute
     span.val(data-bind="text: valueText")
     span.unit(data-bind="text: unitText") 
 script#rule-template(type='text/template')
-  li.rule.sortable(data-bind="css: {deactivated: !active()}")
+  li.rule.sortable(data-bind="css: {deactivated: !active()}, dragslide: {}")
     a(data-transition='slide', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
       span.if='if'
       | 
@@ -44,31 +43,29 @@ script#rule-template(type='text/template')
       span.action(data-bind="text: action")
 //- Actuators and rules page
 div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
-  div(data-theme='a', data-role='header', data-position='fixed')
-    div(class="ui-btn-left", data-role="controlgroup", data-type="horizontal")
-      a#nav-button(data-role="button", href='#nav-panel', data-icon='bars', data-iconpos='notext')=__('Menu')
+  div(data-theme='b', data-role='header', data-position='fixed')
+    a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-nodisc-icon.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3 pimatic
-    div(class="ui-btn-right", data-role="controlgroup", data-type="horizontal")
-      a#error-count(data-role="button",href='#log', data-icon="alert", data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
-  div(data-role='content')
+    a#error-count.ui-btn-right.ui-btn.ui-btn-inline.ui-mini.ui-corner-all.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
+  div.ui-content(data-role="main")
     ul#items(data-role='listview', data-inset='true', data-bind="sortable: {data: items, options: {stop: onItemsSorted}, indexOffset: 1, isSorting: isSortingItems}")
-      li.with-button(data-role='list-divider')=__('Devices')
-        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a", data-bind="jqmbutton: lockButton(), click: toggleEditing")
+      li.with-button(data-theme='b', data-role='list-divider')=__('Devices')
+        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-nodisc-icon.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: getItemTemplate, foreach: items, afterRender: afterRenderItem } -->
       <!-- /ko -->
       li#add-a-item(data-bind="visible: enabledEditing() && !isSortingItems() ")
         a(data-transition='slide', href='#add-item')=__('Add an item')+'...'
       li#delete-item(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems(), droppable: {options: {drop: onDropItemOnTrash}}")=__('Drop here to remove item')
     ul#rules(data-role='listview', data-inset='true', data-bind="sortable: {data: rules, options: {stop: onRulesSorted}, indexOffset: 1, isSorting: isSortingRules}")
-      li.with-button(data-role='list-divider')=__('Rules')
-        a.lock-button.round(data-role="button",data-icon="check", data-iconpos='notext', data-theme="a", data-bind="jqmbutton: lockButton(), click: toggleEditing")
+      li.with-button(data-theme='b',data-role='list-divider')=__('Rules')
+        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-nodisc-icon.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: 'rule-template', foreach: rules, afterRender: afterRenderRule } -->
       <!-- /ko -->     
       li#add-rule()
         a(data-transition='slide', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
       div.drag-message
-  div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme='a')
-    ul.nav-panel-menu(data-role='listview', data-theme='a', data-divider-theme='a', style='margin-top: -16px;')
+  div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme='c')
+    ul.nav-panel-menu(data-role='listview', data-theme='c', data-divider-theme='c', style='margin-top: -16px;')
       li(data-icon='delete', data-theme='f')
         a(href='#', data-rel='close')=__("Close menu")
       li(data-theme='f')
@@ -82,11 +79,10 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       //- Not yet implemented:
       //- li(data-theme='f')
       //-   a(href='#', data-transition="slide")=__('Logout')
-      li(data-theme='f').rememberme
-        label
-          span=__('Remember me')
+      li(data-theme='f').rememberme.ui-btn.ui-btn-f
+          label(for="rememberme")=__('Remember me')
           input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
-            data-theme="f", data-overlay-theme="b" data-bind="checked: rememberme")
+            data-theme="c", data-overlay-theme="c" data-bind="jqmchecked: rememberme")
           
   #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a", )
     ul.ui-corner-all(data-role='listview')

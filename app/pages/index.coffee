@@ -1,179 +1,9 @@
 # index-page
 # ----------
 
-( ->
-
-  ###
-    Item classes that are shown in the Device List
-  ###
-
- class Item
-
-    @mapping = {
-      copy: ['itemId', 'type', 'template']
-    }
-
-    constructor: (data) ->
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-    update: (data) -> 
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-    afterRender: (elements) ->
-      $(elements)
-      .addClass('item')
-      .find("label").before(
-        $('<div class="ui-icon-alt handle"><div class="ui-icon ui-icon-bars"></div></div>')
-      )
-
-  class HeaderItem extends Item
-
-    @mapping = {
-      copy: Item.mapping.copy.concat ['headerId', 'text']
-    }
-
-    constructor: (data) ->
-      super(data)
-
-  class ButtonItem extends Item
-
-    @mapping = {
-      copy: Item.mapping.copy.concat ['buttonId', 'text']
-    }
-
-    constructor: (data) ->
-      super(data)
-    afterRender: (elements) -> 
-      super(elements)
-      @buttonEle = $(elements).find('a')
-      @buttonEle.button()
-    onButtonPress: ->
-      $.get("/button-pressed/#{@buttonId}").fail(ajaxAlertFail)
-
-  class DeviceAttribute 
-
-    @mapping = {
-      observe: ["value"]
-    }
-
-    constructor: (data) ->
-      # Allways create an observable for value:
-      unless data.value? then data.value = null
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-      @valueText = ko.computed( =>
-        value = @value()
-        unless value?
-          return __("unknown")
-        if @type is 'boolean'
-          unless @labels? then return value.toString()
-          else if value is true then @labels[0] 
-          else if value is false then @labels[1]
-          else value.toString()
-        else return value.toString()
-      )
-      @unitText = if @unit? then @unit else ''
-
-  class DeviceItem extends Item
-
-    @mapping = {
-      attributes:
-        create: ({data, parent, skip}) => new DeviceAttribute(data)
-        update: ({data, parent, target}) =>
-          #target.update(data)
-          return target
-        key: (data) => data.name
-      observe: ["name", "attributes"]
-    }
-
-    constructor: (data) ->
-      super(data)
-
-    getAttribute: (name) ->
-      attribute = null
-      for attr in @attributes()
-        if attr.name is name
-          attribute = attr
-          break
-      return attribute
-
-    afterAttributeRender: (elements, attribute) ->
-      $(elements)
-        .addClass("attr-#{attribute.name}")
-        .addClass("attr-type-#{attribute.type}")
-      .parent('.attributes')
-        .addClass("contains-attr-#{attribute.name}")
-        .addClass("contains-attr-type-#{attribute.type}")
-
-    updateAttribute: (attrName, attrValue) ->
-      attribute = @getAttribute(attrName)
-      if attribute?
-        attribute.value(attrValue)
-
-  class SwitchItem extends DeviceItem
-
-    constructor: (data) ->
-      super(data)
-      @switchId = "switch-#{data.deviceId}"
-      @switchState = ko.observable(if @getAttribute('state').value() then 'on' else 'off')
-      @getAttribute('state').value.subscribe( (newState) =>
-        @switchState(if newState then 'on' else 'off')
-        pimatic.try => @sliderEle.slider('refresh') 
-      )
-    onSwitchChange: ->
-      @sliderEle.slider('disable')
-      oldState = (if @switchState() is 'on' then 'off' else 'on')
-      deviceAction = (if @switchState() is 'on' then 'turnOn' else 'turnOff')
-      pimatic.loading "switch-on-#{@switchId}", "show", text: __("switching #{@switchState()}")
-      $.ajax("/api/device/#{@deviceId}/#{deviceAction}", global: no)
-        .done( ajaxShowToast)
-        .fail( => 
-          @switchState(if @switchState() is 'on' then 'off' else 'on')
-          pimatic.try( => @sliderEle.slider('refresh'))
-        ).always( => 
-          pimatic.loading "switch-on-#{@switchId}", "hide"
-          # element could be not existing anymore
-          pimatic.try( => @sliderEle.slider('enable'))
-        ).fail(ajaxAlertFail)
-    afterRender: (elements) ->
-      super(elements)
-      @sliderEle = $(elements).find('select')
-      @sliderEle.slider()
-
-  class DimmerItem extends DeviceItem
-    constructor: (data) ->
-      super(data)
-      @sliderId = "switch-#{data.deviceId}"
-      dimlevel = @getAttribute('dimlevel').value
-      @sliderValue = ko.observable(if dimlevel()? then dimlevel() else 0)
-      @getAttribute('dimlevel').value.subscribe( (newDimlevel) =>
-        @sliderValue(newDimlevel)
-        pimatic.try => @sliderEle.slider('refresh') 
-      )
-
-    onSliderStop: ->
-      @sliderEle.slider('disable')
-      pimatic.loading(
-        "dimming-#{@sliderId}", "show", text: __("diminng to %s%", @sliderValue())
-      )
-      $.ajax("/api/device/#{@deviceId}/changeDimlevelTo", 
-          data: {dimlevel: @sliderValue()}
-          global: no
-        ).done(ajaxShowToast)
-        .fail( => 
-          pimatic.try => @sliderEle.val(@getAttribute('dimlevel').value()).slider('refresh') 
-        ).always( => 
-          pimatic.loading "dimming-#{@sliderId}", "hide"
-          # element could be not existing anymore
-          pimatic.try( => @sliderEle.slider('enable'))
-        ).fail(ajaxAlertFail)
-    afterRender: (elements) ->
-      super(elements)
-      if pimatic.pages.index.pageCreated
-        @sliderEle = $(elements).find('input')
-        @sliderEle.slider()
-
-  class TemperatureItem extends DeviceItem
-
-  class PresenceItem extends DeviceItem
-
+$(document).on( "pagebeforecreate", (event) ->
+  # Just execute it one time
+  if pimatic.pages.index? then return
   ###
     Rule class that are shown in the Rules List
   ###
@@ -192,20 +22,11 @@
 
     afterRender: (elements) ->
       $(elements).find("a").before(
-        $('<div class="ui-icon-alt handle"><div class="ui-icon ui-icon-bars"></div></div>')
+        $('<div class="handle"><div class="ui-btn-icon-notext ui-icon ui-icon-bars ui-alt-icon ui-nodisc-icon"></div></div>')
       )
 
-  # Exposrt all classe to be extendable by plugins
-  pimatic.Item = Item
-  pimatic.HeaderItem = HeaderItem
-  pimatic.ButtonItem = ButtonItem
-  pimatic.DeviceItem = DeviceItem
-  pimatic.SwitchItem = SwitchItem
-  pimatic.DimmerItem = DimmerItem
-  pimatic.TemperatureItem = TemperatureItem
-  pimatic.PresenceItem = PresenceItem
+  # Export the rule class
   pimatic.Rule = Rule
-
 
   pimatic.templateClasses = {
     header: pimatic.HeaderItem
@@ -217,12 +38,12 @@
     presence: pimatic.PresenceItem
   }
 
-
   class IndexViewModel
     # static property:
     @mapping = {
       items:
         create: ({data, parent, skip}) =>
+          console.log "create"
           itemClass = pimatic.templateClasses[data.template]
           #console.log "creating:", itemClass
           unless itemClass?
@@ -244,7 +65,7 @@
 
     loading: no
     hasData: no
-    pageCreated: false
+    pageCreated: ko.observable(no)
     items: ko.observableArray([])
     rules: ko.observableArray([])
     errorCount: ko.observable(0)
@@ -268,22 +89,24 @@
       @itemsListViewRefresh = ko.computed( =>
         @items()
         @isSortingItems()
-        console.log "refresing items listview"
-        try
-          $('#items').listview('refresh')
-        catch e
-          #ignore error refreshing
+        if @pageCreated()  
+          try
+            console.log "refresing items listview"
+            $('#items').listview('refresh')
+          catch e
+            #ignore error refreshing
         return ''
       ).extend(rateLimit: {timeout: 0, method: "notifyWhenChangesStop"})
 
       @rulesListViewRefresh = ko.computed( =>
         @rules()
         @isSortingRules()
-        console.log "refresing rules listview"
-        try
-          $('#rules').listview('refresh')
-        catch e
-          #ignore error refreshing
+        if @pageCreated()  
+          try
+            console.log "refresing rules listview"
+            $('#rules').listview('refresh')
+          catch e
+            #ignore error refreshing
         return ''
       ).extend(rateLimit: {timeout: 0, method: "notifyWhenChangesStop"})
 
@@ -332,12 +155,13 @@
         @rememberme(yes)
       else
         # select localStorage as default
-        pimatic.torage = $.localStorage
+        pimatic.storage = $.localStorage
         @rememberme(no)
-        pimaticStorage.set('pimatic', {})
+        pimatic.storage.set('pimatic', {})
 
 
     updateFromJs: (data) -> 
+      console.log "updating:", data
       ko.mapping.fromJS(data, IndexViewModel.mapping, this)
 
     getItemTemplate: (item) ->
@@ -438,12 +262,13 @@
     onAddRuleClicked: ->
       editRulePage = pimatic.pages.editRule
       editRulePage.resetFields()
-      editRulePage.action('new')
+      editRulePage.action('add')
+      editRulePage.ruleEnabled(yes)
       return true
 
     onEditRuleClicked: (rule)->
       editRulePage = pimatic.pages.editRule
-      editRulePage.action('edit')
+      editRulePage.action('update')
       editRulePage.ruleId(rule.id)
       editRulePage.ruleCondition(rule.condition())
       editRulePage.ruleActions(rule.action())
@@ -454,52 +279,50 @@
       urlEncoded = encodeURIComponent(window.location.href)
       window.location.href = "/login?url=#{urlEncoded}"
 
-  pimatic.pages.index = new IndexViewModel()
 
-  $(document).on "pagecreate", '#index', (event) ->
-    indexPage = pimatic.pages.index
-    ko.applyBindings(indexPage, $('#index')[0])
+  pimatic.pages.index = indexPage = new IndexViewModel()
 
-    fixScrollOverDraggableRule()
+  pimatic.socket.on("welcome", (data) ->
+    indexPage.updateFromJs(data)
+  )
 
-    indexPage.loading = yes
-    pimatic.socket.on("welcome", (data) ->
-      indexPage.updateFromJs(data)
-      indexPage.loading = no
-    )
+  pimatic.socket.on("device-attribute", (attrEvent) -> 
+    indexPage.updateDeviceAttribute(attrEvent.id, attrEvent.name, attrEvent.value)
+  )
 
-    pimatic.socket.on("device-attribute", (attrEvent) -> 
-      indexPage.updateDeviceAttribute(attrEvent.id, attrEvent.name, attrEvent.value)
-    )
+  pimatic.socket.on("item-add", (item) -> indexPage.addItemFromJs(item))
+  pimatic.socket.on("item-remove", (itemId) -> indexPage.removeItem(itemId))
+  pimatic.socket.on("item-order", (order) -> indexPage.updateItemOrder(order))
 
-    pimatic.socket.on("item-add", (item) -> indexPage.addItemFromJs(item))
-    pimatic.socket.on("item-remove", (itemId) -> indexPage.removeItem(itemId))
-    pimatic.socket.on("item-order", (order) -> indexPage.updateItemOrder(order))
+  pimatic.socket.on("rule-add", (rule) -> indexPage.updateRuleFromJs(rule))
+  pimatic.socket.on("rule-update", (rule) -> indexPage.updateRuleFromJs(rule))
+  pimatic.socket.on("rule-remove", (ruleId) -> indexPage.removeRule(ruleId))
+  pimatic.socket.on("rule-order", (order) -> indexPage.updateRuleOrder(order))
+  return
+)
 
-    pimatic.socket.on("rule-add", (rule) -> indexPage.updateRuleFromJs(rule))
-    pimatic.socket.on("rule-update", (rule) -> indexPage.updateRuleFromJs(rule))
-    pimatic.socket.on("rule-remove", (ruleId) -> indexPage.removeRule(ruleId))
-    pimatic.socket.on("rule-order", (order) -> indexPage.updateRuleOrder(order))
+$(document).on("pagecreate", '#index', (event) ->
+  indexPage = pimatic.pages.index
+  ko.applyBindings(indexPage, $('#index')[0])
 
+  $('#index #items').on("click", ".device-label", (event, ui) ->
+    deviceId = $(this).parents(".item").data('item-id')
+    device = pimatic.devices[deviceId]
+    unless device? then return
+    div = $ "#device-info-popup"
+    div.find('.info-id .info-val').text device.id
+    div.find('.info-name .info-val').text device.name
+    div.find(".info-attr").remove()
+    for attrName, attr of device.attributes
+      attr = $('<li class="info-attr">').text(attr.label)
+      div.find("ul").append attr
+    div.find('ul').listview('refresh')
+    div.popup "open"
+    return
+  )
 
-    $('#index #items').on "click", ".device-label", (event, ui) ->
-      deviceId = $(this).parents(".item").data('item-id')
-      device = pimatic.devices[deviceId]
-      unless device? then return
-      div = $ "#device-info-popup"
-      div.find('.info-id .info-val').text device.id
-      div.find('.info-name .info-val').text device.name
-      div.find(".info-attr").remove()
-      for attrName, attr of device.attributes
-        attr = $('<li class="info-attr">').text(attr.label)
-        div.find("ul").append attr
-      div.find('ul').listview('refresh')
-      div.popup "open"
-      return
-    
-    $("#items .handle, #rules .handle").disableSelection()
-
-    indexPage.pageCreated = yes
+  $("#items .handle, #rules .handle").disableSelection()
+  indexPage.pageCreated(yes)
 
   fixScrollOverDraggableRule = ->
 
@@ -533,12 +356,9 @@
           # stop dragging
           this._isDragging = no
         _touchEnd.apply(this, [event]) 
-
-)()
-
-
-
-
+  fixScrollOverDraggableRule()
+  return
+)
 
 
 

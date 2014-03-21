@@ -46,24 +46,22 @@
 }
 
 /* align the slider for switches to the right */
-#index div.ui-slider-switch {
-    margin: 3px 10px 10px 0 !important;
+#index div.ui-flipswitch {
+    margin: 5px 16px 5px 0 !important;
     position: absolute;
     right: 0;
     top: 0;
 }
 
-#index li.button fieldset {
+#index li.button a {
   margin: 3px 10px 3px 0 !important;
   position: absolute;
   right: 0;
   top: 0;
-  padding: 0;
 }
 
-#index li.button fieldset a{
+#index li.button a{
   margin-top: 1px;
-  font-weight: bold;
 }
 
 /* index-page */
@@ -71,10 +69,14 @@
   font-weight: bold;
 }
 
+#index #rules li a, #index #items li a {
+  font-weight: normal;
+  color: #333;
+}
 
 .unlocked ul#items li.sortable,
 .unlocked ul#rules li.sortable a {
-  padding-left: 28px;
+  padding-left: 36px;
 }
 
 li.sortable .handle{
@@ -83,9 +85,19 @@ li.sortable .handle{
   opacity: 0.2;
   cursor: move;
   position: absolute;
+  z-index: 2;
   top: 50%;
   left: 0;
-  margin-top: -14px;
+  margin-top: -19px;
+}
+
+li.sortable.header .handle {
+  margin-top: -18px;
+  left: 2px;
+}
+
+#index li.sortable .handle .ui-icon:after{
+  background-color: transparent;
 }
 
 .locked li.sortable .handle{
@@ -99,6 +111,7 @@ li.sortable .handle{
 #delete-item {
   background-color: #CC0000;
   border-color: #AA0000;
+  color: #fff;
 }
 
 fieldset .ui-block-a .ui-btn{
@@ -108,21 +121,15 @@ fieldset .ui-block-b .ui-btn{
     margin-right: 0px;
 }
 
-li.sortable-placeholder{
+#index li.sortable-placeholder{
   border-style: dashed;
   border-width: 1px;
   background-color: rgb(51, 51, 51);
   border-color: rgb(204, 204, 204);
 }
 
-#index .ui-header .ui-btn .ui-btn-inner {
-  height: 16px;
-}
-
-
-#error-count .ui-btn-text {
-  font-weight: bold;
-  top: -1px;
+#index #rules li.sortable-placeholder{
+  padding: 0;
 }
 
 .ui-header .ui-controlgroup .ui-shadow:not(.ui-focus){
@@ -177,31 +184,33 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   margin-left: 0.1em;
 }
 
+.ui-mobile  #items label {
+  margin: 0;
+  display: inline;
+}
+
 .added label {
   color: #A0A0A0;
 }
 
 
-li.rememberme, li.rememberme label{
+
+
+li.rememberme, li.rememberme .ui-checkbox{
   padding: 0 !important;
   margin: 0 !important;
-  border-width: 0;
+  border-width: 0 !important;
 }
 
-li.rememberme label span {
-  font-size: 16px;
-}
 
-li.rememberme label .ui-icon-checkbox-off, li.rememberme label .ui-icon-checkbox-on {
-  left: 15px !important;
+li.rememberme label {
+  font-size: 16px !important;
+  border-left-width: !important;
+  border-right-width: !important;
+  -webkit-border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+  border-radius: 0 !important;
 }
-
-li.rememberme .ui-btn-inner  {
-  border-top-width: 1px;
-  padding: 1.0em 15px;
-  padding-left: 43px !important;
-}
-
 
 
 #rememberme {
@@ -221,11 +230,14 @@ li.rememberme .ui-btn-inner  {
   min-width: 238px;
 }
 
-[data-role=listview].checkbox-list a.ui-link-inherit {
-  padding: 0 0 0 0;
+[data-role=listview].checkbox-list a.ui-btn,
+[data-role=listview].checkbox-list{
+  padding: 0 0 0 0 !important;
 }
 [data-role=listview].checkbox-list label {
-  border: none; margin: 0;
+  border: none;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
 }
 
 #log-messages li {
@@ -307,7 +319,7 @@ li.rememberme .ui-btn-inner  {
   border: 5px solid #ccc !important;
 }
 
-.rule.deactivated a{
+#index #rules li.rule.deactivated a{
   color: #A0A0A0;
 }
 
@@ -316,7 +328,12 @@ li.rememberme .ui-btn-inner  {
   overflow-x: visible !important;
 }
 
-.textcomplete-item a {white-space: nowrap;}
+.textcomplete-item a {
+  white-space: nowrap;
+  color: #000;
+  font-weight: normal;
+  text-shadow: none;
+}
 
 .textcomplete-more select{
   margin: 0;
@@ -360,7 +377,7 @@ li.rememberme .ui-btn-inner  {
     position: relative !important;
 }*/
 
-li.with-button {
+#index li.with-button {
   padding-top: 10px;
   padding-bottom: 10px;
   font-weight: bold;
@@ -368,34 +385,28 @@ li.with-button {
 
 li.with-button a.ui-btn {
   position: absolute;
-  top: -2px;
+  top: 4px;
   right: 8px;
 }
 
-.ui-btn.round {
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  border-radius: 20px;
+#index .lock-button {
+  -webkit-border-radius: 16px;
+  -moz-border-radius: 16px;
+  border-radius: 16px;
+  border-width: 1px;
 }
 
 @media (min-width:35em) {
  
   /* wrap on wide viewports once open */
- 
-  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-push.ui-panel-content-fixed-toolbar-position-left,
-  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-reveal.ui-panel-content-fixed-toolbar-position-left,
-  .ui-page-panel-open .ui-panel-content-wrap-display-push.ui-panel-content-wrap-position-left,
-  .ui-page-panel-open .ui-panel-content-wrap-display-reveal.ui-panel-content-wrap-position-left {
+
+  .ui-panel-page-content-open.ui-panel-page-content-position-left{
     margin-right: 17em;
   }
-  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-push.ui-panel-content-fixed-toolbar-position-right,
-  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-reveal.ui-panel-content-fixed-toolbar-position-right,
-  .ui-page-panel-open .ui-panel-content-wrap-display-push.ui-panel-content-wrap-position-right,
-  .ui-page-panel-open .ui-panel-content-wrap-display-reveal.ui-panel-content-wrap-position-right {
+  .ui-panel-page-content-open.ui-panel-page-content-position-right {
     margin-left: 17em;
   }
-  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-push,
-  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-reveal {
+  .ui-panel-page-content-open{
     width: auto;    
   }
  
@@ -408,4 +419,27 @@ li.with-button a.ui-btn {
     display: none;
   }
  
+}
+
+#index .ui-bar-b .ui-btn{
+  border:1px solid #007dcd;
+  background:#333;
+  font-weight:bold;
+  color:#fff;
+  background-image:-webkit-gradient(linear,left top,left bottom,from( #0093EA ),to( #0093EA ));
+  background-image:-webkit-linear-gradient( #0093EA,#0093EA );
+  background-image:-moz-linear-gradient( #0093EA,#0093EA );
+  background-image:-ms-linear-gradient( #0093EA,#0093EA );
+  background-image:-o-linear-gradient( #0093EA,#0093EA );
+  background-image:linear-gradient( #0093EA,#0093EA );
+
+  -moz-box-shadow:0 1px 0 rgba(255,255,255,.3);
+  -webkit-box-shadow:0 1px 0 rgba(255,255,255,.3);
+  box-shadow:0 1px 0 rgba(255,255,255,.3);
+  box-shadow: 0 1px 0 rgba(255,255,255,.3),
+              0 1px 0 rgba(255,255,255,.3) inset;
+}
+
+#nav-panel {
+  background-color: #333;
 }

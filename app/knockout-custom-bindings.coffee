@@ -1,33 +1,36 @@
 ( ->
 
+  setIconClass = ($ele, icon) ->
+    # remove old icon-class
+    classes = (
+      cl for cl in $ele.attr('class').split(" ") when cl.lastIndexOf('ui-icon-') isnt 0
+    )
+    classes.push('ui-icon-'+icon)
+    console.log classes
+    # add new one
+    $ele.attr("class", classes.join(" "));
+
   ko.bindingHandlers.jqmbutton = {
+
+    init: (element, valueAccessor, allBindings) ->
+      value = valueAccessor()
+      valueUnwrapped = ko.unwrap(value)
+      $ele = $(element)
+      return
+
+
     update: (element, valueAccessor, allBindings) ->
       value = valueAccessor()
       valueUnwrapped = ko.unwrap(value)
       $ele = $(element)
       # Handle text binding
-      if value.text?
-        textValue = ko.unwrap(value.text)
-        $bt = $ele.find('.ui-btn-text')
-        if $bt.length > 0
-          $bt.text(textValue)
-        else
-          $ele.text(textValue)
-
-      # Handle icon binding
-      if value.icon?
-        iconValue = ko.unwrap(value.icon)
-        if $ele.find('.ui-icon').length > 0
-          $ele.buttonMarkup(icon: iconValue)
-        else
-          $ele.attr('data-icon', iconValue)
-
-      # Refresh the button
-      try
-        if $ele.data('role') is 'button'
-          $ele.button('refresh')
-      catch e
-        # ignore button not initialise
+      if valueUnwrapped.text?
+        textValue = ko.unwrap(valueUnwrapped.text)
+        $ele.text(textValue)
+      if valueUnwrapped.icon?
+        icon =  ko.unwrap(valueUnwrapped.icon)
+        setIconClass($ele, icon)
+      return
   }
 
   ko.bindingHandlers.jqmlistitem = {
@@ -38,12 +41,34 @@
 
       # Handle icon binding
       if value.icon?
-        iconValue = ko.unwrap(value.icon)
-        if $ele.find('.ui-icon').length > 0
-          $ele.buttonMarkup(icon: iconValue)
-        else
-          $ele.attr('data-icon', iconValue)
+        icon = ko.unwrap(value.icon)
+        console.log "setting icon", icon
+        setIconClass($ele, icon)
   }
+
+  ko.bindingHandlers.jqmenabled = {
+    update: (element, valueAccessor, allBindings) ->
+      value = valueAccessor()
+      valueUnwrapped = ko.unwrap(value)
+      $ele = $(element)
+      if valueUnwrapped
+        $ele.textinput('enable'); 
+      else
+        $ele.textinput('disable'); 
+      return
+  }
+
+
+
+  ko.bindingHandlers.jqmchecked = {
+    init: ko.bindingHandlers.checked.init
+    update: (element, valueAccessor) ->
+      value = valueAccessor()
+      valueUnwrapped = ko.unwrap(value)
+      #calling 'refresh' only if already enhanced by JQM
+      $(element).checkboxradio("refresh")
+      return
+    }
 
 
   ko.bindingHandlers.sortable = {
@@ -146,6 +171,7 @@
       customOptions = valueUnwrapped.options or {}
 
       li = $(element)
+      rule = bindingContext.$rawData
       action = null
 
       showDragMessage = (msg) =>

@@ -5,16 +5,16 @@
   <meta name="viewport" content="initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="stylesheet" href="jquery.mobile-1.3.2.css" />
-  <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-  <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+  <link rel="stylesheet" href="jquery.mobile-1.4.1.css" />
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.js"></script>
 </head>
 <body>
 
 <div data-role="page">
 
   <div data-role="header" data-position="fixed">
-    <a href="#" data-role="button">Back</a>
+    <a href="#" data-role="button" data-theme="b" class="ui-shadow">Back</a>
     <h1>My Title</h1>
   </div><!-- /header -->
 
@@ -65,11 +65,11 @@
     <div class="ui-body">
       <h1>H1 Heading</h1>
       <p>This is a paragraph that contains <strong>strong</strong>, <em>emphasized</em> and <a href="index.html">linked</a> text. Here is more text so you can see how HTML markup works in content. Here is more text so you can see how HTML markup works in content.</p>
-      <div data-role="collapsible" data-collapsed="true" data-theme="a">
+      <div data-role="collapsible" data-collapsed="true" data-theme="b" data-content-theme="b">
         <h3>I'm a themed collapsible</h3>
         <p>I have <code> data-theme</code> attribute set manually on my container to set the color to match the content block I'm in. </p>
       </div><!-- /collapsible -->
-      <div data-role="collapsible" data-theme="a" data-content-theme="a">
+      <div data-role="collapsible" data-theme="b" data-content-theme="b">
         <h3>I'm a themed collapsible with a themed content</h3>
         <p>I have <code> data-content-theme</code> attribute set manually on my container to set the color to match the content block I'm in. </p>
       </div>
@@ -140,9 +140,9 @@
   <div data-role="footer" data-position="fixed">
     <div data-role="navbar">
       <ul>
-        <li><a href="#" data-icon="gear" class="ui-btn-active ui-state-persist">Button 1</a></li>
-        <li><a href="#" data-icon="refresh">Button 2</a></li>
-        <li><a href="#" data-icon="check">Button 3</a></li>
+        <li><a href="#" data-icon="gear" class="ui-btn-active ui-state-persist" data-theme="b">Button 1</a></li>
+        <li><a href="#" data-icon="refresh" data-theme="b">Button 2</a></li>
+        <li><a href="#" data-icon="check" data-theme="b">Button 3</a></li>
       </ul>
     </div>
   </div>

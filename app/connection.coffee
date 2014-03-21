@@ -1,6 +1,7 @@
-$(document).on "pagebeforecreate", ->
-  if pimatic.inited then return
-  pimatic.inited = yes
+
+$(document).on( "pagebeforecreate", (event) ->
+  # Just execte this function one time:
+  if pimatic.socket? then return
 
   pimatic.socket = io.connect("/", 
     'connect timeout': 20000
@@ -43,3 +44,5 @@ $(document).on "pagebeforecreate", ->
 
   pimatic.socket.on 'error', onConnectionError
   pimatic.socket.on 'connect_error', onConnectionError
+  return
+)

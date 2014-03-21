@@ -1,9 +1,9 @@
 div#edit-rule(data-role='page')
-  div(data-theme='a', data-role='header', data-position='fixed')
+  div(data-theme='b', data-role='header', data-position='fixed')
     h3(data-bind="text: pageTitle()")
-  div(data-role='content')
+  div.ui-content
     form#edit-rule-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
-      input#edit-rule-id(type="text", placeholder="id" data-bind="value: ruleId")
+      input#edit-rule-id(type="text", placeholder="id" data-bind="value: ruleId, jqmenabled: action() == 'add'")
       fieldset
         label(for='edit-rule-condition')='if'
         textarea#edit-rule-condition(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleCondition")
@@ -11,15 +11,15 @@ div#edit-rule(data-role='page')
         label(for='edit-rule-actions')='then'
         textarea#edit-rule-actions(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleActions")
       fieldset(data-role='controlgroup')
-        input#edit-rule-active(type='checkbox', name='edit-rule-active', data-bind="checked: ruleEnabled")
+        input#edit-rule-active(type='checkbox', name='edit-rule-active', data-bind="jqmchecked: ruleEnabled")
         label(for='edit-rule-active')=__('Enabled')
       fieldset.ui-grid-a
         div.ui-block-a
-          a#edit-rule-cancel(data-icon="close", data-transition='slide', data-direction="reverse"
+          a#edit-rule-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
                              data-role="button", href='#index')=__('Cancel')
         div.ui-block-b
-          input#edit-rule-save(data-icon="check", data-theme="a",value=__('Save'), type="submit")
-      div#edit-rule-advanced
+          a#edit-rule-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: onSubmit")=__('Save')
+      div#edit-rule-advanced(data-bind="visible: action() == 'edit'")
         span=__('Advanced Options')+':'
-        a#edit-rule-remove(data-icon="delete", data-transition='slide', data-direction="reverse"
+        a#edit-rule-remove.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
                                data-role="button", href='#index')=__('Delete this rule')

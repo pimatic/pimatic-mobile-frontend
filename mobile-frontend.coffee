@@ -303,10 +303,6 @@ module.exports = (env) ->
         res.setHeader('content-type', 'application/x-x509-ca-cert')
         res.sendfile(certFile)
 
-    
-      # * Static assets
-      app.use express.static(__dirname + "/public")
-
       # ###Socket.io stuff:
       # For every webserver
       for webServer in [app.httpServer, app.httpsServer]
@@ -345,7 +341,6 @@ module.exports = (env) ->
         io.sockets.on('connection', (socket) =>
 
           initData = @getInitalClientData()
-          console.log "initData: ", util.inspect(initData, { showHidden: true, depth: null })
           socket.emit "welcome", initData
 
           for item in initData.items 
@@ -505,14 +500,19 @@ module.exports = (env) ->
 
       themeCss = (
         if @config.theme is 'classic'
-          [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.3.2.css",
-            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.theme-1.3.2.css" ]
+          [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.inline-svg-1.4.2.css",
+            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]
+        else if @config.theme is 'pimatic'
+          [ "pimatic-mobile-frontend/app/css/themes/pimatic/jquery.mobile.icons.min.css",
+            "pimatic-mobile-frontend/app/css/themes/pimatic/pimatic.css",
+            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]        
         else
           [ "pimatic-mobile-frontend/app/css/themes/graphite/#{@config.theme}/" +
-            "jquery.mobile-1.3.2.css" ]
+            "jquery.mobile-1.4.1.css" ]
       )
 
       # Configure static assets with nap
+      console.log "nap mode", @config.mode
       nap(
         appDir: parentDir
         publicDir: "pimatic-mobile-frontend/public"
@@ -522,7 +522,7 @@ module.exports = (env) ->
           js:
             jquery: [
               minPath "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
-              minPath "pimatic-mobile-frontend/app/js/jquery.mobile-1.3.2.js"
+              minPath "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
               minPath "pimatic-mobile-frontend/app/js/jquery-ui-1.10.3.custom.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.ui.touch-punch.js"
@@ -537,12 +537,13 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/helper.coffee"
               "pimatic-mobile-frontend/app/knockout-custom-bindings.coffee"
               "pimatic-mobile-frontend/app/connection.coffee"
+              "pimatic-mobile-frontend/app/pages/index-items.coffee"
               "pimatic-mobile-frontend/app/pages/*"
             ] .concat (minPath(f) for f in @additionalAssetFiles['js'])
             
           css:
             theme: [
-              minPath "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.3.2.css"
+              minPath "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
             ] .concat ( minPath t for t in themeCss ) .concat [
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               minPath "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
@@ -608,6 +609,9 @@ module.exports = (env) ->
           env.logger.error "Unknown mode: #{@config.mode}!"
           ""
       )
+
+      # * Static assets
+      app.use express.static(__dirname + "/public")
 
       # If the app manifest is requested
       @app.get "/application.manifest", (req, res) =>

@@ -3,7 +3,7 @@ div#updates(data-role='page')
     a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
       data-inline='true', data-transition="slide", data-direction="reverse")=__('Back')
     h3=__('Updates')
-  div(data-role='content')
+  div.ui-content
     div.message
     a#install-updates(data-role="button", data-icon="check",  data-inline="true", data-theme="b", data-mini="true")=__('Install Updates')
     a.restart-now(data-role="button", data-icon="refresh",  data-inline="true", data-theme="b", data-mini="true")=__('Restart pimatic')
