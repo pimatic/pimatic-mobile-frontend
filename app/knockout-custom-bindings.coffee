@@ -6,7 +6,6 @@
       cl for cl in $ele.attr('class').split(" ") when cl.lastIndexOf('ui-icon-') isnt 0
     )
     classes.push('ui-icon-'+icon)
-    console.log classes
     # add new one
     $ele.attr("class", classes.join(" "));
 

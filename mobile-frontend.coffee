@@ -146,7 +146,7 @@ module.exports = (env) ->
         unless itemId?
           return res.send(200, {success: false, message: 'no itemId given'})
 
-        item = _(@jsonConfig.items).first({itemId: itemId})
+        item = _(@jsonConfig.items).find({itemId: itemId})
         unless item?
           return res.send(200, {success: false, message: 'could not find item'})
 
@@ -207,7 +207,7 @@ module.exports = (env) ->
       ###
       app.get('/button-pressed/:buttonId', (req, res) =>
         buttonId = req.params.buttonId
-        item = _(@config.items).first({type: 'button', buttonId: buttonId})
+        item = _(@config.items).find({type: 'button', buttonId: buttonId})
         unless item?
           return res.send(200, {success: false, message: 'could not find the button'})
         @emit "button pressed", item
@@ -377,16 +377,20 @@ module.exports = (env) ->
           env.logger.debug("adding item listers") if @config.debug
 
           @on 'item-add', addItemListener = (item) =>
+            assert item? and item.itemId?
             @addAttributeNotify(socket, item)
             socket.emit("item-add", item)
 
           @on 'item-remove', removeItemListener = (item) =>
+            assert item? and item.itemId?
             socket.emit("item-remove", item.itemId)
             
           @on 'item-order', orderItemListener = (order) =>
+            assert order? and Array.isArray order
             socket.emit("item-order", order)
 
           @on 'rule-order', orderRuleListener = (order) =>
+            assert order? and Array.isArray order
             socket.emit("rule-order", order)
 
           socket.on 'disconnect', => 
@@ -447,11 +451,19 @@ module.exports = (env) ->
       env.logger.info "rendering html"
       jade = require('jade')
 
-      renderOptions = 
+      theme = {
+        headerSwatch: 'a'
+        dividerSwatch: 'a'
+        menuSwatch: 'f'
+      }
+
+      renderOptions = {
         pretty: @config.mode is "development"
         compileDebug: @config.mode is "development"
         globals: ["__", "nap", "i18n"]
         mode: @config.mode
+        theme
+      }
 
       awaitingRenders = 
         for page in @additionalAssetFiles['html']
@@ -497,7 +509,7 @@ module.exports = (env) ->
         return p
 
 
-
+      console.log @config.theme
       themeCss = (
         if @config.theme is 'classic'
           [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.inline-svg-1.4.2.css",
@@ -508,7 +520,7 @@ module.exports = (env) ->
             "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]        
         else
           [ "pimatic-mobile-frontend/app/css/themes/graphite/#{@config.theme}/" +
-            "jquery.mobile-1.4.1.css" ]
+            "jquery.mobile-1.4.2.css" ]
       )
 
       # Configure static assets with nap
@@ -611,7 +623,7 @@ module.exports = (env) ->
       )
 
       # * Static assets
-      app.use express.static(__dirname + "/public")
+      @app.use express.static(__dirname + "/public")
 
       # If the app manifest is requested
       @app.get "/application.manifest", (req, res) =>
@@ -637,19 +649,19 @@ module.exports = (env) ->
       @emit 'item-add', item 
 
     addAttributeNotify: (socket, item) ->
-      device = @framework.getDeviceById item.deviceId
+      device = @framework.getDeviceById(item.deviceId)
       unless device? 
         env.logger.debug "device #{item.deviceId} not found."
         return
-      for attr in device.attributes 
-        do (attr) =>
-          env.logger.debug("adding listener for #{attr.name} of #{device.id}") if @config.debug
-          device.on attr.name, attrListener = (value) =>
-            env.logger.debug("attr change for #{attr.name} of #{device.id}: #{value}") if @config.debug
-            @emitAttributeValue socket, device, attr.name, value
+      for attrName, attr of device.attributes 
+        do (attrName, attr) =>
+          env.logger.debug("adding listener for #{attrName} of #{device.id}") if @config.debug
+          device.on attrName, attrListener = (value) =>
+            env.logger.debug("attr change for #{attrName} of #{device.id}: #{value}") if @config.debug
+            @emitAttributeValue socket, device, attrName, value
           socket.on 'disconnect', => 
-            env.logger.debug("removing listener for #{attr} of #{device.id}") if @config.debug
-            device.removeListener attr.name, attrListener
+            env.logger.debug("removing listener for #{attrName} of #{device.id}") if @config.debug
+            device.removeListener attrName, attrListener
       return
 
     getItemsWithData: () ->

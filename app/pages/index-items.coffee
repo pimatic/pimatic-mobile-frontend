@@ -114,22 +114,24 @@ $(document).on( "pagebeforecreate", (event) ->
       @switchState = ko.observable(if @getAttribute('state').value() then 'on' else 'off')
       @getAttribute('state').value.subscribe( (newState) =>
         @switchState(if newState then 'on' else 'off')
-        pimatic.try => @sliderEle.slider('refresh') 
+        pimatic.try => @sliderEle.flipswitch('refresh') 
       )
     onSwitchChange: ->
-      @sliderEle.slider('disable')
-      oldState = (if @switchState() is 'on' then 'off' else 'on')
+      stateToSet = (@switchState() is 'on')
+      if stateToSet is @getAttribute('state').value()
+        return
+      @sliderEle.flipswitch('disable')
       deviceAction = (if @switchState() is 'on' then 'turnOn' else 'turnOff')
       pimatic.loading "switch-on-#{@switchId}", "show", text: __("switching #{@switchState()}")
       $.ajax("/api/device/#{@deviceId}/#{deviceAction}", global: no)
         .done( ajaxShowToast)
         .fail( => 
           @switchState(if @switchState() is 'on' then 'off' else 'on')
-          pimatic.try( => @sliderEle.slider('refresh'))
+          pimatic.try( => @sliderEle.flipswitch('refresh'))
         ).always( => 
           pimatic.loading "switch-on-#{@switchId}", "hide"
           # element could be not existing anymore
-          pimatic.try( => @sliderEle.slider('enable'))
+          pimatic.try( => @sliderEle.flipswitch('enable'))
         ).fail(ajaxAlertFail)
     afterRender: (elements) ->
       super(elements)

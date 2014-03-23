@@ -43,9 +43,7 @@ $(document).on( "pagebeforecreate", (event) ->
     @mapping = {
       items:
         create: ({data, parent, skip}) =>
-          console.log "create"
           itemClass = pimatic.templateClasses[data.template]
-          #console.log "creating:", itemClass
           unless itemClass?
             console.warn "Could not find a template class for #{data.template}"
             itemClass = pimatic.Item
@@ -91,7 +89,6 @@ $(document).on( "pagebeforecreate", (event) ->
         @isSortingItems()
         if @pageCreated()  
           try
-            console.log "refresing items listview"
             $('#items').listview('refresh')
           catch e
             #ignore error refreshing
@@ -103,7 +100,6 @@ $(document).on( "pagebeforecreate", (event) ->
         @isSortingRules()
         if @pageCreated()  
           try
-            console.log "refresing rules listview"
             $('#rules').listview('refresh')
           catch e
             #ignore error refreshing
@@ -116,7 +112,6 @@ $(document).on( "pagebeforecreate", (event) ->
 
       @autosave = ko.computed( =>
         data = ko.mapping.toJS(this)
-        console.log "saving", data
         pimatic.storage.set('pimatic.indexPage', data)
       ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
 
@@ -135,21 +130,20 @@ $(document).on( "pagebeforecreate", (event) ->
         allData = pimatic.storage.get('pimatic')
         pimatic.storage.removeAll()
         if shouldRememberMe
-          pimatic.storage = $.localStorage
-        else
           pimatic.storage = $.sessionStorage
+        else
+          pimatic.storage = $.localStorage
         pimatic.storage.set('pimatic', allData)
       )
 
     setupStorage: ->
-      allData = $.localStorage.get('pimatic')
       if $.localStorage.isSet('pimatic')
-        # Select sessionStorage
+        # Select localStorage
         pimatic.storage = $.localStorage
         $.sessionStorage.removeAll()
         @rememberme(no)
       else if $.sessionStorage.isSet('pimatic')
-        # Select localStorage
+        # Select sessionSotrage
         pimatic.storage = $.sessionStorage
         $.localStorage.removeAll()
         @rememberme(yes)
@@ -161,11 +155,9 @@ $(document).on( "pagebeforecreate", (event) ->
 
 
     updateFromJs: (data) -> 
-      console.log "updating:", data
       ko.mapping.fromJS(data, IndexViewModel.mapping, this)
 
     getItemTemplate: (item) ->
-      console.log "getItemTemplate"
       template = (
         if item.type is 'device'
           if item.template? then "#{item.template}-template"
@@ -187,6 +179,7 @@ $(document).on( "pagebeforecreate", (event) ->
 
 
     removeItem: (itemId) ->
+      console.log "removing", itemId
       @items.remove( (item) => item.itemId is itemId )
 
     removeRule: (ruleId) ->
@@ -201,10 +194,20 @@ $(document).on( "pagebeforecreate", (event) ->
         rule.update(data)
 
     updateItemOrder: (order) ->
-      # todo order items
+      toIndex = (id) -> 
+        index = $.inArray(id, order)
+        if index is -1 # if not in array then move it to the back
+          index = 999999
+        return index
+      @items.sort( (left, right) => toIndex(left.itemId) - toIndex(right.itemId) )
 
     updateRuleOrder: (order) ->
-      # todo order items
+      toIndex = (id) -> 
+        index = $.inArray(id, order)
+        if index is -1 # if not in array then move it to the back
+          index = 999999
+        return index
+      @rules.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
 
     updateDeviceAttribute: (deviceId, attrName, attrValue) ->
       for item in @items()
@@ -246,18 +249,22 @@ $(document).on( "pagebeforecreate", (event) ->
       ).done(ajaxShowToast).fail(ajaxAlertFail)
 
     onDropItemOnTrash: (ev, ui) ->
-      # clear animation
       item = ko.dataFor(ui.draggable[0])
-      pimatic.loading "deleteitem", "show", text: __('Saving')
-      $.post('remove-item', itemId: item.itemId).done( (data) =>
-        if data.success
-          if ui.helper.length > 0
-            ui.helper.hide(0, => @items.remove(item) )
-          else
-            @items.remove(item)
-      ).always( => 
-        pimatic.loading "deleteitem", "hide"
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
+      # Remove the item after sorting stopped:
+      subscripton = @isSortingItems.subscribe( =>
+        pimatic.loading "deleteitem", "show", text: __('Saving')
+        $.post('remove-item', itemId: item.itemId).done( (data) =>
+          if data.success
+            if ui.helper.length > 0
+              ui.helper.hide(0, => @items.remove(item) )
+            else
+              @items.remove(item)
+        ).always( => 
+          pimatic.loading "deleteitem", "hide"
+        ).done(ajaxShowToast).fail(ajaxAlertFail)
+        # Just do it once
+        subscripton.dispose()
+      )
 
     onAddRuleClicked: ->
       editRulePage = pimatic.pages.editRule
@@ -305,21 +312,33 @@ $(document).on("pagecreate", '#index', (event) ->
   indexPage = pimatic.pages.index
   ko.applyBindings(indexPage, $('#index')[0])
 
-  $('#index #items').on("click", ".device-label", (event, ui) ->
-    deviceId = $(this).parents(".item").data('item-id')
-    device = pimatic.devices[deviceId]
-    unless device? then return
-    div = $ "#device-info-popup"
-    div.find('.info-id .info-val').text device.id
-    div.find('.info-name .info-val').text device.name
-    div.find(".info-attr").remove()
-    for attrName, attr of device.attributes
-      attr = $('<li class="info-attr">').text(attr.label)
-      div.find("ul").append attr
-    div.find('ul').listview('refresh')
-    div.popup "open"
+  $('#index #items').on("change", ".switch", (event) ->
+    switchDevice = ko.dataFor(this)
+    switchDevice.onSwitchChange()
     return
   )
+
+  $('#index #items').on("slidestop", ".dimmer", (event) ->
+    dimmerDevice = ko.dataFor(this)
+    dimmerDevice.onSliderStop()
+    return
+  )
+
+  # $('#index #items').on("click", ".device-label", (event, ui) ->
+  #   deviceId = $(this).parents(".item").data('item-id')
+  #   device = pimatic.devices[deviceId]
+  #   unless device? then return
+  #   div = $ "#device-info-popup"
+  #   div.find('.info-id .info-val').text device.id
+  #   div.find('.info-name .info-val').text device.name
+  #   div.find(".info-attr").remove()
+  #   for attrName, attr of device.attributes
+  #     attr = $('<li class="info-attr">').text(attr.label)
+  #     div.find("ul").append attr
+  #   div.find('ul').listview('refresh')
+  #   div.popup "open"
+  #   return
+  # )
 
   $("#items .handle, #rules .handle").disableSelection()
   indexPage.pageCreated(yes)

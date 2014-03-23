@@ -6,8 +6,9 @@ $(document).on("pageinit", '#log', (event) ->
   class LogMessageViewModel
 
     @mapping = {
-      message:
-        key: (data) => data.time + data.message
+      messages:
+        create: ({data, parent, skip}) => data
+      ignore: ['success']
     }
 
     messages: ko.observableArray([])
@@ -21,6 +22,21 @@ $(document).on("pageinit", '#log', (event) ->
     updateFromJs: (data) ->
       ko.mapping.fromJS(data, LogMessageViewModel.mapping, this)
 
+    timeToShow: (index) ->
+      justDate = (time) -> time.substring(0, 10)
+      justTime = (time) -> time.substring(11, 19) 
+
+      index = index()
+      messages = @messages()
+      #console.log index, messages
+      if index is 0 then return messages[index].time
+      else 
+        before = justDate(messages[index-1].time)
+        current = justDate(messages[index].time)
+        if current is before then return justTime(messages[index].time)
+        else return item.time
+    
+
   pimatic.pages.log = logPage = new LogMessageViewModel()
 
   $.get("/api/messages")
@@ -30,7 +46,7 @@ $(document).on("pageinit", '#log', (event) ->
     ).fail(ajaxAlertFail)
 
   pimatic.socket.on 'log', (entry) -> 
-    logPages.message.push entry
+    logPage.messages.push entry
 
   $('#log').on "click", '#clear-log', (event, ui) ->
     $.get("/clear-log")
@@ -42,18 +58,3 @@ $(document).on("pageinit", '#log', (event) ->
   ko.applyBindings(logPage, $('#log')[0])
   return
 )
-
- # =
- #  lastEntry: null
- #  addLogMessage: (entry) ->
- #    li = $ $('#log-message-template').html()
- #    li.find('.level').text(entry.level).addClass(entry.level)
- #    li.find('.msg').text(entry.msg)
- #    lastDate = pimatic.pages.log.lastEntry?.time.substring(0, 10)
- #    newDate = entry.time.substring(0, 10)
- #    li.find('.time').text(
- #      (if lastDate isnt newDate then entry.time else entry.time.substring 11, 19) + " "
- #    )
- #    pimatic.pages.log.lastEntry = entry
- #    $('#log-messages').append li
- #    return

@@ -47,7 +47,7 @@
 
 /* align the slider for switches to the right */
 #index div.ui-flipswitch {
-    margin: 5px 16px 5px 0 !important;
+    margin: 5px 10px 5px 0 !important;
     position: absolute;
     right: 0;
     top: 0;
@@ -72,6 +72,10 @@
 #index #rules li a, #index #items li a {
   font-weight: normal;
   color: #333;
+}
+
+#index #items li.sortable {
+  padding-right: 10px;
 }
 
 .unlocked ul#items li.sortable,
@@ -199,19 +203,26 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
 li.rememberme, li.rememberme .ui-checkbox{
   padding: 0 !important;
   margin: 0 !important;
-  border-width: 0 !important;
+
 }
 
 
-li.rememberme label {
-  font-size: 16px !important;
-  border-left-width: !important;
-  border-right-width: !important;
+li.rememberme .ui-checkbox{
+  padding-left: 8px !important;
+  border-left-width: 0 !important;
+  border-right-width: 0 !important;
   -webkit-border-radius: 0 !important;
   -moz-border-radius: 0 !important;
   border-radius: 0 !important;
 }
 
+
+li.rememberme label {
+  font-size: 16px !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  border-width: 0 !important;
+}
 
 #rememberme {
   opacity: 0;
@@ -243,6 +254,7 @@ li.rememberme label {
 #log-messages li {
   padding: 0.2em 15px;
   line-height: 1.5em;
+  white-space: normal;
 }
 
 #log-messages .time {
@@ -421,7 +433,7 @@ li.with-button a.ui-btn {
  
 }
 
-#index .ui-bar-b .ui-btn{
+#index .ui-bar-b .ui-btn, #index .ui-bar-b {
   border:1px solid #007dcd;
   background:#333;
   font-weight:bold;

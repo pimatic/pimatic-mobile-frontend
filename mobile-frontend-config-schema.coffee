@@ -15,9 +15,8 @@ module.exports =
       else the graphite theme with the corresponding color theme is used.
       """
     # http://driftyco.github.io/graphite/
-    format: ["pimatic", "classic", "aloe", "candy", "melon", "mint", "royal", "sand", "slate", 
-             "water"]
-    default: 'pimatic'
+    format: ["classic", "aloe", "candy", "melon", "mint", "royal", "sand", "slate", "water"]
+    default: 'water'
   debug:
     doc: "that to true to get additional debug outputs"
     format: Boolean

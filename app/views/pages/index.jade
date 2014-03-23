@@ -3,7 +3,7 @@ script#switch-template(type='text/template')
     label.device-label(data-bind="text: name, attr: { for: switchId }")
     | 
     select.switch(
-      data-bind="attr: { id: switchId }, event: { slidestop: onSwitchChange }, value: switchState")
+      data-bind="attr: { id: switchId }, value: switchState")
       option(value="off")=__('Off')
       option(value="on")=__('On')
 script#dimmer-template(type='text/template')
@@ -12,16 +12,16 @@ script#dimmer-template(type='text/template')
       label.device-label(data-bind="text: name")
       | 
       input.dimmer(min="0", max="100", step="5", data-highlight="true",
-        data-bind="attr: { id: sliderId }, event: { slidestop: onSliderStop }, value: sliderValue")
+        data-bind="attr: { id: sliderId }, value: sliderValue")
 script#device-template(type='text/template')     
-  li.sortable.device(data-role="fieldcontain")
+  li.sortable.device()
     label.device-label(data-bind="text: name")
     | 
     span.error
     | 
     span.attributes(data-bind="template: { name: 'attribute-template', foreach: attributes, afterRender: $data.afterAttributeRender }")
 script#header-template(type='text/template')
-  li.sortable.header(data-role='list-divider', data-theme="b")
+  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
     label(data-bind="text: text")
 script#button-template(type='text/template')
   li.sortable.button
@@ -43,13 +43,13 @@ script#rule-template(type='text/template')
       span.action(data-bind="text: action")
 //- Actuators and rules page
 div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
-  div(data-theme='b', data-role='header', data-position='fixed')
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
     a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-nodisc-icon.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3 pimatic
     a#error-count.ui-btn-right.ui-btn.ui-btn-inline.ui-mini.ui-corner-all.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
   div.ui-content(data-role="main")
     ul#items(data-role='listview', data-inset='true', data-bind="sortable: {data: items, options: {stop: onItemsSorted}, indexOffset: 1, isSorting: isSortingItems}")
-      li.with-button(data-theme='b', data-role='list-divider')=__('Devices')
+      li.with-button(data-theme=theme.dividerSwatch, data-role='list-divider')=__('Devices')
         a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-nodisc-icon.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: getItemTemplate, foreach: items, afterRender: afterRenderItem } -->
       <!-- /ko -->
@@ -57,32 +57,32 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
         a(data-transition='slide', href='#add-item')=__('Add an item')+'...'
       li#delete-item(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems(), droppable: {options: {drop: onDropItemOnTrash}}")=__('Drop here to remove item')
     ul#rules(data-role='listview', data-inset='true', data-bind="sortable: {data: rules, options: {stop: onRulesSorted}, indexOffset: 1, isSorting: isSortingRules}")
-      li.with-button(data-theme='b',data-role='list-divider')=__('Rules')
+      li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Rules')
         a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-nodisc-icon.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: 'rule-template', foreach: rules, afterRender: afterRenderRule } -->
       <!-- /ko -->     
       li#add-rule()
         a(data-transition='slide', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
       div.drag-message
-  div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme='c')
-    ul.nav-panel-menu(data-role='listview', data-theme='c', data-divider-theme='c', style='margin-top: -16px;')
-      li(data-icon='delete', data-theme='f')
+  div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)
+    ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
+      li(data-icon='delete', data-theme=theme.menuSwatch)
         a(href='#', data-rel='close')=__("Close menu")
-      li(data-theme='f')
+      li(data-theme=theme.menuSwatch)
         a(href='#log', data-transition="slide")=__('Log') 
-      li(data-theme='f')
+      li(data-theme=theme.menuSwatch)
         a(href='#plugins', data-transition="slide")=__('Plugins') 
-      li(data-theme='f')
+      li(data-theme=theme.menuSwatch)
         a(href='#updates', data-transition="slide")=__('Updates')
-      li#import-ca-cert(data-theme='f')
+      li#import-ca-cert(data-theme=theme.menuSwatch)
         a(href='root-ca-cert.crt', data-ajax="false", data-bind="visible: hasRootCACert")=__('Show CA root certificate')
       //- Not yet implemented:
-      //- li(data-theme='f')
+      //- li(data-theme=theme.menuSwatch)
       //-   a(href='#', data-transition="slide")=__('Logout')
-      li(data-theme='f').rememberme.ui-btn.ui-btn-f
+      li(data-theme=theme.menuSwatch).rememberme.ui-btn.ui-btn-f
           label(for="rememberme")=__('Remember me')
           input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
-            data-theme="c", data-overlay-theme="c" data-bind="jqmchecked: rememberme")
+            data-bind="jqmchecked: rememberme")
           
   #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a", )
     ul.ui-corner-all(data-role='listview')
