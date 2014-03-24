@@ -53,6 +53,17 @@
     top: 0;
 }
 
+#index div.ui-flipswitch .ui-flipswitch-on {
+  color: #FFF;
+  font-weight: bold;
+}
+
+#index div.ui-flipswitch .ui-flipswitch-off {
+  color: #000;
+  font-weight: bold;
+}
+
+
 #index li.button a {
   margin: 3px 10px 3px 0 !important;
   position: absolute;
@@ -69,13 +80,18 @@
   font-weight: bold;
 }
 
-#index #rules li a, #index #items li a {
+#index #rules li a{
   font-weight: normal;
   color: #333;
 }
 
 #index #items li.sortable {
   padding-right: 10px;
+}
+
+#index #items #add-a-item a, #index #rules #add-rule a{
+  font-weight: normal;
+  color: #000;
 }
 
 .unlocked ul#items li.sortable,
@@ -453,5 +469,6 @@ li.with-button a.ui-btn {
 }
 
 #nav-panel {
-  background-color: #333;
+  background-color: #FFF;
+  box-shadow: none;
 }
