@@ -95,9 +95,9 @@ module.exports = (env) ->
           return
         # else add the item to the item list and send success
         @addNewItem({
-            itemId: @genItemId('device', deviceId)
-            type: 'device'
-            deviceId: deviceId
+          itemId: @genItemId('device', deviceId)
+          type: 'device'
+          deviceId: deviceId
         })
         res.send(200, {success: true, message: __("Added %s to the list.", deviceId)})
       )
@@ -517,7 +517,7 @@ module.exports = (env) ->
         else if @config.theme is 'pimatic'
           [ "pimatic-mobile-frontend/app/css/themes/pimatic/jquery.mobile.icons.min.css",
             "pimatic-mobile-frontend/app/css/themes/pimatic/pimatic.css",
-            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]        
+            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]
         else
           [ "pimatic-mobile-frontend/app/css/themes/graphite/#{@config.theme}/" +
             "jquery.mobile-1.4.2.css" ]
@@ -657,7 +657,8 @@ module.exports = (env) ->
         do (attrName, attr) =>
           env.logger.debug("adding listener for #{attrName} of #{device.id}") if @config.debug
           device.on attrName, attrListener = (value) =>
-            env.logger.debug("attr change for #{attrName} of #{device.id}: #{value}") if @config.debug
+            if @config.debug
+              env.logger.debug("attr change for #{attrName} of #{device.id}: #{value}") 
             @emitAttributeValue socket, device, attrName, value
           socket.on 'disconnect', => 
             env.logger.debug("removing listener for #{attrName} of #{device.id}") if @config.debug
