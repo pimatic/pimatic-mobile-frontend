@@ -534,6 +534,7 @@ module.exports = (env) ->
           js:
             jquery: [
               minPath "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
+              minPath "pimatic-mobile-frontend/app/mobile-init.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
               minPath "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
               minPath "pimatic-mobile-frontend/app/js/jquery-ui-1.10.3.custom.js"
