@@ -94,15 +94,25 @@ html .ui-loader {
 }
 
 #index #items li.sortable {
-  padding-right: 10px;
+  padding-right: 20px;
 }
 
-#index #items #add-a-item a, #index #rules #add-rule a{
+#index #items #add-a-item a, #index #rules #add-rule a, #index #rules #add-variable a{
   font-weight: normal;
   color: #000;
 }
 
+#index .ui-content .ui-listview {
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+
+#index .ui-content{
+  padding-top: 0px;
+}
+
 .unlocked ul#items li.sortable,
+.unlocked ul#variables li.sortable,
 .unlocked ul#rules li.sortable a {
   padding-left: 36px;
 }
@@ -130,10 +140,6 @@ li.sortable.header .handle {
 
 .locked li.sortable .handle{
   display: none;
-}
-
-.locked #add-a-item {
-  display: none !important;
 }
 
 #delete-item {
@@ -166,7 +172,7 @@ fieldset .ui-block-b .ui-btn{
   box-shadow: 0 1px 0           rgba(255,255,255,.3);
 }
 
-ul#items, ul#rules{
+ul#items, ul#rules, ul#variables{
   position: relative;
   background-color: rgb(51, 51, 51);
 }
@@ -211,6 +217,15 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   color: #888888;
   margin-left: 0.1em;
 }
+
+#index #variables .var-name{
+  display: inline;
+} 
+
+#index #variables .var-value{
+  float: right;
+  display: block;
+} 
 
 .ui-mobile  #items label {
   margin: 0;

@@ -193,6 +193,20 @@ module.exports = (env) ->
         @emit 'rule-order', order
         res.send 200, {success: true}
       )
+
+      ###
+      Handle post request for updating the variables list sorting.
+      ###
+      app.post('/update-variable-order', (req, res) =>
+        order = req.body.order
+        unless order?
+          res.send 200, {success: false, message: 'no order given'}
+          return
+        @config.variables = @jsonConfig.variables = _(order).map( (name)=> {name}).value()
+        @framework.saveConfig()
+        @emit 'variable-order', order
+        res.send 200, {success: true}
+      )
     
       ###
       Handle get request for clearing the log
@@ -358,6 +372,26 @@ module.exports = (env) ->
                         env.logger.debug error.stack
                       )
 
+          for variable in initData.variables
+            do (variable) =>
+              console.log "getting var value:", variable.name
+              @framework.variableManager.getVariableValue(variable.name).then( (value) =>
+                @emitVariableValue(socket, variable.name, value)
+              ).catch( (error) => 
+                env.logger.warn "Error getting value of #{variable.name}"
+                env.logger.debug error.stack
+              )
+          
+          env.logger.debug("adding listener for variables") if @config.debug
+          @framework.variableManager.on('change', varChangeListener = (name, value) =>
+            env.logger.debug("var change for #{name}: #{value}") if @config.debug
+            @emitVariableValue(socket, name, value)
+          )
+          socket.on('disconnect', => 
+            env.logger.debug("removing variables listener") if @config.debug
+            @framework.variableManager.removeListener('change', varChangeListener)
+          )
+
 
           env.logger.debug("adding rule listerns") if @config.debug
           framework.ruleManager.on "add", addRuleListener = (rule) =>
@@ -393,6 +427,10 @@ module.exports = (env) ->
             assert order? and Array.isArray order
             socket.emit("rule-order", order)
 
+          @on 'variable-order', orderVariablesListener = (order) =>
+            assert order? and Array.isArray order
+            socket.emit("variable-order", order)
+
           socket.on 'disconnect', => 
             env.logger.debug("removing rule listerns") if @config.debug
             framework.ruleManager.removeListener "update", updateRuleListener
@@ -405,6 +443,7 @@ module.exports = (env) ->
             @removeListener 'item-remove', removeItemListener
             @removeListener 'item-order', orderItemListener
             @removeListener 'rule-order', orderRuleListener
+            @removeListener 'variable-order', orderVariablesListener
           return
         )
       # register the predicate provider
@@ -508,8 +547,6 @@ module.exports = (env) ->
         # in other modes or when not exist return full file:
         return p
 
-
-      console.log @config.theme
       themeCss = (
         if @config.theme is 'classic'
           [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.inline-svg-1.4.2.css",
@@ -524,7 +561,6 @@ module.exports = (env) ->
       )
 
       # Configure static assets with nap
-      console.log "nap mode", @config.mode
       nap(
         appDir: parentDir
         publicDir: "pimatic-mobile-frontend/public"
@@ -740,6 +776,16 @@ module.exports = (env) ->
         return if index is -1 then 99999 else index 
       ).value()
 
+    getVariables: () =>
+      variables = @framework.variableManager.getAllVariables()
+      # sort rules by ordering in config
+      order = _(@config.variables).map( (r) => r.name )
+      variables = _(variables).sortBy( (r) => 
+        index = order.indexOf r.name
+        # push it to the end if not found
+        return if index is -1 then 99999 else index 
+      ).value()
+
     getInitalClientData: () ->
       return {
         errorCount: env.logger.transports.memory.getErrorCount()
@@ -747,21 +793,27 @@ module.exports = (env) ->
         hasRootCACert: @hasRootCACert
         items: @getItemsWithData()
         rules: @getRules()
+        variables: @getVariables()
       }      
 
     emitRuleUpdate: (socket, trigger, rule) ->
-      socket.emit "rule-#{trigger}",
+      socket.emit "rule-#{trigger}", {
         id: rule.id
         condition: rule.conditionToken
         action: rule.actionsToken
         active: rule.active
         valid: rule.valid
+      }
 
     emitAttributeValue: (socket, device, name, value) ->
-      socket.emit "device-attribute",
+      socket.emit "device-attribute", {
         id: device.id
         name: name
         value: value
+      }
+
+    emitVariableValue: (socket, name, value) ->
+      socket.emit "variable", { name, value }
 
     genItemId: (prefix, baseText, existingItems = @config.items) ->
       existingIds = _(existingItems).map( (item) => item.itemId ).filter( (id) => id? ).value()

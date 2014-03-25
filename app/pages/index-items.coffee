@@ -7,6 +7,8 @@ $(document).on( "pagebeforecreate", (event) ->
   ###
     Item classes that are shown in the Device List
   ###
+
+  handleHTML = $('#sortable-handle-template').text()
   
   class Item
 
@@ -21,9 +23,7 @@ $(document).on( "pagebeforecreate", (event) ->
     afterRender: (elements) ->
       $(elements)
       .addClass('item')
-      .find("label").before(
-        $('<div class="handle"><div class="ui-btn-icon-notext ui-icon ui-icon-bars ui-alt-icon ui-nodisc-icon"></div></div>')
-      )
+      .find("label").before($(handleHTML))
 
   class HeaderItem extends Item
 

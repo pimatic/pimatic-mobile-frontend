@@ -79,7 +79,6 @@
       dataList = value.data
       customOptions = valueUnwrapped.options or {}
       # The differents between the index in the array and the index in the html dom
-      indexOffset = valueUnwrapped.indexOffset or 0
       sourceIndex = null
 
       defaultOptions = {
@@ -90,6 +89,7 @@
         cursor: "move"
         revert: 100
         scroll: true
+        containment: "parent"
       }
 
       events = ["activate", "beforeStop", "change", "create", "deactivate", "out", "over", "receive", 
@@ -104,7 +104,8 @@
       bindingEventHandler = {
         # cache the item index when the dragging starts
         start: (event, ui) =>
-          sourceIndex = ui.item.index() - indexOffset 
+          data = ko.dataFor(ui.item[0])
+          sourceIndex = dataList.indexOf(data)
           $('#items').listview('refresh')        
           ui.item.css('border-bottom-width', '1px')
           # signal start sorting
@@ -112,9 +113,10 @@
         # capture the item index at end of the dragging
         # then move the item
         stop: (event, ui) =>
+          data = ko.dataFor(ui.item.prev()[0])
           ui.item.css('border-bottom-width', '0')
           # get the new location item index
-          targetIndex = ui.item.index() - indexOffset
+          targetIndex = dataList.indexOf(data) + 1
           if sourceIndex >= 0 and targetIndex >= 0 and sourceIndex isnt targetIndex
             #  get the item to be moved
             underlyingList = ko.utils.unwrapObservable(dataList)

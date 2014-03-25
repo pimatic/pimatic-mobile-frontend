@@ -8,25 +8,40 @@ $(document).on( "pagebeforecreate", (event) ->
     Rule class that are shown in the Rules List
   ###
 
-  class Rule
+  handleHTML = $('#sortable-handle-template').text()
 
+  class Rule
     @mapping = {
       key: (data) => data.id
       copy: ['id']
     }
-
     constructor: (data) ->
       ko.mapping.fromJS(data, @constructor.mapping, this)
     update: (data) ->
       ko.mapping.fromJS(data, @constructor.mapping, this)
-
     afterRender: (elements) ->
-      $(elements).find("a").before(
-        $('<div class="handle"><div class="ui-btn-icon-notext ui-icon ui-icon-bars ui-alt-icon ui-nodisc-icon"></div></div>')
-      )
+      $(elements).find("a").before($(handleHTML))
+
+  class Variable
+    @mapping = {
+      key: (data) => data.name
+      observe: ['value']
+    }
+    constructor: (data) ->
+      unless data.value? then data.value = null
+      ko.mapping.fromJS(data, @constructor.mapping, this)
+
+      @displayName = ko.computed( => "$#{@name}" )
+      @hasValue = ko.computed( => @value()? )
+      @displayValue = ko.computed( => if @hasValue() then @value() else "null" )
+    update: (data) ->
+      ko.mapping.fromJS(data, @constructor.mapping, this)
+    afterRender: (elements) ->
+      $(elements).find("label").before($(handleHTML))
 
   # Export the rule class
   pimatic.Rule = Rule
+  pimatic.Variable = Variable
 
   pimatic.templateClasses = {
     header: pimatic.HeaderItem
@@ -59,6 +74,12 @@ $(document).on( "pagebeforecreate", (event) ->
           target.update(data)
           return target
         key: (data) => data.id
+      variables:
+        create: ({data, parent, skip}) => new pimatic.Variable(data)
+        update: ({data, parent, target}) =>
+          target.update(data)
+          return target
+        key: (data) => data.name
     }
 
     loading: no
@@ -66,13 +87,16 @@ $(document).on( "pagebeforecreate", (event) ->
     pageCreated: ko.observable(no)
     items: ko.observableArray([])
     rules: ko.observableArray([])
+    variables: ko.observableArray([])
     errorCount: ko.observable(0)
     enabledEditing: ko.observable(no)
     hasRootCACert: ko.observable(no)
     rememberme: ko.observable(no)
+    showAttributeVars: ko.observable(no)
 
     isSortingItems: ko.observable(no)
     isSortingRules: ko.observable(no)
+    isSortingVariables: ko.observable(no)
 
     constructor: () ->
       @setupStorage()
@@ -87,6 +111,7 @@ $(document).on( "pagebeforecreate", (event) ->
       @itemsListViewRefresh = ko.computed( =>
         @items()
         @isSortingItems()
+        @enabledEditing()
         if @pageCreated()  
           try
             $('#items').listview('refresh')
@@ -98,9 +123,22 @@ $(document).on( "pagebeforecreate", (event) ->
       @rulesListViewRefresh = ko.computed( =>
         @rules()
         @isSortingRules()
+        @enabledEditing()
         if @pageCreated()  
           try
             $('#rules').listview('refresh')
+          catch e
+            #ignore error refreshing
+        return ''
+      ).extend(rateLimit: {timeout: 0, method: "notifyWhenChangesStop"})
+
+      @variablesListViewRefresh = ko.computed( =>
+        @variables()
+        @enabledEditing()
+        @showAttributeVars()
+        if @pageCreated()  
+          try
+            $('#variables').listview('refresh')
           catch e
             #ignore error refreshing
         return ''
@@ -135,6 +173,8 @@ $(document).on( "pagebeforecreate", (event) ->
           pimatic.storage = $.localStorage
         pimatic.storage.set('pimatic', allData)
       )
+
+      @showAttributeVarsText = ko.computed( => __('show device attribute variables'))
 
     setupStorage: ->
       if $.localStorage.isSet('pimatic')
@@ -173,10 +213,15 @@ $(document).on( "pagebeforecreate", (event) ->
     afterRenderRule: (elements, rule) ->
       rule.afterRender(elements)
 
+    afterRenderVariable: (elements, variable) ->
+      variable.afterRender(elements)
+
     addItemFromJs: (data) ->
       item = IndexViewModel.mapping.items.create({data})
       @items.push(item)
 
+    toggleShowAttributeVars: () ->
+      @showAttributeVars(not @showAttributeVars())
 
     removeItem: (itemId) ->
       @items.remove( (item) => item.itemId is itemId )
@@ -208,15 +253,28 @@ $(document).on( "pagebeforecreate", (event) ->
         return index
       @rules.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
 
+    updateVariableOrder: (order) ->
+      console.log order
+      toIndex = (name) -> 
+        index = $.inArray(name, order)
+        if index is -1 # if not in array then move it to the back
+          index = 999999
+        return index
+      @variables.sort( (left, right) => toIndex(left.name) - toIndex(right.name) )
+
     updateDeviceAttribute: (deviceId, attrName, attrValue) ->
       for item in @items()
         if item.type is 'device' and item.deviceId is deviceId
           item.updateAttribute(attrName, attrValue)
           break
 
+    updateVariableValue: (varName, varValue) ->
+      for variable in @variables()
+        if variable.name is varName
+          variable.value(varValue)
+
     toggleEditing: ->
       @enabledEditing(not @enabledEditing())
-      $('#items').listview('refresh') if pimatic.pages.index.pageCreated
       pimatic.loading "enableediting", "show", text: __('Saving')
       $.ajax("/enabledEditing/#{@enabledEditing()}",
         global: false # don't show loading indicator
@@ -245,6 +303,18 @@ $(document).on( "pagebeforecreate", (event) ->
         data: {order: order}
       ).always( ->
         pimatic.loading "ruleorder", "hide"
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
+
+    onVariablesSorted: ->
+      order = (variable.name for variable in @variables())
+      console.log order
+      pimatic.loading "variableorder", "show", text: __('Saving')
+      $.ajax("update-variable-order",
+        type: "POST"
+        global: false
+        data: {order: order}
+      ).always( ->
+        pimatic.loading "variableorder", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
 
     onDropItemOnTrash: (ev, ui) ->
@@ -296,6 +366,10 @@ $(document).on( "pagebeforecreate", (event) ->
     indexPage.updateDeviceAttribute(attrEvent.id, attrEvent.name, attrEvent.value)
   )
 
+  pimatic.socket.on("variable", (varEvent) -> 
+    indexPage.updateVariableValue(varEvent.name, varEvent.value)
+  )
+
   pimatic.socket.on("item-add", (item) -> indexPage.addItemFromJs(item))
   pimatic.socket.on("item-remove", (itemId) -> indexPage.removeItem(itemId))
   pimatic.socket.on("item-order", (order) -> indexPage.updateItemOrder(order))
@@ -304,6 +378,8 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("rule-update", (rule) -> indexPage.updateRuleFromJs(rule))
   pimatic.socket.on("rule-remove", (ruleId) -> indexPage.removeRule(ruleId))
   pimatic.socket.on("rule-order", (order) -> indexPage.updateRuleOrder(order))
+
+  pimatic.socket.on("variable-order", (order) -> indexPage.updateVariableOrder(order))
   return
 )
 
