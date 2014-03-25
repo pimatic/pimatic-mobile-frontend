@@ -26,5 +26,5 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     include pages/plugins
     include pages/updates
     | !{additionalPages}
-    #toast(data-role='toast')
+    #toast.ui-corner-all(data-role='toast')
     div.ui-loader-background  

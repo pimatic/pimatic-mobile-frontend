@@ -16,16 +16,24 @@
   display: block;
 }
 
+html .ui-loader {
+  opacity: 0.88;
+  border-width: 1px;
+  background-color: #2a2a2a;
+  border-color: #1d1d1d;
+  color: #fff;
+  text-shadow: 0 1px 0 #111;
+}
+
+
 .ui-loader-textonly {
   padding: 7px;
   margin-top: -32px;
   bottom: 10px;
   top: auto;
+  font-size: 0.8em;
 }
 
-.ui-loader-verbose h1 {
-  font-weight: normal;
-}
 
 /* button display enhancements */
 .ui-focus,
@@ -471,4 +479,9 @@ li.with-button a.ui-btn {
 #nav-panel {
   background-color: #FFF;
   box-shadow: none;
+}
+
+
+#edit-rule-form label {
+  font-weight: bold;
 }

@@ -6,17 +6,17 @@
 /* Shared Styles */
 
 .ui-toast {
-  color: white;
-  background-color: #555;
+  color: #fff;
+  background-color: #000;
   padding: 6px;
-  font-size: 10pt;
-  font-weight: normal;
-  border: 1px solid #666;
-  
-  -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  border-radius: 6px;
-  
+  font-size: 0.8em;
+  font-weight: bold;
   position: fixed;
   z-index: 5000;
+  opacity: 0.88;
+  border-width: 1px;
+  background-color: #2a2a2a;
+  border-color: #1d1d1d;
+  color: #fff;
+  text-shadow: 0 1px 0 #111;
 }

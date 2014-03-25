@@ -179,7 +179,6 @@ $(document).on( "pagebeforecreate", (event) ->
 
 
     removeItem: (itemId) ->
-      console.log "removing", itemId
       @items.remove( (item) => item.itemId is itemId )
 
     removeRule: (ruleId) ->
@@ -343,44 +342,38 @@ $(document).on("pagecreate", '#index', (event) ->
   $("#items .handle, #rules .handle").disableSelection()
   indexPage.pageCreated(yes)
 
-  fixScrollOverDraggableRule = ->
 
-    _touchStart = $.ui.mouse.prototype._touchStart
-    if _touchStart?
-      $.ui.mouse.prototype._touchStart = (event) ->
-        # Just alter behavior if the event is triggered on an draggable
-        if this._isDragging?
-          if this._isDragging is no
-            # we are not dragging so allow scrolling
-            return
-        _touchStart.apply(this, [event]) 
-
-      _touchMove = $.ui.mouse.prototype._touchMove
-      $.ui.mouse.prototype._touchMove = (event) ->
-        if this._isDragging?
-          unless this._isDragging is yes
-            # discard the event to not prevent defaults
-            return
-        _touchMove.apply(this, [event])
-        # Sometimes the rule item seems to keep highlighted
-        # so clear hover/down state manualy
-        $('#rules li.ui-btn-down-c')
-          .removeClass("ui-btn-down-c")
-          .removeClass('ui-btn-hover-c')
-          .addClass("ui-btn-up-c")
-
-      _touchEnd = $.ui.mouse.prototype._touchEnd
-      $.ui.mouse.prototype._touchEnd = (event) ->
-        if this._isDragging?
-          # stop dragging
-          this._isDragging = no
-        _touchEnd.apply(this, [event]) 
-  fixScrollOverDraggableRule()
   return
 )
 
 
+fixScrollOverDraggableRule = ->
+  _touchStart = $.ui.mouse.prototype._touchStart
+  if _touchStart?
+    $.ui.mouse.prototype._touchStart = (event) ->
+      # Just alter behavior if the event is triggered on an draggable
+      if this._isDragging?
+        if this._isDragging is no
+          # we are not dragging so allow scrolling
+          return
+      _touchStart.apply(this, [event]) 
 
+    _touchMove = $.ui.mouse.prototype._touchMove
+    $.ui.mouse.prototype._touchMove = (event) ->
+      if this._isDragging?
+        unless this._isDragging is yes
+          # discard the event to not prevent defaults
+          return
+      _touchMove.apply(this, [event])
+
+    _touchEnd = $.ui.mouse.prototype._touchEnd
+    $.ui.mouse.prototype._touchEnd = (event) ->
+      if this._isDragging?
+        # stop dragging
+        this._isDragging = no
+        return
+      _touchEnd.apply(this, [event]) 
+fixScrollOverDraggableRule()
 
 
 

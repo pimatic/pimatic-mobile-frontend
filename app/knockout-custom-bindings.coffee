@@ -225,6 +225,7 @@
         # Capture the last mousedown/touchstart event
         lastVmouseDown = null
         li.on('vmousedown', (event) =>
+          console.log 'vmousedown'
           if $(event.target).parent('.handle').length then return
           lastVmouseDown = event
         )
@@ -232,20 +233,25 @@
         uiDraggable._isDragging = no
         # If the mouse
         li.on('vmousemove', (event) =>
+          console.log 'vmousemove'
           if $(event.target).parent('.handle').length then return
           unless lastVmouseDown is null
             deltaX = Math.abs(event.pageX - lastVmouseDown.pageX)
             deltaY = Math.abs(event.pageY - lastVmouseDown.pageY)
             # detect horizontal drag
             if deltaX > deltaY and deltaX > 5 and not uiDraggable._isDragging
+              console.log 'vmousemove dragging'
               # https://code.google.com/p/android/issues/detail?id=19827
               event.originalEvent.preventDefault();
+              event.stopPropagation();
               originalEvent = lastVmouseDown.originalEvent
               uiDraggable._isDragging = yes
               $.ui.mouse.prototype._touchStart.apply(
                 uiDraggable, [originalEvent]
               )
               lastVmouseDown = null
+            else
+              console.log 'vmousemove not dragging'
         )
   }
 

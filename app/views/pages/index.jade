@@ -44,13 +44,13 @@ script#rule-template(type='text/template')
 //- Actuators and rules page
 div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
-    a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-nodisc-icon.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
+    a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3 pimatic
     a#error-count.ui-btn-right.ui-btn.ui-btn-inline.ui-mini.ui-corner-all.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
   div.ui-content(data-role="main")
     ul#items(data-role='listview', data-inset='true', data-bind="sortable: {data: items, options: {stop: onItemsSorted}, indexOffset: 1, isSorting: isSortingItems}")
       li.with-button(data-theme=theme.dividerSwatch, data-role='list-divider')=__('Devices')
-        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-nodisc-icon.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
+        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: getItemTemplate, foreach: items, afterRender: afterRenderItem } -->
       <!-- /ko -->
       li#add-a-item(data-bind="visible: enabledEditing() && !isSortingItems() ")
@@ -58,7 +58,7 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       li#delete-item(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems(), droppable: {options: {drop: onDropItemOnTrash}}")=__('Drop here to remove item')
     ul#rules(data-role='listview', data-inset='true', data-bind="sortable: {data: rules, options: {stop: onRulesSorted}, indexOffset: 1, isSorting: isSortingRules}")
       li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Rules')
-        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-nodisc-icon.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
+        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: 'rule-template', foreach: rules, afterRender: afterRenderRule } -->
       <!-- /ko -->     
       li#add-rule()

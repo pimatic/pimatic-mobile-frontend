@@ -2,8 +2,8 @@
 $( document ).on( "mobileinit", function() {
   $.extend( $.mobile , {
     ajaxEnabled: false,
-    hoverDelay: 100,
+    hoverDelay: 300,
     defaultPageTransition: 'slide',
-    getMaxScrollForTransition: function(){return 999999;}
+    getMaxScrollForTransition: function(){return 5;}
   });
 });

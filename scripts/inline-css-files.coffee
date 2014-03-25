@@ -16,9 +16,8 @@ cssIncImages = (cssFile) ->
 
 walk = (dir) ->
   files = fs.readdirSync(dir)
-  for i of files
-    continue  unless files.hasOwnAttribute(i)
-    name = dir + "/" + files[i]
+  for f in files
+    name = dir + "/" + f
     if fs.statSync(name).isDirectory()
       walk name
     else
@@ -26,4 +25,4 @@ walk = (dir) ->
         console.log name
         cssIncImages name
 
-walk __dirname + '/../app/css'
+walk __dirname + '/../app/css/themes/'
