@@ -34,6 +34,7 @@ $(document).on( "pagebeforecreate", (event) ->
       @displayName = ko.computed( => "$#{@name}" )
       @hasValue = ko.computed( => @value()? )
       @displayValue = ko.computed( => if @hasValue() then @value() else "null" )
+    isDeviceAttribute: -> $.inArray('.', @name) isnt -1
     update: (data) ->
       ko.mapping.fromJS(data, @constructor.mapping, this)
     afterRender: (elements) ->
@@ -232,6 +233,10 @@ $(document).on( "pagebeforecreate", (event) ->
       item = IndexViewModel.mapping.items.create({data})
       @items.push(item)
 
+    addVariableFromJs: (data) ->
+      variable = IndexViewModel.mapping.variables.create({data})
+      @variables.push(variable)
+
     toggleShowAttributeVars: () ->
       @showAttributeVars(not @showAttributeVars())
       pimatic.loading "showAttributeVars", "show", text: __('Saving')
@@ -246,6 +251,9 @@ $(document).on( "pagebeforecreate", (event) ->
 
     removeRule: (ruleId) ->
       @rules.remove( (rule) => rule.id is ruleId )
+
+    removeVariable: (varName) ->
+      @variables.remove( (variable) => variable.name is varName )
 
     updateRuleFromJs: (data) ->
       rule = ko.utils.arrayFirst(@rules(), (rule) => rule.id is data.id )
@@ -375,6 +383,15 @@ $(document).on( "pagebeforecreate", (event) ->
       editVariablePage.action('add')
       return true
 
+    onEditVariableClicked: (variable)->
+      unless variable.isDeviceAttribute()
+        editVariablePage = pimatic.pages.editVariable
+        editVariablePage.variableName(variable.name)
+        editVariablePage.variableValue(variable.value())
+        editVariablePage.action('update')
+        jQuery.mobile.changePage '#edit-variable', transition: 'slide'
+      return true
+
     toLoginPage: ->
       urlEncoded = encodeURIComponent(window.location.href)
       window.location.href = "/login?url=#{urlEncoded}"
@@ -403,6 +420,8 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("rule-remove", (ruleId) -> indexPage.removeRule(ruleId))
   pimatic.socket.on("rule-order", (order) -> indexPage.updateRuleOrder(order))
 
+  pimatic.socket.on("variable-add", (variable) -> indexPage.addVariableFromJs(variable))
+  pimatic.socket.on("variable-remove", (variableName) -> indexPage.removeVariable(variableName))
   pimatic.socket.on("variable-order", (order) -> indexPage.updateVariableOrder(order))
   return
 )

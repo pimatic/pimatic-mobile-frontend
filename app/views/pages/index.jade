@@ -45,9 +45,9 @@ script#rule-template(type="text/template")
       | 
       span.action(data-bind="text: action")
 script#variable-template(type="text/template")
-  li.variable.sortable(data-bind="visible: $root.showAttributeVars() || $.inArray('.', name) == -1")
+  li.variable.sortable(data-bind="visible: $root.showAttributeVars() || !isDeviceAttribute()")
     label.var-name(data-bind="text: displayName()")
-    span.var-value(data-bind="text: displayValue()")
+    span.var-value(data-bind="text: displayValue(), click: $root.onEditVariableClicked")
 //- Actuators and rules page
 div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')

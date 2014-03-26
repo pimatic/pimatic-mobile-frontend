@@ -388,7 +388,6 @@ module.exports = (env) ->
 
           for variable in initData.variables
             do (variable) =>
-              console.log "getting var value:", variable.name
               @framework.variableManager.getVariableValue(variable.name).then( (value) =>
                 @emitVariableValue(socket, variable.name, value)
               ).catch( (error) => 
@@ -401,9 +400,20 @@ module.exports = (env) ->
             env.logger.debug("var change for #{name}: #{value}") if @config.debug
             @emitVariableValue(socket, name, value)
           )
+
+          @framework.variableManager.on('add', varAddListener = (name, value) =>
+            socket.emit("variable-add", {name, value})
+          )
+
+          @framework.variableManager.on('remove', varRemoveListener = (name) =>
+            socket.emit("variable-remove", name)
+          )
+
           socket.on('disconnect', => 
             env.logger.debug("removing variables listener") if @config.debug
             @framework.variableManager.removeListener('change', varChangeListener)
+            @framework.variableManager.removeListener('add', varAddListener)
+            @framework.variableManager.removeListener('remove', varRemoveListener)
           )
 
 
@@ -415,7 +425,7 @@ module.exports = (env) ->
             @emitRuleUpdate socket, "update", rule
          
           framework.ruleManager.on "remove", removeRuleListener = (rule) =>
-            @emitRuleUpdate socket, "remove", rule
+            socket.emit "rule-remove", rule.id
 
           env.logger.debug("adding log listern") if @config.debug
           memoryTransport = env.logger.transports.memory

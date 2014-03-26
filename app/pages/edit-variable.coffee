@@ -32,6 +32,14 @@ $(document).on("pagebeforecreate", (event) ->
       ).fail(ajaxAlertFail)
       return false
 
+    onRemove: ->
+      $.get("/api/variable/#{@variableName()}/remove")
+        .done( (data) ->
+          if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+          else alert data.error
+        ).fail(ajaxAlertFail)
+      return false
+
   pimatic.pages.editVariable = new EditVariableViewModel()
   return
 )

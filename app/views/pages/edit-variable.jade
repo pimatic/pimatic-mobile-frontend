@@ -5,7 +5,7 @@ div#edit-variable(data-role='page')
     form#edit-variable-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       .fieldcontain
         label(for='edit-variable-name')=__('Name')
-        input#edit-variable-name(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName")
+        input#edit-variable-name(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName, jqmenabled: action() == 'add'")
       .fieldcontain
         label(for='edit-variable-value')=__('Value')
         input#edit-varibale-value(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableValue")
@@ -15,3 +15,7 @@ div#edit-variable(data-role='page')
                              data-role="button", href='#index')=__('Cancel')
         div.ui-block-b
           a#edit-variable-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: onSubmit")=__('Save')
+      div#edit-variable-advanced(data-bind="visible: action() == 'update'")
+          //- span=__('Advanced Options')+':'
+          a#edit-variable-remove.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
+            data-bind="click: onRemove", data-role="button", href='#index')=__('Delete this variable')
