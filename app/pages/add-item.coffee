@@ -56,7 +56,7 @@ $(document).on "pagecreate", '#add-item', (event) ->
     return
 
   $('#add-other').on "click", '#add-a-header', ->
-    $("<div>").simpledialog2
+    $("<div>").simpledialog2(
       mode: "button"
       headerText: __("Name")
       headerClose: true
@@ -72,11 +72,12 @@ $(document).on "pagecreate", '#add-item', (event) ->
               $.get("/add-header/#{name}").done((result) ->
                 pimatic.showToast __("Header added")
               ).fail(ajaxAlertFail)
+    )
     setTimeout ( -> $('.ui-simpledialog-input').focus() ), 1
     return
 
   $('#add-other').on "click", '#add-a-button', ->
-    $("<div>").simpledialog2
+    $("<div>").simpledialog2(
       mode: "button"
       headerText: __("Name")
       headerClose: true
@@ -92,6 +93,7 @@ $(document).on "pagecreate", '#add-item', (event) ->
               $.get("/add-button/#{name}").done((result) ->
                 pimatic.showToast __("Button added")
               ).fail(ajaxAlertFail)
+    )
     setTimeout ( -> $('.ui-simpledialog-input').focus() ), 1
     return
   return

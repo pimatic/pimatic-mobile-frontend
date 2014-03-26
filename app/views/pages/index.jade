@@ -68,7 +68,7 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
         a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: 'rule-template', foreach:rules, afterRender: afterRenderRule } -->
       <!-- /ko -->     
-      li#add-rule()
+      li#add-rule(data-bind="visible: enabledEditing() && !isSortingRules() ")
         a(data-transition='slide', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
       div.drag-message
     ul#variables(data-role='listview', data-bind="sortable: {data: variables, options: {stop: onVariablesSorted}, isSorting: isSortingVariables}")
@@ -77,8 +77,8 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
           data-rel="popup", data-transition="slideup", data-bind="jqmbutton: lockButton()")
       <!-- ko template: { name: 'variable-template', foreach:variables, afterRender: afterRenderVariable } -->
       <!-- /ko --> 
-      li#add-a-item(data-bind="visible: enabledEditing() && !isSortingVariables() ")
-        a(data-transition='slide', href='#add-variable')=__('Add a variable')+'...'
+      li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
+        a(data-transition='slide', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
   div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)
     ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
       li(data-icon='delete', data-theme=theme.menuSwatch)
@@ -102,7 +102,7 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
     ul(data-role='listview', data-inset='true', style='min-width: 210px;')
         li(data-role='list-divider')=__('Choose an action')
         li
-          a(href='#', data-rel="back", data-bind="click: toggleEditing")=__('Change order')
+          a(href='#', data-rel="back", data-bind="text: toggleEditingText(), click: toggleEditing")=__('Change order')
         li
           a(href='#', data-rel="back", data-bind="text: showAttributeVarsText(), click: toggleShowAttributeVars")      
   #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a")

@@ -97,18 +97,18 @@ html .ui-loader {
   padding-right: 20px;
 }
 
-#index #items #add-a-item a, #index #rules #add-rule a, #index #rules #add-variable a{
+#index #items #add-a-item a, #index #rules #add-rule a, #index #variables #add-a-variable a{
   font-weight: normal;
   color: #000;
 }
 
 #index .ui-content .ui-listview {
-  margin-top: 40px;
+  margin-top: 20px;
   margin-bottom: 10px;
 }
 
-#index .ui-content{
-  padding-top: 0px;
+#index .ui-content #items {
+  margin-top: 0px;
 }
 
 .unlocked ul#items li.sortable,

@@ -25,6 +25,10 @@ module.exports =
     doc: "enabled or disabled the drag and drop of items"
     format: Boolean
     default: true
+  showAttributeVars:
+    doc: "show variables for device attributes"
+    format: Boolean
+    default: false
   rules:
     doc: "order of the rules"
     format: Array

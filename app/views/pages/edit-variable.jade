@@ -1,0 +1,17 @@
+div#edit-variable(data-role='page')
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    h3(data-bind="text: pageTitle()")
+  div.ui-content
+    form#edit-variable-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
+      .fieldcontain
+        label(for='edit-variable-name')=__('Name')
+        input#edit-variable-name(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName")
+      .fieldcontain
+        label(for='edit-variable-value')=__('Value')
+        input#edit-varibale-value(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableValue")
+      .fieldcontain.ui-grid-a
+        div.ui-block-a
+          a#edit-variable-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
+                             data-role="button", href='#index')=__('Cancel')
+        div.ui-block-b
+          a#edit-variable-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: onSubmit")=__('Save')

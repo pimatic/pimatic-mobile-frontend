@@ -242,6 +242,20 @@ module.exports = (env) ->
           )
         }
 
+      app.get '/showAttributeVars/:state', (req, res) =>
+        state = req.params.state
+        state = (state is "true")
+        @config.showAttributeVars = state
+        @jsonConfig.showAttributeVars = state
+        @framework.saveConfig()
+        res.send 200, {
+          success: true 
+          message: (
+            if state then __("Showing variables for device attributes.") 
+            else __("Hiding variables for device attributes.")
+          )
+        }
+
       app.get '/remember', (req, res) =>
         rememberMe = req.query.rememberMe
         # rememberMe is handled by the framework, so see if it was picked up:
@@ -790,6 +804,7 @@ module.exports = (env) ->
       return {
         errorCount: env.logger.transports.memory.getErrorCount()
         enabledEditing: @config.enabledEditing
+        showAttributeVars: @config.showAttributeVars
         hasRootCACert: @hasRootCACert
         items: @getItemsWithData()
         rules: @getRules()

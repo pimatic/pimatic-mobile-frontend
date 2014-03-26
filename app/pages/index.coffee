@@ -174,7 +174,19 @@ $(document).on( "pagebeforecreate", (event) ->
         pimatic.storage.set('pimatic', allData)
       )
 
-      @showAttributeVarsText = ko.computed( => __('show device attribute variables'))
+      @toggleEditingText = ko.computed( => 
+        unless @enabledEditing() 
+          __('Edit lists')
+        else
+          __('Lock lists')
+      )
+
+      @showAttributeVarsText = ko.computed( => 
+        unless @showAttributeVars() 
+          __('Show device attribute variables')
+        else
+          __('Hide device attribute variables')
+      )
 
     setupStorage: ->
       if $.localStorage.isSet('pimatic')
@@ -222,6 +234,12 @@ $(document).on( "pagebeforecreate", (event) ->
 
     toggleShowAttributeVars: () ->
       @showAttributeVars(not @showAttributeVars())
+      pimatic.loading "showAttributeVars", "show", text: __('Saving')
+      $.ajax("/showAttributeVars/#{@showAttributeVars()}",
+        global: false # don't show loading indicator
+      ).always( ->
+        pimatic.loading "showAttributeVars", "hide"
+      ).done(ajaxShowToast)
 
     removeItem: (itemId) ->
       @items.remove( (item) => item.itemId is itemId )
@@ -349,6 +367,12 @@ $(document).on( "pagebeforecreate", (event) ->
       editRulePage.ruleCondition(rule.condition())
       editRulePage.ruleActions(rule.action())
       editRulePage.ruleEnabled(rule.active())
+      return true
+
+    onAddVariableClicked: ->
+      editVariablePage = pimatic.pages.editVariable
+      editVariablePage.resetFields()
+      editVariablePage.action('add')
       return true
 
     toLoginPage: ->

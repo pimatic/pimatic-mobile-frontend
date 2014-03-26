@@ -34,7 +34,7 @@ module.exports = (env) ->
         return {
           token: match
           nextInput: input.substring(match.length)
-          predicateHandler: new ButtonPredicateHandler(this, matchingButton.id)
+          predicateHandler: new ButtonPredicateHandler(this, matchingButton.itemId)
         }
       else if matchCount > 1
         context?.addError(""""#{predicate.trim()}" is ambiguous.""")
@@ -45,12 +45,12 @@ module.exports = (env) ->
     constructor: (@provider, @itemId) ->
 
     setup: ->
-      @buttonPressedListener = (item) => if item.id is @itemId then @emit('change', 'event')
+      @buttonPressedListener = (item) => if item.itemId is @itemId then @emit('change', 'event')
       @provider.mobile.on 'button pressed', @buttonPressedListener
       super()
     getValue: -> Q(false)
     destroy: -> 
-      @mobile.removeListener 'button pressed', @buttonPressedListener
+      @provider.mobile.removeListener 'button pressed', @buttonPressedListener
       super()
     getType: -> 'event'
 
