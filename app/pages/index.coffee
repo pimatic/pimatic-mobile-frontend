@@ -44,16 +44,6 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.Rule = Rule
   pimatic.Variable = Variable
 
-  pimatic.templateClasses = {
-    header: pimatic.HeaderItem
-    button: pimatic.ButtonItem
-    device: pimatic.DeviceItem  
-    switch: pimatic.SwitchItem
-    dimmer: pimatic.DimmerItem
-    temperature: pimatic.TemperatureItem
-    presence: pimatic.PresenceItem
-  }
-
   class IndexViewModel
     # static property:
     @mapping = {
@@ -280,7 +270,6 @@ $(document).on( "pagebeforecreate", (event) ->
       @rules.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
 
     updateVariableOrder: (order) ->
-      console.log order
       toIndex = (name) -> 
         index = $.inArray(name, order)
         if index is -1 # if not in array then move it to the back
@@ -333,7 +322,6 @@ $(document).on( "pagebeforecreate", (event) ->
 
     onVariablesSorted: ->
       order = (variable.name for variable in @variables())
-      console.log order
       pimatic.loading "variableorder", "show", text: __('Saving')
       $.ajax("update-variable-order",
         type: "POST"
@@ -440,6 +428,18 @@ $(document).on("pagecreate", '#index', (event) ->
     dimmerDevice = ko.dataFor(this)
     dimmerDevice.onSliderStop()
     return
+  )
+
+  $('#index #items').on("vclick", ".shutter-down", (event) ->
+    shutterDevice = ko.dataFor(this)
+    shutterDevice.onShutterDownClicked()
+    return false
+  )
+
+  $('#index #items').on("vclick", ".shutter-up", (event) ->
+    shutterDevice = ko.dataFor(this)
+    shutterDevice.onShutterUpClicked()
+    return false
   )
 
   # $('#index #items').on("click", ".device-label", (event, ui) ->

@@ -75,9 +75,6 @@ $(document).on( "pagebeforecreate", (event) ->
     @mapping = {
       attributes:
         create: ({data, parent, skip}) => new DeviceAttribute(data)
-        update: ({data, parent, target}) =>
-          #target.update(data)
-          return target
         key: (data) => data.name
       observe: ["name", "attributes"]
     }
@@ -174,6 +171,24 @@ $(document).on( "pagebeforecreate", (event) ->
 
   class PresenceItem extends DeviceItem
 
+  class ContactItem extends DeviceItem
+
+  class ShutterItem extends DeviceItem
+    onShutterDownClicked: -> @_ajaxCall('lowerDown')
+    onShutterUpClicked: -> @_ajaxCall('liftUp')
+    _ajaxCall: (action) ->
+      text = (if action is "liftUp" then "Up" else "Down")
+      pimatic.loading(
+        "shutter-#{@deviceId}", "show", text: __(text)
+      )
+      $.ajax("/api/device/#{@deviceId}/#{action}", 
+          global: no
+        ).done(ajaxShowToast)
+        .always( => 
+          pimatic.loading "shutter-#{@deviceId}", "hide"
+        ).fail(ajaxAlertFail)
+
+
   # Export all classe to be extendable by plugins
   pimatic.Item = Item
   pimatic.HeaderItem = HeaderItem
@@ -183,6 +198,8 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.DimmerItem = DimmerItem
   pimatic.TemperatureItem = TemperatureItem
   pimatic.PresenceItem = PresenceItem
+  pimatic.ShutterItem = ShutterItem
+  pimatic.ContactItem = ContactItem
 
   pimatic.templateClasses = {
     header: pimatic.HeaderItem
@@ -192,6 +209,8 @@ $(document).on( "pagebeforecreate", (event) ->
     dimmer: pimatic.DimmerItem
     temperature: pimatic.TemperatureItem
     presence: pimatic.PresenceItem
+    contact: pimatic.ContactItem
+    shutter: pimatic.ShutterItem
   }
   return
 )

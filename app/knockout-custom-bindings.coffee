@@ -57,8 +57,6 @@
       return
   }
 
-
-
   ko.bindingHandlers.jqmchecked = {
     init: ko.bindingHandlers.checked.init
     update: (element, valueAccessor) ->

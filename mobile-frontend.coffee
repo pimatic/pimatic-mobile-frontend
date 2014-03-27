@@ -377,14 +377,6 @@ module.exports = (env) ->
                 when "device" 
                   device = @framework.getDeviceById(item.deviceId)
                   @addAttributeNotify(socket, item)
-                  for attr in item.attributes
-                    do (attr) =>
-                      device.getAttributeValue(attr.name).timeout(10000).then( (value) =>
-                        @emitAttributeValue(socket, device, attr.name, value)
-                      ).catch( (error) => 
-                        env.logger.warn "Error getting #{attr.name} of #{item.id}: #{error.message}"
-                        env.logger.debug error.stack
-                      )
 
           for variable in initData.variables
             do (variable) =>
@@ -724,6 +716,12 @@ module.exports = (env) ->
           socket.on 'disconnect', => 
             env.logger.debug("removing listener for #{attrName} of #{device.id}") if @config.debug
             device.removeListener attrName, attrListener
+          device.getAttributeValue(attrName).timeout(10000).then( (value) =>
+            @emitAttributeValue(socket, device, attrName, value)
+          ).catch( (error) => 
+            env.logger.warn "Error getting #{attrName} of #{device.id}: #{error.message}"
+            env.logger.debug error.stack
+          )
       return
 
     getItemsWithData: () ->

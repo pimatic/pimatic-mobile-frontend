@@ -6,6 +6,14 @@ script#switch-template(type='text/template')
       data-bind="attr: { id: switchId }, value: switchState")
       option(value="off")=__('Off')
       option(value="on")=__('On')
+script#shutter-template(type='text/template')
+  li.sortable.shutter-device
+    label.device-label(data-bind="text: name")
+    | 
+    div.shutter-buttons.ui-mini.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced="true")
+      div.ui-controlgroup-controls
+        a.shutter-down.ui-first-child.ui-btn.ui-corner-all.ui-icon-arrow-d.ui-btn-icon-left(href='#')=__('Down')
+        a.shutter-up.ui-last-child.ui-btn.ui-corner-all.ui-icon-arrow-u.ui-btn-icon-left(href='#')=__('Up')
 script#dimmer-template(type='text/template')
   li.sortable.dimmer-device
     div.item-inner
@@ -29,8 +37,8 @@ script#button-template(type='text/template')
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: text}, click: onButtonPress")
 script#attribute-template(type='text/template')
   span.attribute
-    span.val(data-bind="text: valueText")
-    span.unit(data-bind="text: unitText") 
+    span.val(data-bind="text: $data.valueText")
+    span.unit(data-bind="text: $data.unitText") 
 script#sortable-handle-template(type='text/template')
   div.handle
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
