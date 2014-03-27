@@ -57,6 +57,8 @@ $(document).on "pagecreate", '#add-item', (event) ->
 
   $('#add-other').on "click", '#add-a-header', ->
     $("<div>").simpledialog2(
+      themeDialog: 'a'
+      themeButtonDefault: 'b'
       mode: "button"
       headerText: __("Name")
       headerClose: true
@@ -64,6 +66,7 @@ $(document).on "pagecreate", '#add-item', (event) ->
       buttonInput: true
       buttons:
         OK:
+          text: __('Add')
           click: ->
             name = $.mobile.sdLastInput
             if name is ""
@@ -78,6 +81,8 @@ $(document).on "pagecreate", '#add-item', (event) ->
 
   $('#add-other').on "click", '#add-a-button', ->
     $("<div>").simpledialog2(
+      themeDialog: 'a'
+      themeButtonDefault: 'b'
       mode: "button"
       headerText: __("Name")
       headerClose: true
@@ -85,6 +90,7 @@ $(document).on "pagecreate", '#add-item', (event) ->
       buttonInput: true
       buttons:
         OK:
+          text: __('Add')
           click: ->
             name = $.mobile.sdLastInput
             if name is ""

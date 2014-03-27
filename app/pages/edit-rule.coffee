@@ -14,7 +14,7 @@ $(document).on("pagebeforecreate", (event) ->
     ruleName: ko.observable('')
     ruleCondition: ko.observable('')
     ruleActions: ko.observable('')
-    ruleEnabled: ko.observable(no)
+    ruleEnabled: ko.observable(yes)
 
     constructor: ->
       @ruleAsText = ko.computed( => "if #{@ruleCondition()} then #{@ruleActions()}")
@@ -27,7 +27,7 @@ $(document).on("pagebeforecreate", (event) ->
       @ruleName('')
       @ruleCondition('')
       @ruleActions('')
-      @ruleEnabled('')
+      @ruleEnabled(yes)
 
     onSubmit: ->
       $.post("/api/rule/#{@ruleId()}/#{@action()}", 

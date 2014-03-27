@@ -166,6 +166,11 @@ fieldset .ui-block-b .ui-btn{
   padding: 0;
 }
 
+#index #variables li.sortable-placeholder{
+  padding-top: 0.7em;
+  padding-bottom: 1.7em;
+}
+
 .ui-header .ui-controlgroup .ui-shadow:not(.ui-focus){
   -moz-box-shadow: 0 1px 0      rgba(255,255,255,.3);
   -webkit-box-shadow: 0 1px 0   rgba(255,255,255,.3);
@@ -236,6 +241,12 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   color: #A0A0A0;
 }
 
+
+#device-items li.item a, 
+#add-other a#add-a-header, 
+#add-other a#add-a-button {
+  font-weight: normal;
+}
 
 
 
@@ -495,7 +506,11 @@ li.with-button a.ui-btn {
   background-color: #FFF;
   box-shadow: none;
 }
-
+#nav-panel a,
+#nav-panel label
+{
+  font-weight: normal;
+}
 
 #edit-rule-form label {
   font-weight: bold;

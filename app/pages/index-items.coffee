@@ -152,7 +152,7 @@ $(document).on( "pagebeforecreate", (event) ->
     onSliderStop: ->
       @sliderEle.slider('disable')
       pimatic.loading(
-        "dimming-#{@sliderId}", "show", text: __("diminng to %s%", @sliderValue())
+        "dimming-#{@sliderId}", "show", text: __("dimming to %s%", @sliderValue())
       )
       $.ajax("/api/device/#{@deviceId}/changeDimlevelTo", 
           data: {dimlevel: @sliderValue()}

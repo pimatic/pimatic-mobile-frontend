@@ -6,10 +6,10 @@ div#edit-rule(data-role='page')
       input#edit-rule-id(type="text", placeholder="id" data-bind="value: ruleId, jqmenabled: action() == 'add'")
       fieldset
         label(for='edit-rule-condition')='if'
-        textarea#edit-rule-condition(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleCondition")
+        textarea#edit-rule-condition(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleCondition, valueUpdate: 'afterkeydown'")
       fieldset
         label(for='edit-rule-actions')='then'
-        textarea#edit-rule-actions(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleActions")
+        textarea#edit-rule-actions(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleActions, valueUpdate: 'afterkeydown'")
       fieldset(data-role='controlgroup')
         input#edit-rule-active(type='checkbox', name='edit-rule-active', data-bind="jqmchecked: ruleEnabled")
         label(for='edit-rule-active')=__('Enabled')

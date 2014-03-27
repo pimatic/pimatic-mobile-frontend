@@ -507,7 +507,6 @@
       },
 
       onKeydown: function (e) {
-        console.log(this.displayCount);
         var $item;
         if (!this.shown) return;
         if (e.keyCode === 27) {         // ESC
