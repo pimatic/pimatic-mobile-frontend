@@ -174,10 +174,19 @@ $(document).on( "pagebeforecreate", (event) ->
   class ContactItem extends DeviceItem
 
   class ShutterItem extends DeviceItem
+
+    constructor: (data) ->
+      super(data)
+      @getAttribute('position').value.subscribe( (position) =>
+        @_updateButtons(position)
+      )
+
     onShutterDownClicked: -> @_ajaxCall('lowerDown')
     onShutterUpClicked: -> @_ajaxCall('liftUp')
     _ajaxCall: (action) ->
       text = (if action is "liftUp" then "Up" else "Down")
+      @downBtn.addClass('ui-state-disabled')
+      @upBtn.addClass('ui-state-disabled')
       pimatic.loading(
         "shutter-#{@deviceId}", "show", text: __(text)
       )
@@ -186,8 +195,24 @@ $(document).on( "pagebeforecreate", (event) ->
         ).done(ajaxShowToast)
         .always( => 
           pimatic.loading "shutter-#{@deviceId}", "hide"
+          @downBtn.removeClass('ui-state-disabled')
+          @upBtn.removeClass('ui-state-disabled')
         ).fail(ajaxAlertFail)
+    _updateButtons: (position) ->
+      switch position
+        when 'up'
+          @downBtn.removeClass('ui-btn-active')
+          @upBtn.addClass('ui-btn-active')
+        when 'down'
+          @upBtn.removeClass('ui-btn-active')
+          @downBtn.addClass('ui-btn-active')
 
+    afterRender: (elements) ->
+      super(elements)
+      @downBtn = $(elements).find('.shutter-down')
+      @upBtn = $(elements).find('.shutter-up')
+      position = @getAttribute('position').value()
+      @_updateButtons(position) if position?
 
   # Export all classe to be extendable by plugins
   pimatic.Item = Item
