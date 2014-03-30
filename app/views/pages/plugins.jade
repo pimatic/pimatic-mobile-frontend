@@ -36,7 +36,7 @@ script#loading-template(type='text/template')
 div#plugins(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
     a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
-      data-inline='true', data-transition="slide", data-direction="reverse")=__('Back')
+      data-inline='true', data-transition="slidefade", data-direction="reverse")=__('Back')
     a.restart-now(data-role="button", data-icon="refresh",  data-iconpos='left', data-inline="true")=__('Restart')
     h3=__('Installed Plugins')
   div.ui-content.overthrow
@@ -54,7 +54,7 @@ div#plugins(data-role='page')
           a#plugin-install(href="#plugins-browse", data-icon="plus", data-role="button")=__('Install a Plugin')
 div#plugins-browse(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
-    a(href='#plugins', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true')=__('Back')
+    a(href='#plugins', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true', data-transition="slidefade")=__('Back')
     h3=__('Install a Plugins')
   div.ui-content.overthrow
     form

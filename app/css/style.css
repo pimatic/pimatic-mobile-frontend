@@ -65,8 +65,8 @@ html .ui-loader {
 
 /* make page animations faster */
 .in, .out {
-    -webkit-animation-timing-function: ease-in-out;
-    -webkit-animation-duration: 120ms !important;
+  -webkit-animation-timing-function: ease-in-out;
+  -webkit-animation-duration: 120ms !important;
 }
 
 /* align the slider for switches to the right */

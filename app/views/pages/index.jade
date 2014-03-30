@@ -69,7 +69,7 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       <!-- ko template: { name: getItemTemplate, foreach: items, afterRender: afterRenderItem } -->
       <!-- /ko -->
       li#add-a-item(data-bind="visible: enabledEditing() && !isSortingItems() ")
-        a(data-transition='slide', href='#add-item')=__('Add an item')+'...'
+        a(data-transition='slidefade', href='#add-item')=__('Add an item')+'...'
       li#delete-item(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems(), droppable: {options: {drop: onDropItemOnTrash}}")=__('Drop here to remove item')
     ul#rules(data-role='listview', data-bind="sortable: {data: rules, options: {stop: onRulesSorted}, isSorting: isSortingRules}")
       li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Rules')
@@ -77,7 +77,7 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       <!-- ko template: { name: 'rule-template', foreach:rules, afterRender: afterRenderRule } -->
       <!-- /ko -->     
       li#add-rule(data-bind="visible: enabledEditing() && !isSortingRules() ")
-        a(data-transition='slide', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
+        a(data-transition='slidefade', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
       div.drag-message
     ul#variables(data-role='listview', data-bind="sortable: {data: variables, options: {stop: onVariablesSorted}, isSorting: isSortingVariables}")
       li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Variables')
@@ -86,17 +86,17 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       <!-- ko template: { name: 'variable-template', foreach:variables, afterRender: afterRenderVariable } -->
       <!-- /ko --> 
       li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
-        a(data-transition='slide', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
+        a(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
   div#nav-panel.overthrow(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)
     ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
       li(data-icon='delete', data-theme=theme.menuSwatch)
         a(href='#', data-rel='close')=__("Close menu")
       li(data-theme=theme.menuSwatch)
-        a(href='#log', data-transition="slide")=__('Log') 
+        a(href='#log', data-transition="slidefade")=__('Log') 
       li(data-theme=theme.menuSwatch)
-        a(href='#plugins', data-transition="slide")=__('Plugins') 
+        a(href='#plugins', data-transition="slidefade")=__('Plugins') 
       li(data-theme=theme.menuSwatch)
-        a(href='#updates', data-transition="slide")=__('Updates')
+        a(href='#updates', data-transition="slidefade")=__('Updates')
       li#import-ca-cert(data-theme=theme.menuSwatch)
         a(href='root-ca-cert.crt', data-ajax="false", data-bind="visible: hasRootCACert")=__('Show CA root certificate')
       //- Not yet implemented:

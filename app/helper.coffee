@@ -3,6 +3,7 @@
 
 # scope this function
 ( ->
+
   pendingLoadings = {}
 
   # build a string containing all loading messages
@@ -79,6 +80,10 @@
   $(document).on "vclick", ".ui-loader", =>
     pimatic.pages.index.toLoginPage()
 
+
+  # Disable jquerys scroll to top on transitions when we scroll inside the page divs
+  unless overthrow.support is 'none'
+    $.mobile.Transition.prototype.scrollPage =  => #nop
 
 )()
 
