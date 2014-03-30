@@ -1,7 +1,7 @@
 div#edit-rule(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
     h3(data-bind="text: pageTitle()")
-  div.ui-content
+  div.ui-content.overthrow
     form#edit-rule-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       input#edit-rule-id(type="text", placeholder="id" data-bind="value: ruleId, jqmenabled: action() == 'add'")
       fieldset

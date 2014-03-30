@@ -3,7 +3,7 @@ div#log(data-role='page')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slide", data-direction="reverse")=__('Back')
     a#clear-log.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-check()=__('Clear')
     h3=__('Log messages')
-  div.ui-content
+  div.ui-content.overthrow
     ul#log-messages(data-role='listview', data-bind="foreach: messages")
       li
         span.time(data-bind='text: $parent.timeToShow($index)')

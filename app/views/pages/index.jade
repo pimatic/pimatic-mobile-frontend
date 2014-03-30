@@ -58,11 +58,11 @@ script#variable-template(type="text/template")
     span.var-value(data-bind="text: displayValue(), click: $root.onEditVariableClicked")
 //- Actuators and rules page
 div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
-  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+  div(data-theme=theme.headerSwatch, data-role='header')
     a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3 pimatic
     a#error-count.ui-btn-right.ui-btn.ui-btn-inline.ui-mini.ui-corner-all.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
-  div.ui-content(data-role="main")
+  div.ui-content.overthrow(data-role="main")
     ul#items(data-role='listview', data-bind="sortable: {data: items, options: {stop: onItemsSorted}, isSorting: isSortingItems}")
       li.with-button(data-theme=theme.dividerSwatch, data-role='list-divider')=__('Devices')
         a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
@@ -87,7 +87,7 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       <!-- /ko --> 
       li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
         a(data-transition='slide', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
-  div#nav-panel(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)
+  div#nav-panel.overthrow(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)
     ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
       li(data-icon='delete', data-theme=theme.menuSwatch)
         a(href='#', data-rel='close')=__("Close menu")

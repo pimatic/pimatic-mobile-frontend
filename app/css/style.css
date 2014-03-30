@@ -1,4 +1,20 @@
 
+/* Overthrow CSS:
+   Enable overflow: auto on elements with overthrow class when html element has overthrow class too */
+.overthrow-enabled .overthrow {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.overthrow-enabled .overthrow.ui-content {
+  position: absolute;
+  z-index: 1;
+  top: 44px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
 /* make the jquery mobile loader to block all elements */
 .ui-loader-background {
     width:100%;

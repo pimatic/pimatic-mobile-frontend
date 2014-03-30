@@ -596,6 +596,7 @@ module.exports = (env) ->
               minPath "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
               minPath "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
               minPath "pimatic-mobile-frontend/app/js/knockout.mapping.js"
+              minPath "pimatic-mobile-frontend/app/js/overthrow.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
