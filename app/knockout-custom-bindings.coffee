@@ -37,11 +37,9 @@
       value = valueAccessor()
       valueUnwrapped = ko.unwrap(value)
       $ele = $(element)
-
       # Handle icon binding
       if value.icon?
         icon = ko.unwrap(value.icon)
-        console.log "setting icon", icon
         setIconClass($ele, icon)
   }
 
@@ -141,6 +139,17 @@
       sortable = $(element).sortable(options)
   }
 
+  ko.bindingHandlers.jqmselectvalue = {
+    init: (element, valueAccessor, allBindingsAccessor, viewModel) ->
+      if typeof ko.bindingHandlers.value.init isnt "undefined"
+        ko.bindingHandlers.value.init element, valueAccessor, allBindingsAccessor, viewModel
+
+    update: (element, valueAccessor, allBindingsAccessor, viewModel) ->
+      if typeof ko.bindingHandlers.value.update isnt "undefined"
+        ko.bindingHandlers.value.update element, valueAccessor, allBindingsAccessor, viewModel
+      $(element).selectmenu("refresh", true)
+  }
+
   ko.bindingHandlers.droppable = {
     init: (element, valueAccessor, allBindings, viewModel, bindingContext) ->
       # cached vars for sorting events
@@ -225,7 +234,6 @@
         # Capture the last mousedown/touchstart event
         lastVmouseDown = null
         li.on('vmousedown', (event) =>
-          console.log 'vmousedown'
           if $(event.target).parent('.handle').length then return
           lastVmouseDown = event
         )
@@ -233,14 +241,12 @@
         uiDraggable._isDragging = no
         # If the mouse
         li.on('vmousemove', (event) =>
-          console.log 'vmousemove'
           if $(event.target).parent('.handle').length then return
           unless lastVmouseDown is null
             deltaX = Math.abs(event.pageX - lastVmouseDown.pageX)
             deltaY = Math.abs(event.pageY - lastVmouseDown.pageY)
             # detect horizontal drag
             if deltaX > deltaY and deltaX > 5 and not uiDraggable._isDragging
-              console.log 'vmousemove dragging'
               # https://code.google.com/p/android/issues/detail?id=19827
               event.originalEvent.preventDefault();
               event.stopPropagation();
@@ -250,8 +256,6 @@
                 uiDraggable, [originalEvent]
               )
               lastVmouseDown = null
-            else
-              console.log 'vmousemove not dragging'
         )
   }
 

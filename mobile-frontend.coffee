@@ -139,6 +139,25 @@ module.exports = (env) ->
       )
 
       ###
+      Handle get request for add a variable to the item list.
+      ###
+      app.get('/add-variable/:name', (req, res) =>
+        name = req.params.name
+        # If no text is given then send an error.
+        if name is ""
+          return res.send(200, {success: false, message: 'no variable name given'})
+        # else add the item to the item list and send success
+        itemId = @genItemId('variable', name)
+        @addNewItem({
+          itemId: itemId
+          type: 'variable'
+          name: name
+        })
+        res.send(200, {success: true})
+      )
+
+
+      ###
       Handle post request for removing an item.
       ###
       app.post('/remove-item', (req, res) =>
@@ -381,20 +400,20 @@ module.exports = (env) ->
           for variable in initData.variables
             do (variable) =>
               @framework.variableManager.getVariableValue(variable.name).then( (value) =>
-                @emitVariableValue(socket, variable.name, value)
+                @emitVariableChange(socket, {name: variable.name, value})
               ).catch( (error) => 
                 env.logger.warn "Error getting value of #{variable.name}"
                 env.logger.debug error.stack
               )
           
           env.logger.debug("adding listener for variables") if @config.debug
-          @framework.variableManager.on('change', varChangeListener = (name, value) =>
-            env.logger.debug("var change for #{name}: #{value}") if @config.debug
-            @emitVariableValue(socket, name, value)
+          @framework.variableManager.on('change', varChangeListener = (varInfo) =>
+            env.logger.debug("var change for #{varInfo.name}: #{varInfo.value}") if @config.debug
+            @emitVariableChange(socket, varInfo)
           )
 
-          @framework.variableManager.on('add', varAddListener = (name, value) =>
-            socket.emit("variable-add", {name, value})
+          @framework.variableManager.on('add', varAddListener = (varInfo) =>
+            socket.emit("variable-add", varInfo)
           )
 
           @framework.variableManager.on('remove', varRemoveListener = (name) =>
@@ -428,7 +447,15 @@ module.exports = (env) ->
 
           @on 'item-add', addItemListener = (item) =>
             assert item? and item.itemId?
-            @addAttributeNotify(socket, item)
+            switch item.type
+              when 'device' then @addAttributeNotify(socket, item)
+              when 'variable'
+                @framework.variableManager.getVariableValue(item.name).then( (value) =>
+                  @emitVariableChange(socket, {name: item.name, value})
+                ).catch( (error) => 
+                  env.logger.warn "Error getting value of #{item.name}"
+                  env.logger.debug error.stack
+                )
             socket.emit("item-add", item)
 
           @on 'item-remove', removeItemListener = (item) =>
@@ -698,6 +725,10 @@ module.exports = (env) ->
           when 'header', 'button'
             item.template = item.type
             item
+          when 'variable'
+            item.template = 'variable'
+            item
+          else item
       )
 
       @emit 'item-add', item 
@@ -735,6 +766,9 @@ module.exports = (env) ->
               items.push item
             when "header", 'button'
               item.template = item.type
+              items.push item
+            when "variable"
+              item.template = "variable"
               items.push item
             else
               errorMsg = "Unknown item type \"#{item.type}\""
@@ -836,8 +870,8 @@ module.exports = (env) ->
         value: value
       }
 
-    emitVariableValue: (socket, name, value) ->
-      socket.emit "variable", { name, value }
+    emitVariableChange: (socket, varInfo) ->
+      socket.emit "variable", varInfo
 
     genItemId: (prefix, baseText, existingItems = @config.items) ->
       existingIds = _(existingItems).map( (item) => item.itemId ).filter( (id) => id? ).value()
@@ -845,10 +879,10 @@ module.exports = (env) ->
       unless newId in existingIds then return newId
       num = 2
       newIdWithNum = newId + num
-      while newIdWitNum in existingIds
+      while newIdWithNum in existingIds
         num++
         newIdWithNum = newId + num
-      return newIdWitNum
+      return newIdWithNum
 
   plugin = new MobileFrontend
   return plugin

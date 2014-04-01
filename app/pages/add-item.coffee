@@ -1,9 +1,7 @@
 # add-item-page
 # ----------
 
-
 class DeviceEntry
-
   constructor: (data) ->
     @id = data.id
     @name = ko.observable(data.name)
@@ -15,17 +13,36 @@ class DeviceEntry
       return match?
     )
     @icon = ko.computed( => if @isAdded() then 'check' else 'plus' )
-
   update: (data) ->
     @name(data.name)
 
+class VariableEntry
+  constructor: (data) ->
+    @name = data.name
+    @isAdded = ko.computed( =>
+      items = pimatic.pages.index.items()
+      match = ko.utils.arrayFirst(items, (item) =>
+        return item.type is 'variable' and item.name is @name
+      )
+      return match?
+    )
+    @icon = ko.computed( => if @isAdded() then 'check' else 'plus' )
+  update: (data) ->
+    @name = data.name
+
 class AddItemViewModel
   devices: ko.observableArray([])
+  variables: ko.observableArray([])
 
   constructor: ->
-    @refreshListView = ko.computed( =>
+    @refreshDeviceListView = ko.computed( =>
       @devices()
       $('#device-items').listview('refresh')
+    ).extend(rateLimit: {timeout: 10, method: "notifyWhenChangesStop"})
+
+    @refreshVariableListView = ko.computed( =>
+      @variables()
+      $('#variable-items').listview('refresh')
     ).extend(rateLimit: {timeout: 10, method: "notifyWhenChangesStop"})
 
   updateDevicesFromJs: (devices) ->
@@ -38,11 +55,29 @@ class AddItemViewModel
     }
     ko.mapping.fromJS(devices, mapping, @devices)
 
+  updateVariablesFromJs: (variables) ->
+    mapping = {
+      create: ({data, parent, skip}) => new VariableEntry(data)
+      update: ({data, parent, target}) =>
+        target.update(data)
+        return target
+      key: (data) => data.name
+    }
+    ko.mapping.fromJS(variables, mapping, @variables)
+
+
   addDeviceToIndexPage: (device) ->
     if device.isAdded() then return
     $.get("/add-device/#{device.id}")
       .done(ajaxShowToast)
       .fail(ajaxAlertFail)
+
+  addVariableToIndexPage: (variable) ->
+    if variable.isAdded() then return
+    $.get("/add-variable/#{variable.name}")
+      .done(ajaxShowToast)
+      .fail(ajaxAlertFail)
+
 
 
 pimatic.pages.addItem = new AddItemViewModel()
@@ -53,6 +88,11 @@ $(document).on "pagecreate", '#add-item', (event) ->
   $('#device-items').on "click", 'li.item', ->
     li = $(this)
     pimatic.pages.addItem.addDeviceToIndexPage(ko.dataFor(li[0]))
+    return
+
+  $('#variable-items').on "click", 'li.item', ->
+    li = $(this)
+    pimatic.pages.addItem.addVariableToIndexPage(ko.dataFor(li[0]))
     return
 
   $('#add-other').on "click", '#add-a-header', ->
@@ -105,10 +145,13 @@ $(document).on "pagecreate", '#add-item', (event) ->
   return
 
 $(document).on "pageshow", '#add-item', (event) ->
-
   $.get("/api/devices")
     .done( (data) -> 
       pimatic.pages.addItem.updateDevicesFromJs(data.devices) 
+    ).fail(ajaxAlertFail)
+  $.get("/api/variables")
+    .done( (data) -> 
+      pimatic.pages.addItem.updateVariablesFromJs(data.variables) 
     ).fail(ajaxAlertFail)
   return
 

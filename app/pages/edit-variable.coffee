@@ -12,23 +12,35 @@ $(document).on("pagebeforecreate", (event) ->
     action: ko.observable('add')
     variableName: ko.observable('')
     variableValue: ko.observable('')
+    variableType: ko.observable('value')
 
     constructor: ->
       @pageTitle = ko.computed( => 
         return (if @action() is 'add' then __('Add new variable') else __('Edit variable'))
       )
 
+      @valueLabelText = ko.computed( => 
+        return if @variableType() is 'value' then __('Value') else __('Expression') 
+      )
+
     resetFields: () ->
       @variableName('')
       @variableValue('')
+      @variableType('value')
+
 
     onSubmit: ->
-      $.post("/api/variable/#{@variableName()}/#{@action()}", 
+      data = {
         name: @variableName()
-        value: @variableValue()
-      ).done( (data) ->
-          if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
-          else alert data.error
+      }
+      switch @variableType()
+        when 'value' then data.value = @variableValue()
+        when 'expression' then data.expression = @variableValue()
+
+      $.post("/api/variable/#{@variableName()}/#{@action()}", data)
+      .done( (data) ->
+        if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+        else alert data.error
       ).fail(ajaxAlertFail)
       return false
 

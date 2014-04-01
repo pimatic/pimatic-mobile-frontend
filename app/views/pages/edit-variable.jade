@@ -7,7 +7,12 @@ div#edit-variable(data-role='page')
         label(for='edit-variable-name')=__('Name')
         input#edit-variable-name(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName, jqmenabled: action() == 'add'")
       .fieldcontain
-        label(for='edit-variable-value')=__('Value')
+        label(for='select-variable-type')=__('Type')
+        select#select-plugin-action(name='select-variable-type', data-bind="jqmselectvalue: variableType")
+          option(value="value")=__('Value')
+          option(value="expression")=__('Expression')
+      .fieldcontain
+        label(data-bind="text: valueLabelText")
         input#edit-varibale-value(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableValue")
       .fieldcontain.ui-grid-a
         div.ui-block-a

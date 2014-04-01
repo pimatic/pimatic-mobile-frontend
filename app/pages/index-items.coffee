@@ -47,6 +47,18 @@ $(document).on( "pagebeforecreate", (event) ->
     onButtonPress: ->
       $.get("/button-pressed/#{@buttonId}").fail(ajaxAlertFail)
 
+  class VariableItem extends Item
+    @mapping = {
+      copy: Item.mapping.copy.concat ['name']
+      observe: ["value"]
+    }
+    constructor: (data) ->
+      unless data.value then data.value = null
+      super(data)
+    afterRender: (elements) -> 
+      super(elements)
+
+
   class DeviceAttribute 
 
     @mapping = {
@@ -218,6 +230,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.Item = Item
   pimatic.HeaderItem = HeaderItem
   pimatic.ButtonItem = ButtonItem
+  pimatic.VariableItem = VariableItem
   pimatic.DeviceItem = DeviceItem
   pimatic.SwitchItem = SwitchItem
   pimatic.DimmerItem = DimmerItem
@@ -229,6 +242,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.templateClasses = {
     header: pimatic.HeaderItem
     button: pimatic.ButtonItem
+    variable: pimatic.VariableItem
     device: pimatic.DeviceItem  
     switch: pimatic.SwitchItem
     dimmer: pimatic.DimmerItem

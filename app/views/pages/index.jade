@@ -35,6 +35,10 @@ script#button-template(type='text/template')
   li.sortable.button
     label()=__('Button')
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: text}, click: onButtonPress")
+script#variable-item-template(type='text/template')
+  li.sortable.variable
+    label(data-bind="text: name")
+    span.var-value(data-bind="text: value")
 script#attribute-template(type='text/template')
   span.attribute
     span.val(data-bind="text: $data.valueText")
@@ -44,7 +48,7 @@ script#sortable-handle-template(type='text/template')
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
 script#rule-template(type="text/template")
   li.rule.sortable(data-bind="css: {deactivated: !active()}, dragslide: {}")
-    a(data-transition='slide', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
+    a(data-transition='slidefade', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
       span.if='if'
       | 
       span.condition(data-bind="text: condition")
@@ -54,8 +58,11 @@ script#rule-template(type="text/template")
       span.action(data-bind="text: action")
 script#variable-template(type="text/template")
   li.variable.sortable(data-bind="visible: $root.showAttributeVars() || !isDeviceAttribute()")
-    label.var-name(data-bind="text: displayName()")
-    span.var-value(data-bind="text: displayValue(), click: $root.onEditVariableClicked")
+    a(data-transition='slidefade', href='#edit-variable', style="white-space: normal", data-bind="click: $root.onEditVariableClicked")
+      label.var-name(data-bind="text: displayName()")
+      span.var-expression(data-bind="text: type() == 'expression' ? ' = ' + exprInputStr() : ''")
+      span.var-type(data-bind="text: ' (' + type() + ')'")
+      span.var-value(data-bind="text: displayValue()")
 //- Actuators and rules page
 div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
   div(data-theme=theme.headerSwatch, data-role='header')

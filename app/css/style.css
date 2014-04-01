@@ -128,7 +128,7 @@ html .ui-loader {
 }
 
 .unlocked ul#items li.sortable,
-.unlocked ul#variables li.sortable,
+.unlocked ul#variables li.sortable a,
 .unlocked ul#rules li.sortable a {
   padding-left: 36px;
 }
@@ -226,7 +226,8 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   }
 }
 
-#items .attributes{
+#items .attributes,
+#items .variable .var-value {
   float: right;
 }
 
@@ -247,6 +248,8 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   float: right;
   display: block;
 } 
+
+
 
 .ui-mobile  #items label {
   margin: 0;
@@ -466,6 +469,24 @@ li.with-button a.ui-btn {
   top: 4px;
   right: 8px;
 }
+
+#variables .variable .var-type {
+  color: gray;
+}
+
+#variables .variable .var-name,
+#variables .variable .var-value {
+  font-weight: bold;
+  color: #333;
+}
+
+#variables .variable .var-type,
+#variables .variable .var-expression {
+  font-weight: normal;
+  color: #333;
+}
+
+
 
 #index .lock-button {
   -webkit-border-radius: 16px;

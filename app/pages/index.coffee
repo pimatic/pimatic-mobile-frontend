@@ -25,7 +25,7 @@ $(document).on( "pagebeforecreate", (event) ->
   class Variable
     @mapping = {
       key: (data) => data.name
-      observe: ['value']
+      observe: ['value', 'type', 'exprInputStr', 'exprTokens']
     }
     constructor: (data) ->
       unless data.value? then data.value = null
@@ -205,6 +205,7 @@ $(document).on( "pagebeforecreate", (event) ->
         if item.type is 'device'
           if item.template? then "#{item.template}-template"
           else "devie-template"
+        else if item.type is 'variable' then 'variable-item-template'
         else "#{item.type}-template"
       )
       if $('#'+template).length > 0 then return template
@@ -283,10 +284,15 @@ $(document).on( "pagebeforecreate", (event) ->
           item.updateAttribute(attrName, attrValue)
           break
 
-    updateVariableValue: (varName, varValue) ->
+    updateVariable: (varInfo) ->
       for variable in @variables()
-        if variable.name is varName
-          variable.value(varValue)
+        if variable.name is varInfo.name
+          variable.value(varInfo.value) if varInfo.value?
+          variable.type(varInfo.type) if varInfo.type?
+          variable.expression(varInfo.expression) if varInfo.expression?
+      for item in @items()
+        if item.type is "variable" and item.name is varInfo.name
+          item.value(varInfo.value)
 
     toggleEditing: ->
       @enabledEditing(not @enabledEditing())
@@ -376,9 +382,10 @@ $(document).on( "pagebeforecreate", (event) ->
         editVariablePage = pimatic.pages.editVariable
         editVariablePage.variableName(variable.name)
         editVariablePage.variableValue(variable.value())
+        editVariablePage.variableType(variable.type())
         editVariablePage.action('update')
-        jQuery.mobile.changePage '#edit-variable', transition: 'slide'
-      return true
+        return true
+      else return false
 
     toLoginPage: ->
       urlEncoded = encodeURIComponent(window.location.href)
@@ -395,9 +402,7 @@ $(document).on( "pagebeforecreate", (event) ->
     indexPage.updateDeviceAttribute(attrEvent.id, attrEvent.name, attrEvent.value)
   )
 
-  pimatic.socket.on("variable", (varEvent) -> 
-    indexPage.updateVariableValue(varEvent.name, varEvent.value)
-  )
+  pimatic.socket.on("variable", (variable) -> indexPage.updateVariable(variable))
 
   pimatic.socket.on("item-add", (item) -> indexPage.addItemFromJs(item))
   pimatic.socket.on("item-remove", (itemId) -> indexPage.removeItem(itemId))
