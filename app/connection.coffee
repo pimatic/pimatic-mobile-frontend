@@ -21,12 +21,12 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on 'connecting', ->
     pimatic.loading "socket", "show",
       text: __("connecting")
-      blocking: (not pimatic.pages.index.hasData)
+      blocking: no
 
   pimatic.socket.on 'disconnect', ->
     pimatic.loading "socket", "show",
       text: __("connection lost, retrying")
-      blocking: (not pimatic.pages.index.hasData)
+      blocking: no
 
   onConnectionError = (reason) ->
     if reason is 'handshake unauthorized'
@@ -37,7 +37,7 @@ $(document).on( "pagebeforecreate", (event) ->
     else reason = ''
     pimatic.loading "socket", "show",
       text: __("could not connect%s, retrying", reason)
-      blocking: (not pimatic.pages.index.hasData)
+      blocking: no
     setTimeout ->
       pimatic.socket.socket.connect()
     , 2000

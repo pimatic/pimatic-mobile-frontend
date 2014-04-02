@@ -74,7 +74,6 @@ $(document).on( "pagebeforecreate", (event) ->
     }
 
     loading: no
-    hasData: no
     pageCreated: ko.observable(no)
     items: ko.observableArray([])
     rules: ko.observableArray([])

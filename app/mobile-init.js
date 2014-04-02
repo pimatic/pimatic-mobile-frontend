@@ -6,4 +6,6 @@ $( document ).on( "mobileinit", function() {
     defaultPageTransition: 'slide',
     getMaxScrollForTransition: function(){return 5;}
   });
+
+  $.mobile.toolbar.tapToggle = false;
 });
