@@ -417,6 +417,10 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("variable-add", (variable) -> indexPage.addVariableFromJs(variable))
   pimatic.socket.on("variable-remove", (variableName) -> indexPage.removeVariable(variableName))
   pimatic.socket.on("variable-order", (order) -> indexPage.updateVariableOrder(order))
+
+  pimatic.socket.on('log', (entry) -> 
+    if entry.level is "error" then indexPage.errorCount(indexPage.errorCount() + 1)
+  )
   return
 )
 
