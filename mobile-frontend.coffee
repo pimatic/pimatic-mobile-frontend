@@ -818,6 +818,7 @@ module.exports = (env) ->
         rule = @framework.ruleManager.rules[id]
         rules.push {
           id: id
+          name: rule.name
           condition: rule.conditionToken
           action: rule.actionsToken
           active: rule.active
@@ -845,6 +846,7 @@ module.exports = (env) ->
 
     getInitalClientData: () ->
       return {
+        ruleItemCssClass: @config.ruleItemCssClass
         errorCount: env.logger.transports.memory.getErrorCount()
         enabledEditing: @config.enabledEditing
         showAttributeVars: @config.showAttributeVars
@@ -857,6 +859,7 @@ module.exports = (env) ->
     emitRuleUpdate: (socket, trigger, rule) ->
       socket.emit "rule-#{trigger}", {
         id: rule.id
+        name: rule.name
         condition: rule.conditionToken
         action: rule.actionsToken
         active: rule.active

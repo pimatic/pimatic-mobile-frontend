@@ -47,15 +47,17 @@ script#sortable-handle-template(type='text/template')
   div.handle
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
 script#rule-template(type="text/template")
-  li.rule.sortable(data-bind="css: {deactivated: !active()}, dragslide: {}")
+  li.rule.sortable(data-bind="css: {deactivated: !active()}, dragslide: {}, css: $root.ruleItemCssClass")
     a(data-transition='slidefade', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
-      span.if='if'
-      | 
-      span.condition(data-bind="text: condition")
-      | 
-      span.then='then'
-      | 
-      span.action(data-bind="text: action")
+      span.name(data-bind="text: ($data.name() != '' ? $data.name() : __('Unnamed rule') ) ")
+      p
+        span.if='if'
+        | 
+        span.condition(data-bind="text: condition")
+        | 
+        span.then='then'
+        | 
+        span.action(data-bind="text: action")
 script#variable-template(type="text/template")
   li.variable.sortable(data-bind="visible: $root.showAttributeVars() || !isDeviceAttribute()")
     a(data-transition='slidefade', href='#edit-variable', style="white-space: normal", data-bind="click: $root.onEditVariableClicked")

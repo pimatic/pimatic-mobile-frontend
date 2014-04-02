@@ -29,6 +29,10 @@ module.exports =
     doc: "show variables for device attributes"
     format: Boolean
     default: false
+  ruleItemCssClass:
+    doc: "additional css classes for rule items: hideRuleName, hideRuleText"
+    format: String
+    default: "" # For example: "hideRuleName" or 
   rules:
     doc: "order of the rules"
     format: Array

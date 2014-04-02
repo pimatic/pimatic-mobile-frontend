@@ -101,8 +101,7 @@
         # cache the item index when the dragging starts
         start: (event, ui) =>
           data = ko.dataFor(ui.item[0])
-          sourceIndex = dataList.indexOf(data)
-          $('#items').listview('refresh')        
+          sourceIndex = dataList.indexOf(data) 
           ui.item.css('border-bottom-width', '1px')
           # signal start sorting
           value.isSorting(yes) if value.isSorting?
@@ -112,7 +111,11 @@
           data = ko.dataFor(ui.item.prev()[0])
           ui.item.css('border-bottom-width', '0')
           # get the new location item index
-          targetIndex = dataList.indexOf(data) + 1
+          targetIndex = dataList.indexOf(data)
+          if targetIndex == -1 then targetIndex = 0 # No item was before this one
+          else if targetIndex < sourceIndex then targetIndex += 1
+
+          console.log "prev", data, targetIndex
           if sourceIndex >= 0 and targetIndex >= 0 and sourceIndex isnt targetIndex
             #  get the item to be moved
             underlyingList = ko.utils.unwrapObservable(dataList)
@@ -127,6 +130,7 @@
             dataList.valueHasMutated()
             # signal stop sorting
           value.isSorting(no) if value.isSorting?
+          return true
       }
 
       for evtType, handler of bindingEventHandler

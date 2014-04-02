@@ -109,6 +109,29 @@ html .ui-loader {
   color: #333;
 }
 
+#index #rules li a p{
+  font-size: .9em;
+  margin-top: 0.4em;
+  margin-bottom: 0;
+  white-space: normal;
+}
+
+/* hideRuleName class */
+#index #rules li.hideRuleName a .name{
+  display: none;
+}
+
+#index #rules li.hideRuleName a p{
+  font-size: 1em;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* hideRuleText class */
+#index #rules li.hideRuleText a p{
+  display: none;
+}
+
 #index #items li.sortable {
   padding-right: 20px;
 }
@@ -194,7 +217,6 @@ fieldset .ui-block-b .ui-btn{
 }
 
 ul#items, ul#rules, ul#variables{
-  position: relative;
   background-color: rgb(51, 51, 51);
 }
 
@@ -262,6 +284,7 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
 
 
 #device-items li.item a, 
+#variable-items li.item a, 
 #add-other a#add-a-header, 
 #add-other a#add-a-button {
   font-weight: normal;
@@ -404,6 +427,10 @@ li.rememberme label {
   color: #A0A0A0;
 }
 
+#index #rules li.rule a .name {
+  font-weight: bold;
+}
+
 #edit-rule .ui-content {
   /* no idea why this is necessary to display full y when autocomplete is visible*/
   overflow-x: visible !important;
@@ -470,9 +497,7 @@ li.with-button a.ui-btn {
   right: 8px;
 }
 
-#variables .variable .var-type {
-  color: gray;
-}
+
 
 #variables .variable .var-name,
 #variables .variable .var-value {
@@ -480,10 +505,15 @@ li.with-button a.ui-btn {
   color: #333;
 }
 
+
 #variables .variable .var-type,
 #variables .variable .var-expression {
   font-weight: normal;
   color: #333;
+}
+
+#variables .variable .var-type {
+  color: gray;
 }
 
 

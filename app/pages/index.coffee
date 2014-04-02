@@ -84,6 +84,7 @@ $(document).on( "pagebeforecreate", (event) ->
     hasRootCACert: ko.observable(no)
     rememberme: ko.observable(no)
     showAttributeVars: ko.observable(no)
+    ruleItemCssClass: ko.observable('')
 
     isSortingItems: ko.observable(no)
     isSortingRules: ko.observable(no)
@@ -366,6 +367,7 @@ $(document).on( "pagebeforecreate", (event) ->
       editRulePage = pimatic.pages.editRule
       editRulePage.action('update')
       editRulePage.ruleId(rule.id)
+      editRulePage.ruleName(rule.name())
       editRulePage.ruleCondition(rule.condition())
       editRulePage.ruleActions(rule.action())
       editRulePage.ruleEnabled(rule.active())

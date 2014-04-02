@@ -5,6 +5,9 @@ div#edit-rule(data-role='page')
     form#edit-rule-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       input#edit-rule-id(type="text", placeholder="id" data-bind="value: ruleId, jqmenabled: action() == 'add'")
       fieldset
+        label(for='edit-rule-name')=__('Name')
+        input#edit-rule-name(type="text", placeholder=__('Name') data-bind="value: ruleName")
+      fieldset
         label(for='edit-rule-condition')='if'
         textarea#edit-rule-condition(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleCondition, valueUpdate: 'afterkeydown'")
       fieldset

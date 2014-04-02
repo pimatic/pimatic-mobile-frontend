@@ -33,6 +33,7 @@ $(document).on("pagebeforecreate", (event) ->
       $.post("/api/rule/#{@ruleId()}/#{@action()}", 
         rule: @ruleAsText()
         active: @ruleEnabled()
+        name: @ruleName()
       ).done( (data) ->
           if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
           else alert data.error
