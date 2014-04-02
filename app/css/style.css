@@ -117,18 +117,18 @@ html .ui-loader {
 }
 
 /* hideRuleName class */
-#index #rules li.hideRuleName a .name{
+#index #rules.hideRuleName li.rule a .name{
   display: none;
 }
 
-#index #rules li.hideRuleName a p{
+#index #rules.hideRuleName li.rule a p{
   font-size: 1em;
   margin-top: 0;
   margin-bottom: 0;
 }
 
 /* hideRuleText class */
-#index #rules li.hideRuleText a p{
+#index #rules.hideRuleText li.rule a p{
   display: none;
 }
 

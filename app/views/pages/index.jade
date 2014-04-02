@@ -47,7 +47,7 @@ script#sortable-handle-template(type='text/template')
   div.handle
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
 script#rule-template(type="text/template")
-  li.rule.sortable(data-bind="css: {deactivated: !active()}, dragslide: {}, css: $root.ruleItemCssClass")
+  li.rule.sortable(data-bind="css: {deactivated: !active()}, dragslide: {}")
     a(data-transition='slidefade', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
       span.name(data-bind="text: ($data.name() != '' ? $data.name() : __('Unnamed rule') ) ")
       p
@@ -80,7 +80,7 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       li#add-a-item(data-bind="visible: enabledEditing() && !isSortingItems() ")
         a(data-transition='slidefade', href='#add-item')=__('Add an item')+'...'
       li#delete-item(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems(), droppable: {options: {drop: onDropItemOnTrash}}")=__('Drop here to remove item')
-    ul#rules(data-role='listview', data-bind="sortable: {data: rules, options: {stop: onRulesSorted}, isSorting: isSortingRules}")
+    ul#rules(data-role='listview', data-bind="sortable: {data: rules, options: {stop: onRulesSorted}, isSorting: isSortingRules}, css: ruleItemCssClass")
       li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Rules')
         a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: 'rule-template', foreach:rules, afterRender: afterRenderRule } -->

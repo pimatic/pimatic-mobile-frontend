@@ -115,7 +115,6 @@
           if targetIndex == -1 then targetIndex = 0 # No item was before this one
           else if targetIndex < sourceIndex then targetIndex += 1
 
-          console.log "prev", data, targetIndex
           if sourceIndex >= 0 and targetIndex >= 0 and sourceIndex isnt targetIndex
             #  get the item to be moved
             underlyingList = ko.utils.unwrapObservable(dataList)
@@ -202,6 +201,9 @@
         zIndex: 100
         scroll: false
         revertDuration: 200
+        start: =>
+          li.parent('ul').css(position: 'relative')
+
         drag: ( event, ui ) => 
           # offset of the helper is 15 at start
           offsetX = ui.offset.left-15
@@ -219,6 +221,7 @@
               action = null
 
         stop: => 
+          li.parent('ul').css(position: 'static')
           $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
           if action?
             pimatic.loading "saveactivate", "show", text: __(action)
