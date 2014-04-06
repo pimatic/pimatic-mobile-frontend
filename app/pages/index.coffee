@@ -293,7 +293,6 @@ $(document).on( "pagebeforecreate", (event) ->
           break
 
     updateVariable: (varInfo) ->
-      console.log varInfo
       for variable in @variables()
         if variable.name is varInfo.name
           variable.value(varInfo.value) if varInfo.value?
