@@ -99,6 +99,12 @@ $(document).on( "pagebeforecreate", (event) ->
         }
       )
 
+      @visibleVars = ko.computed( => 
+        return ko.utils.arrayFilter(@variables(), (item) =>
+          return @showAttributeVars() or (not item.isDeviceAttribute())
+        )
+      )
+
       @itemsListViewRefresh = ko.computed( =>
         @items()
         @isSortingItems()
@@ -337,23 +343,14 @@ $(document).on( "pagebeforecreate", (event) ->
         pimatic.loading "variableorder", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
 
-    onDropItemOnTrash: (ev, ui) ->
-      item = ko.dataFor(ui.draggable[0])
-      # Remove the item after sorting stopped:
-      subscripton = @isSortingItems.subscribe( =>
-        pimatic.loading "deleteitem", "show", text: __('Saving')
-        $.post('remove-item', itemId: item.itemId).done( (data) =>
-          if data.success
-            if ui.helper.length > 0
-              ui.helper.hide(0, => @items.remove(item) )
-            else
-              @items.remove(item)
-        ).always( => 
-          pimatic.loading "deleteitem", "hide"
-        ).done(ajaxShowToast).fail(ajaxAlertFail)
-        # Just do it once
-        subscripton.dispose()
-      )
+    onDropItemOnTrash: (item) ->
+      pimatic.loading "deleteitem", "show", text: __('Saving')
+      $.post('remove-item', itemId: item.itemId).done( (data) =>
+        if data.success
+          @items.remove(item)
+      ).always( => 
+        pimatic.loading "deleteitem", "hide"
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
 
     onAddRuleClicked: ->
       editRulePage = pimatic.pages.editRule
@@ -471,38 +468,8 @@ $(document).on("pagecreate", '#index', (event) ->
   $("#items .handle, #rules .handle").disableSelection()
   indexPage.pageCreated(yes)
 
-
   return
 )
-
-
-fixScrollOverDraggableRule = ->
-  _touchStart = $.ui.mouse.prototype._touchStart
-  if _touchStart?
-    $.ui.mouse.prototype._touchStart = (event) ->
-      # Just alter behavior if the event is triggered on an draggable
-      if this._isDragging?
-        if this._isDragging is no
-          # we are not dragging so allow scrolling
-          return
-      _touchStart.apply(this, [event]) 
-
-    _touchMove = $.ui.mouse.prototype._touchMove
-    $.ui.mouse.prototype._touchMove = (event) ->
-      if this._isDragging?
-        unless this._isDragging is yes
-          # discard the event to not prevent defaults
-          return
-      _touchMove.apply(this, [event])
-
-    _touchEnd = $.ui.mouse.prototype._touchEnd
-    $.ui.mouse.prototype._touchEnd = (event) ->
-      if this._isDragging?
-        # stop dragging
-        this._isDragging = no
-        return
-      _touchEnd.apply(this, [event]) 
-fixScrollOverDraggableRule()
 
 
 

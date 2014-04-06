@@ -1,5 +1,18 @@
 ( ->
 
+  # $.fn.disableSelection = ( ->
+  #   @attr('unselectable', 'on')
+  #     .css({
+  #       '-moz-user-select':'-moz-none',
+  #       '-moz-user-select':'none',
+  #       '-o-user-select':'none',
+  #       '-khtml-user-select':'none',
+  #       '-webkit-user-select':'none',
+  #       '-ms-user-select':'none',
+  #       'user-select':'none'})
+  #    .on('selectstart mousedown', (event) => event.preventDefault(); false )
+  # )
+
   setIconClass = ($ele, icon) ->
     # remove old icon-class
     classes = (
@@ -68,78 +81,137 @@
 
   ko.bindingHandlers.sortable = {
     init: (element, valueAccessor, allBindings, viewModel, bindingContext) ->
-      # cached vars for sorting events
       value = valueAccessor()
-      valueUnwrapped = ko.toJS(value)
+      items = value.items
 
-      dataList = value.data
-      customOptions = valueUnwrapped.options or {}
-      # The differents between the index in the array and the index in the html dom
-      sourceIndex = null
+      getElementBeforeAndAfter = (ele) =>
+        eleBefore = null
+        eleAfter = null
+        eleBeforePos = null
+        eleAfterPos = null
 
-      defaultOptions = {
-        items: "li.sortable"
-        forcePlaceholderSize: true
-        placeholder: "sortable-placeholder"
-        handle: ".handle"
-        cursor: "move"
-        revert: 100
-        scroll: true
-        containment: "parent"
-      }
+        dragPos = ele.offset()
+        #dragPos.bottom = dragPos.top + ele.outerHeight()
+        #dragPos.middle = (dragPos.top + dragPos.bottom) / 2.0
 
-      events = ["activate", "beforeStop", "change", "create", "deactivate", "out", "over", "receive", 
-        "remove", "sort", "start", "stop", "update"]
+        $(element).find('.sortable').each((i, o) =>
+          if o is ele[0] then return
 
-      for name, v of customOptions
-        if name in events
-          customOptions[name] = v.bind(bindingContext.$data)
+          pos = $(o).offset()
+          #pos.bottom = pos.top + $(o).outerHeight()
+          #pos.middle = (pos.top + pos.bottom) / 2.0
 
-      options = ko.utils.extend(customOptions, defaultOptions)
+          if pos.top < dragPos.top
+            if (not eleBeforePos?) or pos.top > eleBeforePos.top
+              [eleBefore, eleBeforePos] = [o, pos]
+          else if pos.top > dragPos.top
+            if (not eleAfterPos?) or pos.top < eleAfterPos.top 
+              [eleAfter, eleAfterPos] = [o, pos] 
+        )
+        return {eleBefore, eleAfter}
+      
+      $(element).on("MSPointerDown touchstart mousedown", '.handle', (event) ->
+        parent = $(this).parents('.sortable')
+        updatePlaceholder = =>
+          pos = parent.offset()
+          eleHeight = parent.outerHeight()
+          pos.bottom = pos.top + eleHeight
+          {eleBefore, eleAfter} = getElementBeforeAndAfter(parent)
+          # reset elements css
+          $(element).find('.sortable').each((i, o) =>
+            if o is parent[0] then return
+            # $(o).css('background-color', 'white')
+            $(o).css('margin-bottom', 0)
+            $(o).css('margin-top', 0)
+            #$(o).attr('style', '')
+          )
+          # Just for debugging
+          # if eleBefore? then $(eleBefore).css('background-color', 'green')
+          # if eleAfter? then $(eleAfter).css('background-color', 'red')
 
-      bindingEventHandler = {
-        # cache the item index when the dragging starts
-        start: (event, ui) =>
-          data = ko.dataFor(ui.item[0])
-          sourceIndex = dataList.indexOf(data) 
-          ui.item.css('border-bottom-width', '1px')
-          # signal start sorting
-          value.isSorting(yes) if value.isSorting?
-        # capture the item index at end of the dragging
-        # then move the item
-        stop: (event, ui) =>
-          data = ko.dataFor(ui.item.prev()[0])
-          ui.item.css('border-bottom-width', '0')
-          # get the new location item index
-          targetIndex = dataList.indexOf(data)
-          if targetIndex == -1 then targetIndex = 0 # No item was before this one
-          else if targetIndex < sourceIndex then targetIndex += 1
+          if eleBefore? 
+            eleBeforePos = $(eleBefore).offset()
+            eleBeforePos.width = $(eleBefore).outerHeight()
+            eleBeforePos.middle = eleBeforePos.top + eleBeforePos.width / 2.0
+            eleBeforePos.bottom = eleBeforePos.top + eleBeforePos.width
+            if pos.top < eleBeforePos.middle
+              $(eleBefore).css('margin-top', eleHeight)
+            else
+              if eleAfter?
+                eleAfterPos = $(eleAfter).offset()
+                eleAfterPos.width = $(eleAfter).outerHeight()
+                eleAfterPos.middle = eleAfterPos.top + eleAfterPos.width / 2.0
+                if pos.bottom > eleAfterPos.middle and pos.top > eleBeforePos.bottom + eleHeight/2.0
+                  $(eleAfter).css('margin-bottom', eleHeight)
+                else
+                  $(eleBefore).css('margin-bottom', eleHeight)
+              else
+                $(eleBefore).css('margin-bottom', eleHeight)
+          else if eleAfter? then $(eleAfter).css('margin-top', eleHeight)
+          offset = pos.top - parent.offset().top
+          if offset isnt 0
+            parent.data('plugin_pep').moveToUsingTransforms(0, offset)
 
-          if sourceIndex >= 0 and targetIndex >= 0 and sourceIndex isnt targetIndex
-            #  get the item to be moved
-            underlyingList = ko.utils.unwrapObservable(dataList)
-            item = underlyingList[sourceIndex]
-            # notify 'beforeChange' subscribers
-            dataList.valueWillMutate()
-            # move from source index ...
-            underlyingList.splice sourceIndex, 1
-            # ... to target index
-            underlyingList.splice targetIndex, 0, item
-            # notify subscribers
-            dataList.valueHasMutated()
-            # signal stop sorting
-          value.isSorting(no) if value.isSorting?
-          return true
-      }
+        updateOrder = =>
+          {eleBefore, eleAfter} = getElementBeforeAndAfter(parent)
+          unless eleBefore is null and eleAfter is null
+            sourceIndex = items.indexOf(ko.dataFor(parent[0])) 
+            targetIndex = (
+              if eleBefore?
+                data = ko.dataFor(eleBefore)
+                index = items.indexOf(data) + 1
+                if sourceIndex < index then index--
+                index
+              else 0
+            )
+            #console.log sourceIndex, targetIndex
+            if sourceIndex >= 0 and targetIndex >= 0 and sourceIndex isnt targetIndex
+              #  get the item to be moved
+              underlyingList = ko.utils.unwrapObservable(items)
+              itemToMove = underlyingList[sourceIndex]
+              # notify 'beforeChange' subscribers
+              items.valueWillMutate()
+              # move from source index ...
+              underlyingList.splice sourceIndex, 1
+              # ... to target index
+              underlyingList.splice targetIndex, 0, itemToMove
+              # notify subscribers
+              items.valueHasMutated()
+              value.sorted.call(viewModel) if value.sorted
 
-      for evtType, handler of bindingEventHandler
-        do (evtType, handler) =>
-          customHandler = customOptions[evtType] or (=>) 
-          options[evtType] = -> 
-            handler.apply(this, arguments)
-            return customHandler.apply(bindingContext.$data, arguments)
-            
-      sortable = $(element).sortable(options)
+        parent.pep(
+          place: false
+          axis: 'y'
+          shouldEase: false
+          constrainTo: 'parent'
+          droppable: '.droppable'
+          overlapFunction: ($a, $b) =>
+            rect1 = $a[0].getBoundingClientRect()
+            rect2 = $b[0].getBoundingClientRect()
+            drop = rect2.bottom-rect1.bottom > -20 and rect2.bottom-rect1.bottom < 10
+            return drop
+          start: =>
+            parent.css('margin-bottom', -parent.outerHeight())
+            value.isSorting(yes) if value.isSorting?
+          stop: (ev, obj) =>
+            onDropRegion = obj.activeDropRegions.length > 0
+            $(obj.activeDropRegions).each( (i, o) =>
+              value.drop.call(viewModel, ko.dataFor(parent[0]), o) if value.drop?
+            )
+            unless onDropRegion then updateOrder()
+            pepObj = parent.data('plugin_pep')
+            $.pep.unbind( parent );
+            $(element).find('.sortable').attr('style', '')
+            value.isSorting(no) if value.isSorting?
+          drag: (ev, obj) => 
+            updatePlaceholder()
+            return true
+
+        )
+        parent.data('plugin_pep').handleStart(event)
+        event.stopImmediatePropagation()
+      )
+
   }
 
   ko.bindingHandlers.jqmselectvalue = {
@@ -159,111 +231,116 @@
       value = valueAccessor()
       valueUnwrapped = ko.toJS(value)
       customOptions = valueUnwrapped.options or {}
-
-      defaultOptions = {
-        accept: "li.sortable"
-        hoverClass: "ui-state-hover"
-      }
-
-      events = ["activate", "create", "deactivate", "drop", "out", "over"]
-      for name, value of customOptions
-        if name in events
-          customOptions[name] = value.bind(bindingContext.$data)
-
-      options = ko.utils.extend(customOptions, defaultOptions)
-      $(element).droppable(options)
   }
 
   ko.bindingHandlers.dragslide = {
     init: (element, valueAccessor, allBindings, viewModel, bindingContext) ->
-      # cached vars for sorting events
       value = valueAccessor()
       valueUnwrapped = ko.toJS(value)
       customOptions = valueUnwrapped.options or {}
+      $(element).css('overflow': 'hidden')
+      # Disable selection:
+      $(element).on("selectstart mousedown", (event) ->
+        event.preventDefault()
+      )
 
-      li = $(element)
-      rule = bindingContext.$rawData
-      action = null
 
-      showDragMessage = (msg) =>
+      showDragMessage = (target, msg) =>
         $('.drag-message')
         .text(msg)
         .css(
-          top: li.position().top
-          height: li.outerHeight()
-          'line-height': li.outerHeight() + "px"
+          top: target.position().top
+          height: target.outerHeight()
+          'line-height': target.outerHeight() + "px"
         ).fadeIn(500)
 
-      li.draggable(
-        axis: "x"
-        revert: true
-        handle: 'a'
-        zIndex: 100
-        scroll: false
-        revertDuration: 200
-        start: =>
-          li.parent('ul').css(position: 'relative')
 
-        drag: ( event, ui ) => 
-          # offset of the helper is 15 at start
-          offsetX = ui.offset.left-15
-          if offsetX < -120
-            unless action is "deactivate"
-              showDragMessage(__('deactivate rule')).addClass('deactivate').removeClass('activate')
-              action = "deactivate"
-          else if offsetX > 120
-            unless action is "activate"
-              showDragMessage(__('activate rule')).addClass('activate').removeClass('deactivate')
-              action = "activate"
-          else
-            if action?
-              $('.drag-message').fadeOut(500)
-              action = null
+      lastVmouseDown = null
 
-        stop: => 
-          li.parent('ul').css(position: 'static')
-          $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
-          if action?
-            pimatic.loading "saveactivate", "show", text: __(action)
-            $.ajax("/api/rule/#{rule.id}/#{action}",
-              global: false
-            ).always( ->
-              pimatic.loading "saveactivate", "hide"
-            ).done(ajaxShowToast).fail(ajaxAlertFail)
+      dragging = no
+
+      $(element).on("click", (event) ->
+        if dragging then event.preventDefault()
+      )
+      mouseDownTarget = null
+      $(element).on('vmousedown', '.draggable', (event) =>
+        mouseDownTarget = $(event.target).parents('.draggable')
+        lastVmouseDown = event if mouseDownTarget?.length
       )
 
-      ###
-        Some realy dirty hacks to allow vertical scralling
-      ###
-      if $.ui.mouse.prototype._touchStart?
-        uiDraggable = li.data('uiDraggable')
-
-        # Capture the last mousedown/touchstart event
-        lastVmouseDown = null
-        li.on('vmousedown', (event) =>
-          if $(event.target).parent('.handle').length then return
-          lastVmouseDown = event
+      $(element).on('vmousemove', '.draggable', (event) =>
+        target = $(event.target).parents('.draggable')
+        if (
+          (not lastVmouseDown?) or
+          (not target?.length) or
+          (not mouseDownTarget?.length) or
+          (mouseDownTarget[0] isnt target[0])
         )
+          mouseDownTarget = null
+          lastVmouseDown = null
+          return
 
-        uiDraggable._isDragging = no
-        # If the mouse
-        li.on('vmousemove', (event) =>
-          if $(event.target).parent('.handle').length then return
-          unless lastVmouseDown is null
-            deltaX = Math.abs(event.pageX - lastVmouseDown.pageX)
-            deltaY = Math.abs(event.pageY - lastVmouseDown.pageY)
-            # detect horizontal drag
-            if deltaX > deltaY and deltaX > 5 and not uiDraggable._isDragging
-              # https://code.google.com/p/android/issues/detail?id=19827
-              event.originalEvent.preventDefault();
-              event.stopPropagation();
-              originalEvent = lastVmouseDown.originalEvent
-              uiDraggable._isDragging = yes
-              $.ui.mouse.prototype._touchStart.apply(
-                uiDraggable, [originalEvent]
-              )
-              lastVmouseDown = null
-        )
+        deltaX = Math.abs(event.pageX - lastVmouseDown.pageX)
+        deltaY = Math.abs(event.pageY - lastVmouseDown.pageY)
+        # detect horizontal drag
+        if deltaX > deltaY and deltaX > 5
+          # https://code.google.com/p/android/issues/detail?id=19827
+          event.preventDefault()
+          event.stopPropagation()
+          lastVmouseDown.preventDefault()
+
+          
+          rule = ko.dataFor(target[0])
+          action = null
+
+          startPosition = target.position()
+          target.pep(
+            place: false
+            axis: 'x'
+            shouldEase: yes
+            revert: yes
+            shouldPreventDefault: no
+            start: (ev, obj)  => dragging = yes
+            rest: (ev, obj) =>
+              pepObj = target.data('plugin_pep')
+              $.pep.unbind( target );
+              target.attr('style', '')
+              dragging = no
+            drag: (ev, obj) => 
+              offsetX = target.position().left - startPosition.left
+              if offsetX < -120
+                unless action is "deactivate"
+                  showDragMessage(target, __('deactivate rule')).addClass('deactivate').removeClass('activate')
+                  action = "deactivate"
+              else if offsetX > 120
+                unless action is "activate"
+                  showDragMessage(target, __('activate rule')).addClass('activate').removeClass('deactivate')
+                  action = "activate"
+              else
+                if action?
+                  $('.drag-message').fadeOut(500)
+                  action = null
+              return true
+            stop: (ev, obj) =>
+              $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
+              if action?
+                pimatic.loading "saveactivate", "show", text: __(action)
+                $.ajax("/api/rule/#{rule.id}/#{action}",
+                  global: false
+                ).always( ->
+                  pimatic.loading "saveactivate", "hide"
+                ).done(ajaxShowToast).fail(ajaxAlertFail)
+          )
+          # fix revert function:
+          target.data('plugin_pep').revert = ->
+            @moveToUsingTransforms(-@xTranslation(), 0)  if @shouldUseCSSTranslation()
+            @moveTo(@initialPosition.left, 0)
+
+          target.data('plugin_pep').handleStart(lastVmouseDown)
+          lastVmouseDown = null
+
+      )
+      return
   }
 
 )()
