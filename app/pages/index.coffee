@@ -29,6 +29,8 @@ $(document).on( "pagebeforecreate", (event) ->
     }
     constructor: (data) ->
       unless data.value? then data.value = null
+      unless data.exprInputStr? then data.exprInputStr = null
+      unless data.exprTokens? then data.exprTokens = null
       ko.mapping.fromJS(data, @constructor.mapping, this)
 
       @displayName = ko.computed( => "$#{@name}" )
@@ -291,11 +293,12 @@ $(document).on( "pagebeforecreate", (event) ->
           break
 
     updateVariable: (varInfo) ->
+      console.log varInfo
       for variable in @variables()
         if variable.name is varInfo.name
           variable.value(varInfo.value) if varInfo.value?
           variable.type(varInfo.type) if varInfo.type?
-          variable.expression(varInfo.expression) if varInfo.expression?
+          variable.exprInputStr(varInfo.exprInputStr) if varInfo.exprInputStr?
       for item in @items()
         if item.type is "variable" and item.name is varInfo.name
           item.value(varInfo.value)
