@@ -295,9 +295,7 @@ $(document).on( "pagebeforecreate", (event) ->
     updateVariable: (varInfo) ->
       for variable in @variables()
         if variable.name is varInfo.name
-          variable.value(varInfo.value) if varInfo.value?
-          variable.type(varInfo.type) if varInfo.type?
-          variable.exprInputStr(varInfo.exprInputStr) if varInfo.exprInputStr?
+          variable.update(varInfo)
       for item in @items()
         if item.type is "variable" and item.name is varInfo.name
           item.value(varInfo.value)
@@ -381,7 +379,9 @@ $(document).on( "pagebeforecreate", (event) ->
       unless variable.isDeviceAttribute()
         editVariablePage = pimatic.pages.editVariable
         editVariablePage.variableName(variable.name)
-        editVariablePage.variableValue(variable.value())
+        editVariablePage.variableValue(
+          if variable.type() is 'value' then variable.value() else variable.exprInputStr()
+        )
         editVariablePage.variableType(variable.type())
         editVariablePage.action('update')
         return true
