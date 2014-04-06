@@ -38,7 +38,7 @@ $(document).on( "pagebeforecreate", (event) ->
     update: (data) ->
       ko.mapping.fromJS(data, @constructor.mapping, this)
     afterRender: (elements) ->
-      $(elements).find("label").before($(handleHTML))
+      $(elements).find("a").before($(handleHTML))
 
   # Export the rule class
   pimatic.Rule = Rule
