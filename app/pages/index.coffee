@@ -165,9 +165,9 @@ $(document).on( "pagebeforecreate", (event) ->
         allData = pimatic.storage.get('pimatic')
         pimatic.storage.removeAll()
         if shouldRememberMe
-          pimatic.storage = $.sessionStorage
-        else
           pimatic.storage = $.localStorage
+        else
+          pimatic.storage = $.sessionStorage
         pimatic.storage.set('pimatic', allData)
       )
 
@@ -190,15 +190,15 @@ $(document).on( "pagebeforecreate", (event) ->
         # Select localStorage
         pimatic.storage = $.localStorage
         $.sessionStorage.removeAll()
-        @rememberme(no)
+        @rememberme(yes)
       else if $.sessionStorage.isSet('pimatic')
         # Select sessionSotrage
         pimatic.storage = $.sessionStorage
         $.localStorage.removeAll()
-        @rememberme(yes)
+        @rememberme(no)
       else
-        # select localStorage as default
-        pimatic.storage = $.localStorage
+        # select sessionStorage as default
+        pimatic.storage = $.sessionStorage
         @rememberme(no)
         pimatic.storage.set('pimatic', {})
 
