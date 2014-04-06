@@ -261,6 +261,7 @@
 
       $(element).on("click", (event) ->
         if dragging then event.preventDefault()
+        else lastVmouseDown = null
       )
       mouseDownTarget = null
       $(element).on('vmousedown', '.draggable', (event) =>

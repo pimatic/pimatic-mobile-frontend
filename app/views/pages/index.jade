@@ -79,18 +79,20 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
       li#delete-item.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems()")=__('Drop here to remove item')
       li#add-a-item(data-bind="visible: enabledEditing() && !isSortingItems() ")
         a(data-transition='slidefade', href='#add-item')=__('Add an item')+'...'
-    ul#rules(data-role='listview', data-bind="sortable: {items: rules, isSorting: isSortingRules, sorted: onRulesSorted}, dragslide: {}, css: ruleItemCssClass")
+    ul#rules(data-role='listview', data-bind="sortable: {items: rules, isSorting: isSortingRules, sorted: onRulesSorted, drop: onDropRuleOnTrash}, dragslide: {}, css: ruleItemCssClass")
       li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Rules')
         a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
       <!-- ko template: { name: 'rule-template', foreach:rules, afterRender: afterRenderRule } --><!-- /ko -->
+      li#delete-rule.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingRules()")=__('Drop here to remove rule')
       li#add-rule(data-bind="visible: enabledEditing() && !isSortingRules() ")
         a(data-transition='slidefade', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
       div.drag-message
-    ul#variables(data-role='listview', data-bind="sortable: {items: variables, isSorting: isSortingVariables, sorted: onVariablesSorted}")
+    ul#variables(data-role='listview', data-bind="sortable: {items: variables, isSorting: isSortingVariables, sorted: onVariablesSorted, drop: onDropVariableOnTrash}")
       li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Variables')
         a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(href="#variablesMenu", 
           data-rel="popup", data-transition="slideup", data-bind="jqmbutton: lockButton()")
       <!-- ko template: { name: 'variable-template', foreach: visibleVars, afterRender: afterRenderVariable } --><!-- /ko -->
+      li#delete-variable.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
       li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
         a(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
   div#nav-panel.overthrow(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)

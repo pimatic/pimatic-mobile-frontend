@@ -352,6 +352,26 @@ $(document).on( "pagebeforecreate", (event) ->
         pimatic.loading "deleteitem", "hide"
       ).done(ajaxShowToast).fail(ajaxAlertFail)
 
+    onDropRuleOnTrash: (rule) ->
+      console.log rule
+      pimatic.loading "deleterule", "show", text: __('Saving')
+      $.get("/api/rule/#{rule.id}/remove").done( (data) =>
+        if data.success
+          @rules.remove(rule)
+      ).always( => 
+        pimatic.loading "deleterule", "hide"
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
+
+    onDropVariableOnTrash: (variable) ->
+      pimatic.loading "deletevariable", "show", text: __('Saving')
+      $.get("/api/variable/#{variable.name}/remove").done( (data) =>
+        if data.success
+          @variables.remove(variable)
+      ).always( => 
+        pimatic.loading "deletevariable", "hide"
+      ).done(ajaxShowToast).fail(ajaxAlertFail)
+
+
     onAddRuleClicked: ->
       editRulePage = pimatic.pages.editRule
       editRulePage.resetFields()
