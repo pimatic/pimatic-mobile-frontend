@@ -221,8 +221,10 @@
             drop = rect2.bottom-rect1.bottom > -20 and rect2.bottom-rect1.bottom < 10
             return drop
           start: =>
-            parent.css('margin-bottom', -parent.outerHeight())
+            # fix the hight of the element while sorting
+            $(element).css('height', $(element).height())
             value.isSorting(yes) if value.isSorting?
+            parent.css('margin-bottom', -parent.innerHeight())
             scrollArea = new ScrollArea($('#index .ui-content.overthrow')[0]);
             
             lastX = null
@@ -242,6 +244,7 @@
             pepObj = parent.data('plugin_pep')
             $.pep.unbind( parent );
             $(element).find('.sortable').attr('style', '')
+            $(element).css('height', '')
             value.isSorting(no) if value.isSorting?
           drag: (ev, obj) => 
             x = ev.pageX
@@ -265,14 +268,6 @@
       if typeof ko.bindingHandlers.value.update isnt "undefined"
         ko.bindingHandlers.value.update element, valueAccessor, allBindingsAccessor, viewModel
       $(element).selectmenu("refresh", true)
-  }
-
-  ko.bindingHandlers.droppable = {
-    init: (element, valueAccessor, allBindings, viewModel, bindingContext) ->
-      # cached vars for sorting events
-      value = valueAccessor()
-      valueUnwrapped = ko.toJS(value)
-      customOptions = valueUnwrapped.options or {}
   }
 
   ko.bindingHandlers.dragslide = {
