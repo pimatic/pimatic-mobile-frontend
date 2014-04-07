@@ -11,6 +11,10 @@
   position: relative;
 }
 
+#index #items .device label {
+  float: left;
+}
+
 
 /* Overthrow CSS:
    Enable overflow: auto on elements with overthrow class when html element has overthrow class too */
