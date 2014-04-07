@@ -193,8 +193,18 @@ $(document).on( "pagebeforecreate", (event) ->
         @_updateButtons(position)
       )
 
-    onShutterDownClicked: -> @_ajaxCall('lowerDown')
-    onShutterUpClicked: -> @_ajaxCall('liftUp')
+    onShutterDownClicked: -> 
+      if @getAttribute('position').value() is 'down'
+        @_ajaxCall('stop')
+      else
+        @_ajaxCall('lowerDown')
+
+    onShutterUpClicked: -> 
+      if @getAttribute('position').value() is 'up'
+        @_ajaxCall('stop')
+      else
+        @_ajaxCall('liftUp')
+    
     _ajaxCall: (action) ->
       text = (if action is "liftUp" then "Up" else "Down")
       @downBtn.addClass('ui-state-disabled')
@@ -218,6 +228,9 @@ $(document).on( "pagebeforecreate", (event) ->
         when 'down'
           @upBtn.removeClass('ui-btn-active')
           @downBtn.addClass('ui-btn-active')
+        when 'stopped'
+          @upBtn.removeClass('ui-btn-active')
+          @downBtn.removeClass('ui-btn-active')
 
     afterRender: (elements) ->
       super(elements)
