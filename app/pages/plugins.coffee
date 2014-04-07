@@ -37,7 +37,7 @@ $(document).on "pageinit", '#plugins', (event) ->
 
 
 $(document).on "pagebeforeshow", '#plugins', (event) ->
-  $('#select-plugin-action').val('select').selectmenu('refresh')
+  pimatic.try => $('#select-plugin-action').val('select').selectmenu('refresh')
 
 # plugins-browse-page
 # ---------
