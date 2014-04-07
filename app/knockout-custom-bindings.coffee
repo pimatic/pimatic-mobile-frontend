@@ -79,6 +79,31 @@
     }
 
 
+  ScrollArea = (element) ->
+    @element = element
+    @$element = $(element)
+    @scrollMargin = Math.floor(@$element.innerHeight() / 10)
+    @offset = @$element.offset()
+    @innerHeight = @$element.innerHeight()
+    @scrollDeltaMin = 5
+    @scrollDeltaMax = 30
+  ScrollArea::scroll = (x, y) ->
+    topLimit = @scrollMargin + @offset.top
+    speed = undefined
+    scrollDelta = 0
+    if y < topLimit
+      speed = (topLimit - y) / @scrollMargin
+      scrollDelta = -(speed * (@scrollDeltaMax - @scrollDeltaMin) + @scrollDeltaMin)
+    bottomLimit = @offset.top + @innerHeight - @scrollMargin
+    if y > bottomLimit
+      speed = (y - bottomLimit) / @scrollMargin
+      scrollDelta = speed * (@scrollDeltaMax - @scrollDeltaMin) + @scrollDeltaMin
+    if scrollDelta != 0  
+      scrolled = @$element.scrollTop(@$element.scrollTop() + scrollDelta)
+      unless scrolled
+        scrollDelta = 0
+    return scrollDelta
+
   ko.bindingHandlers.sortable = {
     init: (element, valueAccessor, allBindings, viewModel, bindingContext) ->
       value = valueAccessor()
@@ -150,7 +175,7 @@
           else if eleAfter? then $(eleAfter).css('margin-top', eleHeight)
           offset = pos.top - parent.offset().top
           if offset isnt 0
-            parent.data('plugin_pep').moveToUsingTransforms(0, offset)
+            parent.data('plugin_pep').doMoveTo(0, offset)
 
         updateOrder = =>
           {eleBefore, eleAfter} = getElementBeforeAndAfter(parent)
@@ -179,6 +204,11 @@
               items.valueHasMutated()
               value.sorted.call(viewModel) if value.sorted
 
+        x = null
+        y = null
+        scrollArea = null
+        timer = null
+
         parent.pep(
           place: false
           axis: 'y'
@@ -193,7 +223,17 @@
           start: =>
             parent.css('margin-bottom', -parent.outerHeight())
             value.isSorting(yes) if value.isSorting?
+            scrollArea = new ScrollArea($('#index .ui-content.overthrow')[0]);
+            
+            lastX = null
+            lastY = null
+            timer = setInterval( (=> 
+              scrollDelta = scrollArea.scroll(x, y)
+              if scrollDelta != 0
+                parent.data('plugin_pep').doMoveTo(0, scrollDelta)
+            ) , 100);
           stop: (ev, obj) =>
+            clearTimeout(timer)
             onDropRegion = obj.activeDropRegions.length > 0
             $(obj.activeDropRegions).each( (i, o) =>
               value.drop.call(viewModel, ko.dataFor(parent[0]), o) if value.drop?
@@ -204,6 +244,8 @@
             $(element).find('.sortable').attr('style', '')
             value.isSorting(no) if value.isSorting?
           drag: (ev, obj) => 
+            x = ev.pageX
+            y = ev.pageY
             updatePlaceholder()
             return true
 
