@@ -232,7 +232,7 @@
         i = Math.min(trigger.length, suggestion.length);
         while (i >= 0) {
           search = suggestion.substring(0, i);
-          if (trigger.lastIndexOf(search) === trigger.length - search.length) {
+          if (trigger.toLowerCase().lastIndexOf(search.toLowerCase()) === trigger.length - search.length) {
             break;
           } else {
             i--;
@@ -283,7 +283,7 @@
                 var matchLen = 0;
                 var maxMatchLen = Math.min(word.length, prefixLen);
                 while (++matchLen < maxMatchLen) {
-                    if (word.charAt(matchLen) != prefix.charAt(matchLen)) {
+                    if (word.charAt(matchLen).toLowerCase() != prefix.charAt(matchLen).toLowerCase()) {
                         break;
                     }
                 }

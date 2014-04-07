@@ -57,7 +57,7 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
 
   customReplace = (pre, value) -> 
     commonPart = this.ac.getCommonPart(pre, value)
-    return pre + value.substring(commonPart.length, value.length)
+    return pre.substring(0, pre.length - commonPart.length) + value
 
   customTemplate = (value) ->
     commonPart = this.ac.getCommonPart(@lastTerm, value)
