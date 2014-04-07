@@ -118,12 +118,6 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
   ])
 )
 
-$(document).on("pagebeforeshow", '#edit-rule', (event) ->
-  pimatic.pages.editRule.autocompleEnabled = no
-  $("#edit-rule-form textarea").css("height", 50).keyup()
-  pimatic.pages.editRule.autocompleEnabled = yes
-)
-
 $(document).on("pagebeforehide", '#edit-rule', (event) ->
   pimatic.pages.editRule.autocompleteAjax?.abort()
 )
