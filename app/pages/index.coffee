@@ -344,32 +344,40 @@ $(document).on( "pagebeforecreate", (event) ->
       ).done(ajaxShowToast).fail(ajaxAlertFail)
 
     onDropItemOnTrash: (item) ->
-      pimatic.loading "deleteitem", "show", text: __('Saving')
-      $.post('remove-item', itemId: item.itemId).done( (data) =>
-        if data.success
-          @items.remove(item)
-      ).always( => 
-        pimatic.loading "deleteitem", "hide"
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
+      really = confirm(__("Do you really want to delete the item?"))
+      if really then (doDeletion = =>
+          pimatic.loading "deleteitem", "show", text: __('Saving')
+          $.post('remove-item', itemId: item.itemId).done( (data) =>
+            if data.success
+              @items.remove(item)
+          ).always( => 
+            pimatic.loading "deleteitem", "hide"
+          ).done(ajaxShowToast).fail(ajaxAlertFail)
+        )()
 
     onDropRuleOnTrash: (rule) ->
-      console.log rule
-      pimatic.loading "deleterule", "show", text: __('Saving')
-      $.get("/api/rule/#{rule.id}/remove").done( (data) =>
-        if data.success
-          @rules.remove(rule)
-      ).always( => 
-        pimatic.loading "deleterule", "hide"
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
+      really = confirm(__("Do you really want to delete the %s rule?", rule.name()))
+      if really then (doDeletion = =>
+          pimatic.loading "deleterule", "show", text: __('Saving')
+          $.get("/api/rule/#{rule.id}/remove").done( (data) =>
+            if data.success
+              @rules.remove(rule)
+          ).always( => 
+            pimatic.loading "deleterule", "hide"
+          ).done(ajaxShowToast).fail(ajaxAlertFail)
+        )()
 
     onDropVariableOnTrash: (variable) ->
-      pimatic.loading "deletevariable", "show", text: __('Saving')
-      $.get("/api/variable/#{variable.name}/remove").done( (data) =>
-        if data.success
-          @variables.remove(variable)
-      ).always( => 
-        pimatic.loading "deletevariable", "hide"
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
+      really = confirm(__("Do you really want to delete variable: %s?", '$' + variable.name))
+      if really then (doDeletion = =>
+        pimatic.loading "deletevariable", "show", text: __('Saving')
+        $.get("/api/variable/#{variable.name}/remove").done( (data) =>
+          if data.success
+            @variables.remove(variable)
+        ).always( => 
+          pimatic.loading "deletevariable", "hide"
+        ).done(ajaxShowToast).fail(ajaxAlertFail)
+      )()
 
 
     onAddRuleClicked: ->
