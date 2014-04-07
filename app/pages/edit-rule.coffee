@@ -84,7 +84,10 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
         ).fail( => callback [] )
       else callback []
     index: 1
-    replace: customReplace
+    replace: (pre, value) ->
+      textValue = customReplace.call(this, pre, value)
+      editRulePage.ruleCondition(textValue)
+      return textValue
     template: customTemplate
   ])
 
@@ -107,7 +110,10 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
         ).fail( => callback [] )
       else callback []
     index: 1
-    replace: customReplace
+    replace: (pre, value) ->
+      textValue = customReplace.call(this, pre, value)
+      editRulePage.ruleActions(textValue)
+      return textValue
     template: customTemplate
   ])
 )
