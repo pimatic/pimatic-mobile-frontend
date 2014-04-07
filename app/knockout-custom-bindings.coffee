@@ -1,18 +1,5 @@
 ( ->
 
-  # $.fn.disableSelection = ( ->
-  #   @attr('unselectable', 'on')
-  #     .css({
-  #       '-moz-user-select':'-moz-none',
-  #       '-moz-user-select':'none',
-  #       '-o-user-select':'none',
-  #       '-khtml-user-select':'none',
-  #       '-webkit-user-select':'none',
-  #       '-ms-user-select':'none',
-  #       'user-select':'none'})
-  #    .on('selectstart mousedown', (event) => event.preventDefault(); false )
-  # )
-
   setIconClass = ($ele, icon) ->
     # remove old icon-class
     classes = (
@@ -246,6 +233,7 @@
             $(element).find('.sortable').attr('style', '')
             $(element).css('height', '')
             value.isSorting(no) if value.isSorting?
+            parent.removeClass('ui-btn-active')
           drag: (ev, obj) => 
             x = ev.pageX
             y = ev.pageY
@@ -368,6 +356,7 @@
                 ).always( ->
                   pimatic.loading "saveactivate", "hide"
                 ).done(ajaxShowToast).fail(ajaxAlertFail)
+              target.removeClass('ui-btn-active')
           )
           # fix revert function:
           target.data('plugin_pep').revert = ->
