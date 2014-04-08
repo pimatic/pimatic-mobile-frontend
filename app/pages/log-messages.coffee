@@ -1,13 +1,14 @@
 # log-page
 # ---------
 
-$(document).on("pageinit", '#log', (event) ->
+$(document).on("pagecreate", '#log', (event) ->
 
   class LogMessageViewModel
 
     @mapping = {
       messages:
         create: ({data, parent, skip}) => data
+        key: (data) -> data.id
       ignore: ['success']
     }
 
@@ -35,15 +36,20 @@ $(document).on("pageinit", '#log', (event) ->
         current = justDate(messages[index].time)
         if current is before then return justTime(messages[index].time)
         else return item.time
+
+    loadMessages: ->
+      pimatic.loading "loading message", "show", text: __('Loading Messages')
+      $.ajax("/api/messages",
+        global: false # don't show loading indicator
+      ).always( ->
+        pimatic.loading "loading message", "hide"
+      ).done( (data) ->
+        if data.success
+          logPage.updateFromJs(data)
+      ).fail(ajaxAlertFail)
     
 
   pimatic.pages.log = logPage = new LogMessageViewModel()
-
-  $.get("/api/messages")
-    .done( (data) ->
-      if data.success
-        logPage.updateFromJs(data)
-    ).fail(ajaxAlertFail)
 
   pimatic.socket.on 'log', (entry) -> 
     logPage.messages.push entry
@@ -57,4 +63,8 @@ $(document).on("pageinit", '#log', (event) ->
 
   ko.applyBindings(logPage, $('#log')[0])
   return
+)
+
+$(document).on("pagebeforeshow", '#log', (event) ->
+  pimatic.pages.log.loadMessages()
 )
