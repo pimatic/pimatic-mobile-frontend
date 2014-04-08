@@ -30,12 +30,14 @@ $(document).on("pagecreate", '#log', (event) ->
       index = index()
       messages = @messages()
       #console.log index, messages
-      if index is 0 then return messages[index].time
+      if index is 0 
+        msg = messages[index]
+        return msg?.time
       else 
-        before = justDate(messages[index-1].time)
-        current = justDate(messages[index].time)
-        if current is before then return justTime(messages[index].time)
-        else return item.time
+        [msgBefore, msgCurrent] = [ messages[index-1], messages[index] ]
+        [before, current] = [ justDate(msgBefore.time), justDate(msgCurrent.time) ]
+        if current is before then return justTime(msgCurrent.time)
+        else return current.time
 
     loadMessages: ->
       pimatic.loading "loading message", "show", text: __('Loading Messages')
