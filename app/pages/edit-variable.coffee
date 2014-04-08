@@ -20,7 +20,7 @@ $(document).on("pagebeforecreate", (event) ->
       )
 
       @valueLabelText = ko.computed( => 
-        return if @variableType() is 'value' then __('Value') else __('Expression') 
+        return if @variableType() is 'value' then __('Value') else __('Expr.') 
       )
 
     resetFields: () ->

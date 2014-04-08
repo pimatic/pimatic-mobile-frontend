@@ -1,23 +1,7 @@
-
-.pep-active {
-  z-index: 1001;
-}
-
-.ui-header {
-  z-index: 1000;
-}
-
-#index #items, #index #rules, #index #variables {
-  position: relative;
-}
-
-#index #items .device label {
-  float: left;
-}
-
-
-/* Overthrow CSS:
-   Enable overflow: auto on elements with overthrow class when html element has overthrow class too */
+/* 
+  Overthrow CSS:
+  Enable overflow: auto on elements with overthrow class when html element has overthrow class too 
+*/
 .overthrow-enabled .overthrow {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
@@ -31,6 +15,15 @@
   left: 0;
   right: 0;
 }
+
+.pep-active {
+  z-index: 1001;
+}
+
+.ui-header {
+  z-index: 1000;
+}
+
 
 /* make the jquery mobile loader to block all elements */
 .ui-loader-background {
@@ -84,6 +77,17 @@ html .ui-loader {
 .in, .out {
   -webkit-animation-timing-function: ease-in-out;
   -webkit-animation-duration: 120ms !important;
+}
+
+
+/* style for index page */
+
+#index #items, #index #rules, #index #variables {
+  position: relative;
+}
+
+#index #items .device label {
+  float: left;
 }
 
 /* align the slider for switches to the right */
@@ -149,6 +153,8 @@ html .ui-loader {
   display: none;
 }
 
+
+
 #index #items li.sortable {
   padding-right: 20px;
 }
@@ -204,10 +210,10 @@ li.sortable.header .handle {
   color: #fff;
 }
 
-fieldset .ui-block-a .ui-btn{
+.ui-block-a .ui-btn{
     margin-left: 0px;
 }
-fieldset .ui-block-b .ui-btn{
+.ui-block-b .ui-btn{
     margin-right: 0px;
 }
 
@@ -596,6 +602,42 @@ li.with-button a.ui-btn {
   font-weight: normal;
 }
 
-#edit-rule-form label {
+#edit-rule-form label, #edit-variable-form label {
   font-weight: bold;
+}
+
+
+.has-variable-name-input .ui-input-text:before {
+  position: absolute;
+  margin: 0.4em;
+  margin-top: 0.5em;
+  content: '$';
+  z-index: 100;
+}
+
+.has-variable-name-input .ui-input-text input {
+  margin-left: 0.55em;
+}
+
+
+@media (min-width: 28em) {
+
+  #edit-rule-form label[for='edit-rule-condition'],
+  #edit-rule-form label[for='edit-rule-actions'] {
+    float: none;
+  }
+
+
+  .short-labels .ui-field-contain > label,
+  .short-labels .ui-field-contain .ui-controlgroup-label,
+  .short-labels .ui-field-contain > .ui-rangeslider > label {
+    width: 12%;
+  }
+
+  .short-labels .ui-field-contain > label ~ [class*="ui-"],
+  .short-labels .ui-field-contain .ui-controlgroup-controls {
+    float: left;
+    width: 86%;
+  }
+
 }

@@ -42,7 +42,7 @@ div#plugins(data-role='page')
   div.ui-content.overthrow
     form
       ul#plugin-list.checkbox-list(data-role='listview', data-inset='true')
-      fieldset.ui-grid-a
+      .ui-field-contain.ui-grid-a
         div.ui-block-a
           select#select-plugin-action(name='select-plugin-action')
             option(value="select")=__('Select an action')
@@ -50,7 +50,7 @@ div#plugins(data-role='page')
             option(value="remove")=__('Remove from config')
         div.ui-block-b
           a#plugin-do-action(data-icon="arrow-r", data-theme="a", data-role="button")=__('Do it!')
-      fieldset
+      .ui-field-contain
           a#plugin-install(href="#plugins-browse", data-icon="plus", data-role="button")=__('Install a Plugin')
 div#plugins-browse(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')

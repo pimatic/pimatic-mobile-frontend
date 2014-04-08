@@ -2,19 +2,20 @@ div#edit-variable(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
     h3(data-bind="text: pageTitle()")
   div.ui-content.overthrow
-    form#edit-variable-form(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
-      .fieldcontain
-        label(for='edit-variable-name')=__('Name')
-        input#edit-variable-name(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName, jqmenabled: action() == 'add'")
-      .fieldcontain
-        label(for='select-variable-type')=__('Type')
+    form#edit-variable-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
+      .ui-field-contain.has-variable-name-input
+        label(for='edit-variable-name')=__('Name') + ': '
+        input#edit-variable-name(placeholder="variable-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName, jqmenabled: action() == 'add'")
+      .ui-field-contain
+        label(for='select-variable-type')=__('Type') + ': '
         select#select-plugin-action(name='select-variable-type', data-bind="jqmselectvalue: variableType")
           option(value="value")=__('Value')
           option(value="expression")=__('Expression')
-      .fieldcontain
-        label(data-bind="text: valueLabelText")
-        input#edit-varibale-value(placeholder="...", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableValue")
-      .fieldcontain.ui-grid-a
+      .ui-field-contain
+        label(data-bind="text: valueLabelText() + ': '")
+        input#edit-varibale-value(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", 
+          data-bind="value: variableValue, attr: {placeholder: (variableType() == 'value' ? 'Number or string in quotes' : 'Numeric expr or string in quotes')}")
+      .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-variable-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
                              data-role="button", href='#index')=__('Cancel')

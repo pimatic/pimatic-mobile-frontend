@@ -86,9 +86,9 @@
       speed = (y - bottomLimit) / @scrollMargin
       scrollDelta = speed * (@scrollDeltaMax - @scrollDeltaMin) + @scrollDeltaMin
     if scrollDelta != 0  
-      scrolled = @$element.scrollTop(@$element.scrollTop() + scrollDelta)
-      unless scrolled
-        scrollDelta = 0
+      scrollPos = @$element.scrollTop()
+      scrolled = @$element.scrollTop(scrollPos + scrollDelta)
+      scrollDelta = @$element.scrollTop( )- scrollPos
     return scrollDelta
 
   ko.bindingHandlers.sortable = {

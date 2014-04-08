@@ -7,7 +7,7 @@ $(document).on("pagebeforecreate", (event) ->
   class EditRuleViewModel
 
     autocompleteAjax: null
-    autocompleEnabled: no
+    autocompleEnabled: yes
 
     action: ko.observable('add')
     ruleId: ko.observable('')
