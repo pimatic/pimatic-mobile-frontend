@@ -803,6 +803,7 @@ module.exports = (env) ->
         errorMsg = "No device to display with id \"#{item.deviceId}\" found"
         env.logger.error errorMsg
         return item = {
+          itemId: item.itemId
           type: "device"
           deviceId: item.deviceId
           name: ""

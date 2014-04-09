@@ -25,7 +25,7 @@ script#device-template(type='text/template')
   li.sortable.device()
     label.device-label(data-bind="text: name")
     | 
-    span.error
+    span.error(data-bind="text: ($data.error ? $data.error : '') ")
     | 
     span.attributes(data-bind="template: { name: 'attribute-template', foreach: attributes, afterRender: $data.afterAttributeRender }")
 script#header-template(type='text/template')
