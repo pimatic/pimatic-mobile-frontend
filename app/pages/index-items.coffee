@@ -206,7 +206,12 @@ $(document).on( "pagebeforecreate", (event) ->
         @_ajaxCall('liftUp')
     
     _ajaxCall: (action) ->
-      text = (if action is "liftUp" then "Up" else "Down")
+      text = (
+        switch action
+          when "liftUp" then "moving up" 
+          when "lowerDown" then "moving down"
+          when 'stop' then "stopping"
+        )
       @downBtn.addClass('ui-state-disabled')
       @upBtn.addClass('ui-state-disabled')
       pimatic.loading(
