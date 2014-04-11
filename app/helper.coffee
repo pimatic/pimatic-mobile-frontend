@@ -115,10 +115,10 @@ pimatic.try = (call) =>
   catch e
     console.log "ignoring error: ", e 
 
-ajaxShowToast = (data, textStatus, jqXHR) -> 
+window.ajaxShowToast = (data, textStatus, jqXHR) -> 
   pimatic.showToast (if data.message? then data.message else 'done')
 
-ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
+window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   data = null
   try
     data = $.parseJSON jqXHR.responseText
@@ -150,7 +150,7 @@ $(document).ready =>
       (msg) -> $('#toast').text(msg).toast('show')
   )
 
-__ = (text, args...) -> 
+window.__ = (text, args...) -> 
   translated = text
   if locale[text]? then translated = locale[text]
   else console.log 'no translation yet:', text

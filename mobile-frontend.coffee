@@ -581,15 +581,6 @@ module.exports = (env) ->
 
       parentDir = path.resolve __dirname, '..'
 
-      # Returns p.min.file versions of p.file when it exist
-      minPath = (p) => 
-        # Check if a minimised version exists:
-        if @config.mode is "production"
-          minFile = p.replace(/\.[^\.]+$/, '.min$&')
-          if fs.existsSync parentDir + "/" + minFile then return minFile
-        # in other modes or when not exist return full file:
-        return p
-
       themeCss = (
         if @config.theme is 'classic'
           [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.inline-svg-1.4.2.css",
@@ -604,7 +595,7 @@ module.exports = (env) ->
       )
 
       # Configure static assets with nap
-      nap(
+      napAsserts = nap(
         appDir: parentDir
         publicDir: "pimatic-mobile-frontend/public"
         mode: @config.mode
@@ -612,17 +603,17 @@ module.exports = (env) ->
         assets:
           js:
             jquery: [
-              minPath "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
-              minPath "pimatic-mobile-frontend/app/mobile-init.js"
-              minPath "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
-              minPath "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
-              minPath "pimatic-mobile-frontend/app/js/jquery.pep.js"
-              minPath "pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js"
-              minPath "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
-              minPath "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
-              minPath "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
-              minPath "pimatic-mobile-frontend/app/js/knockout.mapping.js"
-              minPath "pimatic-mobile-frontend/app/js/overthrow.js"
+              "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
+              "pimatic-mobile-frontend/app/mobile-init.js"
+              "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
+              "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
+              "pimatic-mobile-frontend/app/js/jquery.pep.js"
+              "pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js"
+              "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
+              "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
+              "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
+              "pimatic-mobile-frontend/app/js/knockout.mapping.js"
+              "pimatic-mobile-frontend/app/js/overthrow.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -630,29 +621,40 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/knockout-custom-bindings.coffee"
               "pimatic-mobile-frontend/app/connection.coffee"
               "pimatic-mobile-frontend/app/pages/index-items.coffee"
-              "pimatic-mobile-frontend/app/pages/*"
-            ] .concat (minPath(f) for f in @additionalAssetFiles['js'])
+              "pimatic-mobile-frontend/app/pages/add-item.coffee"
+              "pimatic-mobile-frontend/app/pages/edit-rule.coffee"
+              "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
+              "pimatic-mobile-frontend/app/pages/index.coffee"
+              "pimatic-mobile-frontend/app/pages/log-messages.coffee"
+              "pimatic-mobile-frontend/app/pages/plugins.coffee"
+              "pimatic-mobile-frontend/app/pages/updates.coffee"
+            ] .concat @additionalAssetFiles['js']
             
           css:
             theme: [
-              minPath "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
-            ] .concat ( minPath t for t in themeCss ) .concat [
-              minPath "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
-              minPath "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
-              minPath "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
+              "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
+            ] .concat themeCss .concat [
+              "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
+              "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
+              "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
             ] 
             style: [
               "pimatic-mobile-frontend/app/css/style.css"
-            ] .concat (minPath(f) for f in @additionalAssetFiles['css'])
+            ] .concat @additionalAssetFiles['css']
       )
 
-      nap.preprocessors['.coffee'] = (contents, filename) ->
-        try
-          coffee.compile contents, bare: on
-        catch err
-          err.stack = "Nap error compiling #{filename}\n" + err.stack
-          throw err
+      # Returns p.min.file versions of p.file when it exist
+      minPath = (p) => 
+        # Check if a minimised version exists:
+        minFile = p.replace(/\.[^\.]+$/, '.min$&').replace(/\.coffee$/,'.js')
+        if fs.existsSync(parentDir + "/" + minFile) then return minFile
+        # in other modes or when not exist return full file:
+        return p
 
+      if @config.mode is "production"
+        for sec, files of napAsserts.assets.js
+          for f, i in files
+            files[i] = minPath f
 
       # When the config mode 
       manifest = (switch @config.mode 

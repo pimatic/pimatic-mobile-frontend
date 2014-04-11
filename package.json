@@ -20,8 +20,13 @@
     "type": "git",
     "url": "git://github.com/pimatic/pimatic-log-mobile-frontend.git"
   },
-  "bundledDependencies": ["jade", "socket.io", "nap", "render-appcache-manifest"],
-  "dependencies": { 
+  "bundledDependencies": [
+    "jade",
+    "socket.io",
+    "nap",
+    "render-appcache-manifest"
+  ],
+  "dependencies": {
     "ws": "0.4.31",
     "jade": "1.1.4",
     "socket.io": "0.9.16",
@@ -34,5 +39,10 @@
   "engines": {
     "node": ">0.8.x",
     "npm": ">1.1.x"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-uglify": "~0.4.0",
+    "grunt-contrib-coffee": "~0.10.1"
   }
 }
