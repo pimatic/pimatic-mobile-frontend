@@ -1,5 +1,5 @@
 script#switch-template(type='text/template')
-  li.sortable.switch-device
+  li.sortable.switch-device.no-header
     label.device-label(data-bind="text: name, attr: { for: switchId }")
     | 
     select.switch(
@@ -7,7 +7,7 @@ script#switch-template(type='text/template')
       option(value="off")=__('Off')
       option(value="on")=__('On')
 script#shutter-template(type='text/template')
-  li.sortable.shutter-device
+  li.sortable.shutter-device.no-header
     label.device-label(data-bind="text: name")
     | 
     div.shutter-buttons.ui-mini.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced="true")
@@ -15,14 +15,14 @@ script#shutter-template(type='text/template')
         a.shutter-down.ui-first-child.ui-btn.ui-corner-all.ui-icon-arrow-d.ui-btn-icon-left(href='#')=__('Down')
         a.shutter-up.ui-last-child.ui-btn.ui-corner-all.ui-icon-arrow-u.ui-btn-icon-left(href='#')=__('Up')
 script#dimmer-template(type='text/template')
-  li.sortable.dimmer-device
+  li.sortable.dimmer-device.no-header
     div.item-inner
       label.device-label(data-bind="text: name")
       | 
       input.dimmer(min="0", max="100", step="5", data-highlight="true",
         data-bind="attr: { id: sliderId }, value: sliderValue")
 script#device-template(type='text/template')     
-  li.sortable.device()
+  li.sortable.device.no-header
     label.device-label(data-bind="text: name")
     | 
     span.error(data-bind="text: ($data.error ? $data.error : '') ")
@@ -32,11 +32,11 @@ script#header-template(type='text/template')
   li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
     label(data-bind="text: text")
 script#button-template(type='text/template')
-  li.sortable.button
+  li.sortable.button.no-header
     label()=__('Button')
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: text}, click: onButtonPress")
 script#variable-item-template(type='text/template')
-  li.sortable.variable
+  li.sortable.variable.no-header
     label(data-bind="text: name")
     span.var-value(data-bind="text: value")
 script#attribute-template(type='text/template')
@@ -66,7 +66,7 @@ script#variable-template(type="text/template")
       span.var-type(data-bind="text: ' (' + type() + ')'")
       span.var-value(data-bind="text: displayValue()")
 //- Actuators and rules page
-div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing()}")
+div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing(), notSorting: !$root.isSortingItems() && !$root.isSortingRules() && !$root.isSortingVariables()}")
   div(data-theme=theme.headerSwatch, data-role='header')
     a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3 pimatic

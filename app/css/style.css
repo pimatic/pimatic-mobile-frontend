@@ -205,9 +205,12 @@ li.sortable.header .handle {
 }
 
 #delete-item, #delete-rule, #delete-variable {
-  background-color: #CC0000;
   border-color: #AA0000;
   color: #fff;
+}
+
+.dark-background {
+  background-color: rgb(51, 51, 51);
 }
 
 .ui-block-a .ui-btn{
@@ -239,9 +242,6 @@ li.sortable.header .handle {
   box-shadow: 0 1px 0           rgba(255,255,255,.3);
 }
 
-ul#items, ul#rules, ul#variables{
-  background-color: rgb(51, 51, 51);
-}
 
 /* dimmer */
 ul#items .ui-slider-input{
@@ -638,6 +638,64 @@ li.with-button a.ui-btn {
   .short-labels .ui-field-contain .ui-controlgroup-controls {
     float: left;
     width: 86%;
+  }
+
+}
+
+.notSorting #items .item, 
+.notSorting #rules .rule, 
+.notSorting #variables .variable {
+  -webkit-transition: margin 250ms,padding 250ms;
+  transition: margin 250ms,padding 250ms;
+}
+
+.notSorting #rules .rule a, 
+.notSorting #variables .variable a {
+  -webkit-transition: margin 250ms,padding 250ms;
+  transition: margin 250ms,padding 250ms;
+}
+
+@media (min-width: 60em) {
+  
+  .locked #items .no-header {
+    border-radius: 2px;
+    float: left;
+    padding-left: 1% !important;
+    padding-right: 1% !important;
+    width: 46.4%;
+    margin-left: 0;
+    margin-right: 0;
+    border: 1px solid #ccc !important;
+    margin-left: 1%;
+    margin-top: 0.4%;
+    margin-bottom: 0.4%;
+  }
+  
+  .locked #items .ui-first-child {
+    margin-bottom: 0.8%;
+  }
+
+  .locked #items .header {
+    margin-top: -0.4%;
+    clear: both;
+  }
+  
+  .locked #items {
+    background: white !important;
+  }
+  
+  .locked #items #delete-item {
+    display: block !important;
+    height: 0px;
+    clear: both;
+    padding: 0;
+    border: none !important;
+    background-color: white !important;
+    padding-top: 0.4%;
+  }
+  
+  .locked #rules {
+    clear: both;
   }
 
 }

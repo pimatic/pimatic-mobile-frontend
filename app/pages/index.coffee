@@ -113,7 +113,7 @@ $(document).on( "pagebeforecreate", (event) ->
         @enabledEditing()
         if @pageCreated()  
           try
-            $('#items').listview('refresh')
+            $('#items').listview('refresh').addClass("dark-background")
           catch e
             #ignore error refreshing
         return ''
@@ -125,7 +125,7 @@ $(document).on( "pagebeforecreate", (event) ->
         @enabledEditing()
         if @pageCreated()  
           try
-            $('#rules').listview('refresh')
+            $('#rules').listview('refresh').addClass("dark-background")
           catch e
             #ignore error refreshing
         return ''
@@ -137,7 +137,7 @@ $(document).on( "pagebeforecreate", (event) ->
         @showAttributeVars()
         if @pageCreated()  
           try
-            $('#variables').listview('refresh')
+            $('#variables').listview('refresh').addClass("dark-background")
           catch e
             #ignore error refreshing
         return ''
