@@ -2,3 +2,5 @@ node_modules
 public/assets/
 public/index.html
 doc/*generated
+compiled
+doc
