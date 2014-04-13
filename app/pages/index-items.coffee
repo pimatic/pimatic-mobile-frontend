@@ -197,19 +197,19 @@ $(document).on( "pagebeforecreate", (event) ->
       if @getAttribute('position').value() is 'down'
         @_ajaxCall('stop')
       else
-        @_ajaxCall('lowerDown')
+        @_ajaxCall('moveDown')
 
     onShutterUpClicked: -> 
       if @getAttribute('position').value() is 'up'
         @_ajaxCall('stop')
       else
-        @_ajaxCall('liftUp')
+        @_ajaxCall('moveUp')
     
     _ajaxCall: (action) ->
       text = (
         switch action
-          when "liftUp" then "moving up" 
-          when "lowerDown" then "moving down"
+          when "moveUp" then "moving up" 
+          when "moveDown" then "moving down"
           when 'stop' then "stopping"
         )
       @downBtn.addClass('ui-state-disabled')
