@@ -92,6 +92,19 @@ $(document).on( "pagebeforecreate", (event) ->
     isSortingVariables: ko.observable(no)
 
     constructor: () ->
+
+      @updateFromJs(
+        items: []
+        rules: []
+        variables: []
+        errorCount: 0
+        enabledEditing: no
+        rememberme: no
+        showAttributeVars: no
+        ruleItemCssClass: ''
+        hasRootCACert: no
+      )
+
       @setupStorage()
 
       @lockButton = ko.computed( => 
