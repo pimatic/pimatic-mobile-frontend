@@ -37,7 +37,7 @@ $(document).on("pagecreate", '#log', (event) ->
         [msgBefore, msgCurrent] = [ messages[index-1], messages[index] ]
         [before, current] = [ justDate(msgBefore.time), justDate(msgCurrent.time) ]
         if current is before then return justTime(msgCurrent.time)
-        else return current.time
+        else return msgCurrent.time
 
     loadMessages: ->
       pimatic.loading "loading message", "show", text: __('Loading Messages')
