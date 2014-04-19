@@ -1,7 +1,7 @@
 # log-page
 # ---------
-
-$(document).on("pagecreate", '#log', (event) ->
+tc = pimatic.tryCatch
+$(document).on("pagecreate", '#log', tc (event) ->
 
   class LogMessageViewModel
 
@@ -45,28 +45,33 @@ $(document).on("pagecreate", '#log', (event) ->
         global: false # don't show loading indicator
       ).always( ->
         pimatic.loading "loading message", "hide"
-      ).done( (data) ->
+      ).done( tc (data) ->
         if data.success
           logPage.updateFromJs(data)
       ).fail(ajaxAlertFail)
     
+  try
+    pimatic.pages.log = logPage = new LogMessageViewModel()
 
-  pimatic.pages.log = logPage = new LogMessageViewModel()
+    pimatic.socket.on 'log', tc (entry) -> 
+      logPage.messages.push entry
 
-  pimatic.socket.on 'log', (entry) -> 
-    logPage.messages.push entry
+    $('#log').on "click", '#clear-log', tc (event, ui) ->
+      $.get("/clear-log")
+        .done( tc ->
+          logPage.messages.removeAll()
+          pimatic.pages.index.errorCount(0)
+        ).fail(ajaxAlertFail)
 
-  $('#log').on "click", '#clear-log', (event, ui) ->
-    $.get("/clear-log")
-      .done( ->
-        logPage.messages.removeAll()
-        pimatic.pages.index.errorCount(0)
-      ).fail(ajaxAlertFail)
-
-  ko.applyBindings(logPage, $('#log')[0])
+    ko.applyBindings(logPage, $('#log')[0])
+  catch e
+    TraceKit.report(e)
   return
 )
 
-$(document).on("pagebeforeshow", '#log', (event) ->
-  pimatic.pages.log.loadMessages()
+$(document).on("pagebeforeshow", '#log', tc (event) ->
+  try
+    pimatic.pages.log.loadMessages()
+  catch e
+    TraceKit.report(e)
 )

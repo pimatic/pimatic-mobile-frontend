@@ -109,11 +109,18 @@ $(document).ready =>
     , false
 , false
 
-pimatic.try = (call) => 
+pimatic.try = (func) -> 
   try
-    call()
+    return func.apply(this, arguments)
   catch e
     console.log "ignoring error: ", e 
+
+pimatic.tryCatch = (func) ->
+  return -> 
+    try
+      return func.apply(this, arguments)
+    catch e
+      TraceKit.report(e)
 
 window.ajaxShowToast = (data, textStatus, jqXHR) -> 
   pimatic.showToast (if data.message? then data.message else 'done')
@@ -140,15 +147,10 @@ window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   , 1)
   return true
 
-$(document).ready => 
-
-  pimatic.showToast = (
-    if device? and device.showToast?
-      device.showToast
-    else
-      $('#toast').toast()
-      (msg) -> $('#toast').text(msg).toast('show')
-  )
+$(document).ready( => 
+  $('#toast').toast()
+  pimatic.showToast = (msg) -> $('#toast').text(msg).toast('show')
+)
 
 window.__ = (text, args...) -> 
   translated = text
@@ -160,3 +162,17 @@ window.__ = (text, args...) ->
   return translated
 
 unless window.console? then window.console = { log: -> }
+
+TraceKit.report.subscribe( (errorReport) => 
+  # add infos about storage
+  errorReport.pimaticData = pimatic.storage?.get('pimatic')
+  $.ajax(
+    url: '/client-error'
+    type: 'POST'
+    global: no
+    data: {
+      error: errorReport
+    }
+  )
+)
+

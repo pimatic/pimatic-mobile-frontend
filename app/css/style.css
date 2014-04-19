@@ -573,27 +573,8 @@ li.with-button a.ui-btn {
  
 }
 
-/*#index .ui-bar-b .ui-btn, #index .ui-bar-b {
-  border:1px solid #007dcd;
-  background:#333;
-  font-weight:bold;
-  color:#fff;
-  background-image:-webkit-gradient(linear,left top,left bottom,from( #0093EA ),to( #0093EA ));
-  background-image:-webkit-linear-gradient( #0093EA,#0093EA );
-  background-image:-moz-linear-gradient( #0093EA,#0093EA );
-  background-image:-ms-linear-gradient( #0093EA,#0093EA );
-  background-image:-o-linear-gradient( #0093EA,#0093EA );
-  background-image:linear-gradient( #0093EA,#0093EA );
-
-  -moz-box-shadow:0 1px 0 rgba(255,255,255,.3);
-  -webkit-box-shadow:0 1px 0 rgba(255,255,255,.3);
-  box-shadow:0 1px 0 rgba(255,255,255,.3);
-  box-shadow: 0 1px 0 rgba(255,255,255,.3),
-              0 1px 0 rgba(255,255,255,.3) inset;
-}
-*/
 #updates .message p{
-  margin-top: 0;
+  margin-top: 3px;
   margin-bottom: 0;
 }
 

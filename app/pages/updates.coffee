@@ -38,7 +38,7 @@ $(document).on("pagecreate", '#updates', (event) ->
         op = @outdatedPlugins()
         unless op? then return []
         if op.length is 0
-          return [ __('All plugins are up to date') ]
+          return [ __('All plugins are up to date.') ]
         else
           return (
             for p in op
@@ -87,15 +87,18 @@ $(document).on("pagecreate", '#updates', (event) ->
         return
       ).fail(ajaxAlertFail)
 
-
-  pimatic.pages.updates = updatePage = new UpdateViewModel()
-  ko.applyBindings(updatePage, $('#updates')[0])
+  try
+    pimatic.pages.updates = updatePage = new UpdateViewModel()
+    ko.applyBindings(updatePage, $('#updates')[0])
+  catch e
+    TraceKit.report(e)
   return
 )
 
 $(document).on "pageshow", '#updates', (event) ->
-  updatesPage = pimatic.pages.updates
-  updatesPage.searchForPimaticUpdate()
-  updatesPage.searchForOutdatedPlugins()
-      # if updatesPage.pimaticUpdate isnt false or updatesPage.outdatedPlugins.length isnt 0
-      #   $('#install-updates').show()
+  try
+    updatesPage = pimatic.pages.updates
+    updatesPage.searchForPimaticUpdate()
+    updatesPage.searchForOutdatedPlugins()
+  catch e
+    TraceKit.report(e)

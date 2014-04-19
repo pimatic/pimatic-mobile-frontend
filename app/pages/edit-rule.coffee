@@ -48,76 +48,85 @@ $(document).on("pagebeforecreate", (event) ->
         ).fail(ajaxAlertFail)
       return false
 
-  pimatic.pages.editRule = new EditRuleViewModel()
+  try
+    pimatic.pages.editRule = new EditRuleViewModel()
+  catch e
+    TraceKit.report(e)
   return
 )
 
 $(document).on("pagecreate", '#edit-rule', (event) ->
-  ko.applyBindings(pimatic.pages.editRule, $('#edit-rule')[0])
+  try
+    ko.applyBindings(pimatic.pages.editRule, $('#edit-rule')[0])
 
-  customReplace = (pre, value) -> 
-    commonPart = this.ac.getCommonPart(pre, value)
-    return pre.substring(0, pre.length - commonPart.length) + value
+    customReplace = (pre, value) -> 
+      commonPart = this.ac.getCommonPart(pre, value)
+      return pre.substring(0, pre.length - commonPart.length) + value
 
-  customTemplate = (value) ->
-    commonPart = this.ac.getCommonPart(@lastTerm, value)
-    remainder = value.substring(commonPart.length, value.length)
-    return "<strong>#{commonPart}</strong>#{remainder}"
+    customTemplate = (value) ->
+      commonPart = this.ac.getCommonPart(@lastTerm, value)
+      remainder = value.substring(commonPart.length, value.length)
+      return "<strong>#{commonPart}</strong>#{remainder}"
 
-  editRulePage = pimatic.pages.editRule
+    editRulePage = pimatic.pages.editRule
 
-  # https://github.com/yuku-t/jquery-textcomplete
-  $("#edit-rule-condition").textcomplete([
-    match: /^(.*)$/
-    search: (term, callback) ->
-      editRulePage.autocompleteAjax?.abort()
-      if pimatic.pages.editRule.autocompleEnabled
-        editRulePage.autocompleteAjax = $.ajax('parseCondition',
-          type: 'POST'
-          data: {condition: term}
-          global: false
-        ).done( (data) =>
-          autocomplete = data.context?.autocomplete or []
-          if data.error then console.log data.error
-          @lastTerm = term
-          callback autocomplete
-        ).fail( => callback [] )
-      else callback []
-    index: 1
-    replace: (pre, value) ->
-      textValue = customReplace.call(this, pre, value)
-      editRulePage.ruleCondition(textValue)
-      return textValue
-    template: customTemplate
-  ])
-
-  $("#edit-rule-actions").textcomplete([
-    match: /^(.*)$/
-    search: (term, callback) ->
-      if pimatic.pages.editRule.autocompleEnabled
+    # https://github.com/yuku-t/jquery-textcomplete
+    $("#edit-rule-condition").textcomplete([
+      match: /^(.*)$/
+      search: (term, callback) ->
         editRulePage.autocompleteAjax?.abort()
-        editRulePage.autocompleteAjax = $.ajax('parseActions',
-          type: 'POST'
-          data: {action: term}
-          global: false
-        ).done( (data) =>
-          autocomplete = data.context?.autocomplete or []
-          if data.message? and data.message.length > 0
-            pimatic.showToast data.message[0]
-          if data.error then console.log data.error
-          @lastTerm = term
-          callback autocomplete
-        ).fail( => callback [] )
-      else callback []
-    index: 1
-    replace: (pre, value) ->
-      textValue = customReplace.call(this, pre, value)
-      editRulePage.ruleActions(textValue)
-      return textValue
-    template: customTemplate
-  ])
+        if pimatic.pages.editRule.autocompleEnabled
+          editRulePage.autocompleteAjax = $.ajax('parseCondition',
+            type: 'POST'
+            data: {condition: term}
+            global: false
+          ).done( (data) =>
+            autocomplete = data.context?.autocomplete or []
+            if data.error then console.log data.error
+            @lastTerm = term
+            callback autocomplete
+          ).fail( => callback [] )
+        else callback []
+      index: 1
+      replace: (pre, value) ->
+        textValue = customReplace.call(this, pre, value)
+        editRulePage.ruleCondition(textValue)
+        return textValue
+      template: customTemplate
+    ])
+
+    $("#edit-rule-actions").textcomplete([
+      match: /^(.*)$/
+      search: (term, callback) ->
+        if pimatic.pages.editRule.autocompleEnabled
+          editRulePage.autocompleteAjax?.abort()
+          editRulePage.autocompleteAjax = $.ajax('parseActions',
+            type: 'POST'
+            data: {action: term}
+            global: false
+          ).done( (data) =>
+            autocomplete = data.context?.autocomplete or []
+            if data.message? and data.message.length > 0
+              pimatic.showToast data.message[0]
+            if data.error then console.log data.error
+            @lastTerm = term
+            callback autocomplete
+          ).fail( => callback [] )
+        else callback []
+      index: 1
+      replace: (pre, value) ->
+        textValue = customReplace.call(this, pre, value)
+        editRulePage.ruleActions(textValue)
+        return textValue
+      template: customTemplate
+    ])
+  catch e
+    TraceKit.report(e)
 )
 
 $(document).on("pagebeforehide", '#edit-rule', (event) ->
-  pimatic.pages.editRule.autocompleteAjax?.abort()
+  try
+    pimatic.pages.editRule.autocompleteAjax?.abort()
+  catch e
+    TraceKit.report(e)
 )

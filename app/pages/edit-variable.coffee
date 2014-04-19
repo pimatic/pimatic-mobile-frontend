@@ -52,12 +52,18 @@ $(document).on("pagebeforecreate", (event) ->
         ).fail(ajaxAlertFail)
       return false
 
-  pimatic.pages.editVariable = new EditVariableViewModel()
+  try
+    pimatic.pages.editVariable = new EditVariableViewModel()
+  catch e
+    TraceKit.report(e)
   return
 )
 
 $(document).on("pagecreate", '#edit-variable', (event) ->
-  ko.applyBindings(pimatic.pages.editVariable, $('#edit-variable')[0])
+  try
+    ko.applyBindings(pimatic.pages.editVariable, $('#edit-variable')[0])
+  catch e
+    TraceKit.report(e)
 )
 
 

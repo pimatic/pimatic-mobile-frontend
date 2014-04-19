@@ -1,7 +1,8 @@
 # index-page
 # ----------
+tc = pimatic.tryCatch
 
-$(document).on( "pagebeforecreate", (event) ->
+$(document).on( "pagebeforecreate", tc (event) ->
   # Just execute it one time
   if pimatic.pages.index? then return
   ###
@@ -109,7 +110,7 @@ $(document).on( "pagebeforecreate", (event) ->
         updateProcessMessages: []
       )
 
-      @updateProcessStatus.subscribe( (status) =>
+      @updateProcessStatus.subscribe( tc (status) =>
         switch status
           when 'running'
             pimatic.loading "update-process-status", "show", {
@@ -121,20 +122,20 @@ $(document).on( "pagebeforecreate", (event) ->
 
       @setupStorage()
 
-      @lockButton = ko.computed( => 
+      @lockButton = ko.computed( tc => 
         editing = @enabledEditing()
         return {
           icon: (if editing then 'check' else 'gear')
         }
       )
 
-      @visibleVars = ko.computed( => 
+      @visibleVars = ko.computed( tc => 
         return ko.utils.arrayFilter(@variables(), (item) =>
           return @showAttributeVars() or (not item.isDeviceAttribute())
         )
       )
 
-      @itemsListViewRefresh = ko.computed( =>
+      @itemsListViewRefresh = ko.computed( tc =>
         @items()
         @isSortingItems()
         @enabledEditing()
@@ -146,7 +147,7 @@ $(document).on( "pagebeforecreate", (event) ->
         return ''
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
-      @rulesListViewRefresh = ko.computed( =>
+      @rulesListViewRefresh = ko.computed( tc =>
         @rules()
         @isSortingRules()
         @enabledEditing()
@@ -158,7 +159,7 @@ $(document).on( "pagebeforecreate", (event) ->
         return ''
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
-      @variablesListViewRefresh = ko.computed( =>
+      @variablesListViewRefresh = ko.computed( tc =>
         @variables()
         @enabledEditing()
         @showAttributeVars()
@@ -180,7 +181,7 @@ $(document).on( "pagebeforecreate", (event) ->
       ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
 
       sendToServer = yes
-      @rememberme.subscribe( (shouldRememberMe) =>
+      @rememberme.subscribe( tc (shouldRememberMe) =>
         if sendToServer
           $.get("remember", rememberMe: shouldRememberMe)
             .done(ajaxShowToast)
@@ -200,14 +201,14 @@ $(document).on( "pagebeforecreate", (event) ->
         pimatic.storage.set('pimatic', allData)
       )
 
-      @toggleEditingText = ko.computed( => 
+      @toggleEditingText = ko.computed( tc => 
         unless @enabledEditing() 
           __('Edit lists')
         else
           __('Lock lists')
       )
 
-      @showAttributeVarsText = ko.computed( => 
+      @showAttributeVarsText = ko.computed( tc => 
         unless @showAttributeVars() 
           __('Show device attribute variables')
         else
@@ -446,64 +447,64 @@ $(document).on( "pagebeforecreate", (event) ->
       urlEncoded = encodeURIComponent(window.location.href)
       window.location.href = "/login?url=#{urlEncoded}"
 
-
   pimatic.pages.index = indexPage = new IndexViewModel()
 
-  pimatic.socket.on("welcome", (data) ->
+  pimatic.socket.on("welcome", tc (data) ->
     indexPage.updateFromJs(data)
   )
 
-  pimatic.socket.on("device-attribute", (attrEvent) -> 
+  pimatic.socket.on("device-attribute", tc (attrEvent) -> 
     indexPage.updateDeviceAttribute(attrEvent.id, attrEvent.name, attrEvent.value)
   )
 
-  pimatic.socket.on("variable", (variable) -> indexPage.updateVariable(variable))
+  pimatic.socket.on("variable", tc (variable) -> indexPage.updateVariable(variable))
 
-  pimatic.socket.on("item-add", (item) -> indexPage.addItemFromJs(item))
-  pimatic.socket.on("item-remove", (itemId) -> indexPage.removeItem(itemId))
-  pimatic.socket.on("item-order", (order) -> indexPage.updateItemOrder(order))
+  pimatic.socket.on("item-add", tc (item) -> indexPage.addItemFromJs(item))
+  pimatic.socket.on("item-remove", tc (itemId) -> indexPage.removeItem(itemId))
+  pimatic.socket.on("item-order", tc (order) -> indexPage.updateItemOrder(order))
 
-  pimatic.socket.on("rule-add", (rule) -> indexPage.updateRuleFromJs(rule))
-  pimatic.socket.on("rule-update", (rule) -> indexPage.updateRuleFromJs(rule))
-  pimatic.socket.on("rule-remove", (ruleId) -> indexPage.removeRule(ruleId))
-  pimatic.socket.on("rule-order", (order) -> indexPage.updateRuleOrder(order))
+  pimatic.socket.on("rule-add", tc (rule) -> indexPage.updateRuleFromJs(rule))
+  pimatic.socket.on("rule-update", tc (rule) -> indexPage.updateRuleFromJs(rule))
+  pimatic.socket.on("rule-remove", tc (ruleId) -> indexPage.removeRule(ruleId))
+  pimatic.socket.on("rule-order", tc (order) -> indexPage.updateRuleOrder(order))
 
-  pimatic.socket.on("variable-add", (variable) -> indexPage.addVariableFromJs(variable))
-  pimatic.socket.on("variable-remove", (variableName) -> indexPage.removeVariable(variableName))
-  pimatic.socket.on("variable-order", (order) -> indexPage.updateVariableOrder(order))
+  pimatic.socket.on("variable-add", tc (variable) -> indexPage.addVariableFromJs(variable))
+  pimatic.socket.on("variable-remove", tc (variableName) -> indexPage.removeVariable(variableName))
+  pimatic.socket.on("variable-order", tc (order) -> indexPage.updateVariableOrder(order))
 
-  pimatic.socket.on("update-process-status", (status) -> indexPage.updateProcessStatus(status))
-  pimatic.socket.on("update-process-message", (msg) -> indexPage.updateProcessMessages.push msg)
+  pimatic.socket.on("update-process-status", tc (status) -> indexPage.updateProcessStatus(status))
+  pimatic.socket.on("update-process-message", tc (msg) -> indexPage.updateProcessMessages.push msg)
 
-  pimatic.socket.on('log', (entry) -> 
+  pimatic.socket.on('log', tc (entry) -> 
     if entry.level is "error" then indexPage.errorCount(indexPage.errorCount() + 1)
   )
   return
 )
 
-$(document).on("pagecreate", '#index', (event) ->
+$(document).on("pagecreate", '#index', tc (event) ->
+
   indexPage = pimatic.pages.index
   ko.applyBindings(indexPage, $('#index')[0])
 
-  $('#index #items').on("change", ".switch", (event) ->
+  $('#index #items').on("change", ".switch", tc (event) ->
     switchDevice = ko.dataFor(this)
     switchDevice.onSwitchChange()
     return
   )
 
-  $('#index #items').on("slidestop", ".dimmer", (event) ->
+  $('#index #items').on("slidestop", ".dimmer", tc (event) ->
     dimmerDevice = ko.dataFor(this)
     dimmerDevice.onSliderStop()
     return
   )
 
-  $('#index #items').on("vclick", ".shutter-down", (event) ->
+  $('#index #items').on("vclick", ".shutter-down", tc (event) ->
     shutterDevice = ko.dataFor(this)
     shutterDevice.onShutterDownClicked()
     return false
   )
 
-  $('#index #items').on("vclick", ".shutter-up", (event) ->
+  $('#index #items').on("vclick", ".shutter-up", tc (event) ->
     shutterDevice = ko.dataFor(this)
     shutterDevice.onShutterUpClicked()
     return false
@@ -527,7 +528,6 @@ $(document).on("pagecreate", '#index', (event) ->
 
   $("#items .handle, #rules .handle").disableSelection()
   indexPage.pageCreated(yes)
-
   return
 )
 

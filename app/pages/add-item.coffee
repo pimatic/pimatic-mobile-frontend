@@ -1,5 +1,6 @@
 # add-item-page
 # ----------
+tc = pimatic.tryCatch
 
 class DeviceEntry
   constructor: (data) ->
@@ -79,23 +80,22 @@ class AddItemViewModel
       .fail(ajaxAlertFail)
 
 
+tc( => pimatic.pages.addItem = new AddItemViewModel() )
 
-pimatic.pages.addItem = new AddItemViewModel()
-
-$(document).on "pagecreate", '#add-item', (event) ->
+$(document).on "pagecreate", '#add-item', tc (event) ->
   ko.applyBindings(pimatic.pages.addItem, $('#add-item')[0])
 
-  $('#device-items').on "click", 'li.item', ->
+  $('#device-items').on "click", 'li.item', tc ->
     li = $(this)
     pimatic.pages.addItem.addDeviceToIndexPage(ko.dataFor(li[0]))
     return
 
-  $('#variable-items').on "click", 'li.item', ->
+  $('#variable-items').on "click", 'li.item', tc ->
     li = $(this)
     pimatic.pages.addItem.addVariableToIndexPage(ko.dataFor(li[0]))
     return
 
-  $('#add-other').on "click", '#add-a-header', ->
+  $('#add-other').on "click", '#add-a-header', tc ->
     $("<div>").simpledialog2(
       themeDialog: 'a'
       themeButtonDefault: 'b'
@@ -119,7 +119,7 @@ $(document).on "pagecreate", '#add-item', (event) ->
     setTimeout ( -> $('.ui-simpledialog-input').focus() ), 1
     return
 
-  $('#add-other').on "click", '#add-a-button', ->
+  $('#add-other').on "click", '#add-a-button', tc ->
     $("<div>").simpledialog2(
       themeDialog: 'a'
       themeButtonDefault: 'b'
@@ -144,13 +144,13 @@ $(document).on "pagecreate", '#add-item', (event) ->
     return
   return
 
-$(document).on "pageshow", '#add-item', (event) ->
+$(document).on "pageshow", '#add-item', tc (event) ->
   $.get("/api/devices")
-    .done( (data) -> 
+    .done( tc (data) -> 
       pimatic.pages.addItem.updateDevicesFromJs(data.devices) 
     ).fail(ajaxAlertFail)
   $.get("/api/variables")
-    .done( (data) -> 
+    .done( tc (data) -> 
       pimatic.pages.addItem.updateVariablesFromJs(data.variables) 
     ).fail(ajaxAlertFail)
   return

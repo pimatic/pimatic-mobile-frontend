@@ -333,6 +333,13 @@ module.exports = (env) ->
           }
       )
 
+      app.post('/client-error', (req, res) =>
+        error = req.body.error
+        env.logger.error("Client error:", error.message)
+        env.logger.debug JSON.stringify(error, null, "  ")
+        res.send 200
+      )
+
 
       app.get('/login', (req, res) =>
         url = req.query.url
@@ -639,6 +646,7 @@ module.exports = (env) ->
         assets:
           js:
             jquery: [
+              "pimatic-mobile-frontend/app/js/tracekit.js"
               "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
               "pimatic-mobile-frontend/app/mobile-init.js"
               "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
