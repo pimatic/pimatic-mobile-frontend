@@ -1,78 +1,101 @@
 # updates-page
 # ---------
 
-$(document).on "pagebeforeshow", '#updates', (event) ->
-  $('#updates #install-updates').hide()
-  $('#updates .restart-now').hide()
+
+# log-page
+# ---------
+
+$(document).on("pagecreate", '#updates', (event) ->
+
+  class UpdateViewModel
+
+    pimaticUpdateInfo: ko.observable(null)
+    outdatedPlugins: ko.observableArray(null)
+
+    constructor: ->
+      index = pimatic.pages.index
+      @updateProcessStatus = index.updateProcessStatus
+      @updateProcessMessages = index.updateProcessMessages
+
+      @hasUpdates = ko.computed( =>
+        return (@pimaticUpdateInfo()?.isOutdated) or (@outdatedPlugins().length > 0)
+      )
+
+      @pimaticUpdateInfoText = ko.computed( =>
+        info = @pimaticUpdateInfo()
+        unless info? then return ''
+        if info.isOutdated
+          return __('Found update for %s: current version is %s, latest version is: %s', 
+            'pimatic', 
+            info.isOutdated.current, 
+            info.isOutdated.latest
+          )
+        else
+          return __('pimatic is up to date.')
+      )
+
+      @pluginUpdateInfoText = ko.computed( =>
+        op = @outdatedPlugins()
+        unless op? then return []
+        if op.length is 0
+          return [ __('All plugins are up to date') ]
+        else
+          return (
+            for p in op
+              __('Found update for %s: current version is %s, latest version is: %s', 
+                p.plugin, p.current, p.latest
+              )
+          ) 
+      )
+
+    installUpdatesClicked: ->
+      modules = (if @pimaticUpdateInfo().isOutdated then ['pimatic'] else [])
+      modules = modules.concat (p.plugin for p in @outdatedPlugins())
+
+      $.ajax(
+        url: "/api/update"
+        type: 'POST'
+        data: {
+          modules: modules
+        }
+        global: false
+        timeout: 10000000 #ms
+      ).fail( (jqXHR, textStatus, errorThrown) =>
+        # ignore timeouts:
+        if textStatus isnt "timeout"
+          ajaxAlertFail(jqXHR, textStatus, errorThrown)
+      )
+
+    restart: ->
+      $.get('/api/restart').fail(ajaxAlertFail)
+
+    searchForPimaticUpdate: ->
+      return $.ajax(
+        url: "/api/outdated/pimatic"
+        timeout: 300000 #ms
+      ).done( (data) =>
+        @pimaticUpdateInfo(data)
+        return 
+      ).fail(ajaxAlertFail)
+
+    searchForOutdatedPlugins: ->
+      return $.ajax(
+        url: "/api/outdated/plugins"
+        timeout: 300000 #ms
+      ).done( (data) =>
+        @outdatedPlugins(data.outdated)
+        return
+      ).fail(ajaxAlertFail)
+
+
+  pimatic.pages.updates = updatePage = new UpdateViewModel()
+  ko.applyBindings(updatePage, $('#updates')[0])
+  return
+)
 
 $(document).on "pageshow", '#updates', (event) ->
   updatesPage = pimatic.pages.updates
-  updatesPage.searchForPimaticUpdate().done ->
-    updatesPage.searchForOutdatedPlugins().done ->
-      if updatesPage.pimaticUpdate isnt false or updatesPage.outdatedPlugins.length isnt 0
-        $('#install-updates').show()
-
-
-$(document).on "pagecreate", '#updates', (event) ->
-  
-  $('#updates').on "click", '#install-updates', (event, ui) ->
-    updatesPage = pimatic.pages.updates
-    modules = (if updatesPage.pimaticUpdate then ['pimatic'] else [])
-    modules = modules.concat (p.plugin for p in updatesPage.outdatedPlugins)
-
-    $.ajax(
-      url: "/api/update"
-      type: 'POST'
-      data: modules: modules
-      timeout: 1000000 #ms
-    ).done( (data) ->
-      $('#updates #install-updates').hide()
-      if data.success
-        $('#updates .message').append $('<p>')
-          .text(__('Updates were successful. Please restart pimatic.'))
-        $('#updates .restart-now').show()
-    ).fail(ajaxAlertFail)
-
-  $('#updates').on "click", '.restart-now', (event, ui) ->
-    $.get('/api/restart').fail(ajaxAlertFail)
-  
-pimatic.pages.updates =
-  outdatedPlugins: null
-  pimaticUpdate: null
-
-  searchForPimaticUpdate: ->
-    $('#updates .message').text __('pimatic is searching for updates...')
-    return $.ajax(
-      url: "/api/outdated/pimatic"
-      timeout: 300000 #ms
-    ).done( (data) ->
-      $('#updates .message').text ''
-      if data.isOutdated is false
-         $('#updates .message').append $('<p>').text(__('pimatic is up to date.'))
-      else
-        $('#updates .message').append $('<p>').text(
-          __('Found update for %s: current version is %s, latest version is: %s', 
-            'pimatic', data.isOutdated.current, data.isOutdated.latest
-          )
-        ) 
-      pimatic.pages.updates.pimaticUpdate = data.isOutdated
-      return 
-    ).fail(ajaxAlertFail)
-
-  searchForOutdatedPlugins: ->
-    return $.ajax(
-      url: "/api/outdated/plugins"
-      timeout: 300000 #ms
-    ).done( (data) ->
-      if data.outdated.length is 0
-        $('#updates .message').append $('<p>').text __('All plugins are up to date')
-      else
-        for p in data.outdated
-          $('#updates .message').append $('<p>').text(
-            __('Found update for %s: current version is %s, latest version is: %s', 
-              p.plugin, p.current, p.latest
-            )
-          ) 
-      pimatic.pages.updates.outdatedPlugins = data.outdated
-      return
-    ).fail(ajaxAlertFail)
+  updatesPage.searchForPimaticUpdate()
+  updatesPage.searchForOutdatedPlugins()
+      # if updatesPage.pimaticUpdate isnt false or updatesPage.outdatedPlugins.length isnt 0
+      #   $('#install-updates').show()

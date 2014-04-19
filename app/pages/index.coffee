@@ -86,6 +86,8 @@ $(document).on( "pagebeforecreate", (event) ->
     rememberme: ko.observable(no)
     showAttributeVars: ko.observable(no)
     ruleItemCssClass: ko.observable('')
+    updateProcessStatus: ko.observable('idle')
+    updateProcessMessages: ko.observableArray([])
 
     isSortingItems: ko.observable(no)
     isSortingRules: ko.observable(no)
@@ -103,6 +105,18 @@ $(document).on( "pagebeforecreate", (event) ->
         showAttributeVars: no
         ruleItemCssClass: ''
         hasRootCACert: no
+        updateProcessStatus: 'idle'
+        updateProcessMessages: []
+      )
+
+      @updateProcessStatus.subscribe( (status) =>
+        switch status
+          when 'running'
+            pimatic.loading "update-process-status", "show", {
+              text: __('Installing updates, Please be patient')
+            }
+          else
+            pimatic.loading "update-process-status", "hide"
       )
 
       @setupStorage()
@@ -130,7 +144,7 @@ $(document).on( "pagebeforecreate", (event) ->
           catch e
             #ignore error refreshing
         return ''
-      ).extend(rateLimit: {timeout: 0, method: "notifyWhenChangesStop"})
+      ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
       @rulesListViewRefresh = ko.computed( =>
         @rules()
@@ -142,7 +156,7 @@ $(document).on( "pagebeforecreate", (event) ->
           catch e
             #ignore error refreshing
         return ''
-      ).extend(rateLimit: {timeout: 0, method: "notifyWhenChangesStop"})
+      ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
       @variablesListViewRefresh = ko.computed( =>
         @variables()
@@ -154,7 +168,7 @@ $(document).on( "pagebeforecreate", (event) ->
           catch e
             #ignore error refreshing
         return ''
-      ).extend(rateLimit: {timeout: 0, method: "notifyWhenChangesStop"})
+      ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
       if pimatic.storage.isSet('pimatic.indexPage')
         data = pimatic.storage.get('pimatic.indexPage')
@@ -457,6 +471,9 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("variable-add", (variable) -> indexPage.addVariableFromJs(variable))
   pimatic.socket.on("variable-remove", (variableName) -> indexPage.removeVariable(variableName))
   pimatic.socket.on("variable-order", (order) -> indexPage.updateVariableOrder(order))
+
+  pimatic.socket.on("update-process-status", (status) -> indexPage.updateProcessStatus(status))
+  pimatic.socket.on("update-process-message", (msg) -> indexPage.updateProcessMessages.push msg)
 
   pimatic.socket.on('log', (entry) -> 
     if entry.level is "error" then indexPage.errorCount(indexPage.errorCount() + 1)

@@ -5,5 +5,18 @@ div#updates(data-role='page')
     h3=__('Updates')
   div.ui-content.overthrow
     div.message
-    a#install-updates(data-role="button", data-icon="check",  data-inline="true", data-theme="b", data-mini="true")=__('Install Updates')
-    a.restart-now(data-role="button", data-icon="refresh",  data-inline="true", data-theme="b", data-mini="true")=__('Restart pimatic')
+      p(data-bind="visible: !pimaticUpdateInfo()")='pimatic is searching for updates...'
+      p(data-bind="visible: pimaticUpdateInfo(), text: pimaticUpdateInfoText")
+      <!-- ko foreach: pluginUpdateInfoText() -->
+      p(data-bind="text: $data")
+      <!-- /ko -->
+    a#install-updates(data-bind="visible: hasUpdates() && updateProcessStatus() == 'idle', click: installUpdatesClicked",
+      data-role="button", data-icon="check",  data-inline="true", data-theme="b", data-mini="true")=__('Install Updates')
+    div.message
+      <!-- ko foreach: updateProcessMessages() -->
+      p(data-bind="text: $data")
+      <!-- /ko -->
+      p(data-bind="visible: updateProcessStatus() == 'error'")=__('There was an error installing the updates.')
+      p(data-bind="visible: updateProcessStatus() == 'done'")=__('Updates were successful. Please restart pimatic.')
+    a.restart-now(data-bind="visible: updateProcessStatus() == 'done', click: restart",
+      data-role="button", data-icon="refresh",  data-inline="true", data-theme="b", data-mini="true")=__('Restart pimatic')

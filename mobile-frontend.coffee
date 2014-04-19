@@ -350,6 +350,8 @@ module.exports = (env) ->
         res.setHeader('content-type', 'application/x-x509-ca-cert')
         res.sendfile(certFile)
 
+      @setupUpdateProcessListener()
+
       # ###Socket.io stuff:
       # For every webserver
       for webServer in [app.httpServer, app.httpsServer]
@@ -475,6 +477,14 @@ module.exports = (env) ->
             assert order? and Array.isArray order
             socket.emit("variable-order", order)
 
+          @on('update-process-status', onUpdateProcessStatus = (status) =>
+            socket.emit 'update-process-status', status
+          )
+
+          @on('update-process-message', onUpdateProcessMessage = (message) =>
+            socket.emit 'update-process-message', message
+          )
+
           socket.on 'disconnect', => 
             env.logger.debug("removing rule listerns") if @config.debug
             framework.ruleManager.removeListener "update", updateRuleListener
@@ -488,6 +498,8 @@ module.exports = (env) ->
             @removeListener 'item-order', orderItemListener
             @removeListener 'rule-order', orderRuleListener
             @removeListener 'variable-order', orderVariablesListener
+            @removeListener 'update-process-status', onUpdateProcessStatus
+            @removeListener 'update-process-message', onUpdateProcessMessage
           return
         )
       # register the predicate provider
@@ -569,6 +581,29 @@ module.exports = (env) ->
           env.logger.info "rendering html finished"
           return html
         )
+      )
+
+    setupUpdateProcessListener: () ->
+      pm = @framework.pluginManager
+      @updateProcessStatus = 'idle'
+      @updateProcessMessages = []
+      pm.on('update-start', (info) =>
+        @updateProcessMessages = []
+        @updateProcessStatus = 'running'
+        @emit 'update-process-status', 'running'
+      )
+      pm.on('update-info', (info) =>
+        @updateProcessMessages.push info.message
+        @emit 'update-process-message', info.message
+      )
+      pm.on('update-done', (info) =>
+        @updateProcessStatus = 'done'
+        @emit 'update-process-status', 'done'
+      )
+      pm.on('update-error', (info) =>
+        @updateProcessMessages.push info.error.message
+        @updateProcessStatus = 'error'
+        @emit 'update-process-status', 'error'
       )
 
 
@@ -854,6 +889,8 @@ module.exports = (env) ->
         enabledEditing: @config.enabledEditing
         showAttributeVars: @config.showAttributeVars
         hasRootCACert: @hasRootCACert
+        updateProcessStatus: @updateProcessStatus
+        updateProcessMessages: @updateProcessMessages
         items: @getItemsWithData()
         rules: @getRules()
         variables: @getVariables()

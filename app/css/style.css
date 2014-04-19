@@ -573,7 +573,7 @@ li.with-button a.ui-btn {
  
 }
 
-#index .ui-bar-b .ui-btn, #index .ui-bar-b {
+/*#index .ui-bar-b .ui-btn, #index .ui-bar-b {
   border:1px solid #007dcd;
   background:#333;
   font-weight:bold;
@@ -590,6 +590,11 @@ li.with-button a.ui-btn {
   box-shadow:0 1px 0 rgba(255,255,255,.3);
   box-shadow: 0 1px 0 rgba(255,255,255,.3),
               0 1px 0 rgba(255,255,255,.3) inset;
+}
+*/
+#updates .message p{
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 #nav-panel {
