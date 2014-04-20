@@ -205,6 +205,7 @@ li.sortable.header .handle {
 }
 
 #delete-item, #delete-rule, #delete-variable {
+  background-color: #CC0000;
   border-color: #AA0000;
   color: #fff;
 }

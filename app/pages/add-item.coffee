@@ -80,7 +80,7 @@ class AddItemViewModel
       .fail(ajaxAlertFail)
 
 
-tc( => pimatic.pages.addItem = new AddItemViewModel() )
+tc( => pimatic.pages.addItem = new AddItemViewModel() )()
 
 $(document).on "pagecreate", '#add-item', tc (event) ->
   ko.applyBindings(pimatic.pages.addItem, $('#add-item')[0])
