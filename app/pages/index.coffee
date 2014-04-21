@@ -173,7 +173,12 @@ $(document).on( "pagebeforecreate", tc (event) ->
 
       if pimatic.storage.isSet('pimatic.indexPage')
         data = pimatic.storage.get('pimatic.indexPage')
-        @updateFromJs(data)
+        try
+          @updateFromJs(data)
+        catch e
+          TraceKit.report(e)
+          pimatic.storage.removeAll()
+          window.location.reload()
 
       @autosave = ko.computed( =>
         data = ko.mapping.toJS(this)
@@ -484,7 +489,12 @@ $(document).on( "pagebeforecreate", tc (event) ->
 $(document).on("pagecreate", '#index', tc (event) ->
 
   indexPage = pimatic.pages.index
-  ko.applyBindings(indexPage, $('#index')[0])
+  try
+    ko.applyBindings(indexPage, $('#index')[0])
+  catch e
+    TraceKit.report(e)
+    pimatic.storage?.removeAll()
+    window.location.reload()
 
   $('#index #items').on("change", ".switch", tc (event) ->
     switchDevice = ko.dataFor(this)

@@ -164,6 +164,12 @@ window.__ = (text, args...) ->
 unless window.console? then window.console = { log: -> }
 
 TraceKit.report.subscribe( (errorReport) => 
+
+  for entry in errorReport.stack
+    if entry.context?
+      for c,i in entry.context
+        if c.length > 200 
+          entry.context[i] = c.substring(0, 200) + '...'
   # add infos about storage
   errorReport.pimaticData = pimatic.storage?.get('pimatic')
   $.ajax(

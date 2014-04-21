@@ -76,9 +76,8 @@ module.exports = (env) ->
       #     }
       # 
       app.get '/data.json', (req, res) =>
-        @getInitalClientData().then( (data) =>
-          res.send data
-        ).done()
+        data = @getInitalClientData()
+        res.send data
     
       ###
       Handle get request for add a device to the item list.
