@@ -9,7 +9,7 @@
 
 .overthrow-enabled .overthrow.ui-content {
   position: absolute;
-  z-index: 1;
+  z-index: 1000;
   top: 44px;
   bottom: 0;
   left: 0;
@@ -572,6 +572,21 @@ li.with-button a.ui-btn {
     display: none;
   }
  
+   /* Animations only for desktop browser, because these are to slow on mobile */
+  .notSorting #items .item, 
+  .notSorting #rules .rule, 
+  .notSorting #variables .variable {
+    -webkit-transition: margin 250ms,padding 250ms;
+    transition: margin 250ms,padding 250ms;
+  }
+
+  .notSorting #rules .rule a, 
+  .notSorting #variables .variable a {
+    -webkit-transition: margin 250ms,padding 250ms;
+    transition: margin 250ms,padding 250ms;
+  }
+
+
 }
 
 #updates .message p{
@@ -626,21 +641,6 @@ li.with-button a.ui-btn {
     float: left;
     width: 86%;
   }
-
-  /* Animations only for desktop browser, because these are to slow on mobile */
-  .notSorting #items .item, 
-  .notSorting #rules .rule, 
-  .notSorting #variables .variable {
-    -webkit-transition: margin 250ms,padding 250ms;
-    transition: margin 250ms,padding 250ms;
-  }
-
-  .notSorting #rules .rule a, 
-  .notSorting #variables .variable a {
-    -webkit-transition: margin 250ms,padding 250ms;
-    transition: margin 250ms,padding 250ms;
-  }
-
 
 }
 
