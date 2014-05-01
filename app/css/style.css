@@ -573,19 +573,23 @@ li.with-button a.ui-btn {
   }
  
    /* Animations only for desktop browser, because these are to slow on mobile */
-  .notSorting #items .item, 
-  .notSorting #rules .rule, 
-  .notSorting #variables .variable {
+  #items .item, 
+  #rules .rule, 
+  #variables .variable,
+  #rules .rule a, 
+  #variables .variable a {
     -webkit-transition: margin 250ms,padding 250ms;
     transition: margin 250ms,padding 250ms;
   }
 
-  .notSorting #rules .rule a, 
-  .notSorting #variables .variable a {
-    -webkit-transition: margin 250ms,padding 250ms;
-    transition: margin 250ms,padding 250ms;
+  #items.noAnimation .item,
+  #rules.noAnimation .rule, 
+  #variables.noAnimation .variable,
+  #rules.noAnimation .rule a, 
+  #variables.noAnimation .variable a  {
+    -webkit-transition: none;
+    transition: none;
   }
-
 
 }
 

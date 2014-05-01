@@ -195,6 +195,7 @@
         y = null
         scrollArea = null
         timer = null
+        animationClassTimeout = null
 
         parent.pep(
           place: false
@@ -210,7 +211,9 @@
           start: =>
             # fix the hight of the element while sorting
             $(element).css('height', $(element).height())
+            clearTimeout(animationClassTimeout)
             value.isSorting(yes) if value.isSorting?
+            $(element).addClass("noAnimation")
             parent.css('margin-bottom', -parent.innerHeight())
             scrollArea = new ScrollArea($('#index .ui-content.overthrow')[0]);
             
@@ -233,6 +236,9 @@
             $(element).find('.sortable').attr('style', '')
             $(element).css('height', '')
             value.isSorting(no) if value.isSorting?
+            animationClassTimeout = setTimeout( (=>
+              $(element).removeClass("noAnimation")
+            ), 100)
             parent.removeClass('ui-btn-active')
           drag: (ev, obj) => 
             x = ev.pageX
