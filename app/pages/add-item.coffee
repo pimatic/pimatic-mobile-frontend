@@ -104,6 +104,7 @@ $(document).on "pagecreate", '#add-item', tc (event) ->
       headerClose: true
       buttonPrompt: __("Please enter a name")
       buttonInput: true
+      zindex: 1001
       buttons:
         OK:
           text: __('Add')
@@ -128,6 +129,7 @@ $(document).on "pagecreate", '#add-item', tc (event) ->
       headerClose: true
       buttonPrompt: __("Please enter a name")
       buttonInput: true
+      zindex: 1001
       buttons:
         OK:
           text: __('Add')
