@@ -363,8 +363,8 @@ li.rememberme label {
 }
 [data-role=listview].checkbox-list label {
   border: none;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
+  padding-top: 0.3em !important;
+  padding-bottom: 0.3em !important;
 }
 
 #log-messages li {
@@ -402,6 +402,12 @@ li.rememberme label {
 
 #plugin-list li > div.ui-btn-inner.ui-li {
   border-top: 0px;
+}
+
+#plugin-list > li > a >.ui-checkbox {
+  margin-top: 0;
+  margin-bottom: 0;
+  border: none;
 }
 
 #plugin-list .active, #plugin-browse-list .active, #plugin-list .update-available, 

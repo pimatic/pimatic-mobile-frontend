@@ -8,7 +8,7 @@ div#edit-variable(data-role='page')
         input#edit-variable-name(placeholder="variable-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName, jqmenabled: action() == 'add'")
       .ui-field-contain
         label(for='select-variable-type')=__('Type') + ': '
-        select#select-plugin-action(name='select-variable-type', data-bind="jqmselectvalue: variableType")
+        select#select-variable-type(name='select-variable-type', data-bind="jqmselectvalue: variableType")
           option(value="value")=__('Value')
           option(value="expression")=__('Expression')
       .ui-field-contain
