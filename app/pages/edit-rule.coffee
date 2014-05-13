@@ -75,18 +75,20 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
       match: /^(.*)$/
       search: (term, callback) ->
         editRulePage.autocompleteAjax?.abort()
+        result = {autocomplete: [], format: []}
         if pimatic.pages.editRule.autocompleEnabled
           editRulePage.autocompleteAjax = $.ajax('parseCondition',
             type: 'POST'
             data: {condition: term}
             global: false
           ).done( (data) =>
-            autocomplete = data.context?.autocomplete or []
+            result.autocomplete = data.context?.autocomplete or []
+            result.format = data.context?.format or []
             if data.error then console.log data.error
             @lastTerm = term
-            callback autocomplete
-          ).fail( => callback [] )
-        else callback []
+            callback result
+          ).fail( => callback result )
+        else callback result
       index: 1
       replace: (pre, value) ->
         textValue = customReplace.call(this, pre, value)
@@ -98,6 +100,7 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
     $("#edit-rule-actions").textcomplete([
       match: /^(.*)$/
       search: (term, callback) ->
+        result = {autocomplete: [], format: []}
         if pimatic.pages.editRule.autocompleEnabled
           editRulePage.autocompleteAjax?.abort()
           editRulePage.autocompleteAjax = $.ajax('parseActions',
@@ -105,14 +108,15 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
             data: {action: term}
             global: false
           ).done( (data) =>
-            autocomplete = data.context?.autocomplete or []
+            result.autocomplete = data.context?.autocomplete or []
+            result.format = data.context?.format or []
             if data.message? and data.message.length > 0
               pimatic.showToast data.message[0]
             if data.error then console.log data.error
             @lastTerm = term
-            callback autocomplete
-          ).fail( => callback [] )
-        else callback []
+            callback result
+          ).fail( => callback result )
+        else callback result
       index: 1
       replace: (pre, value) ->
         textValue = customReplace.call(this, pre, value)

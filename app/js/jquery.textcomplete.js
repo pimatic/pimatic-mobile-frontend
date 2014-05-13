@@ -113,7 +113,7 @@
 
     html = {
       wrapper: '<div class="textcomplete-wrapper"></div>',
-      list: '<ul class="dropdown-menu"></ul>'
+      list: '<div class="dropdown-menu"><ul class="format"></ul><ul class="autocomplete"></ul></div>'
     };
     css = {
       wrapper: {
@@ -167,10 +167,10 @@
         this.listView.clear();
 
         this.lastData = data;
-        data = this.filterData(term, data);
+        data.autocomplete = this.filterData(term, data.autocomplete);
 
-        if (data.length) {
-          this.listView.setPosition(this.getCaretPosition(term, lastText, data));
+        if (data.autocomplete.length || data.format.length) {
+          this.listView.setPosition(this.getCaretPosition(term, lastText, data.autocomplete));
           if (!this.listView.shown) {
             this.listView
                 .clear()
@@ -180,7 +180,9 @@
           this.listView.render(data);
         }
         
-        if (!this.listView.data.length && this.listView.shown) {
+        if (!this.listView.data.autocomplete.length 
+             && !this.listView.data.format.length
+             && this.listView.shown) {
           this.listView.deactivate();
         }
       },
@@ -247,7 +249,7 @@
       /**
        * Returns caret's relative coordinates from textarea's left top corner.
        */
-      getCaretPosition: function (term, text, data) {
+      getCaretPosition: function (term, text, autocomplete) {
         // Browser native API does not provide the way to know the position of
         // caret in pixels, so that here we use a kind of hack to accomplish
         // the aim. First of all it puts a div element and completely copies
@@ -274,6 +276,7 @@
         }, getStyles(this.$el, properties));
 
         function findLongestPrefix(list) {
+            if(list.length === 0) return "";
             var prefix = list[0];
             var prefixLen = prefix.length;
             for (var i = 1; i < list.length && prefixLen > 0; i++) {
@@ -292,7 +295,7 @@
             return prefix.substring(0, prefixLen);
         }
 
-        var s = findLongestPrefix(data);
+        var s = findLongestPrefix(autocomplete);
         var temp = this.getCommonPart(text, s);
 
         if(text.length >= temp.length) {
@@ -321,19 +324,19 @@
         return text;
       },
 
-      filterData: function(term, data) {
+      filterData: function(term, autocomplete) {
         var text = this.getTextFromHeadToCaret();
         var newPart = text.substring(term.length, text.length);
         if(newPart.lenght > 0) {
           var newData = [];
-          for(var i=0; i < data.length; i++) {
-            if(data[i].substring(0, newPart.lenght) === newPart) {
-              newData.push(data[i]);
+          for(var i=0; i < autocomplete.length; i++) {
+            if(autocomplete[i].substring(0, newPart.lenght) === newPart) {
+              newData.push(autocomplete[i]);
             }
           }
           return newData;
         }
-        return data;
+        return autocomplete;
       },
 
       /**
@@ -389,7 +392,7 @@
   var ListView = (function () {
 
     function ListView($el, completer) {
-      this.data = [];
+      this.data = {autocomplete: [], format: []};
       this.$el = $el;
       this.index = 0;
       this.completer = completer;
@@ -405,31 +408,43 @@
         var html, i, l, index, val;
 
         var displayCount = this.strategy.maxCount;
-        if (data.length > this.strategy.maxCount) {
+        if (data.autocomplete.length > this.strategy.maxCount) {
           displayCount--;
         }
 
+        this.data.format = data.format;
+        if(data.format.length){
+          html = '';
+          for (i = 0, l = data.format.length; i < l; i++) {
+            val = data.format[i];
+            html += '<li class="textcomplete-item textcomplete-format">';
+            html += val;
+            html += '</li>';
+          }
+          this.$el.find('.format').append(html);
+        }
+
         html = '';
-        for (i = 0, l = data.length; i < l; i++) {
-          val = data[i];
-          if (include(this.data, val)) continue;
-          index = this.data.length;
-          this.data.push(val);
+        for (i = 0, l = data.autocomplete.length; i < l; i++) {
+          val = data.autocomplete[i];
+          if (include(this.data.autocomplete, val)) continue;
+          index = this.data.autocomplete.length;
+          this.data.autocomplete.push(val);
           html += '<li class="textcomplete-item" data-index="' + index + '"><a>';
           html +=   this.strategy.template(val);
           html += '</a></li>';
-          if (this.data.length === displayCount) break;
+          if (this.data.autocomplete.length === displayCount) break;
         }
-        this.displayCount = this.data.length;
-        if (data.length > displayCount) {
-          html += '<li class="textcomplete-more" data-index="' + displayCount + '">';
+        this.displayCount = this.data.autocomplete.length;
+        if (data.autocomplete.length > displayCount) {
+          html += '<li class="textcomplete-more" data.autocomplete-index="' + displayCount + '">';
           html += '<select>';
           html += '<option value="more">...</option>';
-          for (i = displayCount, l = data.length; i < l; i++) {
-            val = data[i];
-            if (include(this.data, val)) continue;
-            index = this.data.length;
-            this.data.push(val);
+          for (i = displayCount, l = data.autocomplete.length; i < l; i++) {
+            val = data.autocomplete[i];
+            if (include(this.data.autocomplete, val)) continue;
+            index = this.data.autocomplete.length;
+            this.data.autocomplete.push(val);
             html += '<option data-index="' + index + '" value="' + index + '">' + val + '</option>';
           }
           html += '</select">';
@@ -437,18 +452,26 @@
           //count select
           this.displayCount++;
         }
-
-        this.$el.append(html);
-        if (!this.data.length) {
+        console.log("render");
+        this.$el.find('.autocomplete').append(html);
+        if (this.data.autocomplete.length === 0 && data.format.length === 0) {
+          console.log("deactivate");
           this.deactivate();
         } else {
-          this.activateIndexedItem();
+          if(this.data.autocomplete.length) {
+            this.activateIndexedItem();
+          } else {
+            console.log("reposition");
+            this.reposition();
+          }
         }
       },
 
       clear: function () {
-        this.data = [];
-        this.$el.html('');
+        this.data.autocomplete = [];
+        this.data.format = [];
+        this.$el.find('.autocomplete').html('');
+        this.$el.find('.format').html('');
         this.index = 0;
         return this;
       },
@@ -461,7 +484,7 @@
       },
 
       getActiveItem: function () {
-        return $(this.$el.children().get(this.index));
+        return $(this.$el.find('.autocomplete').children().get(this.index));
       },
 
       activate: function () {
@@ -476,7 +499,8 @@
         if (this.shown) {
           this.$el.hide();
           this.shown = false;
-          this.data = this.index = null;
+          this.data = {autocomplete: [], format: []};
+          this.index = null;
         }
         return this;
       },
@@ -487,7 +511,7 @@
       },
 
       select: function (index) {
-        this.completer.onSelect(this.data[index]);
+        this.completer.onSelect(this.data.autocomplete[index]);
         this.deactivate();
       },
 
@@ -500,9 +524,7 @@
         if(rightOffset > textareaRight) {
           var rel = rightOffset - textareaRight;
           var left = parseInt(this.$el.css('left').replace('px',''), 10);
-          console.log("old", this.$el.css('left'));
           this.$el.css('left', left - rel);
-          console.log("new", this.$el.css('left'));
         }
       },
 

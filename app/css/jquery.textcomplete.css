@@ -5,6 +5,8 @@
     background-color: white;
     -webkit-border-radius: 0.2em;
     border-radius:  0.2em;
+    padding: 0;
+    margin: 0;
 }
 
 .dropdown-menu li {
@@ -25,10 +27,15 @@
 
 /* SHOULD not modify */
 
-.dropdown-menu {
+.dropdown-menu ul {
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+.dropdown-menu ul.format li{
+    font-style: italic;
+    color: gray;
 }
 
 .dropdown-menu a:hover {
