@@ -30,7 +30,7 @@ module.exports = (env) ->
       matchCount = m.getMatchCount()
 
       if matchCount is 1
-        match = m.getFullMatches()[0]
+        match = m.getFullMatch()
         return {
           token: match
           nextInput: input.substring(match.length)
