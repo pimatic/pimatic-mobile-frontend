@@ -27,17 +27,14 @@ module.exports = (env) ->
         .match(' button', optional: true)
         .match(' is', optional: true)
         .match(' pressed')
-      matchCount = m.getMatchCount()
 
-      if matchCount is 1
+      if m.hadMatch()
         match = m.getFullMatch()
         return {
           token: match
           nextInput: input.substring(match.length)
           predicateHandler: new ButtonPredicateHandler(this, matchingButton.itemId)
         }
-      else if matchCount > 1
-        context?.addError(""""#{predicate.trim()}" is ambiguous.""")
       return null
 
   class ButtonPredicateHandler extends env.predicates.PredicateHandler
