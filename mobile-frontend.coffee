@@ -912,6 +912,7 @@ module.exports = (env) ->
         action: rule.actionsToken
         active: rule.active
         valid: rule.valid
+        logging: rule.logging
       }
 
     emitAttributeValue: (socket, device, name, value) ->

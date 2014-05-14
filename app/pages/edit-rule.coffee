@@ -23,6 +23,18 @@ $(document).on("pagebeforecreate", (event) ->
         return (if @action() is 'add' then __('Add new rule') else __('Edit rule'))
       )
 
+      lastGeneratedId = ""
+      @ruleName.subscribe( (newName) =>
+        if @action() isnt 'add'
+          lastGeneratedId = ""
+          return
+        currentId = @ruleId()
+        generatedId = pimatic.makeIdFromName(newName)
+        if currentId is lastGeneratedId or currentId.length is 0
+          @ruleId(generatedId)
+        lastGeneratedId = generatedId
+      )
+
     resetFields: () ->
       @ruleId('')
       @ruleName('')
@@ -50,6 +62,23 @@ $(document).on("pagebeforecreate", (event) ->
           else alert data.error
         ).fail(ajaxAlertFail)
       return false
+
+    onCopy: ->
+      ruleId = @ruleId()
+      ruleName = @ruleName()
+      @action('add')
+
+      if (match = ruleName.match(/.*?([0-9]+)$/))?
+        num = match[1]
+        @ruleName(ruleName.substring(0, ruleName.length-num.length-1) + (parseInt(num,10)+1))
+      else
+        @ruleName(ruleName + " 2")
+
+      if (match = ruleId.match(/.*?([0-9]+)$/))?
+        num = match[1]
+        @ruleId(ruleId.substring(0, ruleId.length-num.length-1) + (parseInt(num,10)+1))
+      else
+        @ruleId(ruleId + " 2")
 
   try
     pimatic.pages.editRule = new EditRuleViewModel()

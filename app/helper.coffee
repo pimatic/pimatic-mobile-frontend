@@ -152,6 +152,24 @@ $(document).ready( =>
   pimatic.showToast = (msg) -> $('#toast').text(msg).toast('show')
 )
 
+pimatic.makeIdFromName = (str) =>
+  str = str.replace(/^\s+|\s+$/g, "") # trim
+  str = str.toLowerCase()
+  
+  # remove accents, swap ñ for n, etc
+  from = "àáäâèéëêìíïîòóöôùúüûñç·/_,:;"
+  to = "aaaaeeeeiiiioooouuuunc------"
+  i = 0
+  l = from.length
+
+  while i < l
+    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i))
+    i++
+  # remove invalid chars
+  # collapse whitespace and replace by -
+  str = str.replace(/[^a-z0-9 -]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-") # collapse dashes
+  return str
+
 window.__ = (text, args...) -> 
   translated = text
   if locale[text]? then translated = locale[text]

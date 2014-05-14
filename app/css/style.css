@@ -204,7 +204,15 @@ li.sortable.header .handle {
   display: none;
 }
 
-#delete-item, #delete-rule, #delete-variable {
+#delete-item, #delete-rule, #delete-variable, 
+.ui-mobile .delete-button {
+  background-color: #cc2929;
+  border-color: #AA0000;
+  color: #fff;
+}
+
+#delete-item, #delete-rule, #delete-variable, 
+.ui-mobile .delete-button:hover {
   background-color: #CC0000;
   border-color: #AA0000;
   color: #fff;
@@ -465,6 +473,14 @@ li.rememberme label {
   /* no idea why this is necessary to display full y when autocomplete is visible*/
   overflow-x: visible !important;
 }
+
+.collapsible-content-not-insert .ui-collapsible-content{
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  background-color:       #eee;
+} 
 
 .textcomplete-item a {
   white-space: nowrap;
