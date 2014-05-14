@@ -15,6 +15,7 @@ $(document).on("pagebeforecreate", (event) ->
     ruleCondition: ko.observable('')
     ruleActions: ko.observable('')
     ruleEnabled: ko.observable(yes)
+    ruleLogging: ko.observable(yes)
 
     constructor: ->
       @ruleAsText = ko.computed( => "if #{@ruleCondition()} then #{@ruleActions()}")
@@ -28,12 +29,14 @@ $(document).on("pagebeforecreate", (event) ->
       @ruleCondition('')
       @ruleActions('')
       @ruleEnabled(yes)
+      @ruleLogging(yes)
 
     onSubmit: ->
       $.post("/api/rule/#{@ruleId()}/#{@action()}", 
         rule: @ruleAsText()
         active: @ruleEnabled()
         name: @ruleName()
+        logging: @ruleLogging()
       ).done( (data) ->
           if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
           else alert data.error

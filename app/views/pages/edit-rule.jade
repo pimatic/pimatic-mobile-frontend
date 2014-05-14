@@ -17,6 +17,9 @@ div#edit-rule(data-role='page')
         textarea#edit-rule-actions(placeholder="Actions", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleActions, valueUpdate: 'afterkeydown'")
       input#edit-rule-active(type='checkbox', name='edit-rule-active', data-bind="jqmchecked: ruleEnabled")
       label(for='edit-rule-active')=__('Enabled')
+      span=__('Advanced Options')+':'
+      input#edit-rule-logging(type='checkbox', name='edit-rule-logging', data-bind="jqmchecked: ruleLogging")
+      label(for='edit-rule-logging')=__('Log Action Execution ')
       .ui-grid-a
         div.ui-block-a
           a#edit-rule-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
@@ -24,6 +27,5 @@ div#edit-rule(data-role='page')
         div.ui-block-b
           a#edit-rule-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: onSubmit")=__('Save')
       div#edit-rule-advanced(data-bind="visible: action() == 'update'")
-        //- span=__('Advanced Options')+':'
         a#edit-rule-remove.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
           data-bind="click: onRemove", data-role="button", href='#index')=__('Delete this rule')

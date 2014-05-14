@@ -868,6 +868,7 @@ module.exports = (env) ->
           action: rule.actionsToken
           active: rule.active
           valid: rule.valid
+          logging: rule.logging
           error: rule.error
         }
 

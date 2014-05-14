@@ -428,6 +428,7 @@ $(document).on( "pagebeforecreate", tc (event) ->
       editRulePage.ruleCondition(rule.condition())
       editRulePage.ruleActions(rule.action())
       editRulePage.ruleEnabled(rule.active())
+      editRulePage.ruleLogging(rule.logging())
       return true
 
     onAddVariableClicked: ->
