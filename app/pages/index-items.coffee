@@ -269,6 +269,9 @@ $(document).on( "pagebeforecreate", (event) ->
     contact: pimatic.ContactItem
     shutter: pimatic.ShutterItem
   }
+
+  $(document).trigger("templateinit", [ ])
+
   return
 )
 
