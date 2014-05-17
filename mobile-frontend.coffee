@@ -834,7 +834,6 @@ module.exports = (env) ->
 
         typeToString = (type) => 
           if typeof type is "function" then type.name.toLowerCase()
-          else if Array.isArray type then "string"
           else "unknown"
 
         for name, attr of device.attributes
