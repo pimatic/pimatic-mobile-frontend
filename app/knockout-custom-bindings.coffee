@@ -27,8 +27,20 @@
         textValue = ko.unwrap(valueUnwrapped.text)
         $ele.text(textValue)
       if valueUnwrapped.icon?
-        icon =  ko.unwrap(valueUnwrapped.icon)
+        icon = ko.unwrap(valueUnwrapped.icon)
         setIconClass($ele, icon)
+      if valueUnwrapped.enabled?
+        enabled = ko.unwrap(valueUnwrapped.enabled)
+        if enabled
+          try 
+            $ele.button("enable")
+          catch e 
+            $ele.removeClass("ui-state-disabled")
+        else 
+          try
+            $ele.button("disable")
+          catch e
+            $ele.addClass("ui-state-disabled")
       return
   }
 
