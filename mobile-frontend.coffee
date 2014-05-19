@@ -230,7 +230,7 @@ module.exports = (env) ->
       Handle get request for clearing the log
       ###
       app.get('/clear-log', (req, res) =>
-        env.logger.transports.memory.clearLog()
+        # TODO: clear?
         res.send(200, {success: true})
       )
 
@@ -448,8 +448,8 @@ module.exports = (env) ->
             socket.emit "rule-remove", rule.id
 
           env.logger.debug("adding log listern") if @config.debug
-          memoryTransport = env.logger.transports.memory
-          memoryTransport.on 'log', logListener = (entry)=>
+          #todo: filter
+          env.logger.base.on 'log', logListener = (entry)=>
             socket.emit 'log', entry
 
           env.logger.debug("adding item listers") if @config.debug
@@ -497,7 +497,7 @@ module.exports = (env) ->
             framework.ruleManager.removeListener "add", addRuleListener 
             framework.ruleManager.removeListener "update", removeRuleListener
             env.logger.debug("removing log listern") if @config.debug
-            memoryTransport.removeListener 'log', logListener
+            env.logger.base.removeListener 'log', logListener
             env.logger.debug("removing item-add listerns") if @config.debug
             @removeListener 'item-add', addItemListener
             @removeListener 'item-remove', removeItemListener
@@ -892,7 +892,7 @@ module.exports = (env) ->
     getInitalClientData: () ->
       return {
         ruleItemCssClass: @config.ruleItemCssClass
-        errorCount: env.logger.transports.memory.getErrorCount()
+        errorCount: 0 #TODO //env.logger.transports.memory.getErrorCount()
         enabledEditing: @config.enabledEditing
         showAttributeVars: @config.showAttributeVars
         hasRootCACert: @hasRootCACert
