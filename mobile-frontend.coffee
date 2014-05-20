@@ -358,19 +358,18 @@ module.exports = (env) ->
 
       @setupUpdateProcessListener()
 
+      socketIOLogger = env.logger.createSublogger('socket.io')
+      # mute debug outs
+      socketIOLogger = new Object(socketIOLogger)
+      socketIOLogger.debug = -> #nop
+
       # ###Socket.io stuff:
       # For every webserver
       for webServer in [app.httpServer, app.httpsServer]
         continue unless webServer?
         # Listen for new websocket connections
         io = socketIo.listen webServer, {
-          logger: 
-            log: (type, args...) ->
-              if type isnt 'debug' then env.logger.log(type, 'socket.io:', args...)
-            debug: (args...) -> this.log('debug', args...)
-            info: (args...) -> this.log('info', args...)
-            warn: (args...) -> this.log('warn', args...)
-            error: (args...) -> this.log('error', args...)
+          logger: socketIOLogger
         }
 
         sessionOptions = app.cookieSessionOptions
@@ -449,7 +448,7 @@ module.exports = (env) ->
 
           env.logger.debug("adding log listern") if @config.debug
           #todo: filter
-          env.logger.base.on 'log', logListener = (entry)=>
+          @framework.eventlog.on 'log', logListener = (entry)=>
             socket.emit 'log', entry
 
           env.logger.debug("adding item listers") if @config.debug
@@ -497,7 +496,7 @@ module.exports = (env) ->
             framework.ruleManager.removeListener "add", addRuleListener 
             framework.ruleManager.removeListener "update", removeRuleListener
             env.logger.debug("removing log listern") if @config.debug
-            env.logger.base.removeListener 'log', logListener
+            @framework.eventlog.removeListener 'log', logListener
             env.logger.debug("removing item-add listerns") if @config.debug
             @removeListener 'item-add', addItemListener
             @removeListener 'item-remove', removeItemListener

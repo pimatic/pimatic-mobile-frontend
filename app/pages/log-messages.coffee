@@ -23,21 +23,27 @@ $(document).on("pagecreate", '#log', tc (event) ->
     updateFromJs: (data) ->
       ko.mapping.fromJS(data, LogMessageViewModel.mapping, this)
 
-    timeToShow: (index) ->
-      justDate = (time) -> time.substring(0, 10)
-      justTime = (time) -> time.substring(11, 19) 
+    timestampToDateTime: (time) ->
+      pad = (n) => if n < 10 then "0#{n}" else "#{n}"
+      d = new Date(time)
+      date = pad(d.getDate()) + '.' + pad((d.getMonth()+1)) + '.' + d.getFullYear()
+      time = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+      return {date, time}
 
+    timeToShow: (index) ->
       index = index()
       messages = @messages()
       #console.log index, messages
       if index is 0 
         msg = messages[index]
-        return msg?.time
+        unless msg? then return ''
+        dt = @timestampToDateTime(msg?.time)
+        return "#{dt.date} #{dt.time}"
       else 
         [msgBefore, msgCurrent] = [ messages[index-1], messages[index] ]
-        [before, current] = [ justDate(msgBefore.time), justDate(msgCurrent.time) ]
-        if current is before then return justTime(msgCurrent.time)
-        else return msgCurrent.time
+        [before, current] = [ @timestampToDateTime(msgBefore.time), @timestampToDateTime(msgCurrent.time) ]
+        if current.date is before.date then return current.time
+        else return "#{current.date} #{current.time}"
 
     loadMessages: ->
       pimatic.loading "loading message", "show", text: __('Loading Messages')
