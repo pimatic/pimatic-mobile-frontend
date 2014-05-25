@@ -11,17 +11,32 @@ $(document).on("pagecreate", '#log', tc (event) ->
         key: (data) -> data.id
       ignore: ['success']
     }
-
-    messages: ko.observableArray([])
+    chosenLevels: ko.observableArray([])
+    tags: ko.observableArray(['All', 'pimatic'])
+    chosenTag: ko.observableArray([])
 
     constructor: ->
-      @listViewRequest = ko.computed( =>
-        @messages()
-        $('#log-messages').listview('refresh') 
-      ).extend(rateLimit: {timeout: 0, method: "notifyWhenChangesStop"})
+      ko.mapping.fromJS({messages: []}, LogMessageViewModel.mapping, this)
+      @displayedMessages = ko.computed( =>
+        chosenLevels = @chosenLevels()
+        chosenTag = @chosenTag()
+        messages = @messages()
 
+        displayed = (
+          m for m in messages when (
+            m.level in chosenLevels and (chosenTag is 'All' or chosenTag in m.tags)
+          )
+        )
+        console.log displayed
+        return displayed
+      ).extend(rateLimit: {timeout: 10, method: "notifyAtFixedRate"})
+
+      @updateListView = ko.computed( =>
+        @displayedMessages()
+        $('#log-messages').listview('refresh') 
+      )
     updateFromJs: (data) ->
-      ko.mapping.fromJS(data, LogMessageViewModel.mapping, this)
+      ko.mapping.fromJS({messages: data}, this)
 
     timestampToDateTime: (time) ->
       pad = (n) => if n < 10 then "0#{n}" else "#{n}"
@@ -47,13 +62,14 @@ $(document).on("pagecreate", '#log', tc (event) ->
 
     loadMessages: ->
       pimatic.loading "loading message", "show", text: __('Loading Messages')
-      $.ajax("/api/messages",
+      $.ajax("/api/eventlog/queryMessages",
         global: false # don't show loading indicator
       ).always( ->
         pimatic.loading "loading message", "hide"
       ).done( tc (data) ->
         if data.success
-          logPage.updateFromJs(data)
+          console.log data.result
+          logPage.updateFromJs({messages: data.result})
       ).fail(ajaxAlertFail)
     
   try
@@ -63,11 +79,13 @@ $(document).on("pagecreate", '#log', tc (event) ->
       logPage.messages.push entry
 
     $('#log').on "click", '#clear-log', tc (event, ui) ->
-      $.get("/clear-log")
-        .done( tc ->
-          logPage.messages.removeAll()
-          pimatic.pages.index.errorCount(0)
-        ).fail(ajaxAlertFail)
+      lastMessage = logPage.messages[logPage.messages.length-1]
+      $.ajax("/api/messages/delete",
+        data: {beforeTime: lastMessage.time}
+      ).done( tc ->
+        logPage.messages.removeAll()
+        pimatic.pages.index.errorCount(0)
+      ).fail(ajaxAlertFail)
 
     ko.applyBindings(logPage, $('#log')[0])
   catch e

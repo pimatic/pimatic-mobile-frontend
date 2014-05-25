@@ -60,8 +60,34 @@
     update: (element, valueAccessor) ->
       value = valueAccessor()
       valueUnwrapped = ko.unwrap(value)
-      #calling 'refresh' only if already enhanced by JQM
       $(element).checkboxradio("refresh")
+      return
+    }
+
+  ko.bindingHandlers.jqmselectedOptions = {
+    init: (element, valueAccessor) ->
+      value = valueAccessor()
+      $ele = $(element)
+      $ele.on('change', => 
+        val = $ele.val()
+        unless val? then val = []
+        value(val)
+      )
+
+    update: (element, valueAccessor) ->
+      value = valueAccessor()
+      $ele = $(element)
+      $ele.val(value())
+      $ele.selectmenu( "refresh", true );
+      return
+    }
+
+  ko.bindingHandlers.jqmoptions = {
+    init: ko.bindingHandlers.options.init
+    update: (element, valueAccessor, allBindings) ->
+      ko.bindingHandlers.options.update(element, valueAccessor, allBindings)
+      value = valueAccessor()
+      $(element).selectmenu("refresh")
       return
     }
 

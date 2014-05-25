@@ -4,9 +4,20 @@ div#log(data-role='page')
     a#clear-log.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-check()=__('Clear')
     h3=__('Log messages')
   div.ui-content.overthrow
-    ul#log-messages(data-role='listview', data-bind="foreach: messages")
+    .controls
+      select#select-levels(name='select-levels', multiple='multiple', data-native-menu='false', 
+        data-mini="true", data-inline="true", data-bind="jqmselectedOptions: chosenLevels")
+        option Level
+        option(value='debug') Debug
+        option(value='info') Info
+        option(value='warn') Warn
+        option(value='error') Error
+      select#select-tag(name='select-tag', data-mini="true", data-inline="true", data-bind="jqmoptions: tags, value: chosenTag")
+    ul#log-messages(data-role='listview', data-bind="foreach: displayedMessages")
       li
         span.time(data-bind='text: $parent.timeToShow($index)')
         span(data-bind='text: level, attr: {class: "level " + level}')
+        | 
+        span.tags(data-bind='text: JSON.stringify($data.tags).replace(/(\")/g, \'\')')
         |: 
         span.msg(data-bind='text: text')
