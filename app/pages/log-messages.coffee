@@ -11,12 +11,13 @@ $(document).on("pagecreate", '#log', tc (event) ->
         key: (data) -> data.id
       ignore: ['success']
     }
-    chosenLevels: ko.observableArray([])
+    chosenLevels: ko.observableArray(['info', 'warn', 'error'])
     tags: ko.observableArray(['All', 'pimatic'])
     chosenTag: ko.observableArray([])
+    messageCount: ko.observable(null)
 
     constructor: ->
-      ko.mapping.fromJS({messages: []}, LogMessageViewModel.mapping, this)
+      @updateFromJs([])
       @displayedMessages = ko.computed( =>
         chosenLevels = @chosenLevels()
         chosenTag = @chosenTag()
@@ -27,16 +28,30 @@ $(document).on("pagecreate", '#log', tc (event) ->
             m.level in chosenLevels and (chosenTag is 'All' or chosenTag in m.tags)
           )
         )
-        console.log displayed
+
         return displayed
       ).extend(rateLimit: {timeout: 10, method: "notifyAtFixedRate"})
+
+      ko.computed( =>
+        @chosenLevels()
+        @chosenTag()
+        @loadMessages()
+      )
+
+      @messageCountText = ko.computed( =>
+        count = @messageCount()
+        return (
+          if count? then __("Showing %s Messages of %s", @displayedMessages().length, count)
+          else ""
+        )
+      )
 
       @updateListView = ko.computed( =>
         @displayedMessages()
         $('#log-messages').listview('refresh') 
       )
     updateFromJs: (data) ->
-      ko.mapping.fromJS({messages: data}, this)
+      ko.mapping.fromJS({messages: data}, LogMessageViewModel.mapping, this)
 
     timestampToDateTime: (time) ->
       pad = (n) => if n < 10 then "0#{n}" else "#{n}"
@@ -47,44 +62,79 @@ $(document).on("pagecreate", '#log', tc (event) ->
 
     timeToShow: (index) ->
       index = index()
-      messages = @messages()
-      #console.log index, messages
+      dMessages = @displayedMessages()
       if index is 0 
-        msg = messages[index]
+        msg = dMessages[index]
         unless msg? then return ''
         dt = @timestampToDateTime(msg?.time)
         return "#{dt.date} #{dt.time}"
       else 
-        [msgBefore, msgCurrent] = [ messages[index-1], messages[index] ]
+        [msgBefore, msgCurrent] = [ dMessages[index-1], dMessages[index] ]
         [before, current] = [ @timestampToDateTime(msgBefore.time), @timestampToDateTime(msgCurrent.time) ]
         if current.date is before.date then return current.time
         else return "#{current.date} #{current.time}"
 
     loadMessages: ->
       pimatic.loading "loading message", "show", text: __('Loading Messages')
-      $.ajax("/api/eventlog/queryMessages",
+
+      ajaxCall = =>
+        if @loadMessagesAjax? then return
+        
+        criteria = {
+          level: @chosenLevels()
+          limit: 100
+        }
+        criteria.tags = @chosenTag() if @chosenTag() isnt 'All'
+
+        @loadMessagesAjax = $.ajax("/api/eventlog/queryMessages",
+          global: false # don't show loading indicator
+          data: { criteria }
+        ).always( ->
+          pimatic.loading "loading message", "hide"
+        ).done( tc (data) =>
+          @loadMessagesAjax = null
+          if data.success
+            logPage.updateFromJs(data.messages)
+            for m in data.messages 
+              for t in m.tags
+                unless t in @tags() then @tags.push t
+          return
+        ).fail(ajaxAlertFail)
+
+      unless @loadMessagesAjax? then ajaxCall()
+      else @loadMessagesAjax.done( => ajaxCall() )
+
+    loadMessagesMeta: ->
+      $.ajax("/api/eventlog/queryMessagesTags",
         global: false # don't show loading indicator
-      ).always( ->
-        pimatic.loading "loading message", "hide"
-      ).done( tc (data) ->
+      ).done( tc (data) =>
         if data.success
-          console.log data.result
-          logPage.updateFromJs({messages: data.result})
-      ).fail(ajaxAlertFail)
+          for t in data.tags
+            unless t in @tags() then @tags.push t
+      )
+      $.ajax("/api/eventlog/queryMessagesCount",
+        global: false # don't show loading indicator
+      ).done( tc (data) =>
+        if data.success
+          @messageCount(data.count)
+      )
+
     
   try
     pimatic.pages.log = logPage = new LogMessageViewModel()
 
     pimatic.socket.on 'log', tc (entry) -> 
-      logPage.messages.push entry
+      count = logPage.messageCount()
+      if count? then logPage.messageCount(count+1)
+      logPage.messages.unshift entry
 
     $('#log').on "click", '#clear-log', tc (event, ui) ->
       lastMessage = logPage.messages[logPage.messages.length-1]
-      $.ajax("/api/messages/delete",
-        data: {beforeTime: lastMessage.time}
+      $.ajax("/api/eventlog/deleteMessages"
       ).done( tc ->
         logPage.messages.removeAll()
         pimatic.pages.index.errorCount(0)
+        logPage.messageCount(0)
       ).fail(ajaxAlertFail)
 
     ko.applyBindings(logPage, $('#log')[0])
@@ -96,6 +146,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
 $(document).on("pagebeforeshow", '#log', tc (event) ->
   try
     pimatic.pages.log.loadMessages()
+    pimatic.pages.log.loadMessagesMeta()
   catch e
     TraceKit.report(e)
 )

@@ -1,7 +1,7 @@
 div#log(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
-    a#clear-log.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-check()=__('Clear')
+    a#clear-log.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-check()=__('Delete All')
     h3=__('Log messages')
   div.ui-content.overthrow
     .controls
@@ -13,6 +13,7 @@ div#log(data-role='page')
         option(value='warn') Warn
         option(value='error') Error
       select#select-tag(name='select-tag', data-mini="true", data-inline="true", data-bind="jqmoptions: tags, value: chosenTag")
+      span(data-bind="text: messageCountText")
     ul#log-messages(data-role='listview', data-bind="foreach: displayedMessages")
       li
         span.time(data-bind='text: $parent.timeToShow($index)')
