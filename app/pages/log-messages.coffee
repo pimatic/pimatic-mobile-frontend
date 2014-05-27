@@ -41,7 +41,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
       @messageCountText = ko.computed( =>
         count = @messageCount()
         return (
-          if count? then __("Showing %s Messages of %s", @displayedMessages().length, count)
+          if count? then __("Showing %s of %s Messages", @displayedMessages().length, count)
           else ""
         )
       )
@@ -75,11 +75,11 @@ $(document).on("pagecreate", '#log', tc (event) ->
         else return "#{current.date} #{current.time}"
 
     loadMessages: ->
-      pimatic.loading "loading message", "show", text: __('Loading Messages')
 
       ajaxCall = =>
         if @loadMessagesAjax? then return
-        
+        pimatic.loading "loading message", "show", text: __('Loading Messages')
+
         criteria = {
           level: @chosenLevels()
           limit: 100
@@ -89,12 +89,12 @@ $(document).on("pagecreate", '#log', tc (event) ->
         @loadMessagesAjax = $.ajax("/api/eventlog/queryMessages",
           global: false # don't show loading indicator
           data: { criteria }
-        ).always( ->
+        ).always( =>
           pimatic.loading "loading message", "hide"
         ).done( tc (data) =>
           @loadMessagesAjax = null
           if data.success
-            logPage.updateFromJs(data.messages)
+            @updateFromJs(data.messages)
             for m in data.messages 
               for t in m.tags
                 unless t in @tags() then @tags.push t

@@ -668,6 +668,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
               "pimatic-mobile-frontend/app/pages/index.coffee"
               "pimatic-mobile-frontend/app/pages/log-messages.coffee"
+              "pimatic-mobile-frontend/app/pages/events.coffee"
               "pimatic-mobile-frontend/app/pages/plugins.coffee"
               "pimatic-mobile-frontend/app/pages/updates.coffee"
             ] .concat @additionalAssetFiles['js']

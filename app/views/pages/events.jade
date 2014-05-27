@@ -1,0 +1,19 @@
+div#events(data-role='page')
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
+    h3=__('Events')
+  div.ui-content.overthrow
+    .controls
+    table#events-table.ui-responsive.table-stroke(data-role='table', data-mode='columntoggle')
+      thead
+        tr
+          th(data-priority='2') Time
+          th(data-priority='3') Device ID
+          th(data-priority='4') Attribute
+          th(data-priority='1') Value
+      tbody(data-bind="foreach: displayedEvents")
+        tr
+          td(data-bind="text: $root.formatTime(time)")
+          td(data-bind="text: deviceId")
+          td(data-bind="text: attributeName")
+          td(data-bind="text: value")
