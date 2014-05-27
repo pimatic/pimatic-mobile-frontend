@@ -86,7 +86,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
         }
         criteria.tags = @chosenTag() if @chosenTag() isnt 'All'
 
-        @loadMessagesAjax = $.ajax("/api/eventlog/queryMessages",
+        @loadMessagesAjax = $.ajax("/api/database/queryMessages",
           global: false # don't show loading indicator
           data: { criteria }
         ).always( =>
@@ -105,14 +105,14 @@ $(document).on("pagecreate", '#log', tc (event) ->
       else @loadMessagesAjax.done( => ajaxCall() )
 
     loadMessagesMeta: ->
-      $.ajax("/api/eventlog/queryMessagesTags",
+      $.ajax("/api/database/queryMessagesTags",
         global: false # don't show loading indicator
       ).done( tc (data) =>
         if data.success
           for t in data.tags
             unless t in @tags() then @tags.push t
       )
-      $.ajax("/api/eventlog/queryMessagesCount",
+      $.ajax("/api/database/queryMessagesCount",
         global: false # don't show loading indicator
       ).done( tc (data) =>
         if data.success
@@ -130,7 +130,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
 
     $('#log').on "click", '#clear-log', tc (event, ui) ->
       lastMessage = logPage.messages[logPage.messages.length-1]
-      $.ajax("/api/eventlog/deleteMessages"
+      $.ajax("/api/database/deleteMessages"
       ).done( tc ->
         logPage.messages.removeAll()
         pimatic.pages.index.errorCount(0)

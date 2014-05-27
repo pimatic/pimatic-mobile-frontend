@@ -448,7 +448,7 @@ module.exports = (env) ->
 
           env.logger.debug("adding log listern") if @config.debug
           #todo: filter
-          @framework.eventlog.on 'log', logListener = (entry)=>
+          @framework.database.on 'log', logListener = (entry)=>
             socket.emit 'log', entry
 
           env.logger.debug("adding item listers") if @config.debug
@@ -496,7 +496,7 @@ module.exports = (env) ->
             framework.ruleManager.removeListener "add", addRuleListener 
             framework.ruleManager.removeListener "update", removeRuleListener
             env.logger.debug("removing log listern") if @config.debug
-            @framework.eventlog.removeListener 'log', logListener
+            @framework.database.removeListener 'log', logListener
             env.logger.debug("removing item-add listerns") if @config.debug
             @removeListener 'item-add', addItemListener
             @removeListener 'item-remove', removeItemListener

@@ -53,7 +53,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
           limit: 100
         }
 
-        @loadEventsAjax = $.ajax("/api/eventlog/queryDeviceAttributeEvents",
+        @loadEventsAjax = $.ajax("/api/database/queryDeviceAttributeEvents",
           global: false # don't show loading indicator
           data: { criteria }
         ).always( ->
@@ -76,14 +76,14 @@ $(document).on("pagecreate", '#events', tc (event) ->
       return "#{date} #{time}"
 
     # loadMessagesMeta: ->
-    #   $.ajax("/api/eventlog/queryMessagesTags",
+    #   $.ajax("/api/database/queryMessagesTags",
     #     global: false # don't show loading indicator
     #   ).done( tc (data) =>
     #     if data.success
     #       for t in data.tags
     #         unless t in @tags() then @tags.push t
     #   )
-    #   $.ajax("/api/eventlog/queryMessagesCount",
+    #   $.ajax("/api/database/queryMessagesCount",
     #     global: false # don't show loading indicator
     #   ).done( tc (data) =>
     #     if data.success
