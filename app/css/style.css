@@ -388,6 +388,14 @@ li.rememberme label {
   padding-left: 10px;
 }
 
+#log .controls {
+  margin-bottom: 1em;
+}
+
+#log-messages .tags {
+  color: #0e1b52;
+}
+
 .level.info {
     color: #339900;
 }
@@ -398,6 +406,10 @@ li.rememberme label {
 
 .level.error {
     color: #CC0000;
+}
+
+.level.debug {
+    color: #1944ff;
 }
 
 #plugin-list .ui-li-desc {

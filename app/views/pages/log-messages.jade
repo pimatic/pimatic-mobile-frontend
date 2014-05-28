@@ -1,12 +1,24 @@
 div#log(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
-    a#clear-log.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-check()=__('Clear')
+    a#clear-log.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-check()=__('Delete All')
     h3=__('Log messages')
   div.ui-content.overthrow
-    ul#log-messages(data-role='listview', data-bind="foreach: messages")
+    .controls
+      select#select-levels(name='select-levels', multiple='multiple', data-native-menu='false', 
+        data-mini="true", data-inline="true", data-bind="jqmselectedOptions: chosenLevels")
+        option Level
+        option(value='debug') Debug
+        option(value='info') Info
+        option(value='warn') Warn
+        option(value='error') Error
+      select#select-tag(name='select-tag', data-mini="true", data-inline="true", data-bind="jqmoptions: tags, value: chosenTag")
+      span(data-bind="text: messageCountText")
+    ul#log-messages(data-role='listview', data-bind="foreach: displayedMessages")
       li
         span.time(data-bind='text: $parent.timeToShow($index)')
         span(data-bind='text: level, attr: {class: "level " + level}')
+        | 
+        span.tags(data-bind='text: JSON.stringify($data.tags).replace(/(\")/g, \'\')')
         |: 
-        span.msg(data-bind='text: msg')
+        span.msg(data-bind='text: text')

@@ -230,7 +230,7 @@ module.exports = (env) ->
       Handle get request for clearing the log
       ###
       app.get('/clear-log', (req, res) =>
-        env.logger.transports.memory.clearLog()
+        # TODO: clear?
         res.send(200, {success: true})
       )
 
@@ -358,19 +358,18 @@ module.exports = (env) ->
 
       @setupUpdateProcessListener()
 
+      socketIOLogger = env.logger.createSublogger('socket.io')
+      # mute debug outs
+      socketIOLogger = new Object(socketIOLogger)
+      socketIOLogger.debug = -> #nop
+
       # ###Socket.io stuff:
       # For every webserver
       for webServer in [app.httpServer, app.httpsServer]
         continue unless webServer?
         # Listen for new websocket connections
         io = socketIo.listen webServer, {
-          logger: 
-            log: (type, args...) ->
-              if type isnt 'debug' then env.logger.log(type, 'socket.io:', args...)
-            debug: (args...) -> this.log('debug', args...)
-            info: (args...) -> this.log('info', args...)
-            warn: (args...) -> this.log('warn', args...)
-            error: (args...) -> this.log('error', args...)
+          logger: socketIOLogger
         }
 
         sessionOptions = app.cookieSessionOptions
@@ -448,8 +447,8 @@ module.exports = (env) ->
             socket.emit "rule-remove", rule.id
 
           env.logger.debug("adding log listern") if @config.debug
-          memoryTransport = env.logger.transports.memory
-          memoryTransport.on 'log', logListener = (entry)=>
+          #todo: filter
+          @framework.database.on 'log', logListener = (entry)=>
             socket.emit 'log', entry
 
           env.logger.debug("adding item listers") if @config.debug
@@ -497,7 +496,7 @@ module.exports = (env) ->
             framework.ruleManager.removeListener "add", addRuleListener 
             framework.ruleManager.removeListener "update", removeRuleListener
             env.logger.debug("removing log listern") if @config.debug
-            memoryTransport.removeListener 'log', logListener
+            @framework.database.removeListener 'log', logListener
             env.logger.debug("removing item-add listerns") if @config.debug
             @removeListener 'item-add', addItemListener
             @removeListener 'item-remove', removeItemListener
@@ -669,6 +668,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
               "pimatic-mobile-frontend/app/pages/index.coffee"
               "pimatic-mobile-frontend/app/pages/log-messages.coffee"
+              "pimatic-mobile-frontend/app/pages/events.coffee"
               "pimatic-mobile-frontend/app/pages/plugins.coffee"
               "pimatic-mobile-frontend/app/pages/updates.coffee"
             ] .concat @additionalAssetFiles['js']
@@ -893,7 +893,7 @@ module.exports = (env) ->
     getInitalClientData: () ->
       return {
         ruleItemCssClass: @config.ruleItemCssClass
-        errorCount: env.logger.transports.memory.getErrorCount()
+        errorCount: 0 #TODO //env.logger.transports.memory.getErrorCount()
         enabledEditing: @config.enabledEditing
         showAttributeVars: @config.showAttributeVars
         hasRootCACert: @hasRootCACert

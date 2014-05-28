@@ -189,7 +189,7 @@ TraceKit.report.subscribe( (errorReport) =>
         if c.length > 200 
           entry.context[i] = c.substring(0, 200) + '...'
   # add infos about storage
-  errorReport.pimaticData = pimatic.storage?.get('pimatic')
+  # errorReport.pimaticData = pimatic.storage?.get('pimatic')
   $.ajax(
     url: '/client-error'
     type: 'POST'

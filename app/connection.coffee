@@ -45,7 +45,8 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on 'error', onConnectionError
   pimatic.socket.on 'connect_error', onConnectionError
 
-  pimatic.socket.on 'log', (entry) -> 
+  pimatic.socket.on 'log', (entry) ->
+    if entry.level is 'debug' then return 
     pimatic.try => pimatic.showToast(entry.msg)
   return
 )
