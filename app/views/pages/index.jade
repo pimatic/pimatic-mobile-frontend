@@ -23,11 +23,11 @@ script#dimmer-template(type='text/template')
         data-bind="attr: { id: sliderId }, value: sliderValue")
 script#device-template(type='text/template')     
   li.sortable.device.no-header
-    label.device-label(data-bind="text: name")
+    label.device-label(data-bind="text: device.name")
     | 
-    span.error(data-bind="text: ($data.error ? $data.error : '') ")
+    span.error(data-bind="text: ($data.error() ? $data.error() : '') ")
     | 
-    span.attributes(data-bind="template: { name: 'attribute-template', foreach: attributes, afterRender: $data.afterAttributeRender }")
+    span.attributes(data-bind="template: { name: 'attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")
 script#header-template(type='text/template')
   li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
     label(data-bind="text: text")
@@ -46,64 +46,35 @@ script#attribute-template(type='text/template')
 script#sortable-handle-template(type='text/template')
   div.handle
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
-script#rule-template(type="text/template")
-  li.rule.sortable.draggable(data-bind="css: {deactivated: !active()}")
-    a(data-transition='slidefade', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
-      span.name(data-bind="text: ($data.name() != '' ? $data.name() : __('Unnamed rule') ) ")
-      p
-        span.if='if'
-        | 
-        span.condition(data-bind="text: condition")
-        | 
-        span.then='then'
-        | 
-        span.action(data-bind="text: action")
-script#variable-template(type="text/template")
-  li.variable.sortable(data-bind="")
-    a(data-transition='slidefade', href='#edit-variable', style="white-space: normal", data-bind="click: $root.onEditVariableClicked")
-      label.var-name(data-bind="text: displayName()")
-      span.var-expression(data-bind="text: type() == 'expression' ? ' = ' + exprInputStr() : ''")
-      span.var-type(data-bind="text: ' (' + type() + ')'")
-      span.var-value(data-bind="text: displayValue()")
-//- Actuators and rules page
-div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked: enabledEditing(), notSorting: !$root.isSortingItems() && !$root.isSortingRules() && !$root.isSortingVariables()}")
+script#page-menuentry-template(type='text/template')
+  li(data-theme=theme.menuSwatch)
+    a(href='#rules-page', data-transition="slidefade", data-bind="text: name")
+div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingItems()}")
   div(data-theme=theme.headerSwatch, data-role='header')
     a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3 pimatic
     a#error-count.ui-btn-right.ui-btn.ui-btn-inline.ui-mini.ui-corner-all.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
   div.ui-content.overthrow(data-role="main")
-    ul#items(data-role='listview', data-bind="sortable: {items: items, isSorting: isSortingItems, drop: onDropItemOnTrash, sorted: onItemsSorted}")
-      li.with-button(data-theme=theme.dividerSwatch, data-role='list-divider')=__('Devices')
-        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
-      <!-- ko template: { name: getItemTemplate, foreach: items, afterRender: afterRenderItem } --><!-- /ko -->
-      li#delete-item.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingItems()")=__('Drop here to remove item')
-      li#add-a-item(data-bind="visible: enabledEditing() && !isSortingItems() ")
-        a(data-transition='slidefade', href='#add-item')=__('Add an item')+'...'
-    ul#rules(data-role='listview', data-bind="sortable: {items: rules, isSorting: isSortingRules, sorted: onRulesSorted, drop: onDropRuleOnTrash}, dragslide: {}, css: ruleItemCssClass")
-      li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Rules')
-        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
-      <!-- ko template: { name: 'rule-template', foreach:rules, afterRender: afterRenderRule } --><!-- /ko -->
-      li#delete-rule.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingRules()")=__('Drop here to remove rule')
-      li#add-rule(data-bind="visible: enabledEditing() && !isSortingRules() ")
-        a(data-transition='slidefade', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
-      div.drag-message
-    ul#variables(data-role='listview', data-bind="sortable: {items: variables, isSorting: isSortingVariables, sorted: onVariablesSorted, drop: onDropVariableOnTrash}")
-      li.with-button(data-theme=theme.dividerSwatch,data-role='list-divider')=__('Variables')
-        a.round.lock-button.ui-corner-all.ui-btn-right.ui-btn.ui-btn-inline.ui-btn-icon-notext(href="#variablesMenu", 
-          data-rel="popup", data-transition="slideup", data-bind="jqmbutton: lockButton()")
-      <!-- ko template: { name: 'variable-template', foreach: visibleVars, afterRender: afterRenderVariable } --><!-- /ko -->
-      li#delete-variable.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
-      li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
-        a(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
+    div#item-tabs(data-insert="false")
+    div#item-lists.owl-carousel()
   div#nav-panel.overthrow(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)
     ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
       li(data-icon='delete', data-theme=theme.menuSwatch)
         a(href='#', data-rel='close')=__("Close menu")
+      li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Devices')
+      <!-- ko template: { name: 'page-menuentry-template', foreach:devicepages} --><!-- /ko -->
+      li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Automation')
       li(data-theme=theme.menuSwatch)
-        a(href='#log', data-transition="slidefade")=__('Log')
+        a(href='#rules-page', data-transition="slidefade")=__('Rules')
+      li(data-theme=theme.menuSwatch)
+        a(href='#variables-page', data-transition="slidefade")=__('Variables')        
+      li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Log')
+      li(data-theme=theme.menuSwatch)
+        a(href='#log', data-transition="slidefade")=__('Messages')
       li(data-theme=theme.menuSwatch)
         a(href='#events', data-transition="slidefade")=__('Events') 
-      li(data-theme=theme.menuSwatch)
+      li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Settings')
+      li(data-theme=theme.menuSwatch)  
         a(href='#plugins', data-transition="slidefade")=__('Plugins') 
       li(data-theme=theme.menuSwatch)
         a(href='#updates', data-transition="slidefade")=__('Updates')
@@ -116,13 +87,6 @@ div#index(data-role='page' data-bind="css: {locked: !enabledEditing(), unlocked:
           label(for="rememberme")=__('Remember me')
           input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
             data-bind="jqmchecked: rememberme")
-  #variablesMenu(data-role='popup', data-theme='a', data-arrow="r")
-    ul(data-role='listview', data-inset='true', style='min-width: 210px;')
-        li(data-role='list-divider')=__('Choose an action')
-        li
-          a(href='#', data-rel="back", data-bind="text: toggleEditingText(), click: toggleEditing")=__('Change order')
-        li
-          a(href='#', data-rel="back", data-bind="text: showAttributeVarsText(), click: toggleShowAttributeVars")      
   #device-info-popup.ui-content(data-role='popup', data-history="false", data-overlay-theme="a")
     ul.ui-corner-all(data-role='listview')
       li(data-role='list-divider')=__('Device info')

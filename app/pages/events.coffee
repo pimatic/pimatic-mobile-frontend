@@ -53,10 +53,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
           limit: 100
         }
 
-        @loadEventsAjax = $.ajax("/api/database/queryDeviceAttributeEvents",
-          global: false # don't show loading indicator
-          data: { criteria }
-        ).always( ->
+        pimatic.client.rest.queryDeviceAttributeEvents( { criteria }).always( ->
           pimatic.loading "loading events", "hide"
         ).done( tc (data) =>
           @loadEventsAjax = null

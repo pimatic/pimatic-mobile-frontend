@@ -11,96 +11,58 @@ $(document).on( "pagebeforecreate", (event) ->
   handleHTML = $('#sortable-handle-template').text()
   
   class Item
-
     @mapping = {
-      copy: ['itemId', 'type', 'template']
+      copy: ['deviceId']
     }
-
-    constructor: (data) ->
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-    update: (data) -> 
-      ko.mapping.fromJS(data, @constructor.mapping, this)
+    constructor: (@templData) ->
+      ko.mapping.fromJS(templData, @constructor.mapping, this)
+    update: (templData) -> 
+      ko.mapping.fromJS(templData, @constructor.mapping, this)
     afterRender: (elements) ->
       $(elements)
       .addClass('item')
       .find("label").before($(handleHTML))
 
-  class HeaderItem extends Item
+  # class HeaderItem extends Item
 
-    @mapping = {
-      copy: Item.mapping.copy.concat ['headerId', 'text']
-    }
+  #   @mapping = {
+  #     copy: Item.mapping.copy.concat ['headerId', 'text']
+  #   }
 
-    constructor: (data) ->
-      super(data)
+  #   constructor: (data) ->
+  #     super(data)
 
-  class ButtonItem extends Item
+  # class ButtonItem extends Item
 
-    @mapping = {
-      copy: Item.mapping.copy.concat ['buttonId', 'text']
-    }
+  #   @mapping = {
+  #     copy: Item.mapping.copy.concat ['buttonId', 'text']
+  #   }
 
-    constructor: (data) ->
-      super(data)
-    afterRender: (elements) -> 
-      super(elements)
-    onButtonPress: ->
-      $.get("/button-pressed/#{@buttonId}").fail(ajaxAlertFail)
+  #   constructor: (data) ->
+  #     super(data)
+  #   afterRender: (elements) -> 
+  #     super(elements)
+  #   onButtonPress: ->
+  #     $.get("/button-pressed/#{@buttonId}").fail(ajaxAlertFail)
 
-  class VariableItem extends Item
-    @mapping = {
-      copy: Item.mapping.copy.concat ['name']
-      observe: ["value"]
-    }
-    constructor: (data) ->
-      unless data.value then data.value = null
-      super(data)
-    afterRender: (elements) -> 
-      super(elements)
+  # class VariableItem extends Item
+  #   @mapping = {
+  #     copy: Item.mapping.copy.concat ['name']
+  #     observe: ["value"]
+  #   }
+  #   constructor: (data) ->
+  #     unless data.value then data.value = null
+  #     super(data)
+  #   afterRender: (elements) -> 
+  #     super(elements)
 
-
-  class DeviceAttribute 
-
-    @mapping = {
-      observe: ["value"]
-    }
-
-    constructor: (data) ->
-      # Allways create an observable for value:
-      unless data.value? then data.value = null
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-      @valueText = ko.computed( =>
-        value = @value()
-        unless value?
-          return __("unknown")
-        if @type is 'boolean'
-          unless @labels? then return value.toString()
-          else if value is true then @labels[0] 
-          else if value is false then @labels[1]
-          else value.toString()
-        else return value.toString()
-      )
-      @unitText = if @unit? then @unit else ''
 
   class DeviceItem extends Item
+    constructor: (templData, @device) ->
+      super(templData)
 
-    @mapping = {
-      attributes:
-        create: ({data, parent, skip}) => new DeviceAttribute(data)
-        key: (data) => data.name
-      observe: ["name", "attributes"]
-    }
-
-    constructor: (data) ->
-      super(data)
-
-    getAttribute: (name) ->
-      attribute = null
-      for attr in @attributes()
-        if attr.name is name
-          attribute = attr
-          break
-      return attribute
+    getAttribute: (name) -> @device.getAttribute(name)
+    getItemTemplate: -> 'device'
 
     afterAttributeRender: (elements, attribute) ->
       $(elements)
@@ -110,16 +72,19 @@ $(document).on( "pagebeforecreate", (event) ->
         .addClass("contains-attr-#{attribute.name}")
         .addClass("contains-attr-type-#{attribute.type}")
 
-    updateAttribute: (attrName, attrValue) ->
-      attribute = @getAttribute(attrName)
-      if attribute?
-        attribute.value(attrValue)
+    error: ->
+      return (
+        if @deive is pimatic.nullDevice
+          "Could not find a device with id: #{@templData.deviceId}"
+        else null
+      )
+
 
   class SwitchItem extends DeviceItem
 
-    constructor: (data) ->
-      super(data)
-      @switchId = "switch-#{data.deviceId}"
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @switchId = "switch-#{templData.deviceId}"
       @switchState = ko.observable(if @getAttribute('state').value() then 'on' else 'off')
       @getAttribute('state').value.subscribe( (newState) =>
         @switchState(if newState then 'on' else 'off')
@@ -148,9 +113,9 @@ $(document).on( "pagebeforecreate", (event) ->
       @sliderEle.flipswitch()
 
   class DimmerItem extends DeviceItem
-    constructor: (data) ->
-      super(data)
-      @sliderId = "switch-#{data.deviceId}"
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @sliderId = "switch-#{templData.deviceId}"
       dimlevel = @getAttribute('dimlevel').value
       @sliderValue = ko.observable(if dimlevel()? then dimlevel() else 0)
       @getAttribute('dimlevel').value.subscribe( (newDimlevel) =>
@@ -187,8 +152,8 @@ $(document).on( "pagebeforecreate", (event) ->
 
   class ShutterItem extends DeviceItem
 
-    constructor: (data) ->
-      super(data)
+    constructor: (templData, @device) ->
+      super(templData, @device)
       @getAttribute('position').value.subscribe( (position) =>
         @_updateButtons(position)
       )
@@ -246,9 +211,9 @@ $(document).on( "pagebeforecreate", (event) ->
 
   # Export all classe to be extendable by plugins
   pimatic.Item = Item
-  pimatic.HeaderItem = HeaderItem
-  pimatic.ButtonItem = ButtonItem
-  pimatic.VariableItem = VariableItem
+  # pimatic.HeaderItem = HeaderItem
+  # pimatic.ButtonItem = ButtonItem
+  # pimatic.VariableItem = VariableItem
   pimatic.DeviceItem = DeviceItem
   pimatic.SwitchItem = SwitchItem
   pimatic.DimmerItem = DimmerItem
@@ -258,6 +223,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.ContactItem = ContactItem
 
   pimatic.templateClasses = {
+    null: pimatic.DeviceItem
     header: pimatic.HeaderItem
     button: pimatic.ButtonItem
     variable: pimatic.VariableItem

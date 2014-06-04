@@ -3,17 +3,16 @@
 
 $(document).on "pageinit", '#plugins', (event) ->
   # Get all installed Plugins
-  $.get("/api/plugins/installed")
-    # when done
-    .done( (data) ->
-      $('#plugin-list').empty()
-      # save the plugins in installedPlugins
-      pimatic.pages.plugins.installedPlugins = data.plugins
-      # and add them to the list.
-      pimatic.pages.plugins.addPlugin(p) for p in data.plugins
-      $('#plugin-list').listview("refresh")
-      $("#plugin-list input[type='checkbox']").checkboxradio()
-    ).fail( ajaxAlertFail)
+  pimatic.client.rest.getInstalledPluginsWithInfo().done( (data) ->
+    console.log data
+    $('#plugin-list').empty()
+    # save the plugins in installedPlugins
+    pimatic.pages.plugins.installedPlugins = data.plugins
+    # and add them to the list.
+    pimatic.pages.plugins.addPlugin(p) for p in data.plugins
+    $('#plugin-list').listview("refresh")
+    $("#plugin-list input[type='checkbox']").checkboxradio()
+  ).fail( ajaxAlertFail)
 
   $('#plugins').on "click", '#plugin-do-action', (event, ui) ->
     val = $('#select-plugin-action').val()

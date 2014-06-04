@@ -1,0 +1,25 @@
+script#variable-template(type="text/template")
+  li.variable.sortable(data-bind="")
+    a(data-transition='slidefade', href='#edit-variable', style="white-space: normal", data-bind="click: $root.onEditVariableClicked")
+      label.var-name(data-bind="text: displayName()")
+      span.var-expression(data-bind="text: type() == 'expression' ? ' = ' + exprInputStr() : ''")
+      span.var-type(data-bind="text: ' (' + type() + ')'")
+      span.var-value(data-bind="text: displayValue()")
+div#variables-page(data-role='page')
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
+    h3=__("Variables")
+    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
+  div.ui-content.overthrow
+    ul#variables(data-role='listview', data-bind="sortable: {items: variables, isSorting: isSortingVariables, sorted: onVariablesSorted, drop: onDropVariableOnTrash}")
+      <!-- ko template: { name: 'variable-template', foreach: visibleVars, afterRender: afterRenderVariable } --><!-- /ko -->
+      li#delete-variable.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
+      li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
+        a(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
+  #variablesMenu(data-role='popup', data-theme='a', data-arrow="r")
+    ul(data-role='listview', data-inset='true', style='min-width: 210px;')
+        li(data-role='list-divider')=__('Choose an action')
+        li
+          a(href='#', data-rel="back", data-bind="text: toggleEditingText(), click: toggleEditing")=__('Change order')
+        li
+          a(href='#', data-rel="back", data-bind="text: showAttributeVarsText(), click: toggleShowAttributeVars")      

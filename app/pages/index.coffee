@@ -5,101 +5,18 @@ tc = pimatic.tryCatch
 $(document).on( "pagebeforecreate", tc (event) ->
   # Just execute it one time
   if pimatic.pages.index? then return
-  ###
-    Rule class that are shown in the Rules List
-  ###
-
-  handleHTML = $('#sortable-handle-template').text()
-
-  class Rule
-    @mapping = {
-      key: (data) => data.id
-      copy: ['id']
-    }
-    constructor: (data) ->
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-    update: (data) ->
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-    afterRender: (elements) ->
-      $(elements).find("a").before($(handleHTML))
-
-  class Variable
-    @mapping = {
-      key: (data) => data.name
-      observe: ['value', 'type', 'exprInputStr', 'exprTokens']
-    }
-    constructor: (data) ->
-      unless data.value? then data.value = null
-      unless data.exprInputStr? then data.exprInputStr = null
-      unless data.exprTokens? then data.exprTokens = null
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-
-      @displayName = ko.computed( => "$#{@name}" )
-      @hasValue = ko.computed( => @value()? )
-      @displayValue = ko.computed( => if @hasValue() then @value() else "null" )
-    isDeviceAttribute: -> $.inArray('.', @name) isnt -1
-    update: (data) ->
-      ko.mapping.fromJS(data, @constructor.mapping, this)
-    afterRender: (elements) ->
-      $(elements).find("a").before($(handleHTML))
-
-  # Export the rule class
-  pimatic.Rule = Rule
-  pimatic.Variable = Variable
-
   class IndexViewModel
     # static property:
     @mapping = {
-      items:
-        create: ({data, parent, skip}) =>
-          itemClass = pimatic.templateClasses[data.template]
-          unless itemClass?
-            console.warn "Could not find a template class for #{data.template}"
-            itemClass = pimatic.Item
-          item = new itemClass(data)
-          return item
-        update: ({data, parent, target}) =>
-          target.update(data)
-          return target
-        key: (data) => data.itemId
-      rules:
-        create: ({data, parent, skip}) => new pimatic.Rule(data)
-        update: ({data, parent, target}) =>
-          target.update(data)
-          return target
-        key: (data) => data.id
-      variables:
-        create: ({data, parent, skip}) => new pimatic.Variable(data)
-        update: ({data, parent, target}) =>
-          target.update(data)
-          return target
-        key: (data) => data.name
     }
 
-    loading: no
-    pageCreated: ko.observable(no)
-    items: ko.observableArray([])
-    rules: ko.observableArray([])
-    variables: ko.observableArray([])
-    errorCount: ko.observable(0)
-    enabledEditing: ko.observable(no)
-    hasRootCACert: ko.observable(no)
-    rememberme: ko.observable(no)
-    showAttributeVars: ko.observable(no)
-    ruleItemCssClass: ko.observable('')
-    updateProcessStatus: ko.observable('idle')
-    updateProcessMessages: ko.observableArray([])
-
+    devicepages: pimatic.devicepages
+    activeDevicepage: ko.observable(null)
     isSortingItems: ko.observable(no)
-    isSortingRules: ko.observable(no)
-    isSortingVariables: ko.observable(no)
 
     constructor: () ->
 
       @updateFromJs(
-        items: []
-        rules: []
-        variables: []
         errorCount: 0
         enabledEditing: no
         rememberme: no
@@ -129,47 +46,101 @@ $(document).on( "pagebeforecreate", tc (event) ->
         }
       )
 
-      @visibleVars = ko.computed( tc => 
-        return ko.utils.arrayFilter(@variables(), (item) =>
-          return @showAttributeVars() or (not item.isDeviceAttribute())
-        )
+      @devicepagesTabsRefresh = ko.computed( tc =>
+        dPages =  @devicepages()
+        itemTabs = $("#item-tabs")
+        pimatic.try => itemTabs.navbar "destroy"
+        ko.cleanNode(itemTabs[0])
+        if dPages.length > 0
+          html = """
+            <ul data-bind="foreach: devicepages">
+              <li>
+                <a data-ajax='false' data-bind="attr: {href: '#item-tab-'+$data.id}, text: name, css: {'ui-btn-active': $data.isActive}, click: $root.onPageTabClicked"></a>
+              </li>
+            </ul>
+          """ 
+          itemTabs.html(html)
+          ko.applyBindings(this, itemTabs[0])
+          $("#item-tabs").navbar()
+        else
+          itemTabs.html('')
+      ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
+
+      @devicepagesTabsRefresh = ko.computed( tc =>
+        dPages =  @devicepages()
+        itemLists = $('#item-lists')
+        ko.cleanNode(itemLists[0])
+        owl = itemLists.data('owlCarousel')
+        if owl?
+          owl.destroy()
+        if dPages.length > 0
+          html = ''
+          for page, i in dPages
+            html += """
+              <div>
+                <ul data-role="listview" data-pageid="#{page.id}" class="items">
+                <!-- ko template: { name: $root.getItemTemplate, foreach: devicepages()[#{i}].devices, afterRender: devicepages()[#{i}].afterRender } --><!-- /ko -->
+                </ul>
+              </div>
+            """
+          itemLists.html(html)
+          for page in dPages
+            pageUl = itemLists.find("ul[data-pageid=#{page.id}]")
+          ko.applyBindings(this, itemLists[0])
+          itemLists.find('[data-role="listview"]').listview()
+          itemLists.owlCarousel({
+            navigation: true
+            slideSpeed: 300
+            paginationSpeed: 400
+            singleItem: true  
+            #autoHeight: true
+            pagination: false
+            navigation: false
+            afterAction: =>
+              itemLists.trigger( "updatelayout" )
+            afterMove: (ele) =>
+              current = ele.data('owlCarousel').currentItem
+              @activeDevicepage(@devicepages()[current])
+          })
+        else
+          itemLists.html('')
+        
+       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
+
+      @activeDevicepage.subscribe( (ap) =>
+        unless ap? then return
+        owl = $('#item-lists').data('owlCarousel')
+        unless owl? then return
+        index = @devicepages.indexOf(ap)
+        if index is -1 then return
+        owl.goTo(index)
+      )
+
+      @devicepages.subscribe( (dps) =>
+        if dps.length is 0
+          @activeDevicepage(null)
+        else unless @activeDevicepage()?
+          @activeDevicepage(dps[0])
       )
 
       @itemsListViewRefresh = ko.computed( tc =>
-        @items()
+        dp.devices() for dp in @devicepages()
         @isSortingItems()
         @enabledEditing()
-        if @pageCreated()  
-          try
-            $('#items').listview('refresh').addClass("dark-background")
-          catch e
-            #ignore error refreshing
-        return ''
+        pimatic.try( => 
+          $('#item-lists [data-role="listview"]').each( ->
+            lw = $(this)
+            unless lw.data('mobileListview')? then lw.listview()
+            else lw.listview('refresh').addClass("dark-background")
+          )
+        )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
-      @rulesListViewRefresh = ko.computed( tc =>
-        @rules()
-        @isSortingRules()
-        @enabledEditing()
-        if @pageCreated()  
-          try
-            $('#rules').listview('refresh').addClass("dark-background")
-          catch e
-            #ignore error refreshing
-        return ''
+      @deviepagesRefresh = ko.computed( tc =>
+        @devicepages()
+        pimatic.try( => $('.nav-panel-menu').listview('refresh').addClass("dark-background") )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
-      @variablesListViewRefresh = ko.computed( tc =>
-        @variables()
-        @enabledEditing()
-        @showAttributeVars()
-        if @pageCreated()  
-          try
-            $('#variables').listview('refresh').addClass("dark-background")
-          catch e
-            #ignore error refreshing
-        return ''
-      ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
       if pimatic.storage.isSet('pimatic.indexPage')
         data = pimatic.storage.get('pimatic.indexPage')
@@ -213,12 +184,8 @@ $(document).on( "pagebeforecreate", tc (event) ->
           __('Lock lists')
       )
 
-      @showAttributeVarsText = ko.computed( tc => 
-        unless @showAttributeVars() 
-          __('Show device attribute variables')
-        else
-          __('Hide device attribute variables')
-      )
+    getItemTemplate: (deviceItem) ->
+      return "#{deviceItem.getItemTemplate()}-template"
 
     setupStorage: ->
       if $.localStorage.isSet('pimatic')
@@ -241,97 +208,46 @@ $(document).on( "pagebeforecreate", tc (event) ->
     updateFromJs: (data) -> 
       ko.mapping.fromJS(data, IndexViewModel.mapping, this)
 
-    getItemTemplate: (item) ->
-      template = (
-        if item.type is 'device'
-          if item.template? then "#{item.template}-template"
-          else "devie-template"
-        else if item.type is 'variable' then 'variable-item-template'
-        else "#{item.type}-template"
-      )
-      if $('#'+template).length > 0 then return template
-      else return 'device-template'
+    onPageTabClicked: (page) =>
+      @activeDevicepage(page)
 
-    afterRenderItem: (elements, item) ->
-      item.afterRender(elements)
 
-    afterRenderRule: (elements, rule) ->
-      rule.afterRender(elements)
+    # afterRenderItem: (elements, item) ->
+    #   item.afterRender(elements)
 
-    afterRenderVariable: (elements, variable) ->
-      variable.afterRender(elements)
+    # removeItem: (itemId) ->
+    #   @items.remove( (item) => item.itemId is itemId )
 
-    addItemFromJs: (data) ->
-      item = IndexViewModel.mapping.items.create({data})
-      @items.push(item)
+    # removeRule: (ruleId) ->
+    #   @rules.remove( (rule) => rule.id is ruleId )
 
-    addVariableFromJs: (data) ->
-      variable = IndexViewModel.mapping.variables.create({data})
-      @variables.push(variable)
+    # removeVariable: (varName) ->
+    #   @variables.remove( (variable) => variable.name is varName )
 
-    toggleShowAttributeVars: () ->
-      @showAttributeVars(not @showAttributeVars())
-      pimatic.loading "showAttributeVars", "show", text: __('Saving')
-      $.ajax("/showAttributeVars/#{@showAttributeVars()}",
-        global: false # don't show loading indicator
-      ).always( ->
-        pimatic.loading "showAttributeVars", "hide"
-      ).done(ajaxShowToast)
 
-    removeItem: (itemId) ->
-      @items.remove( (item) => item.itemId is itemId )
+    # updateItemOrder: (order) ->
+    #   toIndex = (id) -> 
+    #     index = $.inArray(id, order)
+    #     if index is -1 # if not in array then move it to the back
+    #       index = 999999
+    #     return index
+    #   @items.sort( (left, right) => toIndex(left.itemId) - toIndex(right.itemId) )
 
-    removeRule: (ruleId) ->
-      @rules.remove( (rule) => rule.id is ruleId )
+    # updateRuleOrder: (order) ->
+    #   toIndex = (id) -> 
+    #     index = $.inArray(id, order)
+    #     if index is -1 # if not in array then move it to the back
+    #       index = 999999
+    #     return index
+    #   @rules.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
 
-    removeVariable: (varName) ->
-      @variables.remove( (variable) => variable.name is varName )
-
-    updateRuleFromJs: (data) ->
-      rule = ko.utils.arrayFirst(@rules(), (rule) => rule.id is data.id )
-      unless rule?
-        rule = IndexViewModel.mapping.rules.create({data})
-        @rules.push(rule)
-      else 
-        rule.update(data)
-
-    updateItemOrder: (order) ->
-      toIndex = (id) -> 
-        index = $.inArray(id, order)
-        if index is -1 # if not in array then move it to the back
-          index = 999999
-        return index
-      @items.sort( (left, right) => toIndex(left.itemId) - toIndex(right.itemId) )
-
-    updateRuleOrder: (order) ->
-      toIndex = (id) -> 
-        index = $.inArray(id, order)
-        if index is -1 # if not in array then move it to the back
-          index = 999999
-        return index
-      @rules.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
-
-    updateVariableOrder: (order) ->
-      toIndex = (name) -> 
-        index = $.inArray(name, order)
-        if index is -1 # if not in array then move it to the back
-          index = 999999
-        return index
-      @variables.sort( (left, right) => toIndex(left.name) - toIndex(right.name) )
-
-    updateDeviceAttribute: (deviceId, attrName, attrValue) ->
-      for item in @items()
-        if item.type is 'device' and item.deviceId is deviceId
-          item.updateAttribute(attrName, attrValue)
-          break
-
-    updateVariable: (varInfo) ->
-      for variable in @variables()
-        if variable.name is varInfo.name
-          variable.update(varInfo)
-      for item in @items()
-        if item.type is "variable" and item.name is varInfo.name
-          item.value(varInfo.value)
+    # updateVariable: (varInfo) ->
+    #   for variable in @variables()
+    #     if variable.name is varInfo.name
+    #       variable.update(varInfo)
+    #   for item in @items()
+    #     if item.type is "variable" and item.name is varInfo.name
+    #       item.value(varInfo.value)
 
     toggleEditing: ->
       @enabledEditing(not @enabledEditing())
@@ -354,28 +270,6 @@ $(document).on( "pagebeforecreate", tc (event) ->
       ).done(ajaxShowToast)
       .fail(ajaxAlertFail)
 
-    onRulesSorted: ->
-      order = (rule.id for rule in @rules())
-      pimatic.loading "ruleorder", "show", text: __('Saving')
-      $.ajax("update-rule-order",
-        type: "POST"
-        global: false
-        data: {order: order}
-      ).always( ->
-        pimatic.loading "ruleorder", "hide"
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
-
-    onVariablesSorted: ->
-      order = (variable.name for variable in @variables())
-      pimatic.loading "variableorder", "show", text: __('Saving')
-      $.ajax("update-variable-order",
-        type: "POST"
-        global: false
-        data: {order: order}
-      ).always( ->
-        pimatic.loading "variableorder", "hide"
-      ).done(ajaxShowToast).fail(ajaxAlertFail)
-
     onDropItemOnTrash: (item) ->
       really = confirm(__("Do you really want to delete the item?"))
       if really then (doDeletion = =>
@@ -387,67 +281,6 @@ $(document).on( "pagebeforecreate", tc (event) ->
             pimatic.loading "deleteitem", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)
         )()
-
-    onDropRuleOnTrash: (rule) ->
-      really = confirm(__("Do you really want to delete the %s rule?", rule.name()))
-      if really then (doDeletion = =>
-          pimatic.loading "deleterule", "show", text: __('Saving')
-          $.get("/api/rule/#{rule.id}/remove").done( (data) =>
-            if data.success
-              @rules.remove(rule)
-          ).always( => 
-            pimatic.loading "deleterule", "hide"
-          ).done(ajaxShowToast).fail(ajaxAlertFail)
-        )()
-
-    onDropVariableOnTrash: (variable) ->
-      really = confirm(__("Do you really want to delete variable: %s?", '$' + variable.name))
-      if really then (doDeletion = =>
-        pimatic.loading "deletevariable", "show", text: __('Saving')
-        $.get("/api/variable/#{variable.name}/remove").done( (data) =>
-          if data.success
-            @variables.remove(variable)
-        ).always( => 
-          pimatic.loading "deletevariable", "hide"
-        ).done(ajaxShowToast).fail(ajaxAlertFail)
-      )()
-
-
-    onAddRuleClicked: ->
-      editRulePage = pimatic.pages.editRule
-      editRulePage.resetFields()
-      editRulePage.action('add')
-      editRulePage.ruleEnabled(yes)
-      return true
-
-    onEditRuleClicked: (rule)->
-      editRulePage = pimatic.pages.editRule
-      editRulePage.action('update')
-      editRulePage.ruleId(rule.id)
-      editRulePage.ruleName(rule.name())
-      editRulePage.ruleCondition(rule.condition())
-      editRulePage.ruleActions(rule.action())
-      editRulePage.ruleEnabled(rule.active())
-      editRulePage.ruleLogging(rule.logging())
-      return true
-
-    onAddVariableClicked: ->
-      editVariablePage = pimatic.pages.editVariable
-      editVariablePage.resetFields()
-      editVariablePage.action('add')
-      return true
-
-    onEditVariableClicked: (variable)->
-      unless variable.isDeviceAttribute()
-        editVariablePage = pimatic.pages.editVariable
-        editVariablePage.variableName(variable.name)
-        editVariablePage.variableValue(
-          if variable.type() is 'value' then variable.value() else variable.exprInputStr()
-        )
-        editVariablePage.variableType(variable.type())
-        editVariablePage.action('update')
-        return true
-      else return false
 
     toLoginPage: ->
       urlEncoded = encodeURIComponent(window.location.href)
@@ -488,6 +321,7 @@ $(document).on( "pagebeforecreate", tc (event) ->
 )
 
 $(document).on("pagecreate", '#index', tc (event) ->
+
 
   indexPage = pimatic.pages.index
   try
@@ -537,8 +371,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
   #   return
   # )
 
-  $("#items .handle, #rules .handle").disableSelection()
-  indexPage.pageCreated(yes)
+  $("#items .handle").disableSelection()
   return
 )
 

@@ -44,13 +44,22 @@ $(document).on("pagebeforecreate", (event) ->
       @ruleLogging(yes)
 
     onSubmit: ->
-      $.post("/api/rule/#{@ruleId()}/#{@action()}", 
-        rule: @ruleAsText()
-        active: @ruleEnabled()
-        name: @ruleName()
-        logging: @ruleLogging()
+      params = {
+        ruleId: @ruleId()
+        rule:
+          ruleString: @ruleAsText()
+          active: @ruleEnabled()
+          name: @ruleName()
+          logging: @ruleLogging()
+      }
+
+      (
+        switch @action()
+          when 'add' then pimatic.client.rest.addRuleByString(params)
+          when 'update' then pimatic.client.rest.updateRuleByString(params)
+          else throw new Error("Illegal rule action: #{action()}")
       ).done( (data) ->
-          if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+          if data.success then $.mobile.changePage '#rules-page', {transition: 'slide', reverse: true}   
           else alert data.error
       ).fail(ajaxAlertFail)
       return false
@@ -58,7 +67,7 @@ $(document).on("pagebeforecreate", (event) ->
     onRemove: ->
       $.get("/api/rule/#{@ruleId()}/remove")
         .done( (data) ->
-          if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+          if data.success then $.mobile.changePage '#rules-page', {transition: 'slide', reverse: true}   
           else alert data.error
         ).fail(ajaxAlertFail)
       return false

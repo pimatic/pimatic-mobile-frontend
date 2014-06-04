@@ -24,6 +24,12 @@
   z-index: 1000;
 }
 
+#item-lists .owl-item div{
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 
 /* make the jquery mobile loader to block all elements */
 .ui-loader-background {
@@ -60,6 +66,10 @@ html .ui-loader {
   font-size: 0.8em;
 }
 
+body.ui-mobile-viewport, div.ui-mobile-viewport {
+  overflow-y: hidden;
+}
+
 
 /* button display enhancements */
 .ui-focus,
@@ -82,12 +92,20 @@ html .ui-loader {
 
 /* style for index page */
 
-#index #items, #index #rules, #index #variables {
+#index .ui-content{
+  padding: 0;
+}
+
+#index .items, #rules, #variables {
   position: relative;
 }
 
-#index #items .device label {
+#index .items .device label {
   float: left;
+}
+
+#index .items {
+  margin: 0;
 }
 
 /* align the slider for switches to the right */
@@ -125,12 +143,12 @@ html .ui-loader {
   font-weight: bold;
 }
 
-#index #rules li a{
+#rules li a{
   font-weight: normal;
   color: #333;
 }
 
-#index #rules li a p{
+#rules li a p{
   font-size: .9em;
   margin-top: 0.4em;
   margin-bottom: 0;
@@ -138,42 +156,42 @@ html .ui-loader {
 }
 
 /* hideRuleName class */
-#index #rules.hideRuleName li.rule a .name{
+#rules.hideRuleName li.rule a .name{
   display: none;
 }
 
-#index #rules.hideRuleName li.rule a p{
+#rules.hideRuleName li.rule a p{
   font-size: 1em;
   margin-top: 0;
   margin-bottom: 0;
 }
 
 /* hideRuleText class */
-#index #rules.hideRuleText li.rule a p{
+#rules.hideRuleText li.rule a p{
   display: none;
 }
 
 
 
-#index #items li.sortable {
+#index .items li.sortable {
   padding-right: 20px;
 }
 
-#index #items #add-a-item a, #index #rules #add-rule a, #index #variables #add-a-variable a{
+.items #add-a-item a, #rules #add-rule a, #variables #add-a-variable a{
   font-weight: normal;
   color: #000;
 }
 
-#index .ui-content .ui-listview {
+/*#index .ui-content .ui-listview {
   margin-top: 20px;
   margin-bottom: 10px;
 }
 
-#index .ui-content #items {
+#index .ui-content .items {
   margin-top: 0px;
-}
+}*/
 
-.unlocked ul#items li.sortable,
+.unlocked ul.items li.sortable,
 .unlocked ul#variables li.sortable a,
 .unlocked ul#rules li.sortable a {
   padding-left: 36px;
@@ -196,7 +214,7 @@ li.sortable.header .handle {
   left: 2px;
 }
 
-#index li.sortable .handle .ui-icon:after{
+li.sortable .handle .ui-icon:after{
   background-color: transparent;
 }
 
@@ -229,18 +247,18 @@ li.sortable.header .handle {
     margin-right: 0px;
 }
 
-#index li.sortable-placeholder{
+#li.sortable-placeholder{
   border-style: dashed;
   border-width: 1px;
   background-color: rgb(51, 51, 51);
   border-color: rgb(204, 204, 204);
 }
 
-#index #rules li.sortable-placeholder{
+#rules li.sortable-placeholder{
   padding: 0;
 }
 
-#index #variables li.sortable-placeholder{
+#variables li.sortable-placeholder{
   padding-top: 0.7em;
   padding-bottom: 1.7em;
 }
@@ -253,17 +271,17 @@ li.sortable.header .handle {
 
 
 /* dimmer */
-ul#items .ui-slider-input{
+ul.items .ui-slider-input{
   display: none;
 }
 
-ul#items .dimmer-device div.item-inner .ui-slider-track {
+ul.items .dimmer-device div.item-inner .ui-slider-track {
   margin-left: 22px;
   margin-right: 8px;
 }
 
 @media (min-width:35em) {
-  ul#items .dimmer-device .ui-slider {
+  ul.items .dimmer-device .ui-slider {
     margin: 3px 10px 10px 0 !important;
     position: absolute;
     right: 5px;
@@ -280,32 +298,32 @@ ul#items .dimmer-device div.item-inner .ui-slider-track {
   }
 }
 
-#items .attributes,
-#items .variable .var-value {
+.items .attributes,
+.items .variable .var-value {
   float: right;
 }
 
-#items .attributes > span{
+.items .attributes > span{
   margin-left: 0.5em;
 }
 
-#items .attribute .unit {
+.items .attribute .unit {
   color: #888888;
   margin-left: 0.1em;
 }
 
-#index #variables .var-name{
+#variables .var-name{
   display: inline;
 } 
 
-#index #variables .var-value{
+#variables .var-value{
   float: right;
   display: block;
 } 
 
 
 
-.ui-mobile  #items label {
+.ui-mobile  .items label {
   margin: 0;
   display: inline;
 }
@@ -473,11 +491,11 @@ li.rememberme label {
   border: 5px solid #ccc !important;
 }
 
-#index #rules li.rule.deactivated a{
+#rules li.rule.deactivated a{
   color: #A0A0A0;
 }
 
-#index #rules li.rule a .name {
+#rules li.rule a .name {
   font-weight: bold;
 }
 
@@ -607,7 +625,7 @@ li.with-button a.ui-btn {
   }
  
    /* Animations only for desktop browser, because these are to slow on mobile */
-  #items .item, 
+  .items .item, 
   #rules .rule, 
   #variables .variable,
   #rules .rule a, 
@@ -616,7 +634,7 @@ li.with-button a.ui-btn {
     transition: margin 250ms,padding 250ms;
   }
 
-  #items.noAnimation .item,
+  .items.noAnimation .item,
   #rules.noAnimation .rule, 
   #variables.noAnimation .variable,
   #rules.noAnimation .rule a, 
@@ -685,7 +703,7 @@ li.with-button a.ui-btn {
 
 @media (min-width: 60em) {
   
-  .locked #items .no-header {
+  .locked .items .no-header {
     border-radius: 2px;
     float: left;
     padding-left: 1% !important;
@@ -699,20 +717,20 @@ li.with-button a.ui-btn {
     margin-bottom: 0.4%;
   }
   
-  .locked #items .ui-first-child {
+  .locked .items .ui-first-child {
     margin-bottom: 0.8%;
   }
 
-  .locked #items .header {
+  .locked .items .header {
     margin-top: -0.4%;
     clear: both;
   }
   
-  .locked #items {
+  .locked .items {
     background: white !important;
   }
   
-  .locked #items #delete-item {
+  .locked .items #delete-item {
     display: block !important;
     height: 0px;
     clear: both;

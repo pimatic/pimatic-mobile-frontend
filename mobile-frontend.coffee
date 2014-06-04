@@ -20,7 +20,7 @@ module.exports = (env) ->
   _ = env.require 'lodash'
 
   # * own
-  socketIo = require 'socket.io'
+  # socketIo = require 'socket.io'
   global.nap = require 'nap'
 
   # ##The MobileFrontend
@@ -229,10 +229,10 @@ module.exports = (env) ->
       ###
       Handle get request for clearing the log
       ###
-      app.get('/clear-log', (req, res) =>
-        # TODO: clear?
-        res.send(200, {success: true})
-      )
+      # app.get('/clear-log', (req, res) =>
+      #   # TODO: clear?
+      #   res.send(200, {success: true})
+      # )
 
       ###
       Handle get request for button press
@@ -365,148 +365,148 @@ module.exports = (env) ->
 
       # ###Socket.io stuff:
       # For every webserver
-      for webServer in [app.httpServer, app.httpsServer]
-        continue unless webServer?
-        # Listen for new websocket connections
-        io = socketIo.listen webServer, {
-          logger: socketIOLogger
-        }
+      # for webServer in [app.httpServer, app.httpsServer]
+      #   continue unless webServer?
+      #   # Listen for new websocket connections
+      #   io = socketIo.listen webServer, {
+      #     logger: socketIOLogger
+      #   }
 
-        sessionOptions = app.cookieSessionOptions
-        ioCookieParser = express.cookieParser(sessionOptions.secret)
-        unless @framework.config.settings.authentication.enabled is false
-          # See http://howtonode.org/socket-io-auth for details
-          io.set("authorization", (handshakeData, accept) =>
-            if handshakeData.headers.cookie
-              ioCookieParser(handshakeData, null, =>
-                sessionCookie = handshakeData.signedCookies?[sessionOptions.key]
-                auth = @framework.config.settings.authentication
-                if sessionCookie? and sessionCookie.username is auth.username
-                  return accept(null, true)
-                else 
-                  env.logger.debug "socket.io: Cookie is invalid."
-                  return accept(null, false)
-              )
-            else
-              env.logger.warn "No cookie transmitted."
-              return accept(null, false)      
-          )
+      #   sessionOptions = app.cookieSessionOptions
+      #   ioCookieParser = express.cookieParser(sessionOptions.secret)
+      #   unless @framework.config.settings.authentication.enabled is false
+      #     # See http://howtonode.org/socket-io-auth for details
+      #     io.set("authorization", (handshakeData, accept) =>
+      #       if handshakeData.headers.cookie
+      #         ioCookieParser(handshakeData, null, =>
+      #           sessionCookie = handshakeData.signedCookies?[sessionOptions.key]
+      #           auth = @framework.config.settings.authentication
+      #           if sessionCookie? and sessionCookie.username is auth.username
+      #             return accept(null, true)
+      #           else 
+      #             env.logger.debug "socket.io: Cookie is invalid."
+      #             return accept(null, false)
+      #         )
+      #       else
+      #         env.logger.warn "No cookie transmitted."
+      #         return accept(null, false)      
+      #     )
 
-        # When a new client connects
-        io.sockets.on('connection', (socket) =>
+      #   # When a new client connects
+      #   io.sockets.on('connection', (socket) =>
 
-          initData = @getInitalClientData()
-          socket.emit "welcome", initData
+      #     initData = @getInitalClientData()
+      #     socket.emit "welcome", initData
 
-          for item in initData.items 
-            do (item) =>
-              switch item.type
-                when "device" 
-                  device = @framework.getDeviceById(item.deviceId)
-                  @addAttributeNotify(socket, item)
+      #     for item in initData.items 
+      #       do (item) =>
+      #         switch item.type
+      #           when "device" 
+      #             device = @framework.getDeviceById(item.deviceId)
+      #             @addAttributeNotify(socket, item)
 
-          for variable in initData.variables
-            do (variable) =>
-              @framework.variableManager.getVariableValue(variable.name).then( (value) =>
-                @emitVariableChange(socket, {name: variable.name, value})
-              ).catch( (error) => 
-                env.logger.warn "Error getting value of #{variable.name}"
-                env.logger.debug error.stack
-              )
+      #     for variable in initData.variables
+      #       do (variable) =>
+      #         @framework.variableManager.getVariableValue(variable.name).then( (value) =>
+      #           @emitVariableChange(socket, {name: variable.name, value})
+      #         ).catch( (error) => 
+      #           env.logger.warn "Error getting value of #{variable.name}"
+      #           env.logger.debug error.stack
+      #         )
           
-          env.logger.debug("adding listener for variables") if @config.debug
-          @framework.variableManager.on('change', varChangeListener = (varInfo) =>
-            env.logger.debug("var change for #{varInfo.name}: #{varInfo.value}") if @config.debug
-            @emitVariableChange(socket, varInfo)
-          )
+      #     env.logger.debug("adding listener for variables") if @config.debug
+      #     @framework.variableManager.on('change', varChangeListener = (varInfo) =>
+      #       env.logger.debug("var change for #{varInfo.name}: #{varInfo.value}") if @config.debug
+      #       @emitVariableChange(socket, varInfo)
+      #     )
 
-          @framework.variableManager.on('add', varAddListener = (varInfo) =>
-            socket.emit("variable-add", varInfo)
-          )
+      #     @framework.variableManager.on('add', varAddListener = (varInfo) =>
+      #       socket.emit("variable-add", varInfo)
+      #     )
 
-          @framework.variableManager.on('remove', varRemoveListener = (name) =>
-            socket.emit("variable-remove", name)
-          )
+      #     @framework.variableManager.on('remove', varRemoveListener = (name) =>
+      #       socket.emit("variable-remove", name)
+      #     )
 
-          socket.on('disconnect', => 
-            env.logger.debug("removing variables listener") if @config.debug
-            @framework.variableManager.removeListener('change', varChangeListener)
-            @framework.variableManager.removeListener('add', varAddListener)
-            @framework.variableManager.removeListener('remove', varRemoveListener)
-          )
+        #   socket.on('disconnect', => 
+        #     env.logger.debug("removing variables listener") if @config.debug
+        #     @framework.variableManager.removeListener('change', varChangeListener)
+        #     @framework.variableManager.removeListener('add', varAddListener)
+        #     @framework.variableManager.removeListener('remove', varRemoveListener)
+        #   )
 
 
-          env.logger.debug("adding rule listerns") if @config.debug
-          framework.ruleManager.on "add", addRuleListener = (rule) =>
-            @emitRuleUpdate socket, "add", rule
+        #   env.logger.debug("adding rule listerns") if @config.debug
+        #   framework.ruleManager.on "add", addRuleListener = (rule) =>
+        #     @emitRuleUpdate socket, "add", rule
           
-          framework.ruleManager.on "update", updateRuleListener = (rule) =>
-            @emitRuleUpdate socket, "update", rule
+        #   framework.ruleManager.on "update", updateRuleListener = (rule) =>
+        #     @emitRuleUpdate socket, "update", rule
          
-          framework.ruleManager.on "remove", removeRuleListener = (rule) =>
-            socket.emit "rule-remove", rule.id
+        #   framework.ruleManager.on "remove", removeRuleListener = (rule) =>
+        #     socket.emit "rule-remove", rule.id
 
-          env.logger.debug("adding log listern") if @config.debug
-          #todo: filter
-          @framework.database.on 'log', logListener = (entry)=>
-            socket.emit 'log', entry
+        #   env.logger.debug("adding log listern") if @config.debug
+        #   #todo: filter
+        #   @framework.database.on 'log', logListener = (entry)=>
+        #     socket.emit 'log', entry
 
-          env.logger.debug("adding item listers") if @config.debug
+        #   env.logger.debug("adding item listers") if @config.debug
 
-          @on 'item-add', addItemListener = (item) =>
-            assert item? and item.itemId?
-            switch item.type
-              when 'device' then @addAttributeNotify(socket, item)
-              when 'variable'
-                @framework.variableManager.getVariableValue(item.name).then( (value) =>
-                  @emitVariableChange(socket, {name: item.name, value})
-                ).catch( (error) => 
-                  env.logger.warn "Error getting value of #{item.name}"
-                  env.logger.debug error.stack
-                )
-            socket.emit("item-add", item)
+        #   @on 'item-add', addItemListener = (item) =>
+        #     assert item? and item.itemId?
+        #     switch item.type
+        #       when 'device' then @addAttributeNotify(socket, item)
+        #       when 'variable'
+        #         @framework.variableManager.getVariableValue(item.name).then( (value) =>
+        #           @emitVariableChange(socket, {name: item.name, value})
+        #         ).catch( (error) => 
+        #           env.logger.warn "Error getting value of #{item.name}"
+        #           env.logger.debug error.stack
+        #         )
+        #     socket.emit("item-add", item)
 
-          @on 'item-remove', removeItemListener = (item) =>
-            assert item? and item.itemId?
-            socket.emit("item-remove", item.itemId)
+        #   @on 'item-remove', removeItemListener = (item) =>
+        #     assert item? and item.itemId?
+        #     socket.emit("item-remove", item.itemId)
             
-          @on 'item-order', orderItemListener = (order) =>
-            assert order? and Array.isArray order
-            socket.emit("item-order", order)
+        #   @on 'item-order', orderItemListener = (order) =>
+        #     assert order? and Array.isArray order
+        #     socket.emit("item-order", order)
 
-          @on 'rule-order', orderRuleListener = (order) =>
-            assert order? and Array.isArray order
-            socket.emit("rule-order", order)
+        #   @on 'rule-order', orderRuleListener = (order) =>
+        #     assert order? and Array.isArray order
+        #     socket.emit("rule-order", order)
 
-          @on 'variable-order', orderVariablesListener = (order) =>
-            assert order? and Array.isArray order
-            socket.emit("variable-order", order)
+        #   @on 'variable-order', orderVariablesListener = (order) =>
+        #     assert order? and Array.isArray order
+        #     socket.emit("variable-order", order)
 
-          @on('update-process-status', onUpdateProcessStatus = (status) =>
-            socket.emit 'update-process-status', status
-          )
+        #   @on('update-process-status', onUpdateProcessStatus = (status) =>
+        #     socket.emit 'update-process-status', status
+        #   )
 
-          @on('update-process-message', onUpdateProcessMessage = (message) =>
-            socket.emit 'update-process-message', message
-          )
+        #   @on('update-process-message', onUpdateProcessMessage = (message) =>
+        #     socket.emit 'update-process-message', message
+        #   )
 
-          socket.on 'disconnect', => 
-            env.logger.debug("removing rule listerns") if @config.debug
-            framework.ruleManager.removeListener "update", updateRuleListener
-            framework.ruleManager.removeListener "add", addRuleListener 
-            framework.ruleManager.removeListener "update", removeRuleListener
-            env.logger.debug("removing log listern") if @config.debug
-            @framework.database.removeListener 'log', logListener
-            env.logger.debug("removing item-add listerns") if @config.debug
-            @removeListener 'item-add', addItemListener
-            @removeListener 'item-remove', removeItemListener
-            @removeListener 'item-order', orderItemListener
-            @removeListener 'rule-order', orderRuleListener
-            @removeListener 'variable-order', orderVariablesListener
-            @removeListener 'update-process-status', onUpdateProcessStatus
-            @removeListener 'update-process-message', onUpdateProcessMessage
-          return
-        )
+        #   socket.on 'disconnect', => 
+        #     env.logger.debug("removing rule listerns") if @config.debug
+        #     framework.ruleManager.removeListener "update", updateRuleListener
+        #     framework.ruleManager.removeListener "add", addRuleListener 
+        #     framework.ruleManager.removeListener "update", removeRuleListener
+        #     env.logger.debug("removing log listern") if @config.debug
+        #     @framework.database.removeListener 'log', logListener
+        #     env.logger.debug("removing item-add listerns") if @config.debug
+        #     @removeListener 'item-add', addItemListener
+        #     @removeListener 'item-remove', removeItemListener
+        #     @removeListener 'item-order', orderItemListener
+        #     @removeListener 'rule-order', orderRuleListener
+        #     @removeListener 'variable-order', orderVariablesListener
+        #     @removeListener 'update-process-status', onUpdateProcessStatus
+        #     @removeListener 'update-process-message', onUpdateProcessMessage
+        #   return
+        # )
       # register the predicate provider
       ButtonPredicateProvider = require('./button-predicates') env
       @framework.ruleManager.addPredicateProvider(new ButtonPredicateProvider(this))
@@ -561,7 +561,8 @@ module.exports = (env) ->
         pretty: @config.mode is "development"
         compileDebug: @config.mode is "development"
         globals: ["__", "nap", "i18n"]
-        mode: @config.mode
+        mode: @config.mode,
+        api: env.api.all
         theme
       }
 
@@ -656,6 +657,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
               "pimatic-mobile-frontend/app/js/knockout.mapping.js"
               "pimatic-mobile-frontend/app/js/overthrow.js"
+              "pimatic-mobile-frontend/app/js/owl.carousel.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -667,6 +669,8 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/edit-rule.coffee"
               "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
               "pimatic-mobile-frontend/app/pages/index.coffee"
+              "pimatic-mobile-frontend/app/pages/rules.coffee"
+              "pimatic-mobile-frontend/app/pages/variables.coffee"
               "pimatic-mobile-frontend/app/pages/log-messages.coffee"
               "pimatic-mobile-frontend/app/pages/events.coffee"
               "pimatic-mobile-frontend/app/pages/plugins.coffee"
@@ -680,6 +684,8 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
               "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
+              "pimatic-mobile-frontend/app/css/owl.carousel.css"
+              #"pimatic-mobile-frontend/app/css/owl.theme.css"
             ] 
             style: [
               "pimatic-mobile-frontend/app/css/style.css"
@@ -777,28 +783,28 @@ module.exports = (env) ->
 
       @emit 'item-add', item 
 
-    addAttributeNotify: (socket, item) ->
-      device = @framework.getDeviceById(item.deviceId)
-      unless device? 
-        env.logger.debug "device #{item.deviceId} not found."
-        return
-      for attrName, attr of device.attributes 
-        do (attrName, attr) =>
-          env.logger.debug("adding listener for #{attrName} of #{device.id}") if @config.debug
-          device.on attrName, attrListener = (value) =>
-            if @config.debug
-              env.logger.debug("attr change for #{attrName} of #{device.id}: #{value}") 
-            @emitAttributeValue socket, device, attrName, value
-          socket.on 'disconnect', => 
-            env.logger.debug("removing listener for #{attrName} of #{device.id}") if @config.debug
-            device.removeListener attrName, attrListener
-          device.getAttributeValue(attrName).timeout(10000).then( (value) =>
-            @emitAttributeValue(socket, device, attrName, value)
-          ).catch( (error) => 
-            env.logger.warn "Error getting #{attrName} of #{device.id}: #{error.message}"
-            env.logger.debug error.stack
-          )
-      return
+    # addAttributeNotify: (socket, item) ->
+    #   device = @framework.getDeviceById(item.deviceId)
+    #   unless device? 
+    #     env.logger.debug "device #{item.deviceId} not found."
+    #     return
+    #   for attrName, attr of device.attributes 
+    #     do (attrName, attr) =>
+    #       env.logger.debug("adding listener for #{attrName} of #{device.id}") if @config.debug
+    #       device.on attrName, attrListener = (value) =>
+    #         if @config.debug
+    #           env.logger.debug("attr change for #{attrName} of #{device.id}: #{value}") 
+    #         @emitAttributeValue socket, device, attrName, value
+    #       socket.on 'disconnect', => 
+    #         env.logger.debug("removing listener for #{attrName} of #{device.id}") if @config.debug
+    #         device.removeListener attrName, attrListener
+    #       device.getAttributeValue(attrName).timeout(10000).then( (value) =>
+    #         @emitAttributeValue(socket, device, attrName, value)
+    #       ).catch( (error) => 
+    #         env.logger.warn "Error getting #{attrName} of #{device.id}: #{error.message}"
+    #         env.logger.debug error.stack
+    #       )
+    #   return
 
     getItemsWithData: () ->
       items = []

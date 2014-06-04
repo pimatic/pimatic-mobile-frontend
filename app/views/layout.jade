@@ -16,10 +16,14 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     != nap.css('style')
     != nap.js('jquery')
     script(src='socket.io/socket.io.js')
+    script(src='api/decl-api-client.js')
     script(type='text/javascript')!="locale = " + JSON.stringify(i18n.getCatalog()) + ";"
+    script(type='text/javascript')!="api = " + JSON.stringify(api) + ";"
     != nap.js('main')
   body
     include pages/index
+    include pages/rules
+    include pages/variables
     include pages/add-item
     include pages/edit-rule
     include pages/edit-variable
@@ -29,4 +33,4 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     include pages/updates
     | !{additionalPages}
     #toast.ui-corner-all(data-role='toast')
-    div.ui-loader-background  
+    div.ui-loader-background

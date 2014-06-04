@@ -3,50 +3,55 @@ $(document).on( "pagebeforecreate", (event) ->
   # Just execte this function one time:
   if pimatic.socket? then return
 
-  pimatic.socket = io.connect("/", 
-    'connect timeout': 20000
-    'reconnection delay': 500
-    'reconnection limit': 2000 # the max delay
-    'max reconnection attempts': Infinity
-  )
+  pimatic.client = new DeclApiClient(api)
 
-  pimatic.socket.on 'connect', ->
+  pimatic.socket = io('/',{
+    reconnection: yes
+    reconnectionDelay: 1000
+    reconnectionDelayMax: 3000
+    timeout: 20000
+  })
+
+  pimatic.socket.io.on 'open', (socket) ->
+    #console.log "m: open"
     pimatic.loading "socket", "hide"
+
     if window.applicationCache?
       try
         window.applicationCache.update()
       catch e
         console.log e
 
-  pimatic.socket.on 'connecting', ->
-    pimatic.loading "socket", "show",
-      text: __("connecting")
-      blocking: no
 
-  pimatic.socket.on 'disconnect', ->
-    pimatic.loading "socket", "show",
+  pimatic.socket.on('devices', (devices) -> pimatic.updateFromJs({devices}) )
+  pimatic.socket.on('rules', (rules) -> pimatic.updateFromJs({rules}) )
+  pimatic.socket.on('variables', (variables) -> pimatic.updateFromJs({variables}) )
+  pimatic.socket.on('pages', (pages) -> pimatic.updateFromJs({devicepages: pages}) )
+  #pimatic.socket.io.on 'close', -> console.log "m: close"
+
+  pimatic.socket.io.on('reconnect_attempt', -> 
+    #console.log "m: reconnect attemp"
+    pimatic.loading("socket", "show", {
       text: __("connection lost, retrying")
       blocking: no
+    })
+  )
 
-  onConnectionError = (reason) ->
-    if reason is 'handshake unauthorized'
-      # wrap inside setTimeout because stange iphone behavior
-      # https://github.com/pimatic/pimatic/issues/69 
-      setTimeout(pimatic.pages.index.toLoginPage, 10)
-    if reason? and reason.length isnt 0 then reason = ": #{reason}"
-    else reason = ''
-    pimatic.loading "socket", "show",
-      text: __("could not connect%s, retrying", reason)
+  pimatic.socket.io.on('connect_error', (error) -> 
+    #console.log "m: connect_error", error
+    pimatic.loading("socket", "show", {
+      text: __("could not connect (%s), retrying", error.message)
       blocking: no
-    setTimeout ->
-      pimatic.socket.socket.connect()
-    , 2000
+    })
+  )
 
-  pimatic.socket.on 'error', onConnectionError
-  pimatic.socket.on 'connect_error', onConnectionError
+  pimatic.socket.io.on('connect_timeout', -> 
+    #console.log "m: connect_timeout"
+    pimatic.loading("socket", "show", {
+      text: __("connect timed out")
+      blocking: no
+    })
+  )
 
-  pimatic.socket.on 'log', (entry) ->
-    if entry.level is 'debug' then return 
-    pimatic.try => pimatic.showToast(entry.msg)
-  return
+
 )

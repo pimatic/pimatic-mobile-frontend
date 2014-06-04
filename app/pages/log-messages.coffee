@@ -86,10 +86,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
         }
         criteria.tags = @chosenTag() if @chosenTag() isnt 'All'
 
-        @loadMessagesAjax = $.ajax("/api/database/queryMessages",
-          global: false # don't show loading indicator
-          data: { criteria }
-        ).always( =>
+        pimatic.client.rest.queryMessages({criteria}).always( =>
           pimatic.loading "loading message", "hide"
         ).done( tc (data) =>
           @loadMessagesAjax = null
@@ -105,16 +102,12 @@ $(document).on("pagecreate", '#log', tc (event) ->
       else @loadMessagesAjax.done( => ajaxCall() )
 
     loadMessagesMeta: ->
-      $.ajax("/api/database/queryMessagesTags",
-        global: false # don't show loading indicator
-      ).done( tc (data) =>
+      pimatic.client.rest.queryMessagesTags({criteria: {}}).done( tc (data) =>
         if data.success
           for t in data.tags
             unless t in @tags() then @tags.push t
       )
-      $.ajax("/api/database/queryMessagesCount",
-        global: false # don't show loading indicator
-      ).done( tc (data) =>
+      pimatic.client.rest.queryMessagesCount({criteria: {}}).done( tc (data) =>
         if data.success
           @messageCount(data.count)
       )
@@ -130,8 +123,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
 
     $('#log').on "click", '#clear-log', tc (event, ui) ->
       lastMessage = logPage.messages[logPage.messages.length-1]
-      $.ajax("/api/database/deleteMessages"
-      ).done( tc ->
+      pimatic.client.rest.deleteMessages({criteria: {}}).done( tc ->
         logPage.messages.removeAll()
         pimatic.pages.index.errorCount(0)
         logPage.messageCount(0)

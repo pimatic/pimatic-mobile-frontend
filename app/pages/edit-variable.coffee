@@ -30,16 +30,20 @@ $(document).on("pagebeforecreate", (event) ->
 
 
     onSubmit: ->
-      data = {
-        name: @variableName()
-      }
-      switch @variableType()
-        when 'value' then data.value = @variableValue()
-        when 'expression' then data.expression = @variableValue()
 
-      $.post("/api/variable/#{@variableName()}/#{@action()}", data)
-      .done( (data) ->
-        if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+      params = {
+        name: @variableName()
+        type: @variableType()
+        valueOrExpression: @variableValue()
+      }
+
+      (
+        switch @action()
+          when 'add' then pimatic.client.rest.addVariable(params)
+          when 'update' then pimatic.client.rest.updateVariable(params)
+          else throw new Error("Illegal variable action: #{action()}")
+      ).done( (data) ->
+        if data.success then $.mobile.changePage '#variables-page', {transition: 'slide', reverse: true}   
         else alert data.error
       ).fail(ajaxAlertFail)
       return false
@@ -47,7 +51,7 @@ $(document).on("pagebeforecreate", (event) ->
     onRemove: ->
       $.get("/api/variable/#{@variableName()}/remove")
         .done( (data) ->
-          if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+          if data.success then $.mobile.changePage '#variables-page', {transition: 'slide', reverse: true}   
           else alert data.error
         ).fail(ajaxAlertFail)
       return false

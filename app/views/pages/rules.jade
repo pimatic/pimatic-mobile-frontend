@@ -1,0 +1,25 @@
+script#rule-template(type="text/template")
+  li.rule.sortable.draggable(data-bind="css: {deactivated: !active()}")
+    a(data-transition='slidefade', href='#edit-rule', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
+      span.name(data-bind="text: ($data.name() != '' ? $data.name() : __('Unnamed rule') ) ")
+      p
+        span.if='if'
+        | 
+        span.condition(data-bind="text: condition")
+        | 
+        span.then='then'
+        | 
+        span.actions(data-bind="text: actions")
+div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingRules  ()}")
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
+    h3=__("Rules")
+    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
+      
+  div.ui-content.overthrow
+    ul#rules(data-role='listview', data-bind="sortable: {items: rules, isSorting: isSortingRules, sorted: onRulesSorted, drop: onDropRuleOnTrash}, dragslide: {}, css: ruleItemCssClass")
+      <!-- ko template: { name: 'rule-template', foreach:rules, afterRender: afterRenderRule } --><!-- /ko -->
+      li#delete-rule.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingRules()")=__('Drop here to remove rule')
+      li#add-rule(data-bind="visible: enabledEditing() && !isSortingRules() ")
+        a(data-transition='slidefade', href='#edit-rule', data-bind="click: onAddRuleClicked")=__('Add a new rule')+'...'
+      div.drag-message
