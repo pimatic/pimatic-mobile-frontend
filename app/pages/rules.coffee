@@ -3,7 +3,6 @@
 tc = pimatic.tryCatch
 
 $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
-  console.log "before create"
 
   class RulesViewModel
 
@@ -57,7 +56,7 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       really = confirm(__("Do you really want to delete the %s rule?", rule.name()))
       if really then (doDeletion = =>
           pimatic.loading "deleterule", "show", text: __('Saving')
-          $.get("/api/rule/#{rule.id}/remove").done( (data) =>
+          pimatic.client.rest.removeRule(ruleId: @rule.id).done( (data) =>
             if data.success
               @rules.remove(rule)
           ).always( => 
@@ -77,8 +76,8 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       editRulePage.action('update')
       editRulePage.ruleId(rule.id)
       editRulePage.ruleName(rule.name())
-      editRulePage.ruleCondition(rule.condition())
-      editRulePage.ruleActions(rule.actions())
+      editRulePage.ruleCondition(rule.conditionToken())
+      editRulePage.ruleActions(rule.actionsToken())
       editRulePage.ruleEnabled(rule.active())
       editRulePage.ruleLogging(rule.logging())
       return true

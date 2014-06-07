@@ -3,6 +3,7 @@ class DeviceAttribute
     observe: ["value"]
   }
   constructor: (data) ->
+    #console.log "creating device attribute", data
     # Allways create an observable for value:
     unless data.value? then data.value = null
     ko.mapping.fromJS(data, @constructor.mapping, this)
@@ -18,11 +19,16 @@ class DeviceAttribute
       else return value.toString()
     )
     @unitText = if @unit? then @unit else ''
+  update: (data) -> 
+    ko.mapping.fromJS(data, @constructor.mapping, this)
 
 class Device
   @mapping = {
     attributes:
       create: ({data, parent, skip}) => new DeviceAttribute(data)
+      update: ({data, parent, target}) =>
+        target.update(data)
+        return target
       key: (data) => data.name
     observe: ["name", "attributes"]
   }
@@ -30,14 +36,9 @@ class Device
     ko.mapping.fromJS(data, @constructor.mapping, this)
   update: (data) -> 
     ko.mapping.fromJS(data, @constructor.mapping, this)
-  getAttribute: (name) ->
-    attribute = null
-    for attr in @attributes()
-      if attr.name is name
-        attribute = attr
-        break
-    return attribute
+  getAttribute: (name) -> ko.utils.arrayFirst(@attributes(), (a) => a.name is name )
   updateAttribute: (attrName, attrValue) ->
+    #console.log "updating", attrName, attrValue
     attribute = @getAttribute(attrName)
     if attribute?
       attribute.value(attrValue)
@@ -82,6 +83,7 @@ class DevicePage
           console.warn "Could not find a template class for #{data.template}"
           itemClass = pimatic.DeviceItem
         unless device? then return console.error("Device should never be null")
+        #console.log "Creating #{itemClass.name} for #{device.id} (#{device.template})"
         return new itemClass(data, device)
       key: (data) => data.name
   }
@@ -96,6 +98,9 @@ class DevicePage
   update: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
   getDeviceTemplate: (data) -> data.getDeviceTemplate()
+  afterRenderDevice: (elements, item) ->
+        item.afterRender(elements)
+
 
 class Pimatic
   @mapping = {
@@ -141,7 +146,57 @@ class Pimatic
   updateFromJs: (data) ->
     ko.mapping.fromJS(data, Pimatic.mapping, this)
 
-  getDeviceById: (id) -> ko.utils.arrayFirst(@devices(), (d) => d.id is id )
+  # Device list
+  getDeviceById: (id) -> 
+    ko.utils.arrayFirst(@devices(), (d) => d.id is id )
+  updateDeviceAttribute: (deviceId, attrName, attrValue) ->
+    for device in @devices()
+      if device.id is deviceId
+        device.updateAttribute(attrName, attrValue)
+        break
 
+  # Devicepages
+  updatePageFromJs: (pageData) ->
+    for page in @devicepages()
+      if page.id is pageData.id
+        page.update(pageData)
+        break
+  getPageById: (id) -> 
+    ko.utils.arrayFirst(@devicepages(), (d) => d.id is id )
+  removePage: (pageId) ->
+    @devicepages.remove( (p) => p.id is pageId )
+  updatePageFromJs: (pageData) ->
+    page = @getPageById(pageData.id)
+    unless page?
+      page = Pimatic.mapping.devicepages.create({data: pageData})
+      @devicepages.push(page)
+    else 
+      page.update(pageData)
+
+  # Rules
+  getRuleById: (id) -> 
+    ko.utils.arrayFirst(@rules(), (r) => r.id is id )
+  removeRule: (ruleId) ->
+    @rules.remove( (rule) => rule.id is ruleId )
+  updateRuleFromJs: (ruleData) ->
+    rule = @getRuleById(ruleData.id)
+    unless rule?
+      rule = Pimatic.mapping.devicerules.create({data: ruleData})
+      @devicerules.push(rule)
+    else 
+      rule.update(ruleData)
+
+  # Variables
+  removeVariable: (varName) ->
+    @variables.remove( (variable) => variable.name is varName )
+  getVariableByName: (name) -> 
+    ko.utils.arrayFirst(@variables(), (v) => v.name is name )
+  updateVariableFromJs: (variableData) ->
+    variable = @getVariableById(variableData.name)
+    unless variable?
+      variable = Pimatic.mapping.devicevariables.create({data: variableData})
+      @devicevariables.push(variable)
+    else 
+      variable.update(variableData)
 
 window.pimatic = new Pimatic({devices: [], rules: [], variables: [], devicepages: []})

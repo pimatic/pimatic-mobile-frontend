@@ -5,11 +5,11 @@ script#rule-template(type="text/template")
       p
         span.if='if'
         | 
-        span.condition(data-bind="text: condition")
+        span.condition(data-bind="text: conditionToken")
         | 
         span.then='then'
         | 
-        span.actions(data-bind="text: actions")
+        span.actions(data-bind="text: actionsToken")
 div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingRules  ()}")
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')

@@ -24,7 +24,7 @@
   z-index: 1000;
 }
 
-#item-lists .owl-item div{
+#item-lists .owl-item>div{
   display: block;
   width: 100%;
   height: auto;
@@ -718,7 +718,7 @@ li.with-button a.ui-btn {
   }
   
   .locked .items .ui-first-child {
-    margin-bottom: 0.8%;
+    /*margin-bottom: 0.8%;*/
   }
 
   .locked .items .header {

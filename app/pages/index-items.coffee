@@ -60,9 +60,11 @@ $(document).on( "pagebeforecreate", (event) ->
   class DeviceItem extends Item
     constructor: (templData, @device) ->
       super(templData)
+      @name = @device.name
+      @deviceId = @device.id
 
     getAttribute: (name) -> @device.getAttribute(name)
-    getItemTemplate: -> 'device'
+    getItemTemplate: -> @device.template
 
     afterAttributeRender: (elements, attribute) ->
       $(elements)
@@ -111,6 +113,7 @@ $(document).on( "pagebeforecreate", (event) ->
       super(elements)
       @sliderEle = $(elements).find('select')
       @sliderEle.flipswitch()
+      $(elements).find('.ui-flipswitch').addClass('no-carousel-slide')
 
   class DimmerItem extends DeviceItem
     constructor: (templData, @device) ->
@@ -143,12 +146,16 @@ $(document).on( "pagebeforecreate", (event) ->
       super(elements)
       @sliderEle = $(elements).find('input')
       @sliderEle.slider()
+      $(elements).find('.ui-slider').addClass('no-carousel-slide')
 
   class TemperatureItem extends DeviceItem
+    getItemTemplate: => 'device'
 
   class PresenceItem extends DeviceItem
+    getItemTemplate: => 'device'
 
   class ContactItem extends DeviceItem
+    getItemTemplate: => 'device'
 
   class ShutterItem extends DeviceItem
 

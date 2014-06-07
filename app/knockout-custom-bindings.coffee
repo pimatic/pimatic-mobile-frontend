@@ -394,10 +394,9 @@
             stop: (ev, obj) =>
               $('.drag-message').text('').fadeOut().removeClass('activate').removeClass('deactivate')
               if action?
+                active = (action is "activate")
                 pimatic.loading "saveactivate", "show", text: __(action)
-                $.ajax("/api/rule/#{rule.id}/#{action}",
-                  global: false
-                ).always( ->
+                pimatic.client.rest.updateRuleByString({ruleId: rule.id, rule: {active}}).always( ->
                   pimatic.loading "saveactivate", "hide"
                 ).done(ajaxShowToast).fail(ajaxAlertFail)
               target.removeClass('ui-btn-active')

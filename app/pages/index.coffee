@@ -2,9 +2,10 @@
 # ----------
 tc = pimatic.tryCatch
 
-$(document).on( "pagebeforecreate", tc (event) ->
-  # Just execute it one time
-  if pimatic.pages.index? then return
+$(document).on("pagecreate", '#index', tc (event) ->
+
+
+
   class IndexViewModel
     # static property:
     @mapping = {
@@ -55,12 +56,19 @@ $(document).on( "pagebeforecreate", tc (event) ->
           html = """
             <ul data-bind="foreach: devicepages">
               <li>
-                <a data-ajax='false' data-bind="attr: {href: '#item-tab-'+$data.id}, text: name, css: {'ui-btn-active': $data.isActive}, click: $root.onPageTabClicked"></a>
+                <a 
+                  data-ajax='false' 
+                  data-bind="attr: {
+                    href: '#item-tab-'+$data.id}, 
+                    text: name, 
+                    css: {'ui-btn-active': $data.isActive}, 
+                    click: $root.onPageTabClicked"
+                ></a>
               </li>
             </ul>
           """ 
           itemTabs.html(html)
-          ko.applyBindings(this, itemTabs[0])
+          ko.applyBindings(this, itemTabs[0])  if ko.dataFor($('#index')[0])?
           $("#item-tabs").navbar()
         else
           itemTabs.html('')
@@ -78,15 +86,28 @@ $(document).on( "pagebeforecreate", tc (event) ->
           for page, i in dPages
             html += """
               <div>
-                <ul data-role="listview" data-pageid="#{page.id}" class="items">
-                <!-- ko template: { name: $root.getItemTemplate, foreach: devicepages()[#{i}].devices, afterRender: devicepages()[#{i}].afterRender } --><!-- /ko -->
+                <ul 
+                    data-role="listview" 
+                    data-pageid="#{page.id}" 
+                    class="items" 
+                      data-bind="sortable: {
+                        items: devicepages()[#{i}].devices, 
+                        isSorting: isSortingItems, 
+                        sorted: onItemsSorted, 
+                        drop: onDropItemOnTrash}"
+                >
+                <!-- ko template: { 
+                  name: $root.getItemTemplate, 
+                  foreach: devicepages()[#{i}].devices, 
+                  afterRender: devicepages()[#{i}].afterRenderDevice 
+                } --><!-- /ko -->
                 </ul>
               </div>
             """
           itemLists.html(html)
           for page in dPages
             pageUl = itemLists.find("ul[data-pageid=#{page.id}]")
-          ko.applyBindings(this, itemLists[0])
+          ko.applyBindings(this, itemLists[0]) if ko.dataFor($('#index')[0])?
           itemLists.find('[data-role="listview"]').listview()
           itemLists.owlCarousel({
             navigation: true
@@ -131,14 +152,14 @@ $(document).on( "pagebeforecreate", tc (event) ->
           $('#item-lists [data-role="listview"]').each( ->
             lw = $(this)
             unless lw.data('mobileListview')? then lw.listview()
-            else lw.listview('refresh').addClass("dark-background")
+            else lw.listview('refresh')
           )
         )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
       @deviepagesRefresh = ko.computed( tc =>
         @devicepages()
-        pimatic.try( => $('.nav-panel-menu').listview('refresh').addClass("dark-background") )
+        pimatic.try( => $('.nav-panel-menu').listview('refresh') )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
 
@@ -204,6 +225,11 @@ $(document).on( "pagebeforecreate", tc (event) ->
         @rememberme(no)
         pimatic.storage.set('pimatic', {})
 
+    showDevicePage: (devicePage) =>
+      @activeDevicepage(devicePage)
+      $("#nav-panel").panel( "close" );
+      return true
+
 
     updateFromJs: (data) -> 
       ko.mapping.fromJS(data, IndexViewModel.mapping, this)
@@ -215,14 +241,6 @@ $(document).on( "pagebeforecreate", tc (event) ->
     # afterRenderItem: (elements, item) ->
     #   item.afterRender(elements)
 
-    # removeItem: (itemId) ->
-    #   @items.remove( (item) => item.itemId is itemId )
-
-    # removeRule: (ruleId) ->
-    #   @rules.remove( (rule) => rule.id is ruleId )
-
-    # removeVariable: (varName) ->
-    #   @variables.remove( (variable) => variable.name is varName )
 
 
     # updateItemOrder: (order) ->
@@ -288,42 +306,6 @@ $(document).on( "pagebeforecreate", tc (event) ->
 
   pimatic.pages.index = indexPage = new IndexViewModel()
 
-  pimatic.socket.on("welcome", tc (data) ->
-    indexPage.updateFromJs(data)
-  )
-
-  pimatic.socket.on("device-attribute", tc (attrEvent) -> 
-    indexPage.updateDeviceAttribute(attrEvent.id, attrEvent.name, attrEvent.value)
-  )
-
-  pimatic.socket.on("variable", tc (variable) -> indexPage.updateVariable(variable))
-
-  pimatic.socket.on("item-add", tc (item) -> indexPage.addItemFromJs(item))
-  pimatic.socket.on("item-remove", tc (itemId) -> indexPage.removeItem(itemId))
-  pimatic.socket.on("item-order", tc (order) -> indexPage.updateItemOrder(order))
-
-  pimatic.socket.on("rule-add", tc (rule) -> indexPage.updateRuleFromJs(rule))
-  pimatic.socket.on("rule-update", tc (rule) -> indexPage.updateRuleFromJs(rule))
-  pimatic.socket.on("rule-remove", tc (ruleId) -> indexPage.removeRule(ruleId))
-  pimatic.socket.on("rule-order", tc (order) -> indexPage.updateRuleOrder(order))
-
-  pimatic.socket.on("variable-add", tc (variable) -> indexPage.addVariableFromJs(variable))
-  pimatic.socket.on("variable-remove", tc (variableName) -> indexPage.removeVariable(variableName))
-  pimatic.socket.on("variable-order", tc (order) -> indexPage.updateVariableOrder(order))
-
-  pimatic.socket.on("update-process-status", tc (status) -> indexPage.updateProcessStatus(status))
-  pimatic.socket.on("update-process-message", tc (msg) -> indexPage.updateProcessMessages.push msg)
-
-  pimatic.socket.on('log', tc (entry) -> 
-    if entry.level is "error" then indexPage.errorCount(indexPage.errorCount() + 1)
-  )
-  return
-)
-
-$(document).on("pagecreate", '#index', tc (event) ->
-
-
-  indexPage = pimatic.pages.index
   try
     ko.applyBindings(indexPage, $('#index')[0])
   catch e
@@ -331,25 +313,26 @@ $(document).on("pagecreate", '#index', tc (event) ->
     pimatic.storage?.removeAll()
     window.location.reload()
 
-  $('#index #items').on("change", ".switch", tc (event) ->
+
+  $('#index #item-lists').on("change", ".switch", tc (event) ->
     switchDevice = ko.dataFor(this)
     switchDevice.onSwitchChange()
     return
   )
 
-  $('#index #items').on("slidestop", ".dimmer", tc (event) ->
+  $('#index #item-lists').on("slidestop", ".dimmer", tc (event) ->
     dimmerDevice = ko.dataFor(this)
     dimmerDevice.onSliderStop()
     return
   )
 
-  $('#index #items').on("vclick", ".shutter-down", tc (event) ->
+  $('#index #item-lists').on("vclick", ".shutter-down", tc (event) ->
     shutterDevice = ko.dataFor(this)
     shutterDevice.onShutterDownClicked()
     return false
   )
 
-  $('#index #items').on("vclick", ".shutter-up", tc (event) ->
+  $('#index #item-lists').on("vclick", ".shutter-up", tc (event) ->
     shutterDevice = ko.dataFor(this)
     shutterDevice.onShutterUpClicked()
     return false

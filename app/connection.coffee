@@ -1,3 +1,4 @@
+tc = pimatic.tryCatch
 
 $(document).on( "pagebeforecreate", (event) ->
   # Just execte this function one time:
@@ -23,10 +24,64 @@ $(document).on( "pagebeforecreate", (event) ->
         console.log e
 
 
-  pimatic.socket.on('devices', (devices) -> pimatic.updateFromJs({devices}) )
-  pimatic.socket.on('rules', (rules) -> pimatic.updateFromJs({rules}) )
-  pimatic.socket.on('variables', (variables) -> pimatic.updateFromJs({variables}) )
-  pimatic.socket.on('pages', (pages) -> pimatic.updateFromJs({devicepages: pages}) )
+  pimatic.socket.on('devices', tc (devices) -> 
+    pimatic.updateFromJs({devices})
+  )
+  pimatic.socket.on('rules', tc (rules) -> 
+    pimatic.updateFromJs({rules}) 
+  )
+  pimatic.socket.on('variables', tc (variables) -> 
+    pimatic.updateFromJs({variables}) 
+  )
+  pimatic.socket.on('pages', tc (pages) -> 
+    pimatic.updateFromJs({devicepages: pages}) 
+  )
+  pimatic.socket.on("deviceAttributeChanged", (attrEvent) -> 
+    pimatic.updateDeviceAttribute(
+      attrEvent.deviceId, 
+      attrEvent.attributeName, 
+      attrEvent.value
+    )
+  )
+  pimatic.socket.on("pageChanged", tc (page) ->
+    pimatic.updatePageFromJs(page)
+  )
+  pimatic.socket.on("pageRemoved", tc (page) -> 
+    pimatic.removePage(page.id)
+  )
+  pimatic.socket.on("pageAdded", tc (page) -> 
+    pimatic.addPage(page.id)
+  )
+  #pimatic.socket.on("item-order", tc (order) -> indexPage.updateItemOrder(order))
+  pimatic.socket.on("ruleAdded", tc (rule) -> 
+    pimatic.updateRuleFromJs(rule)
+  )
+  pimatic.socket.on("ruleChanged", tc (rule) -> 
+    pimatic.updateRuleFromJs(rule)
+  )
+  pimatic.socket.on("ruleRemoved", tc (rule) -> 
+    pimatic.removeRule(rule.id)
+  )
+  #pimatic.socket.on("rule-order", tc (order) -> indexPage.updateRuleOrder(order))
+
+  pimatic.socket.on("variableAdded", tc (variable) -> 
+    pimatic.updateVariableFromJs(variable)
+  )
+  pimatic.socket.on("variableChanged", tc (variable) -> 
+    pimatic.updateVariableFromJs(variable)
+  )
+  pimatic.socket.on("variableRemoved", tc (variable) -> 
+    pimatic.removeVariable(variable.name)
+  )
+  #pimatic.socket.on("variable-order", tc (order) -> indexPage.updateVariableOrder(order))
+
+  #pimatic.socket.on("update-process-status", tc (status) -> indexPage.updateProcessStatus(status))
+  #pimatic.socket.on("update-process-message", tc (msg) -> indexPage.updateProcessMessages.push msg)
+  
+  pimatic.socket.on('messageLogged', tc (entry) -> 
+    if entry.level isnt "debug" then pimatic.try => pimatic.showToast entry.msg
+  )
+
   #pimatic.socket.io.on 'close', -> console.log "m: close"
 
   pimatic.socket.io.on('reconnect_attempt', -> 

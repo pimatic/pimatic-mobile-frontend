@@ -854,8 +854,17 @@ if (typeof Object.create !== "function") {
             var base = this;
             base.$elem.on("dragstart.owl", function (event) { event.preventDefault(); });
             base.$elem.on("mousedown.disableTextSelect", function (e) {
-                return $(e.target).is('input, textarea, select, option');
+                return base.isNoslide(e);
             });
+        },
+
+        isNoslide: function (event) {
+            return (
+                $(event.target)
+                    .parents()
+                    .andSelf()
+                    .is('input, textarea, select, option, .no-carousel-slide')
+            )
         },
 
         gestures : function () {
@@ -914,6 +923,10 @@ if (typeof Object.create !== "function") {
                 var ev = event.originalEvent || event || window.event,
                     position;
 
+                if (base.isNoslide(event)) {
+                    return;
+                }
+
                 if (ev.which === 3) {
                     return false;
                 }
@@ -956,6 +969,11 @@ if (typeof Object.create !== "function") {
                 var ev = event.originalEvent || event || window.event,
                     minSwipe,
                     maxSwipe;
+
+                if (base.isNoslide(event)) {
+                    return;
+                }
+
 
                 base.newPosX = getTouches(ev).x - locals.offsetX;
                 base.newPosY = getTouches(ev).y - locals.offsetY;
@@ -1000,6 +1018,11 @@ if (typeof Object.create !== "function") {
                     newPosition,
                     handlers,
                     owlStopEvent;
+
+                if (base.isNoslide(event)) {
+                    return;
+                }
+
 
                 ev.target = ev.target || ev.srcElement;
 
