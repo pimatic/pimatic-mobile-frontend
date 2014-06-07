@@ -33,6 +33,21 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
         )
       )
 
+      @toggleEditingText = ko.computed( tc => 
+        unless @enabledEditing() 
+          __('Edit lists')
+        else
+          __('Lock lists')
+      )
+
+      @showAttributeVarsText = ko.computed( tc => 
+        unless @showAttributeVars() 
+          __('Show device attribute variables')
+        else
+          __('Hide device attribute variables')
+      )
+
+
 
     afterRenderVariable: (elements) ->
       #handleHTML = $('#sortable-handle-template').text()

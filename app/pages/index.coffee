@@ -4,8 +4,6 @@ tc = pimatic.tryCatch
 
 $(document).on("pagecreate", '#index', tc (event) ->
 
-
-
   class IndexViewModel
     # static property:
     @mapping = {
@@ -21,7 +19,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
         errorCount: 0
         enabledEditing: no
         rememberme: no
-        showAttributeVars: no
         ruleItemCssClass: ''
         hasRootCACert: no
         updateProcessStatus: 'idle'
@@ -68,8 +65,9 @@ $(document).on("pagecreate", '#index', tc (event) ->
             </ul>
           """ 
           itemTabs.html(html)
-          ko.applyBindings(this, itemTabs[0])  if ko.dataFor($('#index')[0])?
-          $("#item-tabs").navbar()
+          if ko.dataFor($('#index')[0])?
+            ko.applyBindings(this, itemTabs[0])  
+            $("#item-tabs").navbar()
         else
           itemTabs.html('')
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
@@ -117,6 +115,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
             #autoHeight: true
             pagination: false
             navigation: false
+            lazyEffect: no
+            lazyLoad: no
             afterAction: =>
               itemLists.trigger( "updatelayout" )
             afterMove: (ele) =>
@@ -313,7 +313,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
     pimatic.storage?.removeAll()
     window.location.reload()
 
-
   $('#index #item-lists').on("change", ".switch", tc (event) ->
     switchDevice = ko.dataFor(this)
     switchDevice.onSwitchChange()
@@ -359,7 +358,13 @@ $(document).on("pagecreate", '#index', tc (event) ->
 )
 
 
-
+$(document).on("pagebeforeshow", '#index', tc (event) ->
+  setTimeout( (->
+    console.log "refresh"
+    pimatic.try => $('#item-lists').find('[data-role="listview"]').listview('refresh')
+    pimatic.try => $("#item-tabs").navbar()
+  ), 2)
+)
 
 
 

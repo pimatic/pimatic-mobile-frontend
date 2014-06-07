@@ -23,6 +23,9 @@ $(document).on( "pagebeforecreate", (event) ->
       catch e
         console.log e
 
+  pimatic.socket.on('message', tc (data) ->
+    console.log data
+  )
 
   pimatic.socket.on('devices', tc (devices) -> 
     pimatic.updateFromJs({devices})

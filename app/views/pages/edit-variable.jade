@@ -18,10 +18,10 @@ div#edit-variable(data-role='page')
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-variable-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
-                             data-role="button", href='#index')=__('Cancel')
+                             data-role="button", href='#variables-page')=__('Cancel')
         div.ui-block-b
           a#edit-variable-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: onSubmit")=__('Save')
       div#edit-variable-advanced(data-bind="visible: action() == 'update'")
           //- span=__('Advanced Options')+':'
           a#edit-variable-remove.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
-            data-bind="click: onRemove", data-role="button", href='#index')=__('Delete this variable')
+            data-bind="click: onRemove", data-role="button", href='#variables-page')=__('Delete this variable')
