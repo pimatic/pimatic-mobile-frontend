@@ -8,17 +8,17 @@ div#add-item(data-role='page')
       li(data-role='list-divider')=__('Devices')
       <!-- ko foreach: devices -->
       li.item(data-theme="a")
-        a(href="", data-bind="text: name, jqmlistitem: {icon: icon()}, css: {added: isAdded()}")
+        a(href="", data-bind="text: name")
       <!-- /ko -->
-    ul#variable-items(data-role='listview', data-inset='true', data-theme="b")
-      li(data-role='list-divider')=__('Variables')
-      <!-- ko foreach: variables -->
-      li.item(data-theme="a")
-        a(href="", data-bind="text: name, jqmlistitem: {icon: icon()}, css: {added: isAdded()}")
-      <!-- /ko -->
-    ul#add-other(data-role='listview', data-inset='true', data-theme="b")
-      li(data-role='list-divider')=__('Other')
-      li(data-role="fieldcontain", data-theme="a", data-icon="plus", data-iconpos="left")
-        a#add-a-header()=__('Add a group header')
-      li(data-role="fieldcontain", data-theme="a", data-icon="plus", data-iconpos="left")
-        a#add-a-button()=__('Add a button')
+    //- ul#variable-items(data-role='listview', data-inset='true', data-theme="b")
+    //-   li(data-role='list-divider')=__('Variables')
+    //-   <!-- ko foreach: variables -->
+    //-   li.item(data-theme="a")
+    //-     a(href="", data-bind="text: name, jqmlistitem: {icon: icon()}, css: {added: isAdded()}")
+    //-   <!-- /ko -->
+    //- ul#add-other(data-role='listview', data-inset='true', data-theme="b")
+    //-   li(data-role='list-divider')=__('Other')
+    //-   li(data-role="fieldcontain", data-theme="a", data-icon="plus", data-iconpos="left")
+    //-     a#add-a-header()=__('Add a group header')
+    //-   li(data-role="fieldcontain", data-theme="a", data-icon="plus", data-iconpos="left")
+    //-     a#add-a-button()=__('Add a button')

@@ -29,6 +29,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
       @devicepagesTabsRefresh = ko.computed( tc =>
         dPages =  @devicepages()
+        enabledEditing = @enabledEditing()
         itemTabs = $("#item-tabs")
         pimatic.try => itemTabs.navbar "destroy"
         ko.cleanNode(itemTabs[0])
@@ -46,10 +47,14 @@ $(document).on("pagecreate", '#index', tc (event) ->
                 ></a>
               </li>
             </ul>
-          """ 
+          """
           itemTabs.html(html)
           if ko.dataFor($('#index')[0])?
             ko.applyBindings(this, itemTabs[0])  
+            if enabledEditing
+              itemTabs.find('ul').append(
+                """<li><a data-ajax="false">#{__('Add a Page...')}</a></li>"""
+              )
             $("#item-tabs").navbar()
         else
           itemTabs.html('')
@@ -77,11 +82,25 @@ $(document).on("pagecreate", '#index', tc (event) ->
                         sorted: onItemsSorted, 
                         drop: onDropItemOnTrash}"
                 >
-                <!-- ko template: { 
-                  name: $root.getItemTemplate, 
-                  foreach: devicepages()[#{i}].devices, 
-                  afterRender: devicepages()[#{i}].afterRenderDevice 
-                } --><!-- /ko -->
+                  <!-- ko template: { 
+                    name: $root.getItemTemplate, 
+                    foreach: devicepages()[#{i}].devices, 
+                    afterRender: devicepages()[#{i}].afterRenderDevice 
+                  } --><!-- /ko -->
+                  <li
+                    id="delete-item" 
+                    class="droppable" 
+                    data-theme='a'
+                    data-icon="delete"
+                    data-bind="visible: isSortingItems"
+                  >
+                    #{__('Drop here to remove item')}
+                  </li>
+                  <li id="add-item-link" data-bind="visible: enabledEditing() && !isSortingItems()">
+                    <a data-transition='slidefade'  href='#add-item', data-bind="click: onAddItemClicked">
+                      #{__('Add a new item')+'...'}
+                    </a>
+                  </li>
                 </ul>
               </div>
             """
@@ -202,6 +221,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
     onPageTabClicked: (page) =>
       @activeDevicepage(page)
 
+    onAddItemClicked: ->
+      return true
 
     # afterRenderItem: (elements, item) ->
     #   item.afterRender(elements)

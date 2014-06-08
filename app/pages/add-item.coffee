@@ -2,69 +2,36 @@
 # ----------
 tc = pimatic.tryCatch
 
-class DeviceEntry
-  constructor: (data) ->
-    @id = data.id
-    @name = ko.observable(data.name)
-    @isAdded = ko.computed( =>
-      items = pimatic.pages.index.items()
-      match = ko.utils.arrayFirst(items, (item) =>
-        return item.type is 'device' and item.deviceId is @id
-      )
-      return match?
-    )
-    @icon = ko.computed( => if @isAdded() then 'check' else 'plus' )
-  update: (data) ->
-    @name(data.name)
+# class DeviceEntry
+#   constructor: (device) ->
+#     @id = device.id
+#     @name = device.name
+#     @isAdded = ko.computed( =>
+#       return yes
+#       # items = pimatic.pages.index.items()
+#       # match = ko.utils.arrayFirst(items, (item) =>
+#       #   return item.type is 'device' and item.deviceId is @id
+#       # )
+#       # return match?
+#     )
+#     @icon = ko.computed( => if @isAdded() then 'check' else 'plus' )
 
-class VariableEntry
-  constructor: (data) ->
-    @name = data.name
-    @isAdded = ko.computed( =>
-      items = pimatic.pages.index.items()
-      match = ko.utils.arrayFirst(items, (item) =>
-        return item.type is 'variable' and item.name is @name
-      )
-      return match?
-    )
-    @icon = ko.computed( => if @isAdded() then 'check' else 'plus' )
-  update: (data) ->
-    @name = data.name
 
 class AddItemViewModel
-  devices: ko.observableArray([])
-  variables: ko.observableArray([])
 
   constructor: ->
+
+    @devices = pimatic.devices
+
     @refreshDeviceListView = ko.computed( =>
       @devices()
-      $('#device-items').listview('refresh')
+      pimatic.try => $('#device-items').listview('refresh')
     ).extend(rateLimit: {timeout: 10, method: "notifyWhenChangesStop"})
 
-    @refreshVariableListView = ko.computed( =>
-      @variables()
-      $('#variable-items').listview('refresh')
-    ).extend(rateLimit: {timeout: 10, method: "notifyWhenChangesStop"})
-
-  updateDevicesFromJs: (devices) ->
-    mapping = {
-      create: ({data, parent, skip}) => new DeviceEntry(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.id
-    }
-    ko.mapping.fromJS(devices, mapping, @devices)
-
-  updateVariablesFromJs: (variables) ->
-    mapping = {
-      create: ({data, parent, skip}) => new VariableEntry(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.name
-    }
-    ko.mapping.fromJS(variables, mapping, @variables)
+    # @refreshVariableListView = ko.computed( =>
+    #   @variables()
+    #   $('#variable-items').listview('refresh')
+    # ).extend(rateLimit: {timeout: 10, method: "notifyWhenChangesStop"})
 
 
   addDeviceToIndexPage: (device) ->
@@ -147,14 +114,6 @@ $(document).on "pagecreate", '#add-item', tc (event) ->
   return
 
 $(document).on "pageshow", '#add-item', tc (event) ->
-  $.get("/api/devices")
-    .done( tc (data) -> 
-      pimatic.pages.addItem.updateDevicesFromJs(data.devices) 
-    ).fail(ajaxAlertFail)
-  $.get("/api/variables")
-    .done( tc (data) -> 
-      pimatic.pages.addItem.updateVariablesFromJs(data.variables) 
-    ).fail(ajaxAlertFail)
   return
 
 

@@ -30,6 +30,33 @@
   height: auto;
 }
 
+#index .ui-header .ui-controlgroup .ui-btn-icon-notext {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  text-indent: -9999px;
+  white-space: nowrap !important;
+}
+
+
+#index .ui-header .ui-controlgroup .ui-btn-icon-left:after,
+#index .ui-header .ui-controlgroup .ui-btn-icon-right:after,
+#index .ui-header .ui-controlgroup .ui-btn-icon-top:after,
+#index .ui-header .ui-controlgroup .ui-btn-icon-bottom:after,
+#index .ui-header .ui-controlgroup .ui-btn-icon-notext:after {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 22px;
+  height: 22px;
+  left: 16px;
+}
+
+#index .ui-header .ui-controlgroup-controls .ui-btn-corner-all,
+#index .ui-header .ui-controlgroup-controls .ui-btn.ui-corner-all {
+  -webkit-border-radius: 0;
+  border-radius: 0;
+}
 
 /* make the jquery mobile loader to block all elements */
 .ui-loader-background {
