@@ -36,24 +36,6 @@ module.exports = (env) ->
     init: (@app, @framework, @jsonConfig) ->
       conf = convict require("./mobile-frontend-config-schema")
 
-      # do some legacy support
-      for item in @jsonConfig.items
-        if item.type is 'actuator' or item.type is 'sensor'
-          item.type = 'device'
-        switch item.type
-          when "device"
-            unless item.itemId
-              item.itemId = @genItemId(item.type, item.id, @jsonConfig.items)
-            if item.id and (not item.deviceId?)
-              item.deviceId = item.id
-            delete item.id
-          when "header", 'button'
-            unless item.itemId
-              item.itemId = @genItemId(item.type, item.text, @jsonConfig.items)
-            delete item.id
-            if item.type is 'button' and not item.buttonId?
-              item.buttonId = item.itemId.replace('button-', '')
-
       conf.load @jsonConfig
       conf.validate()
       @config = conf.get ""

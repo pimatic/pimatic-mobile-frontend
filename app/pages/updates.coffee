@@ -13,9 +13,8 @@ $(document).on("pagecreate", '#updates', (event) ->
     outdatedPlugins: ko.observableArray(null)
 
     constructor: ->
-      index = pimatic.pages.index
-      @updateProcessStatus = index.updateProcessStatus
-      @updateProcessMessages = index.updateProcessMessages
+      @updateProcessStatus = pimatic.updateProcessStatus
+      @updateProcessMessages = pimatic.updateProcessMessages
 
       @hasUpdates = ko.computed( =>
         return (@pimaticUpdateInfo()?.isOutdated) or (@outdatedPlugins().length > 0)
@@ -52,15 +51,8 @@ $(document).on("pagecreate", '#updates', (event) ->
       modules = (if @pimaticUpdateInfo().isOutdated then ['pimatic'] else [])
       modules = modules.concat (p.plugin for p in @outdatedPlugins())
 
-      $.ajax(
-        url: "/api/update"
-        type: 'POST'
-        data: {
-          modules: modules
-        }
-        global: false
-        timeout: 10000000 #ms
-      ).fail( (jqXHR, textStatus, errorThrown) =>
+      pimatic.client.rest.installUpdatesAsync({modules})
+      .fail( (jqXHR, textStatus, errorThrown) =>
         # ignore timeouts:
         if textStatus isnt "timeout"
           ajaxAlertFail(jqXHR, textStatus, errorThrown)
@@ -70,20 +62,14 @@ $(document).on("pagecreate", '#updates', (event) ->
       $.get('/api/restart').fail(ajaxAlertFail)
 
     searchForPimaticUpdate: ->
-      return $.ajax(
-        url: "/api/outdated/pimatic"
-        timeout: 300000 #ms
-      ).done( (data) =>
+      return pimatic.client.rest.isPimaticOutdated().done( (data) =>
         @pimaticUpdateInfo(data)
         return 
       ).fail(ajaxAlertFail)
 
     searchForOutdatedPlugins: ->
-      return $.ajax(
-        url: "/api/outdated/plugins"
-        timeout: 300000 #ms
-      ).done( (data) =>
-        @outdatedPlugins(data.outdated)
+      return pimatic.client.rest.getOutdatedPlugins().done( (data) =>
+        @outdatedPlugins(data.outdatedPlugins)
         return
       ).fail(ajaxAlertFail)
 

@@ -10,6 +10,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
     }
 
     devicepages: pimatic.devicepages
+    errorCount: pimatic.errorCount
     activeDevicepage: ko.observable(null)
     isSortingItems: ko.observable(no)
     enabledEditing: ko.observable(no)
@@ -178,27 +179,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
         data = ko.mapping.toJS(this)
         pimatic.storage.set('pimatic.indexPage', data)
       ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
-
-      sendToServer = yes
-      @rememberme.subscribe( tc (shouldRememberMe) =>
-        if sendToServer
-          $.get("remember", rememberMe: shouldRememberMe)
-            .done(ajaxShowToast)
-            .fail( => 
-              sendToServer = no
-              @rememberme(not shouldRememberMe)
-            ).fail(ajaxAlertFail)
-        else 
-          sendToServer = yes
-        # swap storage
-        allData = pimatic.storage.get('pimatic')
-        pimatic.storage.removeAll()
-        if shouldRememberMe
-          pimatic.storage = $.localStorage
-        else
-          pimatic.storage = $.sessionStorage
-        pimatic.storage.set('pimatic', allData)
-      )
 
       @toggleEditingText = ko.computed( tc => 
         unless @enabledEditing() 

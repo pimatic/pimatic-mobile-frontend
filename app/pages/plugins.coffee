@@ -44,10 +44,7 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
 
   pimatic.showToast __('pimatic is searching for plugins for you...')
 
-  $.ajax(
-    url: "/api/plugins/search"
-    timeout: 300000 #ms
-  ).done( (data) ->
+  pimatic.client.rest.searchForPluginsWithInfo().done( (data) ->
     $('#plugin-browse-list').empty()
     pimatic.pages.plugins.allPlugins = data.plugins
     for p in data.plugins

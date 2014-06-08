@@ -81,8 +81,12 @@ $(document).on( "pagebeforecreate", (event) ->
   )
   #pimatic.socket.on("variable-order", tc (order) -> indexPage.updateVariableOrder(order))
 
-  #pimatic.socket.on("update-process-status", tc (status) -> indexPage.updateProcessStatus(status))
-  #pimatic.socket.on("update-process-message", tc (msg) -> indexPage.updateProcessMessages.push msg)
+  pimatic.socket.on("updateProcessStatus", tc (statusEvent) -> 
+    pimatic.updateProcessStatus(statusEvent.status)
+  )
+  pimatic.socket.on("updateProcessMessage", tc (msgEvent) -> 
+    pimatic.updateProcessMessages.push(msgEvent.message)
+  )
   
   pimatic.socket.on('messageLogged', tc (entry) -> 
     if entry.level isnt "debug" then pimatic.try => pimatic.showToast entry.msg
