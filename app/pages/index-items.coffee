@@ -99,7 +99,7 @@ $(document).on( "pagebeforecreate", (event) ->
       @sliderEle.flipswitch('disable')
       deviceAction = (if @switchState() is 'on' then 'turnOn' else 'turnOff')
       pimatic.loading "switch-on-#{@switchId}", "show", text: __("switching #{@switchState()}")
-      $.ajax("/api/device/#{@deviceId}/#{deviceAction}", global: no)
+      @device.rest[deviceAction]({}, global: no)
         .done( ajaxShowToast)
         .fail( => 
           @switchState(if @switchState() is 'on' then 'off' else 'on')
@@ -131,17 +131,14 @@ $(document).on( "pagebeforecreate", (event) ->
       pimatic.loading(
         "dimming-#{@sliderId}", "show", text: __("dimming to %s%", @sliderValue())
       )
-      $.ajax("/api/device/#{@deviceId}/changeDimlevelTo", 
-          data: {dimlevel: @sliderValue()}
-          global: no
-        ).done(ajaxShowToast)
-        .fail( => 
-          pimatic.try => @sliderEle.val(@getAttribute('dimlevel').value()).slider('refresh') 
-        ).always( => 
-          pimatic.loading "dimming-#{@sliderId}", "hide"
-          # element could be not existing anymore
-          pimatic.try( => @sliderEle.slider('enable'))
-        ).fail(ajaxAlertFail)
+      @device.rest.changeDimlevelTo( {dimlevel: @sliderValue()}, global: no).done(ajaxShowToast)
+      .fail( => 
+        pimatic.try => @sliderEle.val(@getAttribute('dimlevel').value()).slider('refresh') 
+      ).always( => 
+        pimatic.loading "dimming-#{@sliderId}", "hide"
+        # element could be not existing anymore
+        pimatic.try( => @sliderEle.slider('enable'))
+      ).fail(ajaxAlertFail)
     afterRender: (elements) ->
       super(elements)
       @sliderEle = $(elements).find('input')
@@ -189,9 +186,7 @@ $(document).on( "pagebeforecreate", (event) ->
       pimatic.loading(
         "shutter-#{@deviceId}", "show", text: __(text)
       )
-      $.ajax("/api/device/#{@deviceId}/#{action}", 
-          global: no
-        ).done(ajaxShowToast)
+      @device.rest[action]({}, global: no).done(ajaxShowToast)
         .always( => 
           pimatic.loading "shutter-#{@deviceId}", "hide"
           @downBtn.removeClass('ui-state-disabled')

@@ -4,8 +4,6 @@ $(document).on( "pagebeforecreate", (event) ->
   # Just execte this function one time:
   if pimatic.socket? then return
 
-  pimatic.client = new DeclApiClient(api)
-
   pimatic.socket = io('/',{
     reconnection: yes
     reconnectionDelay: 1000
@@ -53,7 +51,7 @@ $(document).on( "pagebeforecreate", (event) ->
     pimatic.removePage(page.id)
   )
   pimatic.socket.on("pageAdded", tc (page) -> 
-    pimatic.addPage(page.id)
+    pimatic.updatePageFromJs(page)
   )
   #pimatic.socket.on("item-order", tc (order) -> indexPage.updateItemOrder(order))
   pimatic.socket.on("ruleAdded", tc (rule) -> 

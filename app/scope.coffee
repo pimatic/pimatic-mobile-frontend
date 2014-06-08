@@ -34,6 +34,15 @@ class Device
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @rest = {}
+    for action in @actions
+      pimatic.client.createRestAction(
+        @rest,
+        action.name,
+        action,
+        { type: "get", url: "/api/device/#{@id}/#{action.name}" }
+      )
+
   update: (data) -> 
     ko.mapping.fromJS(data, @constructor.mapping, this)
   getAttribute: (name) -> ko.utils.arrayFirst(@attributes(), (a) => a.name is name )
@@ -138,11 +147,14 @@ class Pimatic
     id: 'null'
     name: 'null'
     attributes: []
+    actions: []
     template: 'null'
   })
 
   constructor: () ->
     window.pimatic = this
+    @client = new DeclApiClient(api)
+
     @updateFromJs({
       devices: []
       rules: []

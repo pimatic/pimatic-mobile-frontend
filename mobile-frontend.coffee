@@ -40,27 +40,6 @@ module.exports = (env) ->
       conf.validate()
       @config = conf.get ""
         
-      # * Delivers json-Data in the form of:
-
-      # 
-      #     {
-      #       "items": [
-      #         { "id": "light",
-      #           "name": "Schreibtischlampe",
-      #           "state": null },
-      #           ...
-      #       ], "rules": [
-      #         { "id": "printerOff",
-      #           "condition": "its 6pm",
-      #           "action": "turn the printer off" },
-      #           ...
-      #       ]
-      #     }
-      # 
-      app.get '/data.json', (req, res) =>
-        data = @getInitalClientData()
-        res.send data
-    
       ###
       Handle get request for add a device to the item list.
       ###
@@ -573,8 +552,7 @@ module.exports = (env) ->
 
     setupUpdateProcessListener: () ->
       pm = @framework.pluginManager
-      @updateProcessStatus = 'idle'
-      @updateProcessMessages = []
+
       pm.on('update-start', (info) =>
         @updateProcessMessages = []
         @updateProcessStatus = 'running'
@@ -657,6 +635,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/events.coffee"
               "pimatic-mobile-frontend/app/pages/plugins.coffee"
               "pimatic-mobile-frontend/app/pages/updates.coffee"
+              "pimatic-mobile-frontend/app/pages/edit-devicepage.coffee"
             ] .concat @additionalAssetFiles['js']
             
           css:

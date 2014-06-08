@@ -8,7 +8,7 @@ div#add-item(data-role='page')
       li(data-role='list-divider')=__('Devices')
       <!-- ko foreach: devices -->
       li.item(data-theme="a")
-        a(href="", data-bind="text: name")
+        a(href="", data-bind="text: name, jqmlistitem: {icon: $root.deviceEntryIcon($data)}")
       <!-- /ko -->
     //- ul#variable-items(data-role='listview', data-inset='true', data-theme="b")
     //-   li(data-role='list-divider')=__('Variables')

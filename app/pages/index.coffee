@@ -28,6 +28,13 @@ $(document).on("pagecreate", '#index', tc (event) ->
         }
       )
 
+      @devicepagesTabsRefreshImmediate = ko.computed( tc =>
+        dPages =  @devicepages()
+        enabledEditing = @enabledEditing()
+        itemTabs = $("#item-tabs")
+        ko.cleanNode(itemTabs[0])
+      )
+
       @devicepagesTabsRefresh = ko.computed( tc =>
         dPages =  @devicepages()
         enabledEditing = @enabledEditing()
@@ -51,15 +58,26 @@ $(document).on("pagecreate", '#index', tc (event) ->
           """
           itemTabs.html(html)
           if ko.dataFor($('#index')[0])?
-            ko.applyBindings(this, itemTabs[0])  
+            ko.applyBindings(this, itemTabs[0])
+            handleHTML = $('#edit-handle-template').text()
+            itemTabs.find('li a').each( ->
+              $(this).prepend($(handleHTML))
+            )
+
             if enabledEditing
               itemTabs.find('ul').append(
-                """<li><a data-ajax="false">#{__('Add a Page...')}</a></li>"""
+                """<li><a data-ajax="false" href="#edit-devicepage" id="add-devicepage-link">#{__('Add a Page...')}</a></li>"""
               )
-            $("#item-tabs").navbar()
+            itemTabs.navbar()
         else
           itemTabs.html('')
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
+
+      @devicepagesTabsRefreshImmediate = ko.computed( tc =>
+        dPages =  @devicepages()
+        itemLists = $('#item-lists')
+        ko.cleanNode(itemLists[0])
+      )
 
       @devicepagesTabsRefresh = ko.computed( tc =>
         dPages =  @devicepages()
@@ -201,6 +219,19 @@ $(document).on("pagecreate", '#index', tc (event) ->
     onPageTabClicked: (page) =>
       @activeDevicepage(page)
 
+    onAddPageClicked: =>
+      console.log "reset"
+      pimatic.pages.editDevicepage.resetFields()
+      pimatic.pages.editDevicepage.action('add')
+      return true
+
+    onEditPageClicked: (page) =>
+      pimatic.pages.editDevicepage.pageId(page.id)
+      pimatic.pages.editDevicepage.pageName(page.name())
+      pimatic.pages.editDevicepage.action('update')
+      jQuery.mobile.changePage '#edit-devicepage'
+      return true
+
     onAddItemClicked: ->
       return true
 
@@ -257,10 +288,14 @@ $(document).on("pagecreate", '#index', tc (event) ->
     onDropItemOnTrash: (item) ->
       really = confirm(__("Do you really want to delete the item?"))
       if really then (doDeletion = =>
+          activePage = @activeDevicepage()
           pimatic.loading "deleteitem", "show", text: __('Saving')
-          $.post('remove-item', itemId: item.itemId).done( (data) =>
+          pimatic.client.rest.removeDeviceFromPage(
+            deviceId: item.deviceId
+            pageId: activePage.id
+          ).done( (data) =>
             if data.success
-              @items.remove(item)
+              activePage.devices.remove(item)
           ).always( => 
             pimatic.loading "deleteitem", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)
@@ -279,28 +314,38 @@ $(document).on("pagecreate", '#index', tc (event) ->
     pimatic.storage?.removeAll()
     window.location.reload()
 
-  $('#index #item-lists').on("change", ".switch", tc (event) ->
+  $('#index').on("change", "#item-lists .switch", tc (event) ->
     switchDevice = ko.dataFor(this)
     switchDevice.onSwitchChange()
     return
   )
 
-  $('#index #item-lists').on("slidestop", ".dimmer", tc (event) ->
+  $('#index').on("slidestop", " #item-lists .dimmer", tc (event) ->
     dimmerDevice = ko.dataFor(this)
     dimmerDevice.onSliderStop()
     return
   )
 
-  $('#index #item-lists').on("vclick", ".shutter-down", tc (event) ->
+  $('#index').on("vclick", "#item-lists .shutter-down", tc (event) ->
     shutterDevice = ko.dataFor(this)
     shutterDevice.onShutterDownClicked()
     return false
   )
 
-  $('#index #item-lists').on("vclick", ".shutter-up", tc (event) ->
+  $('#index').on("vclick", "#item-lists .shutter-up", tc (event) ->
     shutterDevice = ko.dataFor(this)
     shutterDevice.onShutterUpClicked()
     return false
+  )
+
+  $('#index').on("vclick", '#item-tabs .edit-handle', tc (event) -> 
+    indexPage.onEditPageClicked(ko.dataFor(this))
+    return false
+  )
+
+  $('#index').on("vclick", '#item-tabs #add-devicepage-link', tc (event) -> 
+    indexPage.onAddPageClicked()
+    return true
   )
 
   # $('#index #items').on("click", ".device-label", (event, ui) ->

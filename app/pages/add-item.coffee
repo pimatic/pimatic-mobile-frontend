@@ -33,18 +33,26 @@ class AddItemViewModel
     #   $('#variable-items').listview('refresh')
     # ).extend(rateLimit: {timeout: 10, method: "notifyWhenChangesStop"})
 
+  isDeviceAdded: (device) =>
+    devicesOnPage = pimatic.pages.index?.activeDevicepage()?.devices
+    unless devicesOnPage? then return no
+    match = ko.utils.arrayFirst(devicesOnPage(), (d) =>
+      return d.deviceId is device.id
+    )
+    return match?
+
+  deviceEntryIcon: (device) => ( if @isDeviceAdded(device) then 'check' else 'plus' )
 
   addDeviceToIndexPage: (device) ->
-    if device.isAdded() then return
-    $.get("/add-device/#{device.id}")
-      .done(ajaxShowToast)
+    if @isDeviceAdded(device) then return
+    activeDevicepage = pimatic.pages.index?.activeDevicepage()
+    unless activeDevicepage? then return
+    pimatic.client.rest.addDeviceToPage({
+      pageId:activeDevicepage.id,
+      deviceId: device.id
+    }).done(ajaxShowToast)
       .fail(ajaxAlertFail)
 
-  addVariableToIndexPage: (variable) ->
-    if variable.isAdded() then return
-    $.get("/add-variable/#{variable.name}")
-      .done(ajaxShowToast)
-      .fail(ajaxAlertFail)
 
 
 tc( => pimatic.pages.addItem = new AddItemViewModel() )()
