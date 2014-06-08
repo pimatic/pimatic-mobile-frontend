@@ -73,6 +73,9 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("variableChanged", tc (variable) -> 
     pimatic.updateVariableFromJs(variable)
   )
+  pimatic.socket.on("variableValueChanged", tc (varValEvent) -> 
+    pimatic.updateVariableValue(varValEvent.variableName, varValEvent.variableValue)
+  )
   pimatic.socket.on("variableRemoved", tc (variable) -> 
     pimatic.removeVariable(variable.name)
   )

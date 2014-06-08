@@ -52,9 +52,7 @@ $(document).on("pagebeforecreate", (event) ->
           name: @ruleName()
           logging: @ruleLogging()
       }
-
       console.log params
-
       (
         switch @action()
           when 'add' then pimatic.client.rest.addRuleByString(params)
@@ -67,7 +65,7 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      $.get("/api/rule/#{@ruleId()}/remove")
+      pimatic.client.rest.removeRule({ruleId: @ruleId()})
         .done( (data) ->
           if data.success then $.mobile.changePage '#rules-page', {transition: 'slide', reverse: true}   
           else alert data.error
@@ -89,7 +87,7 @@ $(document).on("pagebeforecreate", (event) ->
         num = match[1]
         @ruleId(ruleId.substring(0, ruleId.length-num.length-1) + (parseInt(num,10)+1))
       else
-        @ruleId(ruleId + " 2")
+        @ruleId(ruleId + "-2")
 
   try
     pimatic.pages.editRule = new EditRuleViewModel()

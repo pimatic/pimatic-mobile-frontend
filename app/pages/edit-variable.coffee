@@ -49,7 +49,7 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      $.get("/api/variable/#{@variableName()}/remove")
+      pimatic.client.rest.removeVariable({name: @variableName()})
         .done( (data) ->
           if data.success then $.mobile.changePage '#variables-page', {transition: 'slide', reverse: true}   
           else alert data.error

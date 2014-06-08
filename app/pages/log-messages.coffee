@@ -50,6 +50,18 @@ $(document).on("pagecreate", '#log', tc (event) ->
         @displayedMessages()
         $('#log-messages').listview('refresh') 
       )
+
+      pimatic.socket.on('messageLogged', tc (entry) => 
+        @messages.unshift(
+          LogMessageViewModel.mapping.messages.create(data: {
+            tags: entry.meta.tags
+            level: entry.level
+            text: entry.msg
+            time: entry.meta.timestamp
+          })
+        )
+      )
+
     updateFromJs: (data) ->
       ko.mapping.fromJS({messages: data}, LogMessageViewModel.mapping, this)
 
@@ -137,8 +149,9 @@ $(document).on("pagecreate", '#log', tc (event) ->
 
 $(document).on("pagebeforeshow", '#log', tc (event) ->
   try
-    pimatic.pages.log.loadMessages()
-    pimatic.pages.log.loadMessagesMeta()
+    logPage = pimatic.pages.log
+    logPage.loadMessages()
+    logPage.loadMessagesMeta()
   catch e
     TraceKit.report(e)
 )

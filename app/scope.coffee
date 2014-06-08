@@ -141,10 +141,67 @@ class Pimatic
     template: 'null'
   })
 
-  constructor: (data) -> 
-    @updateFromJs(data)
+  constructor: () ->
+    window.pimatic = this
+    @updateFromJs({
+      devices: []
+      rules: []
+      variables: []
+      devicepages: []
+      errorCount: 0
+      rememberme: no
+      updateProcessStatus: 'idle'
+      updateProcessMessages: []
+    })
+    @setupStorage()
+
+    @updateProcessStatus.subscribe( (status) =>
+      switch status
+        when 'running'
+          pimatic.loading "update-process-status", "show", {
+            text: __('Installing updates, Please be patient')
+          }
+        else
+          pimatic.loading "update-process-status", "hide"
+    )
+
+    @autosave = ko.computed( =>
+      data = ko.mapping.toJS(this)
+      pimatic.storage.set('pimatic.scope', data)
+    ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
+
+
+  loadDataFromStorage: ->
+    @_dataLoaded = yes
+    if pimatic.storage.isSet('pimatic.scope')
+      data = pimatic.storage.get('pimatic.scope')
+      try
+        @updateFromJs(data)
+      catch e
+        TraceKit.report(e)
+        pimatic.storage.removeAll()
+        window.location.reload()
+
+
   updateFromJs: (data) ->
     ko.mapping.fromJS(data, Pimatic.mapping, this)
+
+  setupStorage: ->
+    if $.localStorage.isSet('pimatic')
+      # Select localStorage
+      pimatic.storage = $.localStorage
+      $.sessionStorage.removeAll()
+      @rememberme(yes)
+    else if $.sessionStorage.isSet('pimatic')
+      # Select sessionSotrage
+      pimatic.storage = $.sessionStorage
+      $.localStorage.removeAll()
+      @rememberme(no)
+    else
+      # select sessionStorage as default
+      pimatic.storage = $.sessionStorage
+      @rememberme(no)
+      pimatic.storage.set('pimatic', {})
 
   # Device list
   getDeviceById: (id) -> 
@@ -181,8 +238,8 @@ class Pimatic
   updateRuleFromJs: (ruleData) ->
     rule = @getRuleById(ruleData.id)
     unless rule?
-      rule = Pimatic.mapping.devicerules.create({data: ruleData})
-      @devicerules.push(rule)
+      rule = Pimatic.mapping.rules.create({data: ruleData})
+      @rules.push(rule)
     else 
       rule.update(ruleData)
 
@@ -191,12 +248,23 @@ class Pimatic
     @variables.remove( (variable) => variable.name is varName )
   getVariableByName: (name) -> 
     ko.utils.arrayFirst(@variables(), (v) => v.name is name )
+  updateVariableValue: (name, value) ->
+    variable = @getVariableByName(name)
+    if variable?
+      variable.value(value)
   updateVariableFromJs: (variableData) ->
-    variable = @getVariableById(variableData.name)
+    variable = @getVariableByName(variableData.name)
     unless variable?
-      variable = Pimatic.mapping.devicevariables.create({data: variableData})
-      @devicevariables.push(variable)
+      variable = Pimatic.mapping.variables.create({data: variableData})
+      @variables.push(variable)
     else 
       variable.update(variableData)
 
-window.pimatic = new Pimatic({devices: [], rules: [], variables: [], devicepages: []})
+window.pimatic = new Pimatic()
+
+$(document).on( "pagebeforecreate", (event) ->
+  # Just execute it one time
+  if pimatic._dataLoaded then return
+  pimatic.loadDataFromStorage()
+  return
+)

@@ -12,30 +12,13 @@ $(document).on("pagecreate", '#index', tc (event) ->
     devicepages: pimatic.devicepages
     activeDevicepage: ko.observable(null)
     isSortingItems: ko.observable(no)
+    enabledEditing: ko.observable(no)
 
     constructor: () ->
-
       @updateFromJs(
-        errorCount: 0
-        enabledEditing: no
-        rememberme: no
         ruleItemCssClass: ''
         hasRootCACert: no
-        updateProcessStatus: 'idle'
-        updateProcessMessages: []
       )
-
-      @updateProcessStatus.subscribe( tc (status) =>
-        switch status
-          when 'running'
-            pimatic.loading "update-process-status", "show", {
-              text: __('Installing updates, Please be patient')
-            }
-          else
-            pimatic.loading "update-process-status", "hide"
-      )
-
-      @setupStorage()
 
       @lockButton = ko.computed( tc => 
         editing = @enabledEditing()
@@ -208,28 +191,10 @@ $(document).on("pagecreate", '#index', tc (event) ->
     getItemTemplate: (deviceItem) ->
       return "#{deviceItem.getItemTemplate()}-template"
 
-    setupStorage: ->
-      if $.localStorage.isSet('pimatic')
-        # Select localStorage
-        pimatic.storage = $.localStorage
-        $.sessionStorage.removeAll()
-        @rememberme(yes)
-      else if $.sessionStorage.isSet('pimatic')
-        # Select sessionSotrage
-        pimatic.storage = $.sessionStorage
-        $.localStorage.removeAll()
-        @rememberme(no)
-      else
-        # select sessionStorage as default
-        pimatic.storage = $.sessionStorage
-        @rememberme(no)
-        pimatic.storage.set('pimatic', {})
-
     showDevicePage: (devicePage) =>
       @activeDevicepage(devicePage)
       $("#nav-panel").panel( "close" );
       return true
-
 
     updateFromJs: (data) -> 
       ko.mapping.fromJS(data, IndexViewModel.mapping, this)
@@ -360,7 +325,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
 $(document).on("pagebeforeshow", '#index', tc (event) ->
   setTimeout( (->
-    console.log "refresh"
+    pimatic.try => $('#nav-panel').find('[data-role="listview"]').listview('refresh')
     pimatic.try => $('#item-lists').find('[data-role="listview"]').listview('refresh')
     pimatic.try => $("#item-tabs").navbar()
   ), 2)
