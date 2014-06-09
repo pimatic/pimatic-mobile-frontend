@@ -628,6 +628,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/add-item.coffee"
               "pimatic-mobile-frontend/app/pages/edit-rule.coffee"
               "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
+              "pimatic-mobile-frontend/app/pages/edit-groups.coffee"
               "pimatic-mobile-frontend/app/pages/index.coffee"
               "pimatic-mobile-frontend/app/pages/rules.coffee"
               "pimatic-mobile-frontend/app/pages/variables.coffee"

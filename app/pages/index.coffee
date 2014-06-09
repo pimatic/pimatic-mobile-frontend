@@ -79,8 +79,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
         ko.cleanNode(itemLists[0])
       )
 
-      @devicepagesTabsRefresh = ko.computed( tc =>
-        dPages =  @devicepages()
+      ko.computed( tc () =>
+        dPages = @devicepages()
         itemLists = $('#item-lists')
         ko.cleanNode(itemLists[0])
         owl = itemLists.data('owlCarousel')
@@ -90,33 +90,35 @@ $(document).on("pagecreate", '#index', tc (event) ->
           html = ''
           for page, i in dPages
             html += """
-              <div>
+              <div data-bind="with: devicepages()[#{i}]">
                 <ul 
                     data-role="listview" 
                     data-pageid="#{page.id}" 
                     class="items" 
-                      data-bind="sortable: {
-                        items: devicepages()[#{i}].devices, 
-                        isSorting: isSortingItems, 
-                        sorted: onItemsSorted, 
-                        drop: onDropItemOnTrash}"
+                    data-bind="sortable: {
+                      items: devices, 
+                      isSorting: $root.isSortingItems, 
+                      sorted: $root.onItemsSorted, 
+                      drop: $root.onDropItemOnTrash,
+                      droppable: '.droppable#{i}'
+                    }"
                 >
                   <!-- ko template: { 
                     name: $root.getItemTemplate, 
-                    foreach: devicepages()[#{i}].devices, 
-                    afterRender: devicepages()[#{i}].afterRenderDevice 
+                    foreach: devices, 
+                    afterRender: afterRenderDevice 
                   } --><!-- /ko -->
                   <li
                     id="delete-item" 
-                    class="droppable" 
+                    class="droppable#{i}" 
                     data-theme='a'
                     data-icon="delete"
-                    data-bind="visible: isSortingItems"
+                    data-bind="visible: $root.isSortingItems"
                   >
                     #{__('Drop here to remove item')}
                   </li>
-                  <li id="add-item-link" data-bind="visible: enabledEditing() && !isSortingItems()">
-                    <a data-transition='slidefade'  href='#add-item', data-bind="click: onAddItemClicked">
+                  <li id="add-item-link" data-bind="visible: $root.enabledEditing() && !$root.isSortingItems()">
+                    <a data-transition='slidefade'  href='#add-item', data-bind="click: $root.onAddItemClicked">
                       #{__('Add a new item')+'...'}
                     </a>
                   </li>
@@ -205,7 +207,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
           __('Lock lists')
       )
 
-    getItemTemplate: (deviceItem) ->
+    getItemTemplate: (deviceItem) =>
       return "#{deviceItem.getItemTemplate()}-template"
 
     showDevicePage: (devicePage) =>
@@ -220,7 +222,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
       @activeDevicepage(page)
 
     onAddPageClicked: =>
-      console.log "reset"
       pimatic.pages.editDevicepage.resetFields()
       pimatic.pages.editDevicepage.action('add')
       return true
@@ -232,7 +233,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
       jQuery.mobile.changePage '#edit-devicepage'
       return true
 
-    onAddItemClicked: ->
+    onAddItemClicked: =>
       return true
 
     # afterRenderItem: (elements, item) ->
@@ -264,7 +265,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
     #     if item.type is "variable" and item.name is varInfo.name
     #       item.value(varInfo.value)
 
-    toggleEditing: ->
+    toggleEditing: =>
       @enabledEditing(not @enabledEditing())
       pimatic.loading "enableediting", "show", text: __('Saving')
       $.ajax("/enabledEditing/#{@enabledEditing()}",
@@ -273,19 +274,23 @@ $(document).on("pagecreate", '#index', tc (event) ->
         pimatic.loading "enableediting", "hide"
       ).done(ajaxShowToast)
 
-    onItemsSorted: ->
-      order = (item.itemId for item in @items())
+    onItemsSorted: () =>
+      page = @activeDevicepage()
+      unless page? then return
+      devicesOrder = (device.deviceId for device in page.devices())
       pimatic.loading "itemorder", "show", text: __('Saving')
-      $.ajax("update-item-order", 
-        type: "POST"
-        global: false
-        data: {order: order}
-      ).always( ->
+      params = {
+        pageId: page.id, 
+        page:
+          devicesOrder: devicesOrder
+      }
+      pimatic.client.rest.updatePage(params, global: no)
+      .always( ->
         pimatic.loading "itemorder", "hide"
       ).done(ajaxShowToast)
       .fail(ajaxAlertFail)
 
-    onDropItemOnTrash: (item) ->
+    onDropItemOnTrash: (item) =>
       really = confirm(__("Do you really want to delete the item?"))
       if really then (doDeletion = =>
           activePage = @activeDevicepage()

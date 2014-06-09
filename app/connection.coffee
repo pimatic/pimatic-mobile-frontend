@@ -37,6 +37,9 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on('pages', tc (pages) -> 
     pimatic.updateFromJs({devicepages: pages}) 
   )
+  pimatic.socket.on('groups', tc (groups) -> 
+    pimatic.updateFromJs({groups}) 
+  )
   pimatic.socket.on("deviceAttributeChanged", (attrEvent) -> 
     pimatic.updateDeviceAttribute(
       attrEvent.deviceId, 
@@ -53,6 +56,17 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("pageAdded", tc (page) -> 
     pimatic.updatePageFromJs(page)
   )
+
+  pimatic.socket.on("groupChanged", tc (group) ->
+    pimatic.updateGroupFromJs(group)
+  )
+  pimatic.socket.on("groupRemoved", tc (group) -> 
+    pimatic.removeGroup(group.id)
+  )
+  pimatic.socket.on("groupAdded", tc (group) -> 
+    pimatic.updateGroupFromJs(group)
+  )
+
   #pimatic.socket.on("item-order", tc (order) -> indexPage.updateItemOrder(order))
   pimatic.socket.on("ruleAdded", tc (rule) -> 
     pimatic.updateRuleFromJs(rule)

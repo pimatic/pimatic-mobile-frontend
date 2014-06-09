@@ -11,9 +11,6 @@ $(document).on( "pagebeforecreate", (event) ->
   handleHTML = $('#sortable-handle-template').text()
   
   class Item
-    @mapping = {
-      copy: ['deviceId']
-    }
     constructor: (@templData) ->
       ko.mapping.fromJS(templData, @constructor.mapping, this)
     update: (templData) -> 
@@ -23,15 +20,17 @@ $(document).on( "pagebeforecreate", (event) ->
       .addClass('item')
       .find("label").before($(handleHTML))
 
-  # class HeaderItem extends Item
-
-  #   @mapping = {
-  #     copy: Item.mapping.copy.concat ['headerId', 'text']
-  #   }
-
-  #   constructor: (data) ->
-  #     super(data)
-
+  class HeaderItem extends Item
+    constructor: (groups) -> 
+      if groups.length is 0
+        @title = 'Ungrouped'
+      else
+        @title = ''
+        for g, i in groups
+          if i isnt 0 then @title += ', '
+          @title += g.name()
+    afterRender: -> #nop
+    getItemTemplate: -> 'header'
   # class ButtonItem extends Item
 
   #   @mapping = {
@@ -58,6 +57,9 @@ $(document).on( "pagebeforecreate", (event) ->
 
 
   class DeviceItem extends Item
+    @mapping = {
+      copy: ['deviceId']
+    }
     constructor: (templData, @device) ->
       super(templData)
       @name = @device.name
@@ -213,7 +215,7 @@ $(document).on( "pagebeforecreate", (event) ->
 
   # Export all classe to be extendable by plugins
   pimatic.Item = Item
-  # pimatic.HeaderItem = HeaderItem
+  pimatic.HeaderItem = HeaderItem
   # pimatic.ButtonItem = ButtonItem
   # pimatic.VariableItem = VariableItem
   pimatic.DeviceItem = DeviceItem

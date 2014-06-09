@@ -240,7 +240,7 @@
           axis: 'y'
           shouldEase: false
           constrainTo: 'parent'
-          droppable: '.droppable'
+          droppable: value.droppable or '.droppable'
           overlapFunction: ($a, $b) =>
             rect1 = $a[0].getBoundingClientRect()
             rect2 = $b[0].getBoundingClientRect()

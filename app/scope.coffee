@@ -42,6 +42,15 @@ class Device
         action,
         { type: "get", url: "/api/device/#{@id}/#{action.name}" }
       )
+    @groups = ko.computed( =>
+      if @id is 'null' then return []
+      inGroups = []
+      groups = pimatic.groups()
+      for g in groups
+        if g.containsDevice(@id)
+          inGroups.push(g)
+      return inGroups
+    )
 
   update: (data) -> 
     ko.mapping.fromJS(data, @constructor.mapping, this)
@@ -94,7 +103,7 @@ class DevicePage
         unless device? then return console.error("Device should never be null")
         #console.log "Creating #{itemClass.name} for #{device.id} (#{device.template})"
         return new itemClass(data, device)
-      key: (data) => data.name
+      key: (data) => data.deviceId
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
@@ -104,12 +113,45 @@ class DevicePage
         else pimatic.pages.index.activeDevicepage() is @
       )
     )
+
+    deepEqual = (a, b) ->
+      if a.length isnt b.length then return false
+      for e, i in a
+        if e isnt b[i] then return false
+      return true
+
+    @devicesWithHeaders = ko.computed( =>
+      devices = @devices()
+      devicesWithHeaders = []
+      lastGroups = ["not equal to anything"]
+      for d in devices
+        groups = d.device.groups()
+        unless deepEqual(lastGroups, groups)
+          devicesWithHeaders.push new pimatic.HeaderItem(groups)
+          lastGroups = groups
+        devicesWithHeaders.push d
+      return devicesWithHeaders
+    )
+
   update: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
   getDeviceTemplate: (data) -> data.getDeviceTemplate()
   afterRenderDevice: (elements, item) ->
         item.afterRender(elements)
 
+class Group
+  @mapping = {
+    key: (data) => data.id
+    copy: ['id']
+  }
+  constructor: (data) ->
+    ko.mapping.fromJS(data, @constructor.mapping, this)
+  update: (data) ->
+    ko.mapping.fromJS(data, @constructor.mapping, this)
+
+  containsDevice: (deviceId) ->
+    index = ko.utils.arrayIndexOf(@devices(), deviceId)
+    return (index isnt -1)
 
 class Pimatic
   @mapping = {
@@ -137,6 +179,12 @@ class Pimatic
         target.update(data)
         return target
       key: (data) => data.id
+    groups:
+      create: ({data, parent, skip}) => new Group(data)
+      update: ({data, parent, target}) =>
+        target.update(data)
+        return target
+      key: (data) => data.id
   }
   socket: null
   inited: no
@@ -160,6 +208,7 @@ class Pimatic
       rules: []
       variables: []
       devicepages: []
+      groups: []
       errorCount: 0
       rememberme: no
       updateProcessStatus: 'idle'
@@ -245,13 +294,8 @@ class Pimatic
         break
 
   # Devicepages
-  updatePageFromJs: (pageData) ->
-    for page in @devicepages()
-      if page.id is pageData.id
-        page.update(pageData)
-        break
   getPageById: (id) -> 
-    ko.utils.arrayFirst(@devicepages(), (d) => d.id is id )
+    ko.utils.arrayFirst(@devicepages(), (p) => p.id is id )
   removePage: (pageId) ->
     @devicepages.remove( (p) => p.id is pageId )
   updatePageFromJs: (pageData) ->
@@ -261,6 +305,19 @@ class Pimatic
       @devicepages.push(page)
     else 
       page.update(pageData)
+
+  # Groups
+  getGroupById: (id) -> 
+    ko.utils.arrayFirst(@groups(), (g) => g.id is id )
+  removeGroup: (groupId) ->
+    @groups.remove( (p) => p.id is groupId )
+  updateGroupFromJs: (groupData) ->
+    group = @getGroupById(groupData.id)
+    unless group?
+      group = Pimatic.mapping.groups.create({data: groupData})
+      @groups.push(group)
+    else 
+      group.update(groupData)
 
   # Rules
   getRuleById: (id) -> 

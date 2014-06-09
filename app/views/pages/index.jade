@@ -30,7 +30,7 @@ script#device-template(type='text/template')
     span.attributes(data-bind="template: { name: 'attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")
 script#header-template(type='text/template')
   li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
-    label(data-bind="text: text")
+    label(data-bind="text: title")
 script#button-template(type='text/template')
   li.sortable.button.no-header
     label()=__('Button')
