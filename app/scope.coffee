@@ -22,6 +22,16 @@ class DeviceAttribute
   update: (data) -> 
     ko.mapping.fromJS(data, @constructor.mapping, this)
 
+  formatValue: (value) ->
+    if @type is 'boolean'
+      if @labels then (if value is true then @labels[0] else @labels[1])
+      else value.toString()
+    else
+      if @unit? and @unit.length > 0 then "#{value} #{@unit}"
+      else value
+
+
+
 class Device
   @mapping = {
     attributes:

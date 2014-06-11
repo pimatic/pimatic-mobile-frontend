@@ -3,16 +3,56 @@
 tc = pimatic.tryCatch
 $(document).on("pagecreate", '#events', tc (event) ->
 
+
+  class DeviceAttributeEvent
+
+    constructor: (@data) ->
+      @device = ko.computed( => 
+        pimatic.getDeviceById(data.deviceId) 
+      ).extend(rateLimit: {timeout: 10, method: "notifyAtFixedRate"})
+      @attribute = ko.computed( =>
+        if @device()? then @device().getAttribute(data.attributeName)
+        else null
+      )
+
+    formatedTime: () ->
+      pad = (n) => if n < 10 then "0#{n}" else "#{n}"
+      d = new Date(@data.time)
+      date = pad(d.getDate()) + '.' + pad((d.getMonth()+1)) + '.' + d.getFullYear()
+      time = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+      return """
+        <span class="date">#{date}</span> 
+        <span class="time">#{time}</span>
+      """
+
+    formatedValue: () ->
+      if @attribute()? then return @attribute().formatValue(@data.value)
+      return @data.value
+
+    formatedDeviceName: () ->
+      if @device()? then return """
+        <span class="device-name">#{@device().name()}</span> 
+        <span class="device-id">(#{@data.deviceId})</span>
+      """
+      return @data.deviceId
+
+    formatedAttributeName: () ->
+      if @attribute()? then return @attribute().label
+      return @data.attributeName
+
+
+
   class EventViewModel
 
     @mapping = {
       events:
-        create: ({data, parent, skip}) => data
+        create: ({data, parent, skip}) => new DeviceAttributeEvent(data)
         key: (data) -> "#{data.time}-#{data.deviceId}-#{data.attributeName}" 
       ignore: ['success']
     }
 
     constructor: ->
+      pimatic.devices()
       @updateFromJs([])
       @displayedEvents = ko.computed( =>
         events = @events()
@@ -28,18 +68,11 @@ $(document).on("pagecreate", '#events', tc (event) ->
         @loadEvents()
       )
 
-      # @messageCountText = ko.computed( =>
-      #   count = @messageCount()
-      #   return (
-      #     if count? then __("Showing %s of %s Messages", @displayedMessages().length, count)
-      #     else ""
-      #   )
-      # )
-
       @updateListView = ko.computed( =>
         @displayedEvents()
-        $('#events-table').table("refresh") 
-      )
+        pimatic.try => $('#events-table').table("refresh") 
+      ).extend(rateLimit: {timeout: 10, method: "notifyAtFixedRate"})
+
     updateFromJs: (data) ->
       ko.mapping.fromJS({events: data}, EventViewModel.mapping, this)
 
@@ -56,6 +89,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
         pimatic.client.rest.queryDeviceAttributeEvents( { criteria }).always( ->
           pimatic.loading "loading events", "hide"
         ).done( tc (data) =>
+          console.log "loading done"
           @loadEventsAjax = null
           if data.success
             @updateFromJs(data.events)
@@ -65,12 +99,6 @@ $(document).on("pagecreate", '#events', tc (event) ->
       unless @loadEventsAjax? then ajaxCall()
       else @loadEventsAjax.done( => ajaxCall() )
 
-    formatTime: (time) ->
-      pad = (n) => if n < 10 then "0#{n}" else "#{n}"
-      d = new Date(time)
-      date = pad(d.getDate()) + '.' + pad((d.getMonth()+1)) + '.' + d.getFullYear()
-      time = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
-      return "#{date} #{time}"
 
     # loadMessagesMeta: ->
     #   $.ajax("/api/database/queryMessagesTags",

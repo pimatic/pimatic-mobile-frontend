@@ -14,7 +14,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
     activeDevicepage: ko.observable(null)
     isSortingItems: ko.observable(no)
     enabledEditing: ko.observable(no)
-    groupDevices: ko.observable(no)
+    bindingsApplied: ko.observable(no)
 
     constructor: () ->
       @groups = pimatic.groups
@@ -31,14 +31,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
         }
       )
 
-      @devicepagesTabsRefreshImmediate = ko.computed( tc =>
-        dPages =  @devicepages()
-        enabledEditing = @enabledEditing()
-        itemTabs = $("#item-tabs")
-        ko.cleanNode(itemTabs[0])
-      )
-
       @devicepagesTabsRefresh = ko.computed( tc =>
+        unless @bindingsApplied() then return
         dPages =  @devicepages()
         enabledEditing = @enabledEditing()
         itemTabs = $("#item-tabs")
@@ -83,6 +77,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
       )
 
       ko.computed( tc () =>
+        unless @bindingsApplied() then return
         dPages = @devicepages()
         itemLists = $('#item-lists')
         ko.cleanNode(itemLists[0])
@@ -133,6 +128,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
       @itemsListViewRefresh = ko.computed( tc =>
         dp.devices() for dp in @devicepages()
+        g.devices() for g in pimatic.groups()
         @isSortingItems()
         @enabledEditing()
         pimatic.try( => 
@@ -316,6 +312,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
   try
     ko.applyBindings(indexPage, $('#index')[0])
+    indexPage.bindingsApplied(yes)
   catch e
     TraceKit.report(e)
     pimatic.storage?.removeAll()
@@ -354,22 +351,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
     indexPage.onAddPageClicked()
     return true
   )
-
-  # $('#index #items').on("click", ".device-label", (event, ui) ->
-  #   deviceId = $(this).parents(".item").data('item-id')
-  #   device = pimatic.devices[deviceId]
-  #   unless device? then return
-  #   div = $ "#device-info-popup"
-  #   div.find('.info-id .info-val').text device.id
-  #   div.find('.info-name .info-val').text device.name
-  #   div.find(".info-attr").remove()
-  #   for attrName, attr of device.attributes
-  #     attr = $('<li class="info-attr">').text(attr.label)
-  #     div.find("ul").append attr
-  #   div.find('ul').listview('refresh')
-  #   div.popup "open"
-  #   return
-  # )
 
   $("#items .handle").disableSelection()
   return

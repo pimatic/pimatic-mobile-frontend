@@ -59,12 +59,24 @@
 }
 
 .ui-mobile .ui-page-theme-a .ui-li-divider {
-  background: #fff;
-  color: #666;
-  /*text-shadow: none;*/
   border: none;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 2px solid #005994;
   border-top: 1px solid #ccc;
+  margin-bottom: -2px;
+  z-index: 10;
+}
+
+.ui-mobile .ui-page-theme-a #item-lists .ui-li-divider {
+  border-color: #ddd;
+  border-bottom: 2px solid #005994;
+}
+
+.ui-mobile .ui-page-theme-a .ui-li-divider,
+.ui-mobile .ui-page-theme-a .ui-li-divider label{
+  background: #fff;
+  color: #005994;
+  font-weight: bold !important;
+  text-shadow: none;
 }
 
 .ui-mobile .ui-page-theme-a .ui-li-divider label{
@@ -386,6 +398,29 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   color: #A0A0A0;
 }
 
+
+
+@media ( min-width: 40em ) {
+  /* Show the table header rows and set all cells to display: table-cell */
+  #events-table td,
+  #events-table th,
+  #events-table tbody th,
+  #events-table tbody td,
+  #events-table thead td,
+  #events-table thead th {
+    display: table-cell;
+    margin: 0;
+  }
+
+  #events-table .value-column {
+  text-align: right;
+}
+  /* Hide the labels in each cell */
+  #events-table td .ui-table-cell-label,
+  #events-table th .ui-table-cell-label {
+    display: none;
+  }
+}
 
 #device-items li.item a, 
 #variable-items li.item a, 

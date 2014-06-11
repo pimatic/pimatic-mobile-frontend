@@ -4,16 +4,16 @@ div#events(data-role='page')
     h3=__('Events')
   div.ui-content.overthrow
     .controls
-    table#events-table.ui-responsive.table-stroke(data-role='table', data-mode='columntoggle')
+    table#events-table.table-stroke(data-role='table', data-mode='reflow')
       thead
         tr
           th(data-priority='2') Time
           th(data-priority='3') Device ID
           th(data-priority='4') Attribute
-          th(data-priority='1') Value
+          th.value-column(data-priority='1') Value
       tbody(data-bind="foreach: displayedEvents")
         tr
-          td(data-bind="text: $root.formatTime(time)")
-          td(data-bind="text: deviceId")
-          td(data-bind="text: attributeName")
-          td(data-bind="text: value")
+          td(data-bind="html: formatedTime()")
+          td(data-bind="html: formatedDeviceName()")
+          td(data-bind="text: formatedAttributeName()")
+          td.value-column(data-bind="html: formatedValue()")
