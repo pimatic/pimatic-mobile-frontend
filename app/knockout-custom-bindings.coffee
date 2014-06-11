@@ -204,30 +204,37 @@
 
         updateOrder = =>
           {eleBefore, eleAfter} = getElementBeforeAndAfter(parent)
+          console.log {eleBefore, eleAfter} 
           unless eleBefore is null and eleAfter is null
-            sourceIndex = items.indexOf(ko.dataFor(parent[0])) 
-            targetIndex = (
-              if eleBefore?
-                data = ko.dataFor(eleBefore)
-                index = items.indexOf(data) + 1
-                if sourceIndex < index then index--
-                index
-              else 0
-            )
-            #console.log sourceIndex, targetIndex
-            if sourceIndex >= 0 and targetIndex >= 0 and sourceIndex isnt targetIndex
-              #  get the item to be moved
-              underlyingList = ko.utils.unwrapObservable(items)
-              itemToMove = underlyingList[sourceIndex]
-              # notify 'beforeChange' subscribers
-              items.valueWillMutate()
-              # move from source index ...
-              underlyingList.splice sourceIndex, 1
-              # ... to target index
-              underlyingList.splice targetIndex, 0, itemToMove
-              # notify subscribers
-              items.valueHasMutated()
-              value.sorted.call(viewModel) if value.sorted
+            inHand = ko.dataFor(parent[0])
+            before = (if eleBefore? then ko.dataFor(eleBefore))
+            after = (if eleAfter? then ko.dataFor(eleAfter))
+            if items?
+              sourceIndex = items.indexOf(inHand) 
+              targetIndex = (
+                if eleBefore?
+                  index = items.indexOf(before) + 1
+                  if sourceIndex < index then index--
+                  index
+                else 0
+              )
+              #console.log sourceIndex, targetIndex
+              if sourceIndex >= 0 and targetIndex >= 0 and sourceIndex isnt targetIndex
+                #  get the item to be moved
+                underlyingList = ko.utils.unwrapObservable(items)
+                itemToMove = underlyingList[sourceIndex]
+                # notify 'beforeChange' subscribers
+                items.valueWillMutate()
+                # move from source index ...
+                underlyingList.splice sourceIndex, 1
+                # ... to target index
+                underlyingList.splice targetIndex, 0, itemToMove
+                # notify subscribers
+                items.valueHasMutated()
+                if value.sorted?
+                  value.sorted.call(viewModel, inHand, before, after)
+            else if value.sorted?
+              value.sorted.call(viewModel, inHand, before, after)
 
         x = null
         y = null

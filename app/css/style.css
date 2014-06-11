@@ -58,6 +58,19 @@
   border-radius: 0;
 }
 
+.ui-mobile .ui-page-theme-a .ui-li-divider {
+  background: #fff;
+  color: #666;
+  /*text-shadow: none;*/
+  border: none;
+  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #ccc;
+}
+
+.ui-mobile .ui-page-theme-a .ui-li-divider label{
+  margin-bottom: 0;
+}
+
 /* make the jquery mobile loader to block all elements */
 .ui-loader-background {
     width:100%;
@@ -381,7 +394,9 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   font-weight: normal;
 }
 
-
+#device-items li.header label {
+  font-weight: bold;
+}
 
 li.rememberme, li.rememberme .ui-checkbox{
   padding: 0 !important;

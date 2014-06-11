@@ -42,14 +42,9 @@ class Device
         action,
         { type: "get", url: "/api/device/#{@id}/#{action.name}" }
       )
-    @groups = ko.computed( =>
-      if @id is 'null' then return []
-      inGroups = []
-      groups = pimatic.groups()
-      for g in groups
-        if g.containsDevice(@id)
-          inGroups.push(g)
-      return inGroups
+    @group = ko.computed( => 
+      if @id is 'null' then return null
+      pimatic.getGroupOfDevice(@id) 
     )
 
   update: (data) -> 
@@ -68,6 +63,7 @@ class Rule
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @group = ko.computed( => pimatic.getGroupOfRule(@id) )
   update: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
 
@@ -84,6 +80,7 @@ class Variable
     @displayName = ko.computed( => "$#{@name}" )
     @hasValue = ko.computed( => @value()? )
     @displayValue = ko.computed( => if @hasValue() then @value() else "null" )
+    @group = ko.computed( => pimatic.getGroupOfVariable(@name) )
   isDeviceAttribute: -> $.inArray('.', @name) isnt -1
   update: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
@@ -114,24 +111,23 @@ class DevicePage
       )
     )
 
+    @groupsWithDevices = ko.computed( =>
+      return (
+        for group in pimatic.groups()
+          devices = ko.computed( => (d for d in @devices() when d.device.group() is group) )
+          {group, devices} 
+      )
+    )
+
+    @getUngroupedDevices = ko.computed( =>
+      d for d in @devices() when not d.device.group()?
+    )
+
     deepEqual = (a, b) ->
       if a.length isnt b.length then return false
       for e, i in a
         if e isnt b[i] then return false
       return true
-
-    @devicesWithHeaders = ko.computed( =>
-      devices = @devices()
-      devicesWithHeaders = []
-      lastGroups = ["not equal to anything"]
-      for d in devices
-        groups = d.device.groups()
-        unless deepEqual(lastGroups, groups)
-          devicesWithHeaders.push new pimatic.HeaderItem(groups)
-          lastGroups = groups
-        devicesWithHeaders.push d
-      return devicesWithHeaders
-    )
 
   update: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
@@ -146,6 +142,20 @@ class Group
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @getRules = ko.computed( =>
+      rules = []
+      for ruleId in @rules()
+        ruleObj = pimatic.getRuleById(ruleId)
+        if ruleObj? then rules.push ruleObj
+      return rules
+    )
+    @getVariables = ko.computed( =>
+      variables = []
+      for variableName in @variables()
+        variableObj = pimatic.getVariableByName(variableName)
+        if variableObj? then variables.push variableObj
+      return variables
+    )
   update: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
 
@@ -287,6 +297,12 @@ class Pimatic
   # Device list
   getDeviceById: (id) -> 
     ko.utils.arrayFirst(@devices(), (d) => d.id is id )
+  getGroupOfDevice: (deviceId) ->
+    for g in @groups()
+      index = ko.utils.arrayIndexOf(g.devices(), deviceId)
+      if index isnt -1 then return g
+    return null
+
   updateDeviceAttribute: (deviceId, attrName, attrValue) ->
     for device in @devices()
       if device.id is deviceId
@@ -318,6 +334,11 @@ class Pimatic
       @groups.push(group)
     else 
       group.update(groupData)
+  getGroupOfRule: (ruleId) ->
+    for g in @groups()
+      index = ko.utils.arrayIndexOf(g.rules(), ruleId)
+      if index isnt -1 then return g
+    return null
 
   # Rules
   getRuleById: (id) -> 
@@ -331,6 +352,11 @@ class Pimatic
       @rules.push(rule)
     else 
       rule.update(ruleData)
+  updateRuleOrder: (order) ->
+    toIndex = (id) -> 
+      index = $.inArray(id, order)
+      return (if index is -1 then 999999 else index)
+    @rules.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
 
   # Variables
   removeVariable: (varName) ->
@@ -348,8 +374,23 @@ class Pimatic
       @variables.push(variable)
     else 
       variable.update(variableData)
+  updateVariableOrder: (order) ->
+    toIndex = (name) -> 
+      index = $.inArray(name, order)
+      return (if index is -1 then 999999 else index)
+    @variables.sort( (left, right) => toIndex(left.name) - toIndex(right.name) )
+  getGroupOfVariable: (variableName) ->
+    for g in @groups()
+      index = ko.utils.arrayIndexOf(g.variables(), variableName)
+      if index isnt -1 then return g
+    return null
+
 
 window.pimatic = new Pimatic()
+window.pimatic.Rule = Rule
+window.pimatic.Group = Group
+window.pimatic.Variable = Variable
+window.pimatic.DevicePage = DevicePage
 
 $(document).on( "pagebeforecreate", (event) ->
   # Just execute it one time

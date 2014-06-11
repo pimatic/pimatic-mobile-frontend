@@ -14,8 +14,11 @@ $(document).on("pagecreate", '#index', tc (event) ->
     activeDevicepage: ko.observable(null)
     isSortingItems: ko.observable(no)
     enabledEditing: ko.observable(no)
+    groupDevices: ko.observable(no)
 
     constructor: () ->
+      @groups = pimatic.groups
+
       @updateFromJs(
         ruleItemCssClass: ''
         hasRootCACert: no
@@ -73,7 +76,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
           itemTabs.html('')
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
-      @devicepagesTabsRefreshImmediate = ko.computed( tc =>
+      ko.computed( tc =>
         dPages =  @devicepages()
         itemLists = $('#item-lists')
         ko.cleanNode(itemLists[0])
@@ -87,47 +90,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
         if owl?
           owl.destroy()
         if dPages.length > 0
-          html = ''
-          for page, i in dPages
-            html += """
-              <div data-bind="with: devicepages()[#{i}]">
-                <ul 
-                    data-role="listview" 
-                    data-pageid="#{page.id}" 
-                    class="items" 
-                    data-bind="sortable: {
-                      items: devices, 
-                      isSorting: $root.isSortingItems, 
-                      sorted: $root.onItemsSorted, 
-                      drop: $root.onDropItemOnTrash,
-                      droppable: '.droppable#{i}'
-                    }"
-                >
-                  <!-- ko template: { 
-                    name: $root.getItemTemplate, 
-                    foreach: devices, 
-                    afterRender: afterRenderDevice 
-                  } --><!-- /ko -->
-                  <li
-                    id="delete-item" 
-                    class="droppable#{i}" 
-                    data-theme='a'
-                    data-icon="delete"
-                    data-bind="visible: $root.isSortingItems"
-                  >
-                    #{__('Drop here to remove item')}
-                  </li>
-                  <li id="add-item-link" data-bind="visible: $root.enabledEditing() && !$root.isSortingItems()">
-                    <a data-transition='slidefade'  href='#add-item', data-bind="click: $root.onAddItemClicked">
-                      #{__('Add a new item')+'...'}
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            """
+          html = $('#devicepages-template').text()
           itemLists.html(html)
-          for page in dPages
-            pageUl = itemLists.find("ul[data-pageid=#{page.id}]")
           ko.applyBindings(this, itemLists[0]) if ko.dataFor($('#index')[0])?
           itemLists.find('[data-role="listview"]').listview()
           itemLists.owlCarousel({
@@ -148,8 +112,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
           })
         else
           itemLists.html('')
-        
        ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
+
 
       @activeDevicepage.subscribe( (ap) =>
         unless ap? then return
@@ -274,21 +238,59 @@ $(document).on("pagecreate", '#index', tc (event) ->
         pimatic.loading "enableediting", "hide"
       ).done(ajaxShowToast)
 
-    onItemsSorted: () =>
-      page = @activeDevicepage()
-      unless page? then return
-      devicesOrder = (device.deviceId for device in page.devices())
-      pimatic.loading "itemorder", "show", text: __('Saving')
-      params = {
-        pageId: page.id, 
-        page:
-          devicesOrder: devicesOrder
-      }
-      pimatic.client.rest.updatePage(params, global: no)
-      .always( ->
-        pimatic.loading "itemorder", "hide"
-      ).done(ajaxShowToast)
-      .fail(ajaxAlertFail)
+    onItemsSorted: (item, eleBefore, eleAfter) =>
+
+      addToGroup = (group, itemBefore) =>
+        position = (
+          unless itemBefore? then 0 
+          else ko.utils.arrayIndexOf(group.devices(), itemBefore.device.id) + 1
+        )
+        if position is -1 then position = 0
+        groupId = group.id
+
+        pimatic.client.rest.addDeviceToGroup({deviceId: item.device.id, groupId: groupId, position: position})
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+
+      removeFromGroup = ( (group) =>
+        groupId = group.id
+        pimatic.client.rest.removeDeviceFromGroup({deviceId: item.device.id, groupId: groupId})
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+      )
+
+      updatePageDeviceOrder = ( (itemBefore) =>
+        devicesOrder = []
+        unless itemBefore?
+          devicesOrder.push item.device.id 
+        for it in @activeDevicepage().devices()
+          if it is item then continue
+          devicesOrder.push(it.device.id)
+          if itemBefore? and it is itemBefore
+            devicesOrder.push(item.device.id)
+        pimatic.client.rest.updatePage({pageId: @activeDevicepage().id, page: {devicesOrder: devicesOrder}})
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+      )
+      
+      if eleBefore?
+        if eleBefore instanceof pimatic.DeviceItem then g1 = eleBefore.device.group()
+        else if eleBefore.group instanceof pimatic.Group then g1 = eleBefore.group
+        else g1 = null
+        itemBefore = (if eleBefore instanceof pimatic.DeviceItem then eleBefore)
+        g2 = item.device.group()
+
+        if g1 isnt g2
+          if g1?
+            addToGroup(g1, itemBefore)
+            updatePageDeviceOrder(itemBefore)
+          else if g2?
+            removeFromGroup(g2)
+            updatePageDeviceOrder(itemBefore)
+          else
+            updatePageDeviceOrder(itemBefore)
+        else
+          updatePageDeviceOrder(itemBefore)
 
     onDropItemOnTrash: (item) =>
       really = confirm(__("Do you really want to delete the item?"))
