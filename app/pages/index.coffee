@@ -268,7 +268,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
           devicesOrder.push(it.device.id)
           if itemBefore? and it is itemBefore
             devicesOrder.push(item.device.id)
-        pimatic.client.rest.updatePage({pageId: @activeDevicepage().id, page: {devicesOrder: devicesOrder}})
+        pimatic.client.rest.updatePage({pageId: @activeDevicepage().id, page: {devicesOrder}})
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
       )

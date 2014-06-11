@@ -113,15 +113,15 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
       )
 
       updateGroupVariableOrder = ( (group, variableBefore) =>
-        variableOrder = []
+        variablesOrder = []
         unless variableBefore?
-          variableOrder.push variable.name 
+          variablesOrder.push variable.name 
         for variableName in group.variables()
           if variableName is variable.name then continue
-          variableOrder.push(variableName)
+          variablesOrder.push(variableName)
           if variableBefore? and variableName is variableBefore.name
-            variableOrder.push(variable.name)
-        pimatic.client.rest.updateVariableGroupOrder({groupId: group.id, variableOrder})
+            variablesOrder.push(variable.name)
+        pimatic.client.rest.updateGroup({groupId: group.id, group:{variablesOrder}})
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
       )

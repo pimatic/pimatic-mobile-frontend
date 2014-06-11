@@ -89,15 +89,15 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       )
 
       updateGroupRuleOrder = ( (group, ruleBefore) =>
-        ruleOrder = []
+        rulesOrder = []
         unless ruleBefore?
-          ruleOrder.push rule.id 
+          rulesOrder.push rule.id 
         for ruleId in group.rules()
           if ruleId is rule.id then continue
-          ruleOrder.push(ruleId)
+          rulesOrder.push(ruleId)
           if ruleBefore? and ruleId is ruleBefore.id
-            ruleOrder.push(rule.id)
-        pimatic.client.rest.updateRuleGroupOrder({groupId: group.id, ruleOrder})
+            rulesOrder.push(rule.id)
+        pimatic.client.rest.updateGroup({groupId: group.id, group:{rulesOrder}})
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
       )
