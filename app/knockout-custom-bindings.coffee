@@ -204,7 +204,6 @@
 
         updateOrder = =>
           {eleBefore, eleAfter} = getElementBeforeAndAfter(parent)
-          console.log {eleBefore, eleAfter} 
           unless eleBefore is null and eleAfter is null
             inHand = ko.dataFor(parent[0])
             before = (if eleBefore? then ko.dataFor(eleBefore))

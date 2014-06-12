@@ -114,12 +114,6 @@ class DevicePage
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
-    @isActive = ko.computed( =>
-      return(
-        unless pimatic.pages.index? then no
-        else pimatic.pages.index.activeDevicepage() is @
-      )
-    )
 
     @groupsWithDevices = ko.computed( =>
       return (

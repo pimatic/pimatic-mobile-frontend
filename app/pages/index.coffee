@@ -47,7 +47,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
                   data-bind="attr: {
                     href: '#item-tab-'+$data.id}, 
                     text: name, 
-                    css: {'ui-btn-active': $data.isActive}, 
+                    css: {'ui-btn-active': $data == $root.activeDevicepage()}, 
                     click: $root.onPageTabClicked"
                 ></a>
               </li>
@@ -119,7 +119,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
         owl.goTo(index)
       )
 
-      @devicepages.subscribe( (dps) =>
+      ko.computed( =>
+        dps = @devicepages()
         if dps.length is 0
           @activeDevicepage(null)
         else unless @activeDevicepage()?
