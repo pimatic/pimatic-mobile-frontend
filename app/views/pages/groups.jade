@@ -1,0 +1,17 @@
+script#group-template(type="text/template")
+  li.group.sortable
+    a(data-transition='slidefade', href='#edit-group', data-bind="click: $root.onEditGroupClicked")
+      span.name(data-bind="text: $data.name()")
+div#groups-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingGroups() }")
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
+    h3=__("Groups")
+    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
+      
+  div.ui-content.overthrow
+    ul#groups(data-role='listview', data-bind="sortable: {isSorting: isSortingGroups, sorted: onGroupsSorted, drop: onDropGroupOnTrash}")
+      <!-- ko template: { name: 'group-template', foreach: groups, afterRender: $root.afterRenderGroup} --><!-- /ko -->
+      li#delete-group.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingGroups()")=__('Drop here to remove group')
+      li#add-group(data-bind="visible: $root.enabledEditing() && !$root.isSortingGroups() ")
+        a(data-transition='slidefade', href='#edit-group', data-bind="click: $root.onAddGroupClicked")=__('Add a new group')+'...'
+       div.drag-message

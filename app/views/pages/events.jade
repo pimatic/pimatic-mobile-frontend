@@ -4,13 +4,15 @@ div#events(data-role='page')
     h3=__('Events')
   div.ui-content.overthrow
     .controls
+      select#select-device(name='select-device', data-mini="true", data-inline="true", data-bind="jqmoptions: devices, value: chosenDevice")
+      select#select-attribute(name='select-attribute', data-mini="true", data-inline="true", data-bind="jqmoptions: attributes, value: chosenAttribute")
     table#events-table.table-stroke(data-role='table', data-mode='reflow')
       thead
         tr
-          th(data-priority='2') Time
-          th(data-priority='3') Device ID
-          th(data-priority='4') Attribute
-          th.value-column(data-priority='1') Value
+          th(data-priority='2')=__('Time')
+          th(data-priority='3')=__('Device')
+          th(data-priority='4')=__('Attribute')
+          th.value-column(data-priority='1')=__('Value')
       tbody(data-bind="foreach: displayedEvents")
         tr
           td(data-bind="html: formatedTime()")

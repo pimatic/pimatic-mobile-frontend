@@ -147,16 +147,16 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
             updateVariableOrder(variableBefore)
 
     onDropVariableOnTrash: (variable) ->
-      really = confirm(__("Do you really want to delete variable: %s?", '$' + variable.name))
+      really = confirm(__("Do you really want to delete the variable %s?", variable.name))
       if really then (doDeletion = =>
-        pimatic.loading "deletevariable", "show", text: __('Saving')
-        $.get("/api/variable/#{variable.name}/remove").done( (data) =>
-          if data.success
-            @variables.remove(variable)
-        ).always( => 
-          pimatic.loading "deletevariable", "hide"
-        ).done(ajaxShowToast).fail(ajaxAlertFail)
-      )() 
+          pimatic.loading "deletevariable", "show", text: __('Saving')
+          pimatic.client.rest.removeVariable(name: variable.name).done( (data) =>
+            if data.success
+              @variables.remove(variable)
+          ).always( => 
+            pimatic.loading "deletevariable", "hide"
+          ).done(ajaxShowToast).fail(ajaxAlertFail)
+        )()
 
     onAddVariableClicked: ->
       editVariablePage = pimatic.pages.editVariable

@@ -124,8 +124,9 @@ class DevicePage
     @groupsWithDevices = ko.computed( =>
       return (
         for group in pimatic.groups()
-          devices = ko.computed( => (d for d in @devices() when d.device.group() is group) )
-          {group, devices} 
+          do (group) =>
+            devices = ko.computed( => (d for d in @devices() when d.device.group() is group) )
+            {group, devices} 
       )
     )
 
@@ -349,6 +350,11 @@ class Pimatic
       index = ko.utils.arrayIndexOf(g.rules(), ruleId)
       if index isnt -1 then return g
     return null
+  updateGroupOrder: (order) ->
+    toIndex = (id) -> 
+      index = $.inArray(id, order)
+      return (if index is -1 then 999999 else index)
+    @groups.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )    
 
   # Rules
   getRuleById: (id) -> 

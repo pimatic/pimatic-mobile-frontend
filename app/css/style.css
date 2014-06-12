@@ -245,7 +245,8 @@ body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 .unlocked ul.items li.sortable,
 .unlocked ul#variables li.sortable a,
-.unlocked ul#rules li.sortable a {
+.unlocked ul#rules li.sortable a,
+.unlocked ul#groups li.sortable a {
   padding-left: 36px;
 }
 

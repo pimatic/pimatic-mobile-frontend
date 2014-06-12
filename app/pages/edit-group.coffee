@@ -11,7 +11,7 @@ $(document).on("pagebeforecreate", (event) ->
     groupId: ko.observable('')
 
     constructor: ->
-      @groupTitle = ko.computed( => 
+      @pageTitle = ko.computed( => 
         return (if @action() is 'add' then __('Add New Group') else __('Edit Group'))
       )
     resetFields: () ->
@@ -31,7 +31,7 @@ $(document).on("pagebeforecreate", (event) ->
           when 'update' then pimatic.client.rest.updateGroup(params)
           else throw new Error("Illegal devicegroup action: #{action()}")
       ).done( (data) ->
-        if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+        if data.success then $.mobile.changePage '#groups-page', {transition: 'slide', reverse: true}   
         else alert data.error
       ).fail(ajaxAlertFail)
       return false
@@ -39,7 +39,7 @@ $(document).on("pagebeforecreate", (event) ->
     onRemove: ->
       pimatic.client.rest.removeGroup({groupId: @groupId()})
         .done( (data) ->
-          if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+          if data.success then $.mobile.changePage '#groups-page', {transition: 'slide', reverse: true}   
           else alert data.error
         ).fail(ajaxAlertFail)
       return false
@@ -51,9 +51,9 @@ $(document).on("pagebeforecreate", (event) ->
   return
 )
 
-$(document).on("pagecreate", '#edit-devicepage', (event) ->
+$(document).on("pagecreate", '#edit-group', (event) ->
   try
-    ko.applyBindings(pimatic.pages.editGroup, $('#edit-devicepage')[0])
+    ko.applyBindings(pimatic.pages.editGroup, $('#edit-group')[0])
   catch e
     TraceKit.report(e)
 )

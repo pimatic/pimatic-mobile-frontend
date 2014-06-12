@@ -51,14 +51,21 @@ $(document).on("pagecreate", '#events', tc (event) ->
       ignore: ['success']
     }
 
+    devices: ko.observableArray(['All'])
+    chosenDevice: ko.observable()
+    attributes: ko.observableArray(['All'])
+    chosenAttribute: ko.observable()
+
     constructor: ->
-      pimatic.devices()
       @updateFromJs([])
       @displayedEvents = ko.computed( =>
         events = @events()
+        chosenDevice = @chosenDevice()
+        chosenAttribute = @chosenAttribute()
         displayed = (
           e for e in events when (
-            true # m.level in chosenLevels and (chosenTag is 'All' or chosenTag in m.tags)
+            (chosenDevice is 'All' or chosenDevice is e.data.deviceId) and
+            (chosenAttribute is 'All' or chosenAttribute is e.data.attributeName)
           )
         )
         return displayed
@@ -89,9 +96,13 @@ $(document).on("pagecreate", '#events', tc (event) ->
         pimatic.client.rest.queryDeviceAttributeEvents( { criteria }).always( ->
           pimatic.loading "loading events", "hide"
         ).done( tc (data) =>
-          console.log "loading done"
           @loadEventsAjax = null
           if data.success
+            for item in data.events
+              unless item.deviceId in @devices()
+                @devices.push item.deviceId
+              unless item.attributeName in @attributes()
+                @attributes.push item.attributeName
             @updateFromJs(data.events)
           return
         ).fail(ajaxAlertFail)

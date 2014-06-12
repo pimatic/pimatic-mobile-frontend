@@ -628,9 +628,10 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/add-item.coffee"
               "pimatic-mobile-frontend/app/pages/edit-rule.coffee"
               "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
-              "pimatic-mobile-frontend/app/pages/edit-groups.coffee"
+              "pimatic-mobile-frontend/app/pages/edit-group.coffee"
               "pimatic-mobile-frontend/app/pages/index.coffee"
               "pimatic-mobile-frontend/app/pages/rules.coffee"
+              "pimatic-mobile-frontend/app/pages/groups.coffee"
               "pimatic-mobile-frontend/app/pages/variables.coffee"
               "pimatic-mobile-frontend/app/pages/log-messages.coffee"
               "pimatic-mobile-frontend/app/pages/events.coffee"
@@ -849,7 +850,7 @@ module.exports = (env) ->
       ).value()
 
     getVariables: () =>
-      variables = @framework.variableManager.getAllVariables()
+      variables = @framework.variableManager.getVariables()
       # sort rules by ordering in config
       order = _(@config.variables).map( (r) => r.name )
       variables = _(variables).sortBy( (r) => 

@@ -20,16 +20,14 @@ div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEdit
     ul#variables(data-role='listview', data-bind="sortable: {isSorting: isSortingVariables, sorted: onVariablesSorted, drop: onDropVariableOnTrash}")
       <!-- ko template: { name: 'variable-groups-template', foreach: groups} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $root.getUngroupedVariables().length > 0  -->
-      <!-- ko with: $root -->
       li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
         label()=__('Ungrouped')
       <!-- ko template: { name: 'variable-template', foreach: $root.getUngroupedVariables, afterRender: $root.afterRenderVariable } --><!-- /ko -->
+      <!-- /ko -->
       <!-- ko if: !$root.enabledEditing() && $root.getDeviceAttributeVariables().length > 0  -->
       li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
         label()=__('Device Attributes')
       <!-- ko template: { name: 'variable-template', foreach: $root.getDeviceAttributeVariables, afterRender: $root.afterRenderVariable } --><!-- /ko -->
-      <!-- /ko -->
-      <!-- /ko -->
       <!-- /ko -->
       li#delete-variable.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
       li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")

@@ -66,6 +66,10 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("groupAdded", tc (group) -> 
     pimatic.updateGroupFromJs(group)
   )
+  pimatic.socket.on("groupOrderChanged", tc (order) -> 
+    pimatic.updateGroupOrder(order)
+  )
+
 
   pimatic.socket.on("ruleAdded", tc (rule) -> 
     pimatic.updateRuleFromJs(rule)
@@ -92,7 +96,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("variableRemoved", tc (variable) -> 
     pimatic.removeVariable(variable.name)
   )
-  pimatic.socket.on("ruleVariableChanged", tc (order) -> 
+  pimatic.socket.on("variableOrderChanged", tc (order) -> 
     pimatic.updateVariableOrder(order)
   )
 
