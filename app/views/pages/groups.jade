@@ -14,4 +14,3 @@ div#groups-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing
       li#delete-group.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingGroups()")=__('Drop here to remove group')
       li#add-group(data-bind="visible: $root.enabledEditing() && !$root.isSortingGroups() ")
         a(data-transition='slidefade', href='#edit-group', data-bind="click: $root.onAddGroupClicked")=__('Add a new group')+'...'
-       div.drag-message
