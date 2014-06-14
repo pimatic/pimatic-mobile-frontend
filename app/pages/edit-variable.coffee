@@ -49,11 +49,13 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      pimatic.client.rest.removeVariable({name: @variableName()})
-        .done( (data) ->
-          if data.success then $.mobile.changePage '#variables-page', {transition: 'slide', reverse: true}   
-          else alert data.error
-        ).fail(ajaxAlertFail)
+      really = confirm(__("Do you really want to delete the %s variable?", rule.variableName()))
+      if really
+        pimatic.client.rest.removeVariable({name: @variableName()})
+          .done( (data) ->
+            if data.success then $.mobile.changePage '#variables-page', {transition: 'slide', reverse: true}   
+            else alert data.error
+          ).fail(ajaxAlertFail)
       return false
 
   try

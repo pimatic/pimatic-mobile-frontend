@@ -35,7 +35,7 @@ script#buttons-template(type='text/template')
   li.sortable.button.no-header
     label.device-label(data-bind="text: name")
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
-      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
+      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress, click onButtonPress")
 script#variable-item-template(type='text/template')
   li.sortable.variable.no-header
     label(data-bind="text: name")

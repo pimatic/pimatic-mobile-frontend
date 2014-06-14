@@ -37,12 +37,14 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      pimatic.client.rest.removePage({pageId: @pageId()})
-        .done( (data) ->
-          if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
-          else alert data.error
-        ).fail(ajaxAlertFail)
-      return false
+      really = confirm(__("Do you really want to delete the %s rule?", rule.pageName()))
+      if really
+        pimatic.client.rest.removePage({pageId: @pageId()})
+          .done( (data) ->
+            if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+            else alert data.error
+          ).fail(ajaxAlertFail)
+        return false
 
   try
     pimatic.pages.editDevicepage = new EditDevicepageViewModel()

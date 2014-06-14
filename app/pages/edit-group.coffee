@@ -37,11 +37,13 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      pimatic.client.rest.removeGroup({groupId: @groupId()})
-        .done( (data) ->
-          if data.success then $.mobile.changePage '#groups-page', {transition: 'slide', reverse: true}   
-          else alert data.error
-        ).fail(ajaxAlertFail)
+      really = confirm(__("Do you really want to delete the %s group?", rule.groupName()))
+      if really
+        pimatic.client.rest.removeGroup({groupId: @groupId()})
+          .done( (data) ->
+            if data.success then $.mobile.changePage '#groups-page', {transition: 'slide', reverse: true}   
+            else alert data.error
+          ).fail(ajaxAlertFail)
       return false
 
   try

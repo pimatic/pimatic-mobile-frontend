@@ -27,6 +27,6 @@ div#edit-rule(data-role='page')
           a#edit-rule-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: onSubmit")=__('Save')
       div(data-bind="visible: action() == 'update'")
         a#edit-rule-remove.delete-button.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
-          data-bind="click: onRemove", data-role="button", href='#rules-page')=__('Delete this group')
+          data-bind="click: onRemove", data-role="button", href='#rules-page')=__('Delete This Rule')
         a#edit-rule-copy.ui-btn.ui-icon-delete.ui-btn-icon-left(
-          data-bind="click: onCopy", data-role="button", href='#rules-page')=__('Copy as new')
+          data-bind="click: onCopy", data-role="button", href='#rules-page')=__('Copy as New')

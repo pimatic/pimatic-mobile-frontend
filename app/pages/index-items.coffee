@@ -196,6 +196,11 @@ $(document).on( "pagebeforecreate", (event) ->
 
     getItemTemplate: => 'buttons'
 
+    onButtonPress: (button) =>
+      @device.rest.buttonPressed({buttonId: button.id}, global: no)
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+
   # class VariableItem extends Item
   #   @mapping = {
   #     copy: Item.mapping.copy.concat ['name']

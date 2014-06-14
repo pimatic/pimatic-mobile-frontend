@@ -65,11 +65,13 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      pimatic.client.rest.removeRule({ruleId: @ruleId()})
-        .done( (data) ->
-          if data.success then $.mobile.changePage '#rules-page', {transition: 'slide', reverse: true}   
-          else alert data.error
-        ).fail(ajaxAlertFail)
+      really = confirm(__("Do you really want to delete the %s rule?", @ruleName()))
+      if really
+        pimatic.client.rest.removeRule({ruleId: @ruleId()})
+          .done( (data) ->
+            if data.success then $.mobile.changePage '#rules-page', {transition: 'slide', reverse: true}   
+            else alert data.error
+          ).fail(ajaxAlertFail)
       return false
 
     onCopy: ->
