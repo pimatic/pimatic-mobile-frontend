@@ -18,6 +18,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
     constructor: () ->
       @groups = pimatic.groups
+      @rememberme = pimatic.rememberme
 
       @updateFromJs(
         ruleItemCssClass: ''

@@ -618,6 +618,8 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/knockout.mapping.js"
               "pimatic-mobile-frontend/app/js/overthrow.js"
               "pimatic-mobile-frontend/app/js/owl.carousel.js"
+              "pimatic-mobile-frontend/app/js/highstock.js"
+              "pimatic-mobile-frontend/app/js/touch-tooltip-fix.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -638,6 +640,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/plugins.coffee"
               "pimatic-mobile-frontend/app/pages/updates.coffee"
               "pimatic-mobile-frontend/app/pages/edit-devicepage.coffee"
+              "pimatic-mobile-frontend/app/pages/graph.coffee"
             ] .concat @additionalAssetFiles['js']
             
           css:

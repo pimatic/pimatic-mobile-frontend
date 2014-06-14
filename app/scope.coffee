@@ -66,6 +66,11 @@ class Device
     if attribute?
       attribute.value(attrValue)
 
+  hasAttibuteWith: (predicate) ->
+    for attr in @attributes()
+      if predicate(attr) then return yes
+    return false
+
 class Rule
   @mapping = {
     key: (data) => data.id
@@ -147,6 +152,13 @@ class Group
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @getDevices = ko.computed( =>
+      devices = []
+      for deviceId in @devices()
+        deviceObj = pimatic.getDeviceById(deviceId)
+        if deviceObj? then devices.push deviceObj
+      return devices
+    )
     @getRules = ko.computed( =>
       rules = []
       for ruleId in @rules()
@@ -163,6 +175,12 @@ class Group
     )
   update: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
+
+  getDevicesWithAttibute: (predicate) ->
+    return ( d for d in @getDevices() when d.hasAttibuteWith(predicate) )
+
+  getDevicesWithNumericAttribute: ->
+    return @getDevicesWithAttibute( (attr) => attr.type is "number" )
 
   containsDevice: (deviceId) ->
     index = ko.utils.arrayIndexOf(@devices(), deviceId)
@@ -264,8 +282,14 @@ class Pimatic
         pimatic.storage = $.localStorage
       else
         pimatic.storage = $.sessionStorage
+      allData.scope.rememberMe = shouldRememberMe
       pimatic.storage.set('pimatic', allData)
     )
+
+    @getUngroupedDevices = ko.computed( =>
+      d for d in @devices() when not d.group()?
+    )
+
 
   loadDataFromStorage: ->
     @_dataLoaded = yes

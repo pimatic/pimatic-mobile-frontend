@@ -1,0 +1,51 @@
+script#graph-group-template(type='text/template')
+  <!-- ko if: $data.getDevicesWithNumericAttribute().length > 0  -->
+  li(data-role='list-divider', data-theme=theme.dividerSwatch)
+    label(data-bind="text: name")
+  <!-- ko template: { name: 'graph-device-template', foreach: $data.getDevicesWithNumericAttribute() } --><!-- /ko -->
+  <!-- /ko -->
+script#graph-device-template(type='text/template')
+  li.graph-device
+    label(data-bind='text: name')
+    <!-- ko template: { name: 'graph-attribute-template', foreach: $data.attributes(), afterRender: $root.afterRenderAttribute } --><!-- /ko -->
+script#graph-attribute-template(type='text/template')
+  <!-- ko if: $data.type == "number" -->
+  div.graph-device-attribute(data-role="fieldcontain")
+    span.name(data-bind='text: name')
+    div.controls(data-role="controlgroup")
+      label=__('Show: ')
+      select.show-switch(data-role="slider")
+        option(value="no")=__('No')
+        option(value="yes")=__('Yes')
+  <!-- /ko -->
+div#graph-page(data-role='page')
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
+      data-inline='true', data-transition="slide", data-direction="reverse")=__('Back')
+    h3=__('Graph')
+  div.ui-content.overthrow
+    //-   li(data-role='list-divider')=__('Sensor values')
+    div#chart-container
+      div(data-role='fieldcontain')
+        label(for='chart-select-range')=__('Show data of: ') + " "
+        select#chart-select-range(name='chart-select-range', data-bind="value: chosenRange")
+          option(value="day")=__('Last 24 hours')
+          option(value="week")=__('Last 7 days')
+          option(value="month")=__('Last 30 days')
+          option(value="year")=__('Last 365 days')
+      div#chart
+    //-   div#chart-info
+    //-     span=__('Last Update: ')
+    //-     span.last-update-time
+    //-     span=' ('
+    //-     span.last-update-value
+    //-     soan=')'
+
+    ul#graph-device-list(data-role='listview', data-inset='true')
+      <!-- ko template: { name: 'graph-group-template', foreach: groups} --><!-- /ko -->
+      <!-- ko if: $root.getUngroupedDevicesWithNumericAttribute().length > 0  -->
+      li(data-role='list-divider', data-theme=theme.dividerSwatch)
+        label()=__('Ungrouped')
+      <!-- ko template: { name: 'graph-device-template', foreach: $root.getUngroupedDevicesWithNumericAttribute() } --><!-- /ko -->
+      <!-- /ko -->
+
