@@ -179,7 +179,7 @@ body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 
-#index li.button a, #index li.shutter-device .shutter-buttons {
+#index li.button div.buttons, #index li.shutter-device .shutter-buttons {
   margin: 3px 10px 3px 0 !important;
   position: absolute;
   right: 0;

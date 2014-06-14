@@ -31,30 +31,6 @@ $(document).on( "pagebeforecreate", (event) ->
           @title += g.name()
     afterRender: -> #nop
     getItemTemplate: -> 'header'
-  # class ButtonItem extends Item
-
-  #   @mapping = {
-  #     copy: Item.mapping.copy.concat ['buttonId', 'text']
-  #   }
-
-  #   constructor: (data) ->
-  #     super(data)
-  #   afterRender: (elements) -> 
-  #     super(elements)
-  #   onButtonPress: ->
-  #     $.get("/button-pressed/#{@buttonId}").fail(ajaxAlertFail)
-
-  # class VariableItem extends Item
-  #   @mapping = {
-  #     copy: Item.mapping.copy.concat ['name']
-  #     observe: ["value"]
-  #   }
-  #   constructor: (data) ->
-  #     unless data.value then data.value = null
-  #     super(data)
-  #   afterRender: (elements) -> 
-  #     super(elements)
-
 
   class DeviceItem extends Item
     @mapping = {
@@ -213,10 +189,28 @@ $(document).on( "pagebeforecreate", (event) ->
       position = @getAttribute('position').value()
       @_updateButtons(position) if position?
 
+  class ButtonsItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+
+    getItemTemplate: => 'buttons'
+
+  # class VariableItem extends Item
+  #   @mapping = {
+  #     copy: Item.mapping.copy.concat ['name']
+  #     observe: ["value"]
+  #   }
+  #   constructor: (data) ->
+  #     unless data.value then data.value = null
+  #     super(data)
+  #   afterRender: (elements) -> 
+  #     super(elements)
+
   # Export all classe to be extendable by plugins
   pimatic.Item = Item
   pimatic.HeaderItem = HeaderItem
-  # pimatic.ButtonItem = ButtonItem
+  pimatic.ButtonsItem = ButtonsItem
   # pimatic.VariableItem = VariableItem
   pimatic.DeviceItem = DeviceItem
   pimatic.SwitchItem = SwitchItem
@@ -229,7 +223,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
     header: pimatic.HeaderItem
-    button: pimatic.ButtonItem
+    buttons: pimatic.ButtonsItem
     variable: pimatic.VariableItem
     device: pimatic.DeviceItem  
     switch: pimatic.SwitchItem

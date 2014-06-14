@@ -41,9 +41,12 @@ class Device
         return target
       key: (data) => data.name
     observe: ["name", "attributes"]
+    include: ["config"]
+
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @configObserve = ko.observable(data.config)
     @rest = {}
     for action in @actions
       pimatic.client.createRestAction(
@@ -57,8 +60,19 @@ class Device
       pimatic.getGroupOfDevice(@id) 
     )
 
+    @configWithDefaults = ko.computed( =>
+      result = {}
+      for name, c of @configDefaults
+        result[name] = c
+      for name, c of @configObserve()
+        result[name] = c
+      return result
+    )
+
   update: (data) -> 
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @configObserve(data.config)
+
   getAttribute: (name) -> ko.utils.arrayFirst(@attributes(), (a) => a.name is name )
   updateAttribute: (attrName, attrValue) ->
     #console.log "updating", attrName, attrValue
@@ -421,6 +435,7 @@ class Pimatic
 
 
 window.pimatic = new Pimatic()
+window.pimatic.Device = Device
 window.pimatic.Rule = Rule
 window.pimatic.Group = Group
 window.pimatic.Variable = Variable
