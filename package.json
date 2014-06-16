@@ -21,14 +21,11 @@
   },
   "bundledDependencies": [
     "jade",
-    "socket.io",
     "nap",
     "render-appcache-manifest"
   ],
   "dependencies": {
-    "ws": "0.4.31",
     "jade": "1.1.4",
-    "socket.io": "0.9.16",
     "nap": "0.7.15",
     "render-appcache-manifest": "0.3.0"
   },
