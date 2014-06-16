@@ -289,15 +289,13 @@ li .edit-handle .ui-icon:after{
   display: none;
 }
 
-#delete-item, #delete-rule, #delete-variable, 
-.ui-mobile .delete-button {
+html.ui-mobile body .delete-link{
   background-color: #cc2929;
   border-color: #AA0000;
   color: #fff;
 }
 
-#delete-item, #delete-rule, #delete-variable, 
-.ui-mobile .delete-button:hover {
+html.ui-mobile body .delete-link:hover {
   background-color: #CC0000;
   border-color: #AA0000;
   color: #fff;

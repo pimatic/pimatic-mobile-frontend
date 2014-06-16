@@ -37,7 +37,7 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      really = confirm(__("Do you really want to delete the %s group?", rule.groupName()))
+      really = confirm(__("Do you really want to delete the %s group?", @groupName()))
       if really
         pimatic.client.rest.removeGroup({groupId: @groupId()})
           .done( (data) ->

@@ -50,10 +50,8 @@ $(document).on( "pagebeforecreate", '#groups-page', tc (event) ->
       really = confirm(__("Do you really want to delete the %s group?", group.name()))
       if really then (doDeletion = =>
           pimatic.loading "deletegroup", "show", text: __('Saving')
-          pimatic.client.rest.removeGroup(groupId: group.id).done( (data) =>
-            if data.success
-              @groups.remove(group)
-          ).always( => 
+          pimatic.client.rest.removeGroup(groupId: group.id)
+          .always( => 
             pimatic.loading "deletegroup", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)
         )()

@@ -58,14 +58,14 @@ script#devicepages-template(type='text/template')
 script#devicepage-template(type='text/template')
   div(data-bind="id: 'device-page-'+$data.id()")
     ul(data-role="listview", class="items", 
-      data-bind="sortable: {isSorting: $root.isSortingItems, sorted: $root.onItemsSorted, drop: $root.onDropItemOnTrash,droppable: '.droppable#{i}'}")
+      data-bind="sortable: {isSorting: $root.isSortingItems, sorted: $root.onItemsSorted, drop: $root.onDropItemOnTrash, droppable: '.droppable-' + $data.id}")
       <!-- ko template: { name: 'device-group-template', foreach: groupsWithDevices} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $data.getUngroupedDevices().length > 0  -->
       li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
         label()=__('Ungrouped')
       <!-- ko template: { name: $root.getItemTemplate, foreach: $data.getUngroupedDevices, afterRender: $data.afterRenderDevice } --><!-- /ko -->
       <!-- /ko -->
-      li(data-theme='a', data-icon="delete", data-bind="visible: $root.isSortingItems, attr: {id: 'delete-item-' + $data.id}, css: 'droppable-' + $data.id")=__('Drop here to remove item')
+      li.delete-link(data-theme='a', data-icon="delete", data-bind="visible: $root.isSortingItems, attr: {id: 'delete-item-' + $data.id}, css: 'droppable-' + $data.id")=__('Drop here to remove item')
       li(data-bind="visible: $root.enabledEditing() && !$root.isSortingItems(), attr: {id: 'add-item-link-' + $data.id}")
         a(data-transition='slidefade', href='#add-item', data-bind="click: $root.onAddItemClicked")=__('Add a new item')+'...'
 script#device-group-template(type='text/template')

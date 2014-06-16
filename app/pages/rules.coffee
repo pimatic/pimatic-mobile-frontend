@@ -126,10 +126,8 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       really = confirm(__("Do you really want to delete the %s rule?", rule.name()))
       if really then (doDeletion = =>
           pimatic.loading "deleterule", "show", text: __('Saving')
-          pimatic.client.rest.removeRule(ruleId: rule.id).done( (data) =>
-            if data.success
-              @rules.remove(rule)
-          ).always( => 
+          pimatic.client.rest.removeRule(ruleId: rule.id)
+          .always( => 
             pimatic.loading "deleterule", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)
         )()

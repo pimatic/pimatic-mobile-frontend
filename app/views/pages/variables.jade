@@ -29,7 +29,7 @@ div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEdit
         label()=__('Device Attributes')
       <!-- ko template: { name: 'variable-template', foreach: $root.getDeviceAttributeVariables, afterRender: $root.afterRenderVariable } --><!-- /ko -->
       <!-- /ko -->
-      li#delete-variable.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
+      li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
       li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
         a(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
   #variablesMenu(data-role='popup', data-theme='a', data-arrow="r")

@@ -240,7 +240,6 @@
         scrollArea = null
         timer = null
         animationClassTimeout = null
-
         parent.pep(
           place: false
           axis: 'y'

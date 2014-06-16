@@ -11,6 +11,6 @@ div#groups-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing
   div.ui-content.overthrow
     ul#groups(data-role='listview', data-bind="sortable: {isSorting: isSortingGroups, sorted: onGroupsSorted, drop: onDropGroupOnTrash}")
       <!-- ko template: { name: 'group-template', foreach: groups, afterRender: $root.afterRenderGroup} --><!-- /ko -->
-      li#delete-group.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingGroups()")=__('Drop here to remove group')
+      li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingGroups()")=__('Drop here to remove group')
       li#add-group(data-bind="visible: $root.enabledEditing() && !$root.isSortingGroups() ")
         a(data-transition='slidefade', href='#edit-group', data-bind="click: $root.onAddGroupClicked")=__('Add a new group')+'...'

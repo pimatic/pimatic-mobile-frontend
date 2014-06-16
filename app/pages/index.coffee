@@ -54,21 +54,19 @@ $(document).on("pagecreate", '#index', tc (event) ->
               </li>
             </ul>
           """
-          itemTabs.html(html)
-          if ko.dataFor($('#index')[0])?
-            ko.applyBindings(this, itemTabs[0])
-            handleHTML = $('#edit-handle-template').text()
-            itemTabs.find('li a').each( ->
-              $(this).prepend($(handleHTML))
-            )
-
-            if enabledEditing
-              itemTabs.find('ul').append(
-                """<li><a data-ajax="false" href="#edit-devicepage" id="add-devicepage-link">#{__('Add a Page...')}</a></li>"""
-              )
-            itemTabs.navbar()
-        else
-          itemTabs.html('')
+        else html = """<ul></ul>"""
+        itemTabs.html(html)
+        ko.applyBindings(this, itemTabs[0])
+        handleHTML = $('#edit-handle-template').text()
+        itemTabs.find('li a').each( ->
+          $(this).prepend($(handleHTML))
+        )
+        if enabledEditing
+          itemTabs.find('ul').append(
+            """<li><a data-ajax="false" href="#edit-devicepage" id="add-devicepage-link">#{__('Add a Page...')}</a></li>"""
+          )
+        if dPages.length > 0 or @enabledEditing()
+          itemTabs.navbar()
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
       ko.computed( tc =>
@@ -298,9 +296,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
           pimatic.client.rest.removeDeviceFromPage(
             deviceId: item.deviceId
             pageId: activePage.id
-          ).done( (data) =>
-            if data.success
-              activePage.devices.remove(item)
           ).always( => 
             pimatic.loading "deleteitem", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)

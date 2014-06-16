@@ -32,7 +32,7 @@ div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(
       <!-- ko template: { name: 'rule-template', foreach: $root.getUngroupedRules, afterRender: $root.afterRenderRule } --><!-- /ko -->
       <!-- /ko -->
       <!-- /ko -->
-      li#delete-rule.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingRules()")=__('Drop here to remove rule')
+      li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingRules()")=__('Drop here to remove rule')
       li#add-rule(data-bind="visible: $root.enabledEditing() && !$root.isSortingRules() ")
         a(data-transition='slidefade', href='#edit-rule', data-bind="click: $root.onAddRuleClicked")=__('Add a new rule')+'...'
        div.drag-message
