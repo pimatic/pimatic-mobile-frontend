@@ -265,6 +265,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/index.coffee"
               "pimatic-mobile-frontend/app/pages/rules.coffee"
               "pimatic-mobile-frontend/app/pages/groups.coffee"
+              "pimatic-mobile-frontend/app/pages/devices.coffee"
               "pimatic-mobile-frontend/app/pages/variables.coffee"
               "pimatic-mobile-frontend/app/pages/log-messages.coffee"
               "pimatic-mobile-frontend/app/pages/events.coffee"

@@ -351,6 +351,20 @@ class Pimatic
       if device.id is deviceId
         device.updateAttribute(attrName, attrValue)
         break
+  updateDeviceFromJs: (deviceData) ->
+    device = @getDeviceById(deviceData.id)
+    unless device?
+      device = Pimatic.mapping.devices.create({data: deviceData})
+      @devices.push(device)
+    else 
+      device.update(deviceData)
+  updateDeviceOrder: (order) ->
+    toIndex = (id) -> 
+      index = $.inArray(id, order)
+      return (if index is -1 then 999999 else index)
+    @devices.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
+  removeDevice: (deviceId) ->
+    @devices.remove( (d) => d.id is deviceId )
 
   # Devicepages
   getPageById: (id) -> 

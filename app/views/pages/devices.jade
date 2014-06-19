@@ -1,0 +1,30 @@
+script#device-edit-template(type="text/template")
+  li.device-edit.sortable()
+    a(data-transition='slidefade', href='#edit-device', data-bind="click: $root.onEditDeviceClicked")
+      span.name(data-bind="text: $data.name()")
+script#device-groups-template(type="text/template")
+  <!-- ko if: $root.enabledEditing() || $data.getDevices().length > 0  -->
+  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+    label(data-bind="text: name")
+  <!-- ko template: { name: 'device-edit-template', foreach: $data.getDevices, afterRender: $root.afterRenderDevice } --><!-- /ko -->
+  <!-- /ko -->
+div#devices-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingDevices() }")
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
+    h3=__("Devices")
+    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
+      
+  div.ui-content.overthrow
+    ul#devices(data-role='listview', data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}")
+      <!-- ko template: { name: 'device-groups-template', foreach: groups} --><!-- /ko -->
+      <!-- ko if: $root.enabledEditing() || $root.getUngroupedDevices().length > 0  -->
+      <!-- ko with: $root -->
+      li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+        label()=__('Ungrouped')
+      <!-- ko template: { name: 'device-edit-template', foreach: $root.getUngroupedDevices, afterRender: $root.afterRenderDevice } --><!-- /ko -->
+      <!-- /ko -->
+      <!-- /ko -->
+      li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingDevices()")=__('Drop here to remove device')
+      li#add-device(data-bind="visible: $root.enabledEditing() && !$root.isSortingDevices() ")
+        a(data-transition='slidefade', href='#edit-device', data-bind="click: $root.onAddDeviceClicked")=__('Add a new device')+'...'
+       div.drag-message

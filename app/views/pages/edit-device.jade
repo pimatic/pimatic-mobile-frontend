@@ -11,7 +11,7 @@ div#edit-device(data-role='page')
         input#edit-device-id(placeholder="device-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceId, jqmenabled: action() == 'add'")
       .ui-field-contain.has-device-id-input
         label(for='edit-device-class')=__('Class') + ': '
-        select#select-device-class(name='select-device-class', data-bind="jqmoptions: deviceClasses, value: deviceClass")
+        select#select-device-class(name='select-device-class', data-bind="jqmoptions: deviceClasses, value: deviceClass, jqmenabled: action() == 'add'")
     div
       div#device-json-editor()
       .ui-field-contain.ui-grid-a
@@ -23,4 +23,4 @@ div#edit-device(data-role='page')
       div#edit-device-advanced(data-bind="visible: action() == 'update'")
           //- span=__('Advanced Options')+':'
           a#edit-device-remove.delete-link.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
-            data-bind="click: onRemove", data-role="button", href='#devices-page')=__('Delete this Group')
+            data-bind="click: onRemove", data-role="button", href='#devices-page')=__('Delete this Device')

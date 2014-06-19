@@ -43,6 +43,21 @@ $(document).on( "pagebeforecreate", (event) ->
       attrEvent.value
     )
   )
+  pimatic.socket.on("deviceOrderChanged", tc (order) -> 
+    pimatic.updateDeviceOrder(order)
+  )
+
+  pimatic.socket.on("deviceChanged", tc (device) ->
+    pimatic.updateDeviceFromJs(device)
+  )
+  pimatic.socket.on("deviceRemoved", tc (device) -> 
+    pimatic.removeDevice(device.id)
+  )
+  pimatic.socket.on("deviceAdded", tc (device) -> 
+    pimatic.updateDeviceFromJs(device)
+  )
+
+
   pimatic.socket.on("pageChanged", tc (page) ->
     pimatic.updatePageFromJs(page)
   )

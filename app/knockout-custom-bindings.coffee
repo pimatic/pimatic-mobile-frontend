@@ -60,10 +60,11 @@
       value = valueAccessor()
       valueUnwrapped = ko.unwrap(value)
       $ele = $(element)
-      if valueUnwrapped
-        $ele.textinput('enable'); 
-      else
-        $ele.textinput('disable'); 
+      switch element.type
+        when "select-one"
+          if valueUnwrapped then $ele.selectmenu('enable') else $ele.selectmenu('disable') 
+        else 
+          if valueUnwrapped then $ele.textinput('enable') else $ele.textinput('disable')
       return
   }
 

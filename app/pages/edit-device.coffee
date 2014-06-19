@@ -11,6 +11,8 @@ $(document).on("pagebeforecreate", (event) ->
     deviceId: ko.observable('')
     deviceClass: ko.observable('')
     deviceClasses: ko.observableArray()
+    deviceConfig: ko.observable({})
+    editor: null
 
     constructor: ->
       @pageTitle = ko.computed( => 
@@ -18,49 +20,66 @@ $(document).on("pagebeforecreate", (event) ->
       )
 
       editorEle = $('#device-json-editor')
-      editor = null
+      
+      editorSetConfig = (config) =>
+        unless @editor? then return
+        deviceConfig = @deviceConfig()
+        confCopy = {}
+        count = 0
+        for k, v of deviceConfig
+          unless k in ['name', 'id', 'class']
+            confCopy[k] = v
+            count++
+        unless count is 0 then @editor.setValue(confCopy)
+
       @deviceClass.subscribe( (className) =>
-        if className?
-          console.log "change editor ", className
+        if @editor?
+          @editor.destroy()
+          @editor = null
+        if className? and typeof className is "string" and className.length > 0
           pimatic.client.rest.getDeviceConfigSchema({className}).done( (result) =>
-            schema = result.configSchema
-            delete schema.id
-            delete schema.name
-            delete schema.class
-            if editor?
-              editor.destroy()
-              #editorEle.html('')
-            editor = new JSONEditor(editorEle[0], {
-              disable_collapse: yes
-              disable_properties: yes
-              disable_edit_json: yes
-              theme: 'jquerymobile'
-              schema: {
-                title: className
-                type: 'object'
-                properties: schema
-              }
-            });
-            console.log editor
+            if result.success?
+              schema = result.configSchema
+              delete schema.id
+              delete schema.name
+              delete schema.class
+              @editor = new JSONEditor(editorEle[0], {
+                disable_collapse: yes
+                disable_properties: yes
+                disable_edit_json: yes
+                theme: 'jquerymobile'
+                schema: {
+                  title: className
+                  type: 'object'
+                  properties: schema
+                }
+              });
+              @editor.on('ready', =>
+                editorSetConfig(@deviceConfig())
+              )
           )
       )
+      @deviceConfig.subscribe( (config) =>
+        editorSetConfig(config)
+      )
+
 
     resetFields: () ->
       @deviceName('')
       @deviceId('')
       @deviceClass('')
+      @deviceConfig({})
 
     onSubmit: ->
-      params = {
-        deviceId: @deviceId()
-        device: 
-          name: @deviceName()
-      }
+      deviceConfig = @editor.getValue();
+      deviceConfig.id = @deviceId()
+      deviceConfig.name = @deviceName()
+      deviceConfig.class = @deviceClass()
 
       (
         switch @action()
-          when 'add' then pimatic.client.rest.addDevice(params)
-          when 'update' then pimatic.client.resultt.updateDevice(params)
+          when 'add' then pimatic.client.rest.addDeviceByConfig({deviceConfig})
+          when 'update' then pimatic.client.rest.updateDeviceByConfig({deviceConfig})
           else throw new Error("Illegal devicedevice action: #{action()}")
       ).done( (data) ->
         if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
@@ -93,19 +112,11 @@ $(document).on("pagebeforeshow", '#edit-device', (event) ->
 )
 
 
-
-
 $(document).on("pagecreate", '#edit-device', (event) ->
   try
     ko.applyBindings(pimatic.pages.editDevice, $('#edit-device')[0])
   catch e
     TraceKit.report(e)
-
-  $('#edit-device', '#device-json-editor button', (e) =>
-    console.log e
-    e.preventDefault();
-    return
-  )
 )
 
 

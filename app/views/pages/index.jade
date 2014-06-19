@@ -88,7 +88,7 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
     ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
       li(data-icon='delete', data-theme=theme.menuSwatch)
         a(href='#', data-rel='close')=__("Close menu")
-      li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Devices')
+      li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Pages')
       <!-- ko template: { name: 'page-menuentry-template', foreach:devicepages} --><!-- /ko -->
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Automation')
       li(data-theme=theme.menuSwatch)
@@ -101,6 +101,8 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
       li(data-theme=theme.menuSwatch)
         a(href='#events', data-transition="slidefade")=__('Events') 
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Settings')
+      li(data-theme=theme.menuSwatch)  
+        a(href='#devices-page', data-transition="slidefade")=__('Devices') 
       li(data-theme=theme.menuSwatch)  
         a(href='#groups-page', data-transition="slidefade")=__('Groups') 
       li(data-theme=theme.menuSwatch)  
