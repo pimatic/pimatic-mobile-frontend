@@ -21,10 +21,6 @@ $(document).on( "pagebeforecreate", (event) ->
       catch e
         console.log e
 
-  pimatic.socket.on('message', tc (data) ->
-    console.log data
-  )
-
   pimatic.socket.on('devices', tc (devices) -> 
     pimatic.updateFromJs({devices})
   )
@@ -111,7 +107,22 @@ $(document).on( "pagebeforecreate", (event) ->
     if entry.level isnt "debug" then pimatic.try => pimatic.showToast entry.msg
   )
 
+  # pimatic.socket.on('connect', ->
+  #   pimatic.socket.emit('call', {
+  #     action: 'getDevices'
+  #     params: []
+  #     id: 0
+  #   })
+  #   pimatic.socket.on('callResult', (result) =>
+  #     console.log result
+  #   )
+  # )
+
   #pimatic.socket.io.on 'close', -> console.log "m: close"
+  pimatic.loading("socket", "show", {
+    text: __("Connecting")
+    blocking: no
+  })
 
   pimatic.socket.io.on('reconnect_attempt', -> 
     #console.log "m: reconnect attemp"

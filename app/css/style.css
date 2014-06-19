@@ -274,6 +274,12 @@ li .edit-handle{
   margin-top: -16px;
 }
 
+#device-json-editor h3{
+  font-size: .9em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 li.sortable.header .handle {
   margin-top: -18px;
   left: 2px;

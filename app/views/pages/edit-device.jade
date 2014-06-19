@@ -1,0 +1,26 @@
+div#edit-device(data-role='page')
+  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+    h3(data-bind="text: pageTitle()")
+  div.ui-content.overthrow
+    div#edit-device-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false" action="#")
+      .ui-field-contain.has-device-name-input
+        label(for='edit-device-name')=__('Name') + ': '
+        input#edit-device-name(placeholder="device-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceName")
+      .ui-field-contain.has-device-id-input
+        label(for='edit-device-id')=__('ID') + ': '
+        input#edit-device-id(placeholder="device-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceId, jqmenabled: action() == 'add'")
+      .ui-field-contain.has-device-id-input
+        label(for='edit-device-class')=__('Class') + ': '
+        select#select-device-class(name='select-device-class', data-bind="jqmoptions: deviceClasses, value: deviceClass")
+    div
+      div#device-json-editor()
+      .ui-field-contain.ui-grid-a
+        div.ui-block-a
+          a#edit-device-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
+                             data-role="button", href='#devices-page')=__('Cancel')
+        div.ui-block-b
+          a#edit-device-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: onSubmit")=__('Save')
+      div#edit-device-advanced(data-bind="visible: action() == 'update'")
+          //- span=__('Advanced Options')+':'
+          a#edit-device-remove.delete-link.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
+            data-bind="click: onRemove", data-role="button", href='#devices-page')=__('Delete this Group')
