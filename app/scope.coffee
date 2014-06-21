@@ -41,11 +41,13 @@ class Device
         return target
       key: (data) => data.name
     observe: ["name", "attributes"]
+    #ignore: ["config"]
     include: ["config"]
 
   }
   constructor: (data) ->
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @config = data.config
     @configObserve = ko.observable(data.config)
     @rest = {}
     for action in @actions
@@ -71,6 +73,7 @@ class Device
 
   update: (data) -> 
     ko.mapping.fromJS(data, @constructor.mapping, this)
+    @config = data.config if data.config?
     @configObserve(data.config)
 
   getAttribute: (name) -> ko.utils.arrayFirst(@attributes(), (a) => a.name is name )

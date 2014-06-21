@@ -19,6 +19,7 @@
     "type": "git",
     "url": "git://github.com/pimatic/pimatic-log-mobile-frontend.git"
   },
+  "configSchema": "mobile-frontend-config-schema.coffee",
   "bundledDependencies": [
     "jade",
     "nap",

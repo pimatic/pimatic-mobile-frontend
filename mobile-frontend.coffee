@@ -7,7 +7,6 @@ module.exports = (env) ->
   path = require 'path'
 
   # * pimatic imports.
-  convict = env.require "convict"
   Q = env.require 'q'
   assert = env.require 'cassert'
   express = env.require "express" 
@@ -33,13 +32,7 @@ module.exports = (env) ->
     assetsPacked: no
 
     # ###init the frontend:
-    init: (@app, @framework, @jsonConfig) ->
-      conf = convict require("./mobile-frontend-config-schema")
-
-      conf.load @jsonConfig
-      conf.validate()
-      @config = conf.get ""
-        
+    init: (@app, @framework, @config) ->
 
       app.get '/remember', (req, res) =>
         rememberMe = req.query.rememberMe

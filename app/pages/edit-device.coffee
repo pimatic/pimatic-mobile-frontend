@@ -40,19 +40,15 @@ $(document).on("pagebeforecreate", (event) ->
           pimatic.client.rest.getDeviceConfigSchema({className}).done( (result) =>
             if result.success?
               schema = result.configSchema
-              delete schema.id
-              delete schema.name
-              delete schema.class
+              delete schema.properties.id
+              delete schema.properties.name
+              delete schema.properties.class
               @editor = new JSONEditor(editorEle[0], {
                 disable_collapse: yes
                 disable_properties: yes
                 disable_edit_json: yes
                 theme: 'jquerymobile'
-                schema: {
-                  title: className
-                  type: 'object'
-                  properties: schema
-                }
+                schema: schema
               });
               @editor.on('ready', =>
                 editorSetConfig(@deviceConfig())

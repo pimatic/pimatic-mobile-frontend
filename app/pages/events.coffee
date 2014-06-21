@@ -91,6 +91,8 @@ $(document).on("pagecreate", '#events', tc (event) ->
         
         criteria = {
           limit: 100
+          order: "time"
+          orderDirection: "DESC"
         }
 
         pimatic.client.rest.queryDeviceAttributeEvents( { criteria }).always( ->
