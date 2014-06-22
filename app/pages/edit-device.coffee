@@ -30,6 +30,7 @@ $(document).on("pagebeforecreate", (event) ->
           unless k in ['name', 'id', 'class']
             confCopy[k] = v
             count++
+        console.log "confCopy:", confCopy
         unless count is 0 then @editor.setValue(confCopy)
 
       @deviceClass.subscribe( (className) =>
@@ -43,6 +44,7 @@ $(document).on("pagebeforecreate", (event) ->
               delete schema.properties.id
               delete schema.properties.name
               delete schema.properties.class
+              console.log "schema:", result.configSchema
               @editor = new JSONEditor(editorEle[0], {
                 disable_collapse: yes
                 disable_properties: yes
@@ -55,16 +57,16 @@ $(document).on("pagebeforecreate", (event) ->
               )
           )
       )
-      @deviceConfig.subscribe( (config) =>
-        editorSetConfig(config)
-      )
+      # @deviceConfig.subscribe( (config) =>
+      #   editorSetConfig(config)
+      # )
 
 
     resetFields: () ->
       @deviceName('')
       @deviceId('')
-      @deviceClass('')
       @deviceConfig({})
+      @deviceClass('')
 
     onSubmit: ->
       deviceConfig = @editor.getValue();

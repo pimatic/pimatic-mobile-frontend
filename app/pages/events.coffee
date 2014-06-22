@@ -3,7 +3,6 @@
 tc = pimatic.tryCatch
 $(document).on("pagecreate", '#events', tc (event) ->
 
-
   class DeviceAttributeEvent
 
     constructor: (@data) ->
@@ -79,6 +78,18 @@ $(document).on("pagecreate", '#events', tc (event) ->
         @displayedEvents()
         pimatic.try => $('#events-table').table("refresh") 
       ).extend(rateLimit: {timeout: 10, method: "notifyAtFixedRate"})
+
+      pimatic.socket.on("deviceAttributeChanged", (attrEvent) => 
+        unless @events? then return
+        @events.unshift(
+          EventViewModel.mapping.events.create(data: {
+            time: attrEvent.time,
+            deviceId: attrEvent.deviceId, 
+            attributeName: attrEvent.attributeName, 
+            value: attrEvent.value
+          })
+        )
+      )
 
     updateFromJs: (data) ->
       ko.mapping.fromJS({events: data}, EventViewModel.mapping, this)

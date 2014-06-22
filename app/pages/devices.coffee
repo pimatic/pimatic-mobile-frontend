@@ -126,18 +126,22 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
         )()
 
     onAddDeviceClicked: ->
+      pimatic.showToast("Sorry that operation is not supported yet.");
+      return false
       editDevicePage = pimatic.pages.editDevice
       editDevicePage.resetFields()
       editDevicePage.action('add')
       return true
 
     onEditDeviceClicked: (device)->
+      pimatic.showToast("Sorry that operation is not supported yet.");
+      return false
       editDevicePage = pimatic.pages.editDevice
       editDevicePage.action('update')
       editDevicePage.deviceId(device.id)
       editDevicePage.deviceName(device.name())
-      editDevicePage.deviceClass(device.config.class)
       editDevicePage.deviceConfig(device.config)
+      editDevicePage.deviceClass(device.config.class)
       return true
 
   pimatic.pages.devices = devicesPage = new DevicesViewModel()
