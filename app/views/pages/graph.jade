@@ -13,10 +13,12 @@ script#graph-attribute-template(type='text/template')
   div.graph-device-attribute(data-role="fieldcontain")
     span.name(data-bind='text: name')
     div.controls(data-role="controlgroup")
-      label=__('Show: ')
-      select.show-switch(data-role="slider")
-        option(value="no")=__('No')
-        option(value="yes")=__('Yes')
+      <!-- ko if: !$root.isInDisplayedAttributes($parent, $data) -->
+      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.show-button()=__("Show")
+      <!-- /ko -->
+      <!-- ko if: $root.isInDisplayedAttributes($parent, $data) -->
+      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.hide-button.ui-btn-b=__("Hide")
+      <!-- /ko -->
   <!-- /ko -->
 div#graph-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
@@ -40,8 +42,7 @@ div#graph-page(data-role='page')
     //-     span=' ('
     //-     span.last-update-value
     //-     soan=')'
-
-    ul#graph-device-list(data-role='listview', data-inset='true')
+    ul#graph-device-list.device-attribute-list(data-role='listview', data-inset='true')
       <!-- ko template: { name: 'graph-group-template', foreach: groups} --><!-- /ko -->
       <!-- ko if: $root.getUngroupedDevicesWithNumericAttribute().length > 0  -->
       li(data-role='list-divider', data-theme=theme.dividerSwatch)

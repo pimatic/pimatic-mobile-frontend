@@ -184,13 +184,17 @@ $(document).on "pagecreate", '#graph-page', (event) ->
   ko.applyBindings(graphPage, $('#graph-page')[0])
   graphPage.pageCreated(yes)
 
-  $('#graph-page').on("change", "#graph-device-list .show-switch", tc (event) ->
+  $('#graph-page').on("click", ".device-attribute-list .show-button", tc (event) ->
     attribute = ko.dataFor(this)
     device = ko.dataFor($(this).parents('.graph-device')[0])
-    val = $(this).val()
-    console.log device.id, attribute.name, val
-    if val is "yes" then graphPage.addToDisplayedAttributes(device, attribute)
-    else graphPage.removeFromDisplayedAttributes(device, attribute)
+    graphPage.addToDisplayedAttributes(device, attribute)
+    return
+  )
+  
+  $('#graph-page').on("click", ".device-attribute-list .hide-button", tc (event) ->
+    attribute = ko.dataFor(this)
+    device = ko.dataFor($(this).parents('.graph-device')[0])
+    graphPage.removeFromDisplayedAttributes(device, attribute)
     return
   )
 
