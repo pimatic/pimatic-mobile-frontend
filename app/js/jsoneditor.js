@@ -6338,20 +6338,19 @@ JSONEditor.defaults.themes.jquerymobile = JSONEditor.AbstractTheme.extend({
   },
   afterInputReady: function(input) {
     controlgroup = this.closest(input,'.ui-controlgroup-controls');
-    console.log(controlgroup, input);
     switch(input.type) {
       case 'select-one':
         try {
           jQuery(input).selectmenu({ inline: true });
         } catch(e) {
-          console.log("aaaaaaaaaaaa", e);
+            //ignore silently
         }
         break;
       case 'text':
         try {
           jQuery(input).textinput();
         } catch(e) {
-          console.log("aaaaaaaaaaaa", e);
+          //ignore silently
         }
         break;
     }
