@@ -856,10 +856,20 @@ li.with-button a.ui-btn {
   position: relative;
 }
 
+.graph-device-attribute .color-label {
+  display: inline-block;
+  float: left;
+  height: 16px;
+  width: 6px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
 .graph-device-attribute .name{
-  display: block;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  display: inline-block;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .graph-device-attribute div.controls{

@@ -52,9 +52,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
           unless item.attribute.unit in units
             units.push item.attribute.unit
         yAxis = (
-          offset = 0
           for unit in units
-            offset += 30
             {
               labels:
                 format: "{value} #{unit}"
@@ -62,7 +60,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               tooltip:
                 valueDecimals: 2
                 valueSuffix: " " + unit
-              offset: offset
+              opposite: no
             }
         )
 
@@ -92,9 +90,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         chart = $("#chart").highcharts("StockChart", chartOptions)
         chart.show()
         chart = chart.highcharts()
-
-        setTimeout( (=>
-          chart.reflow()
+        @_graph_reflow_timeout = setTimeout( (=>
+          pimatic.try -> chart.reflow()
         ), 500)
 
         for item in displayed
@@ -110,7 +107,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               if result.success
                 data = ([time, value] for {time, value} in result.events)
                 y = ko.utils.arrayIndexOf(units, item.attribute.unit)
-                chart.addSeries(
+                serie = chart.addSeries(
                   name: "#{item.device.name()}: #{item.attribute.label}"
                   data: data
                   yAxis: y
@@ -118,6 +115,10 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                     valueDecimals: 2
                     valueSuffix: " " + item.attribute.unit
                 )
+                item.serie({
+                  index: serie.index
+                  color: serie.color
+                })
             )
 
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
@@ -131,15 +132,16 @@ $(document).on "pagecreate", '#graph-page', (event) ->
       pimatic.try => sliderEle.flipswitch()
 
 
-    isInDisplayedAttributes:  (device, attribute) ->
+    getDisplayedAttribute:  (device, attribute) ->
+      console.log device, attribute
       for item in @displayedAttributes()
         if item.device is device and item.attribute is attribute
-          return yes
-      return no
+          return item
+      return null
 
     addToDisplayedAttributes: (device, attribute) ->
-      if @isInDisplayedAttributes(device, attribute) then return
-      @displayedAttributes.push {device, attribute}
+      if @getDisplayedAttribute(device, attribute)? then return
+      @displayedAttributes.push {device, attribute, serie: ko.observable()}
 
     removeFromDisplayedAttributes: (device, attribute) ->
       @displayedAttributes.remove( (item) => 

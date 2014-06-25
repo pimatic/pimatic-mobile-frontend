@@ -11,12 +11,17 @@ script#graph-device-template(type='text/template')
 script#graph-attribute-template(type='text/template')
   <!-- ko if: $data.type == "number" -->
   div.graph-device-attribute(data-role="fieldcontain")
+    <!-- ko with: $root.getDisplayedAttribute($parent, $data) -->
+    <!-- ko if: $data.serie -->
+    div.color-label(data-bind="style: {'background-color': $data.serie().color}")
+    <!-- /ko -->
+    <!-- /ko -->
     span.name(data-bind='text: name')
     div.controls(data-role="controlgroup")
-      <!-- ko if: !$root.isInDisplayedAttributes($parent, $data) -->
+      <!-- ko if: !$root.getDisplayedAttribute($parent, $data) -->
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.show-button()=__("Show")
       <!-- /ko -->
-      <!-- ko if: $root.isInDisplayedAttributes($parent, $data) -->
+      <!-- ko if: $root.getDisplayedAttribute($parent, $data) -->
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.hide-button.ui-btn-b=__("Hide")
       <!-- /ko -->
   <!-- /ko -->
