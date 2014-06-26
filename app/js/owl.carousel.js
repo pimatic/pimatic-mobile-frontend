@@ -995,6 +995,11 @@ if (typeof Object.create !== "function") {
 
                 if ((base.newPosY > 10 || base.newPosY < -10) && locals.sliding === false) {
                     $(document).off("touchmove.owl");
+                    return;
+                }
+
+                if((base.newRelativeX < 16 && base.newRelativeX > -16) && locals.sliding === false) {
+                    return;
                 }
 
                 minSwipe = function () {
