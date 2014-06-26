@@ -239,6 +239,7 @@ class Pimatic
   inited: no
   pages: {}
   storage: null
+  _dataLoaded: ko.observable(no)
 
   nullDevice: new Device({
     id: 'null'
@@ -276,6 +277,7 @@ class Pimatic
     )
 
     @autosave = ko.computed( =>
+      unless @_dataLoaded() then return
       data = ko.mapping.toJS(this)
       pimatic.storage.set('pimatic.scope', data)
     ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
@@ -308,7 +310,7 @@ class Pimatic
 
 
   loadDataFromStorage: ->
-    @_dataLoaded = yes
+    @_dataLoaded(yes)
     if pimatic.storage.isSet('pimatic.scope')
       data = pimatic.storage.get('pimatic.scope')
       try
@@ -457,9 +459,9 @@ window.pimatic.Group = Group
 window.pimatic.Variable = Variable
 window.pimatic.DevicePage = DevicePage
 
-$(document).on( "pagebeforecreate", (event) ->
+$(document).on( "templateready", (event) ->
   # Just execute it one time
-  if pimatic._dataLoaded then return
+  if pimatic._dataLoaded() then return
   pimatic.loadDataFromStorage()
   return
 )

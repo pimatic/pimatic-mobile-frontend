@@ -240,7 +240,7 @@ $(document).on( "pagebeforecreate", (event) ->
   }
 
   $(document).trigger("templateinit", [ ])
-
+  $(document).trigger("templateready", [ ])
   return
 )
 
