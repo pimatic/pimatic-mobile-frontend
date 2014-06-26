@@ -11,7 +11,7 @@ $(document).on( "pagebeforecreate", (event) ->
     timeout: 20000
   })
 
-  pimatic.socket.io.on 'open', (socket) ->
+  pimatic.socket.io.on 'open', () ->
     #console.log "m: open"
     pimatic.loading "socket", "hide"
 
@@ -20,6 +20,24 @@ $(document).on( "pagebeforecreate", (event) ->
         window.applicationCache.update()
       catch e
         console.log e
+
+  pimatic.socket.on('connect', ->
+    pimatic.socket.emit('call', {
+      id: 'errorMessageCount'
+      action: 'queryMessagesCount'
+      params:
+        criteria:
+          level: 'error'
+    })
+  )
+
+  pimatic.socket.on('callResult', (msg) ->
+    switch msg.id
+      when 'errorMessageCount'
+        if msg.success
+          pimatic.errorCount(msg.result.count)
+
+  )   
 
   pimatic.socket.on('devices', tc (devices) -> 
     pimatic.updateFromJs({devices})
@@ -120,6 +138,7 @@ $(document).on( "pagebeforecreate", (event) ->
   
   pimatic.socket.on('messageLogged', tc (entry) -> 
     if entry.level isnt "debug" then pimatic.try => pimatic.showToast entry.msg
+    if entry.level is "error" then pimatic.errorCount(pimatic.errorCount()+1)
   )
 
   # pimatic.socket.on('connect', ->

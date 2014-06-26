@@ -79,7 +79,7 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
     a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3 pimatic
     div.ui-mini.ui-btn-right(data-role="controlgroup" data-type="horizontal")
-      a#error-count.ui-btn.ui-btn-inline.ui-mini.ui-btn-icon-left.ui-icon-alert.ui-btn-right(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
+      a#error-count.ui-btn.ui-btn-inline.ui-mini.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
       a.ui-btn.ui-btn-inline.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
   div.ui-content.overthrow(data-role="main")
     div#item-tabs(data-insert="false")
