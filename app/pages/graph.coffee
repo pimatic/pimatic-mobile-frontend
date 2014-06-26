@@ -9,7 +9,6 @@ $(document).on "pagecreate", '#index', (event) ->
 
   $('#index').on "click", '#item-lists li.item .attributes.contains-attr-type-number', ->
     device = ko.dataFor($(this).parent('.item')[0])?.device
-    console.log device
     jQuery.mobile.pageParams = {
       device: device
     }
@@ -64,62 +63,88 @@ $(document).on "pagecreate", '#graph-page', (event) ->
             }
         )
 
-        to = new Date
-        from = new Date()
-
-        switch range
-          when "day" then from.setDate(to.getDate()-1)
-          when "week" then from.setDate(to.getDate()-7)
-          when "month" then from.setDate(to.getDate()-30)
-          when "year" then from.setDate(to.getDate()-365)
+        {to, from} = @getDateRange()
 
         chartOptions = {
           tooltip:
             valueDecimals: 2
           yAxis: yAxis
+          xAxis:
+            type: 'datetime'
+            dateTimeLabelFormats:
+              millisecond: '%H:%M:%S',
+              second: '%H:%M:%S',
+              minute: '%H:%M',
+              hour: '%H:%M',
+              day: '%e. %b',
+              week: '%e. %b',
+              month: '%b \'%y',
+              year: '%Y'
           rangeSelector:
             enabled: no
           credits:
             enabled: false
           series: []
-          chart:
-            events:
-              load: ->
         }
 
         chart = $("#chart").highcharts("StockChart", chartOptions)
         chart.show()
         chart = chart.highcharts()
-        @_graph_reflow_timeout = setTimeout( (=>
-          pimatic.try -> chart.reflow()
-        ), 500)
+        # setTimeout( (=>
+        #   pimatic.try -> chart.reflow()
+        # ), 500)
 
-        for item in displayed
-          do (item) =>
-            pimatic.client.rest.querySingleDeviceAttributeEvents({
-              deviceId: item.device.id
-              attributeName: item.attribute.name
-              criteria: {
-                after: from.getTime()
-                before: to.getTime()
-              }
-            }).done( (result) =>
+
+        buildSeries = ( (item, data) =>
+          y = ko.utils.arrayIndexOf(units, item.attribute.unit)
+          return {
+            id: "serie-#{item.device.id}-#{item.attribute.name}"
+            name: "#{item.device.name()}: #{item.attribute.label}"
+            data: data
+            yAxis: y
+            tooltip:
+              valueDecimals: 2
+              valueSuffix: " " + item.attribute.unit     
+          }
+        )
+
+        loadData = ( (item) =>
+          return pimatic.client.rest.querySingleDeviceAttributeEvents({
+            deviceId: item.device.id
+            attributeName: item.attribute.name
+            criteria: {
+              after: from.getTime()
+              before: to.getTime()
+            }
+          })
+        )
+
+        addSeriesToChart = ( (item, data) =>
+          pimatic.try -> chart.reflow()
+          serieConf = buildSeries(item, data)
+          serie = chart.addSeries(serieConf)
+          item.data = data
+          item.range = range
+          item.serie({
+            id: serieConf.id
+            index: serie.index
+            color: serie.color
+          })
+        )
+
+
+        addSeries = ( (item) =>
+          if item.data? and item.range is range
+            addSeriesToChart(item, item.data)
+          else
+            loadData(item).done( (result) =>
               if result.success
                 data = ([time, value] for {time, value} in result.events)
-                y = ko.utils.arrayIndexOf(units, item.attribute.unit)
-                serie = chart.addSeries(
-                  name: "#{item.device.name()}: #{item.attribute.label}"
-                  data: data
-                  yAxis: y
-                  tooltip:
-                    valueDecimals: 2
-                    valueSuffix: " " + item.attribute.unit
-                )
-                item.serie({
-                  index: serie.index
-                  color: serie.color
-                })
+                addSeriesToChart(item, data)
             )
+        )
+
+        addSeries(item) for item in displayed
 
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
@@ -133,7 +158,6 @@ $(document).on "pagecreate", '#graph-page', (event) ->
 
 
     getDisplayedAttribute:  (device, attribute) ->
-      console.log device, attribute
       for item in @displayedAttributes()
         if item.device is device and item.attribute is attribute
           return item
@@ -148,38 +172,17 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         item.device is device and item.attribute is attribute 
       )
 
-    getDateRange = (range = 'day') ->
+    getDateRange: () ->
+      range = @chosenRange()
+      to = new Date
+      from = new Date()
+      switch range
+        when "day" then from.setDate(to.getDate()-1)
+        when "week" then from.setDate(to.getDate()-7)
+        when "month" then from.setDate(to.getDate()-30)
+        when "year" then from.setDate(to.getDate()-365)
+      return {from, to}
 
-
-    showGraph = (device, attribute, range = 'day') ->
-      # unless device
-      #   console.log "device not found?"
-      #   return
-      # unless attribute
-      #   console.log "attribute not found?"
-      #   return
-
-      # {from, to} = getDateRange(range)
-
-      # $('#chart-container').show(0)
-
-      # $.ajax(
-      #   url: "datalogger/data/#{device.deviceId}/#{attrName}"
-      #   timeout: 30000 #ms
-      #   type: "POST"
-      #   data: 
-      #     fromTime: from.getTime()
-      #     toTime: to.getTime()
-      # ).done( (data) ->
-      #   chartInfo =
-      #     device: device
-      #     attrName: attrName
-      #     range: range
-      #     unit: attribute.unit
-
-      #           #updateChartInfo()
-
-      # ).fail(ajaxAlertFail)
 
   pimatic.pages.graph = graphPage = new GraphPageViewModel()
 
@@ -211,83 +214,36 @@ $(document).on("pagebeforeshow", '#graph-page', (event) ->
 )
 
 
-  #   $("#logger-attr-values").on "click", '.show ', (event) ->
-  #     sensorValueName = $(this).parents(".attr-value").data('attr-value-name')
-  #     if device?
-  #       showGraph(device, sensorValueName, chartInfo?.range)
-  #     return
+sensorListener = null
 
-  #   $("#logger-attr-values").on "change", ".logging-switch", (event, ui) ->
-  #     sensorValueName = $(this).parents(".attr-value").data('attr-value-name')
-  #     action = (if $(this).val() is 'yes' then "add" else "remove")
-  #     $.get("/datalogger/#{action}/#{device.deviceId}/#{sensorValueName}")
-  #       .done(ajaxShowToast)
-  #       .fail(ajaxAlertFail)
-  #     return
+$(document).on "pagehide", '#graph-page', (event) ->
+  if sensorListener?
+    pimatic.socket.removeListener 'deviceAttributeChanged', sensorListener
+  return
 
-  #   $("#datalogger").on "change", "#chart-select-range", (event, ui) ->
-  #     val = $(this).val()
-  #     showGraph(chartInfo.device, chartInfo.attrName, val)
-  #     return
-
-  # $(document).on "pagehide", '#datalogger', (event) ->
-  #   if sensorListener?
-  #     pimatic.socket.removeListener 'device-attribute', sensorListener
-  #   return
-
-  # $(document).on "pagebeforeshow", '#datalogger', (event) ->
-  #   unless device?
-  #     jQuery.mobile.changePage '#index'
-  #     return false
-  #   $('#chart-info').hide()
-
-  #   pimatic.socket.on 'device-attribute', sensorListener = (data) ->
-  #     unless chartInfo? then return
-  #     if data.id is chartInfo.device.deviceId and data.name is chartInfo.attrName
-  #       point = [new Date().getTime(), data.value]
-  #       serie = $("#chart").highcharts().series[0]
-  #       shift = no
-  #       firstPoint = null
-  #       if serie.options.data.length > 0
-  #         firstPoint = serie.options.data[0]
-  #       if firstPoint?
-  #         {from, to} = getDateRange(chartInfo.range)
-  #         if firstPoint[0] < from.getTime()
-  #           shift = yes
-  #       serie.addPoint(point, redraw=yes, shift, animate=yes)
-  #       updateChartInfo()
-  #       pimatic.showToast __('new sensor value: %s %s', data.value, chartInfo.unit)
-  #     return
-
-  #   $('#chart-container').hide()
-    
-  #   $("#logger-attr-values").find('li.attr-value').remove()
-  #   $.get( "datalogger/info/#{device.deviceId}", (data) ->
-  #     for name, logged of data.loggingAttributes
-  #       attribute = device.getAttribute(name)
-  #       unless attribute?
-  #         console.log "could not find attribute #{name}"
-  #       li = $ $('#datalogger-attr-value-template').html()
-  #       li.find('.attr-value-name').text(attribute.label)
-  #       li.find('label').attr('for', "flip-attr-value-#{name}")
-  #       select = li.find('select')
-  #         .attr('name', "flip-attr-value-#{name}")
-  #         .attr('id', "flip-attr-value-#{name}")             
-  #       li.data('attr-value-name', name)
-  #       val = (if logged then 'yes' else 'no')
-  #       select.find("option[value=#{val}]").attr('selected', 'selected')
-  #       select.slider() 
-  #       li.find('.show').button()
-  #       $("#logger-attr-values").append li
-
-  #     $("#logger-attr-values").listview('refresh')
-  #     for name, logged of data.loggingAttributes
-  #       if logged 
-  #         range = $('#chart-select-range').val()
-  #         showGraph(device, name, range)
-  #         return
-  #   ).done(ajaxShowToast).fail(ajaxAlertFail)
-  #   return
+$(document).on "pagebeforeshow", '#graph-page', () ->
+  page = pimatic.pages.graph
+  pimatic.socket.on 'deviceAttributeChanged', sensorListener = (attrEvent) ->
+    for item in page.displayedAttributes()
+      if item.device.id is attrEvent.deviceId and item.attribute.name is attrEvent.attributeName
+        if item.serie?
+          serie = $("#chart").highcharts().get(item.serie().id)
+          point = [new Date(attrEvent.time).getTime(), attrEvent.value]
+          shift = no
+          firstPoint = null
+          if serie.options.data.length > 0
+            firstPoint = serie.options.data[0]
+          if firstPoint?
+            {from, to} = page.getDateRange()
+            if firstPoint[0] < from.getTime()
+              shift = yes
+          serie.addPoint(point, redraw=yes, shift, animate=yes)
+          pimatic.showToast __('%s: %s value: %s',
+            item.device.name(),
+            item.attribute.label,
+            item.attribute.formatValue(attrEvent.value)
+          )
+    return
 
 
 
