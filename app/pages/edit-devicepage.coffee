@@ -37,7 +37,7 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      really = confirm(__("Do you really want to delete the %s rule?", rule.pageName()))
+      really = confirm(__("Do you really want to delete the %s page?", @pageName()))
       if really
         pimatic.client.rest.removePage({pageId: @pageId()})
           .done( (data) ->
