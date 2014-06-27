@@ -6,16 +6,17 @@ div#events(data-role='page')
     .controls
       select#select-device(name='select-device', data-mini="true", data-inline="true", data-bind="jqmoptions: devices, value: chosenDevice")
       select#select-attribute(name='select-attribute', data-mini="true", data-inline="true", data-bind="jqmoptions: attributes, value: chosenAttribute")
-    table#events-table.table-stroke(data-role='table', data-mode='reflow')
-      thead
-        tr
-          th(data-priority='2')=__('Time')
-          th(data-priority='3')=__('Device')
-          th(data-priority='4')=__('Attribute')
-          th.value-column(data-priority='1')=__('Value')
-      tbody(data-bind="foreach: displayedEvents")
-        tr
-          td(data-bind="html: formatedTime()")
-          td(data-bind="html: formatedDeviceName()")
-          td(data-bind="text: formatedAttributeName()")
-          td.value-column(data-bind="html: formatedValue()")
+    .outdent
+      table#events-table.table-stroke.ui-table()
+        thead
+          tr
+            th.time-column=__('Time')
+            th.device-column=__('Device')
+            th.attribute-column=__('Attribute')
+            th.value-column(data-priority='1')=__('Value')
+        tbody(data-bind="foreach: displayedEvents")
+          tr
+            td.time-column(data-bind="html: formatedTime()")
+            td.device-column(data-bind="html: formatedDeviceName()")
+            td.attribute-column(data-bind="text: formatedAttributeName()")
+            td.value-column(data-bind="html: formatedValue()")

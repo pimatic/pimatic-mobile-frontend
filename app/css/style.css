@@ -400,28 +400,76 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   color: #A0A0A0;
 }
 
+.outdent {
+  margin-left: -1em;
+  margin-right: -1em;
+}
 
 
-@media ( min-width: 40em ) {
-  /* Show the table header rows and set all cells to display: table-cell */
-  #events-table td,
-  #events-table th,
-  #events-table tbody th,
-  #events-table tbody td,
-  #events-table thead td,
-  #events-table thead th {
-    display: table-cell;
-    margin: 0;
+table#events-table {
+  background: #fff;
+  width: 100%;
+}
+
+#events-table .value-column {
+  text-align: right;
+}
+
+@media ( max-width: 40em ) {
+
+  #events-table tbody td{
+    border: none;
+  }
+   
+  #events-table tbody tr,
+  #events-table thead tr {
+    border-bottom: 1px solid #ddd;
+  }
+  
+  #events-table thead tr {
+    display: block;
+  }
+
+  #events-table .time-column {
+    display: block;
+    width: 20%;
+    float: left;
+  }
+
+  #events-table .device-column {
+    display: block;
+    float: left;
+    width: 70%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-bottom: 0px;
+  }
+
+  #events-table .attribute-column {
+    float: left;
+    display: block;
   }
 
   #events-table .value-column {
-  text-align: right;
-}
-  /* Hide the labels in each cell */
-  #events-table td .ui-table-cell-label,
-  #events-table th .ui-table-cell-label {
-    display: none;
+    display: block;
+    float: right;
+    width: 100px;
   }
+
+  #events-table thead th {
+    display: none !important;
+  }
+
+  #events-table .time-column {
+    color: gray;
+  }
+
+  #events-table .value-column {
+    font-weight: bold;
+  }
+
+
 }
 
 #device-items li.item a, 
