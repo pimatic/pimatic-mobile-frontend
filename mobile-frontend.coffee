@@ -320,6 +320,7 @@ module.exports = (env) ->
               cache: assets.concat [
                 '/',
                 '/socket.io/socket.io.js'
+                '/api/decl-api-client.js'
               ]
               network: ['*']
               fallback: []
