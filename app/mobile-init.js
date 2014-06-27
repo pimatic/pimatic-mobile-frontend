@@ -6,6 +6,9 @@ $( document ).on( "mobileinit", function() {
     defaultPageTransition: 'slide',
     getMaxScrollForTransition: function(){return 5;}
   });
+  //path to nop
+  //$.mobile.resetActivePageHeight = function(){};
+  //console.log($.mobile.resetActivePageHeight);
 
   $.mobile.toolbar.tapToggle = false;
 });

@@ -18,11 +18,9 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
     constructor: () ->
       @groups = pimatic.groups
-      @rememberme = pimatic.rememberme
 
       @updateFromJs(
         ruleItemCssClass: ''
-        hasRootCACert: no
       )
 
       @lockButton = ko.computed( tc => 
@@ -138,11 +136,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
             else lw.listview('refresh')
           )
         )
-      ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
-
-      @deviepagesRefresh = ko.computed( tc =>
-        @devicepages()
-        pimatic.try( => $('.nav-panel-menu').listview('refresh') )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
 

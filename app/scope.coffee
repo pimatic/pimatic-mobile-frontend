@@ -263,6 +263,7 @@ class Pimatic
       rememberme: no
       updateProcessStatus: 'idle'
       updateProcessMessages: []
+      hasRootCACert: no
     })
     @setupStorage()
 
@@ -464,4 +465,15 @@ $(document).on( "templateready", (event) ->
   if pimatic._dataLoaded() then return
   pimatic.loadDataFromStorage()
   return
+)
+
+$(=>
+  
+  $( "#nav-panel" ).panel()
+  $( "#nav-panel" ).enhanceWithin()
+  ko.applyBindings(pimatic, $('#nav-panel')[0])
+  deviepagesRefresh = ko.computed( =>
+    pimatic.devicepages()
+    pimatic.try( => $('#nav-panel .nav-panel-menu').listview('refresh') )
+  ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 )

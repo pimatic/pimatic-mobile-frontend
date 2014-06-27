@@ -2,6 +2,11 @@
   Overthrow CSS:
   Enable overflow: auto on elements with overthrow class when html element has overthrow class too 
 */
+
+body {
+  position: relative;
+}
+
 .overthrow-enabled .overthrow {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
@@ -14,6 +19,14 @@
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.overthrow-enabled .overthrow.ui-panel-position-left{
+  position: absolute;
+  z-index: 1001;
+  top: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .pep-active {
