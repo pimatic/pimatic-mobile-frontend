@@ -12,7 +12,7 @@ script#variable-groups-template(type="text/template")
   <!-- ko template: { name: 'variable-template', foreach: $data.getVariables, afterRender: $root.afterRenderVariable } --><!-- /ko -->
   <!-- /ko -->
 div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingVariables() }")
-  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+  div(data-theme=theme.headerSwatch, data-role='header')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
     h3=__("Variables")
     a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")

@@ -34,7 +34,7 @@ script#loading-template(type='text/template')
   li.loading=__('Loading') + "..."
 
 div#plugins(data-role='page')
-  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+  div(data-theme=theme.headerSwatch, data-role='header')
     a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
       data-inline='true', data-transition="slidefade", data-direction="reverse")=__('Back')
     a.restart-now(data-role="button", data-icon="refresh",  data-iconpos='left', data-inline="true")=__('Restart')
@@ -53,7 +53,7 @@ div#plugins(data-role='page')
       .ui-field-contain
           a#plugin-install(href="#plugins-browse", data-icon="plus", data-role="button")=__('Install a Plugin')
 div#plugins-browse(data-role='page')
-  div(data-theme=theme.headerSwatch, data-role='header', data-position='fixed')
+  div(data-theme=theme.headerSwatch, data-role='header')
     a(href='#plugins', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true', data-transition="slidefade")=__('Back')
     h3=__('Install a Plugins')
   div.ui-content.overthrow
