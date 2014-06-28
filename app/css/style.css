@@ -30,12 +30,35 @@
   height: auto;
 }
 
+
+
+#item-tabs {
+  position: relative;
+  z-index: 1002;
+  box-shadow: 0px 3px 3px 0 rgba(0,0,0,.15);
+}
+
 #index .ui-header .ui-controlgroup .ui-btn-icon-notext {
   padding: 0;
   width: 32px;
   height: 32px;
   text-indent: -9999px;
   white-space: nowrap !important;
+}
+
+#index .ui-header .ui-controlgroup a {
+  border-radius: 0;
+}
+
+
+#index .ui-header .ui-controlgroup .ui-first-child {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+#index .ui-header .ui-controlgroup .ui-last-child {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 
@@ -64,6 +87,7 @@
   border-top: 1px solid #ccc;
   margin-bottom: -2px;
   z-index: 10;
+  overflow: visible;
 }
 
 .ui-mobile .ui-page-theme-a #item-lists .ui-li-divider {
@@ -766,7 +790,7 @@ li.with-button a.ui-btn {
   }
  
    /* Animations only for desktop browser, because these are to slow on mobile */
-  .items .item, 
+/*  .items .item, 
   #rules .rule, 
   #variables .variable,
   #rules .rule a, 
@@ -784,7 +808,7 @@ li.with-button a.ui-btn {
     transition: none;
   }
 
-}
+}*/
 
 #updates .message p{
   margin-top: 3px;
@@ -793,8 +817,8 @@ li.with-button a.ui-btn {
 
 #nav-panel {
   background-color: #FFF;
-  box-shadow: none;
 }
+
 #nav-panel a,
 #nav-panel label
 {
@@ -844,6 +868,12 @@ li.with-button a.ui-btn {
 
 @media (min-width: 60em) {
 
+  .locked #item-lists {
+    background: #fff;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
   .locked #item-lists ul {
     background-color: transparent;
     margin-top: 5px;
@@ -864,6 +894,7 @@ li.with-button a.ui-btn {
   }
   
   .locked .items .no-header {
+    overflow: visible;
     border-radius: 2px;
     float: left;
     padding-left: 1% !important;
@@ -875,6 +906,7 @@ li.with-button a.ui-btn {
     margin-left: 1%;
     margin-top: 0.4%;
     margin-bottom: 0.4%;
+    box-shadow: 0 0 2px 2px rgb(247, 247, 247);
   }
   
   .locked .items .ui-first-child {

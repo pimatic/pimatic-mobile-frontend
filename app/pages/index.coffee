@@ -69,15 +69,19 @@ $(document).on("pagecreate", '#index', tc (event) ->
           itemTabs.navbar()
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
-      ko.computed( tc =>
-        dPages =  @devicepages()
-        itemLists = $('#item-lists')
-        ko.cleanNode(itemLists[0])
-      )
+      _devicePages = []
 
       ko.computed( tc () =>
         unless @bindingsApplied() then return
         dPages = @devicepages()
+        diff = ko.utils.compareArrays(dPages, _devicePages)
+        _devicePages = (p for p in dPages)
+        changed = no
+        for d in diff
+          if d.status isnt 'retained'
+            changed = true
+            break
+        unless changed then return
         itemLists = $('#item-lists')
         ko.cleanNode(itemLists[0])
         owl = itemLists.data('owlCarousel')
@@ -99,13 +103,14 @@ $(document).on("pagecreate", '#index', tc (event) ->
             lazyEffect: no
             lazyLoad: no
             afterAction: =>
-              itemLists.trigger( "updatelayout" )
+              #itemLists.trigger( "updatelayout" )
             afterMove: (ele) =>
               current = ele.data('owlCarousel').currentItem
               @activeDevicepage(@devicepages()[current])
           })
         else
           itemLists.html('')
+        return
        ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
 
