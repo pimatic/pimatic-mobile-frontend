@@ -355,8 +355,20 @@ $(document).on("pagecreate", '#index', tc (event) ->
   )
 
   $("#items .handle").disableSelection()
+
+  $("#nav-panel").on('panelopen panelclose', tc (event) ->
+    $('#item-lists').data('owlCarousel').calculateAll()
+  )
+
   return
 )
+
+
+$(document).on('click', '.content-overlay', tc (event) ->
+  $('#nav-panel').panel( "close" )
+)
+
+
 
 
 $(document).on("pagebeforeshow", '#index', tc (event) ->
