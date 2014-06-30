@@ -57,13 +57,42 @@ box-shadow: none;
   display: block;
 }
 
-@media (min-width: 60em) {
+@media (min-width:60em) {
+
   .ui-panel-page-content-display-reveal .content-overlay{
     pointer-events:none;
     -webkit-box-shadow: inset 5px 0 10px rgba(0,0,0,0.1);
     -moz-box-shadow: inset 5px 0 10px rgba(0,0,0,0.1);
     box-shadow: inset 5px 0 10px rgba(0,0,0,0.1);
   }
+
+  /* wrap on wide viewports once open */
+  .ui-panel-page-content-open.ui-panel-page-content-position-left{
+    margin-right: 17em;
+  }
+  .ui-panel-page-content-open.ui-panel-page-content-position-right {
+    margin-left: 17em;
+  }
+  .ui-panel-page-content-open{
+    width: auto;    
+  }
+  /* disable "dismiss" on wide viewports */
+  .ui-panel-dismiss {
+    display: none;
+  }
+  /* same as the above but for panels with display mode "push" only */
+  .ui-panel-dismiss-display-push {
+    display: none;
+  }
+
+  .owl-item, #item-tabs li {
+    -webkit-transition: width 200ms ease;
+    -moz-transition: width 200ms ease;
+    -o-transition: width 200ms ease;
+    -ms-transition: width 200ms ease;
+    transition: width 200ms ease;
+  }
+
 }
 
 @media (max-width: 60em) {
@@ -809,49 +838,6 @@ li.with-button a.ui-btn {
   border-width: 1px;
 }
 
-@media (min-width:35em) {
- 
-  /* wrap on wide viewports once open */
-
-  .ui-panel-page-content-open.ui-panel-page-content-position-left{
-    margin-right: 17em;
-  }
-  .ui-panel-page-content-open.ui-panel-page-content-position-right {
-    margin-left: 17em;
-  }
-  .ui-panel-page-content-open{
-    width: auto;    
-  }
- 
-  /* disable "dismiss" on wide viewports */
-  .ui-panel-dismiss {
-    display: none;
-  }
-  /* same as the above but for panels with display mode "push" only */
-  .ui-panel-dismiss-display-push {
-    display: none;
-  }
- 
-   /* Animations only for desktop browser, because these are to slow on mobile */
-/*  .items .item, 
-  #rules .rule, 
-  #variables .variable,
-  #rules .rule a, 
-  #variables .variable a {
-    -webkit-transition: margin 250ms,padding 250ms;
-    transition: margin 250ms,padding 250ms;
-  }
-
-  .items.noAnimation .item,
-  #rules.noAnimation .rule, 
-  #variables.noAnimation .variable,
-  #rules.noAnimation .rule a, 
-  #variables.noAnimation .variable a  {
-    -webkit-transition: none;
-    transition: none;
-  }
-*/
-}
 
 #updates .message p{
   margin-top: 3px;

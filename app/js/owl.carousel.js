@@ -68,7 +68,7 @@ if (typeof Object.create !== "function") {
             base.$elem.data("owl-originalStyles", base.$elem.attr("style"));
             base.$elem.data("owl-originalClasses", base.$elem.attr("class"));
 
-            base.$elem.css({opacity: 0});
+            // base.$elem.css({opacity: 0});
             base.orignalItems = base.options.items;
             base.checkBrowser();
             base.wrapperWidth = 0;
@@ -170,7 +170,7 @@ if (typeof Object.create !== "function") {
             var base = this;
 
             if (base.$elem.is(":visible") === false) {
-                base.$elem.css({opacity: 0});
+                // base.$elem.css({opacity: 0});
                 window.clearInterval(base.autoPlayInterval);
                 window.clearInterval(base.checkVisible);
             } else {
@@ -536,7 +536,7 @@ if (typeof Object.create !== "function") {
                 if (base.options.items >= base.itemsAmount) {
                     base.owlControls.hide();
                 } else {
-                    base.owlControls.show();
+                    base.owlControls.show(0);
                 }
             }
         },

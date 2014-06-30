@@ -357,9 +357,10 @@ $(document).on("pagecreate", '#index', tc (event) ->
   $("#items .handle").disableSelection()
 
   $("#nav-panel").on('panelopen panelclose', tc (event) ->
-    $('#item-lists').data('owlCarousel').calculateAll()
+    itemList = $('#item-lists')
+    if itemList.is(":visible")
+      pimatic.try => itemList.data('owlCarousel').reload()
   )
-
   return
 )
 
@@ -368,8 +369,9 @@ $(document).on('click', '.content-overlay', tc (event) ->
   $('#nav-panel').panel( "close" )
 )
 
-
-
+$(document).on("pageshow", '#index', tc (event) ->
+  pimatic.try => $('#item-lists').data('owlCarousel').reload()
+)
 
 $(document).on("pagebeforeshow", '#index', tc (event) ->
   setTimeout( (->
