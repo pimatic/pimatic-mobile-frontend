@@ -31,7 +31,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
       if @query.length is 0 then return
       first = @query[0]
       if first.status is "running" then return
-      console.log "starting"
+      first.status = "running"
       first.start()
     next: ->
       @query.splice(0, 1)
@@ -149,16 +149,18 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               }
             }, {global: no}).done( (result) =>
               if task.status is "aborted" then return
-              timeDiff = new Date().getTime() - startTime
-              timeDiff = Math.max(timeDiff, 1)
-              limit = Math.floor(limit * (3000 / timeDiff))
-              limit = Math.max(limit, 100)
               if result.success
-                hasMore = (result.events.length is limit)
-                onData(result.events, hasMore)
-                if hasMore
-                  last = result.events[limit-1]
-                  setTimeout( ( => loadData(item, last.time+1, tillTime, onData) ) , 500)
+                eventsLength = result.events.length
+                hasMore = (eventsLength is limit)
+                if eventsLength > 0
+                  timeDiff = new Date().getTime() - startTime
+                  timeDiff = Math.max(timeDiff, 1)
+                  limit = Math.floor(eventsLength * (3000 / timeDiff))
+                  #limit = Math.max(eventsLength, 100)
+                  if hasMore
+                    last = result.events[eventsLength-1]
+                    setTimeout( ( => loadData(item, last.time+1, tillTime, onData) ) , 500)
+                  onData(result.events, hasMore)
             ).always( ->
               if task.status is "aborted" then return
               task.onComplete()
@@ -190,7 +192,6 @@ $(document).on "pagecreate", '#graph-page', (event) ->
           else
             allData = []
             loadingId = "loading-series-" + item.device.id + "_" + item.attribute.name
-            console.log loadingId
             pimatic.loading(loadingId, "show", {
               text: __("Loading data for #{item.device.name()}: #{item.attribute.label}")
               blocking: no
@@ -203,7 +204,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                   serie = chart.get(item.serie().id)
                   for d in data
                     serie.addPoint(d, no)
-                  xAxis.setExtremes(from.getTime(), to.getTime());
+                xAxis.setExtremes(from.getTime(), to.getTime());
                 allData = allData.concat data
                 unless hasMore
                   item.data = allData
