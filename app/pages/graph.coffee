@@ -135,8 +135,9 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         )
 
         limit = 100
-        loadData = ( (item, fromTime, tillTime, onData) =>
+        loadData = ( (item, fromTime, tillTime, onData, onError) =>
           task = {}
+          task.abort = onError
           task.start = =>
             startTime = new Date().getTime()
             pimatic.client.rest.querySingleDeviceAttributeEvents({
@@ -154,9 +155,12 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                 hasMore = (eventsLength is limit)
                 if eventsLength > 0
                   timeDiff = new Date().getTime() - startTime
+                  # time diff should not be 0
                   timeDiff = Math.max(timeDiff, 1)
+                  # get limit so, that the next request take about 3 seconds
                   limit = Math.floor(eventsLength * (3000 / timeDiff))
-                  #limit = Math.max(eventsLength, 100)
+                  # Limit should be at least 100
+                  limit = Math.max(limit, 100)
                   if hasMore
                     last = result.events[eventsLength-1]
                     setTimeout( ( => loadData(item, last.time+1, tillTime, onData) ) , 500)
@@ -164,6 +168,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
             ).always( ->
               if task.status is "aborted" then return
               task.onComplete()
+            ).fail( ->
+              onError()
             )
 
           @dataLoadingQuery.addTask(task)
@@ -196,20 +202,20 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               text: __("Loading data for #{item.device.name()}: #{item.attribute.label}")
               blocking: no
             })
-            loadData(item, from.getTime(), to.getTime(), onData = (events, hasMore) =>
-                data = ([time, value] for {time, value} in events)
-                unless item.data?
-                  addSeriesToChart(item, data)
-                else
-                  serie = chart.get(item.serie().id)
-                  for d in data
-                    serie.addPoint(d, no)
-                xAxis.setExtremes(from.getTime(), to.getTime());
-                allData = allData.concat data
-                unless hasMore
-                  item.data = allData
-                  pimatic.loading(loadingId, "hide")
-            )
+            loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>
+              data = ([time, value] for {time, value} in events)
+              unless item.data?
+                addSeriesToChart(item, data)
+              else
+                serie = chart.get(item.serie().id)
+                for d in data
+                  serie.addPoint(d, no)
+              xAxis.setExtremes(from.getTime(), to.getTime());
+              allData = allData.concat data
+              unless hasMore
+                item.data = allData
+                pimatic.loading(loadingId, "hide")
+            ), onError = => pimatic.loading(loadingId, "hide") )
         )
 
         addSeries(item) for item in displayed
