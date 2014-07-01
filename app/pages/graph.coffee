@@ -21,6 +21,27 @@ $(document).on "pagecreate", '#graph-page', (event) ->
       useUTC: false
   )
 
+  class TaskQuery
+    query: []
+    addTask: (task) ->
+      task.onComplete = => @next()
+      @query.push task
+      @start()
+    start: ->
+      if @query.length is 0 then return
+      first = @query[0]
+      if first.status is "running" then return
+      console.log "starting"
+      first.start()
+    next: ->
+      @query.splice(0, 1)
+      @start()
+    clear: ->
+      for t in @query
+        if t.abort? then t.abort()
+        t.status = "aborted"
+      @query.length = 0
+
   class GraphPageViewModel
 
     groups: pimatic.groups
@@ -29,6 +50,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
     dateTo: ko.observable()
     chosenRange: ko.observable('day')
     pageCreated: ko.observable(false)
+    dataLoadingQuery: new TaskQuery()
 
     constructor: ->
       ko.computed( tc =>
@@ -45,6 +67,9 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         if displayed.length is 0
           $("#chart").hide()
           return
+
+        @dataLoadingQuery.clear()
+
         range = @chosenRange()
         units = []
         for item in displayed
@@ -90,6 +115,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         chart = $("#chart").highcharts("StockChart", chartOptions)
         chart.show()
         chart = chart.highcharts()
+        xAxis = chart.xAxis[0]
         # setTimeout( (=>
         #   pimatic.try -> chart.reflow()
         # ), 500)
@@ -108,21 +134,43 @@ $(document).on "pagecreate", '#graph-page', (event) ->
           }
         )
 
-        loadData = ( (item) =>
-          return pimatic.client.rest.querySingleDeviceAttributeEvents({
-            deviceId: item.device.id
-            attributeName: item.attribute.name
-            criteria: {
-              after: from.getTime()
-              before: to.getTime()
-            }
-          })
+        limit = 100
+        loadData = ( (item, fromTime, tillTime, onData) =>
+          task = {}
+          task.start = =>
+            startTime = new Date().getTime()
+            pimatic.client.rest.querySingleDeviceAttributeEvents({
+              deviceId: item.device.id
+              attributeName: item.attribute.name
+              criteria: {
+                after: fromTime
+                before: tillTime
+                limit: limit
+              }
+            }, {global: no}).done( (result) =>
+              if task.status is "aborted" then return
+              timeDiff = new Date().getTime() - startTime
+              timeDiff = Math.max(timeDiff, 1)
+              limit = Math.floor(limit * (3000 / timeDiff))
+              limit = Math.max(limit, 100)
+              if result.success
+                hasMore = (result.events.length is limit)
+                onData(result.events, hasMore)
+                if hasMore
+                  last = result.events[limit-1]
+                  setTimeout( ( => loadData(item, last.time+1, tillTime, onData) ) , 500)
+            ).always( ->
+              if task.status is "aborted" then return
+              task.onComplete()
+            )
+
+          @dataLoadingQuery.addTask(task)
         )
 
         addSeriesToChart = ( (item, data) =>
           pimatic.try -> chart.reflow()
           serieConf = buildSeries(item, data)
-          serie = chart.addSeries(serieConf)
+          serie = chart.addSeries(serieConf, redraw=yes, animate=no)
           item.data = data
           item.range = range
           item.serie({
@@ -134,13 +182,32 @@ $(document).on "pagecreate", '#graph-page', (event) ->
 
 
         addSeries = ( (item) =>
-          if item.data? and item.range is range
+          if item.range isnt range
+            item.range = null
+            item.data = null
+          if item.data?
             addSeriesToChart(item, item.data)
           else
-            loadData(item).done( (result) =>
-              if result.success
-                data = ([time, value] for {time, value} in result.events)
-                addSeriesToChart(item, data)
+            allData = []
+            loadingId = "loading-series-" + item.device.id + "_" + item.attribute.name
+            console.log loadingId
+            pimatic.loading(loadingId, "show", {
+              text: __("Loading data for #{item.device.name()}: #{item.attribute.label}")
+              blocking: no
+            })
+            loadData(item, from.getTime(), to.getTime(), onData = (events, hasMore) =>
+                data = ([time, value] for {time, value} in events)
+                unless item.data?
+                  addSeriesToChart(item, data)
+                else
+                  serie = chart.get(item.serie().id)
+                  for d in data
+                    serie.addPoint(d, no)
+                  xAxis.setExtremes(from.getTime(), to.getTime());
+                allData = allData.concat data
+                unless hasMore
+                  item.data = allData
+                  pimatic.loading(loadingId, "hide")
             )
         )
 
@@ -217,6 +284,7 @@ $(document).on("pagebeforeshow", '#graph-page', (event) ->
 sensorListener = null
 
 $(document).on "pagehide", '#graph-page', (event) ->
+  pimatic.pages.graph.dataLoadingQuery.clear()
   if sensorListener?
     pimatic.socket.removeListener 'deviceAttributeChanged', sensorListener
   return

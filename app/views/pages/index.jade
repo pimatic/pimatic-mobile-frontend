@@ -81,11 +81,11 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
     div.ui-mini.ui-btn-right(data-role="controlgroup" data-type="horizontal")
       a#error-count.ui-btn.ui-btn-inline.ui-mini.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0")
       a.ui-btn.ui-btn-inline.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
-  div.ui-content.overthrow(data-role="main")
+  div.ui-content.overthrow(data-role="main", tabindex="1")
     div#item-tabs(data-insert="false")
     div#item-lists.owl-carousel()
   div.content-overlay.ui-content
-  div#nav-panel.overthrow(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch)
+  div#nav-panel.overthrow(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch, tabindex="0")
     ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
       li(data-icon='delete', data-theme=theme.menuSwatch)
         a(href='#', data-rel='close')=__("Close menu")
