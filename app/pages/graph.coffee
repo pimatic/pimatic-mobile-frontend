@@ -51,6 +51,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
     chosenRange: ko.observable('day')
     pageCreated: ko.observable(false)
     dataLoadingQuery: new TaskQuery()
+    averageDuration: ko.observable(null)
 
     constructor: ->
       ko.computed( tc =>
@@ -71,8 +72,14 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         @dataLoadingQuery.clear()
 
         range = @chosenRange()
+        groupByTime = @getGroupByTimeForRange(range)
+        @averageDuration(@timeDurationToText(groupByTime))
+
         units = []
         for item in displayed
+          if item.range? and item.range isnt range
+            item.range = null
+            item.data = null
           unless item.attribute.unit in units
             units.push item.attribute.unit
         yAxis = (
@@ -147,7 +154,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                 after: fromTime
                 before: tillTime
                 limit: limit
-                groupByTime: @getGroupByTimeForRange(range)
+                groupByTime: groupByTime
               }
             }, {global: no}).done( (result) =>
               if task.status is "aborted" then return
@@ -191,9 +198,6 @@ $(document).on "pagecreate", '#graph-page', (event) ->
 
 
         addSeries = ( (item) =>
-          if item.range isnt range
-            item.range = null
-            item.data = null
           if item.data?
             addSeriesToChart(item, item.data)
           else
@@ -220,6 +224,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               allData = allData.concat data
               unless hasMore
                 item.data = allData
+                item.range = range
                 #t = new Date().getTime()
                 chart.redraw()
                 #console.log "redraw:", (new Date().getTime() - t)
@@ -271,10 +276,30 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         switch range
           when "day" then 10*60*1000 #=10min
           when "week" then 60*60*1000 #=1h
-          when "month" then 3*60*1000 #=2h
-          when "year" then 6*60*1000 #=6h
+          when "month" then 3*60*60*1000 #=2h
+          when "year" then 6*60*60*1000 #=6h
       )
       return time
+
+    timeDurationToText: (time) ->
+      #skip ms
+      time = time / 1000
+      text = ''
+      m = time/60
+      s = time%60
+      if s isnt 0
+        text = "#{s}s #{text}"
+      if m isnt 0
+        if m < 60
+          text = "#{m}min #{text}" if m isnt 0
+        else
+          h = m/60
+          m = m%60
+          if m isnt 0
+            text = "#{h}h #{m}min #{text}"
+          else
+            text = "#{h}h #{text}"
+      return text
 
   pimatic.pages.graph = graphPage = new GraphPageViewModel()
 

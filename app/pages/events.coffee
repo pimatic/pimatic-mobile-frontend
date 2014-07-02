@@ -101,7 +101,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
         pimatic.loading "loading events", "show", text: __('Loading Events')
         
         criteria = {
-          limit: 100
+          limit: 50
           order: "time"
           orderDirection: "DESC"
         }

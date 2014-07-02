@@ -41,7 +41,11 @@ div#graph-page(data-role='page')
           option(value="month")=__('Last 30 days')
           option(value="year")=__('Last 365 days')
       div#chart
-    //-   div#chart-info
+      div#chart-info
+        span(data-bind="if: averageDuration && displayedAttributes().length > 0")
+          |Average values of 
+          span(data-bind="text: averageDuration")
+          |.
     //-     span=__('Last Update: ')
     //-     span.last-update-time
     //-     span=' ('
