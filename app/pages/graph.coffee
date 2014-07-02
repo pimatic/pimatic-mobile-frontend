@@ -147,7 +147,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                 after: fromTime
                 before: tillTime
                 limit: limit
-                groupByTime: 10*60*1000
+                groupByTime: @getGroupByTimeForRange(range)
               }
             }, {global: no}).done( (result) =>
               if task.status is "aborted" then return
@@ -203,6 +203,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               text: __("Loading data for #{item.device.name()}: #{item.attribute.label}")
               blocking: no
             })
+            item.data = null
             loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>
               data = ([time, value] for {time, value} in events)
               unless item.data?
@@ -265,6 +266,15 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         when "year" then from.setDate(to.getDate()-365)
       return {from, to}
 
+    getGroupByTimeForRange: (range) ->
+      time =(
+        switch range
+          when "day" then 10*60*1000 #=10min
+          when "week" then 60*60*1000 #=1h
+          when "month" then 3*60*1000 #=2h
+          when "year" then 6*60*1000 #=6h
+      )
+      return time
 
   pimatic.pages.graph = graphPage = new GraphPageViewModel()
 
