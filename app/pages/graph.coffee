@@ -147,6 +147,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                 after: fromTime
                 before: tillTime
                 limit: limit
+                groupByTime: 10*60*1000
               }
             }, {global: no}).done( (result) =>
               if task.status is "aborted" then return
@@ -207,13 +208,20 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               unless item.data?
                 addSeriesToChart(item, data)
               else
+                #t = new Date().getTime()
                 serie = chart.get(item.serie().id)
                 for d in data
                   serie.addPoint(d, no)
-              xAxis.setExtremes(from.getTime(), to.getTime());
+                #console.log "insert:", (new Date().getTime() - t)
+              #t = new Date().getTime()
+              xAxis.setExtremes(from.getTime(), to.getTime())
+              #console.log "setExtremes:", (new Date().getTime() - t)
               allData = allData.concat data
               unless hasMore
                 item.data = allData
+                #t = new Date().getTime()
+                chart.redraw()
+                #console.log "redraw:", (new Date().getTime() - t)
                 pimatic.loading(loadingId, "hide")
             ), onError = => pimatic.loading(loadingId, "hide") )
         )
@@ -301,7 +309,7 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
   pimatic.socket.on 'deviceAttributeChanged', sensorListener = (attrEvent) ->
     for item in page.displayedAttributes()
       if item.device.id is attrEvent.deviceId and item.attribute.name is attrEvent.attributeName
-        if item.serie?
+        if item.serie? and item.data?
           serie = $("#chart").highcharts().get(item.serie().id)
           point = [new Date(attrEvent.time).getTime(), attrEvent.value]
           shift = no
