@@ -233,7 +233,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                 #t = new Date().getTime()
                 chart.redraw()
                 #console.log "redraw:", (new Date().getTime() - t)
-                #pimatic.loading(loadingId, "hide")
+                pimatic.loading(loadingId, "hide")
             ), onError = => pimatic.loading(loadingId, "hide") )
         )
 
