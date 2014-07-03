@@ -212,6 +212,8 @@ html .ui-loader {
   bottom: 10px;
   top: auto;
   font-size: 0.8em;
+  width: 80%;
+  margin-left: -40%;
 }
 
 body.ui-mobile-viewport, div.ui-mobile-viewport {

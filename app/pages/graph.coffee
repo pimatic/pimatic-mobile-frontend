@@ -23,9 +23,12 @@ $(document).on "pagecreate", '#graph-page', (event) ->
 
   class TaskQuery
     query: []
-    addTask: (task) ->
+    addTask: (task, prepend = false) ->
       task.onComplete = => @next()
-      @query.push task
+      if prepend
+        @query.unshift task
+      else
+        @query.push task
       @start()
     start: ->
       if @query.length is 0 then return
@@ -34,7 +37,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
       first.status = "running"
       first.start()
     next: ->
-      @query.splice(0, 1)
+      @query = (t for t in @query when t.status isnt "running")
       @start()
     clear: ->
       for t in @query
@@ -142,9 +145,11 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         )
 
         limit = 100
-        loadData = ( (item, fromTime, tillTime, onData, onError) =>
-          task = {}
-          task.abort = onError
+        loadData = ( (item, fromTime, tillTime, onData, onError, prepend = no) =>
+          task = {
+            attributeName: item.attribute.name
+            abort: onError
+          }
           task.start = =>
             startTime = new Date().getTime()
             pimatic.client.rest.querySingleDeviceAttributeEvents({
@@ -171,7 +176,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                   limit = Math.max(limit, 100)
                   if hasMore
                     last = result.events[eventsLength-1]
-                    setTimeout( ( => loadData(item, last.time+1, tillTime, onData) ) , 500)
+                    loadData(item, last.time+1, tillTime, onData, onError, yes)
                   onData(result.events, hasMore)
             ).always( ->
               if task.status is "aborted" then return
@@ -180,7 +185,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               onError()
             )
 
-          @dataLoadingQuery.addTask(task)
+          @dataLoadingQuery.addTask(task, prepend)
         )
 
         addSeriesToChart = ( (item, data) =>
@@ -228,7 +233,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                 #t = new Date().getTime()
                 chart.redraw()
                 #console.log "redraw:", (new Date().getTime() - t)
-                pimatic.loading(loadingId, "hide")
+                #pimatic.loading(loadingId, "hide")
             ), onError = => pimatic.loading(loadingId, "hide") )
         )
 
@@ -276,8 +281,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         switch range
           when "day" then 10*60*1000 #=10min
           when "week" then 60*60*1000 #=1h
-          when "month" then 3*60*60*1000 #=2h
-          when "year" then 6*60*60*1000 #=6h
+          when "month" then 2*60*60*1000 #=2h
+          when "year" then 3*60*60*1000 #=3h
       )
       return time
 
