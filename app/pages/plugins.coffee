@@ -22,17 +22,23 @@ $(document).on "pageinit", '#plugins', (event) ->
       ele = $ ele
       if ele.is(':checked')
         selected.push(ele.data 'plugin-name')
-    $.post("/api/plugins/#{val}", plugins: selected)
-      .done( (data) ->
-        past = (if val is 'add' then 'added' else 'removed')
-        pimatic.showToast data[past].length + __(" plugins #{past}") + "." +
-         (if data[past].length > 0 then " " + __("Please restart pimatic.") else "")
-        pimatic.pages.plugins.uncheckAllPlugins()
-        return
-      ).fail(ajaxAlertFail)
+    (switch val
+      when 'add' then pimatic.client.rest.addPluginsToConfig({
+          pluginNames: selected
+        })
+      when 'remove' then pimatic.client.rest.removePluginsFromConfig({
+        pluginNames: selected
+      })
+    ).done( (data) ->
+      past = (if val is 'add' then 'added' else 'removed')
+      pimatic.showToast data[past].length + __(" plugins #{past}") + "." +
+       (if data[past].length > 0 then " " + __("Please restart pimatic.") else "")
+      pimatic.pages.plugins.uncheckAllPlugins()
+      return
+    ).fail(ajaxAlertFail)
 
   $('#plugins').on "click", '.restart-now', (event, ui) ->
-    $.get('/api/restart').fail(ajaxAlertFail)
+    pimatic.client.rest.restart({}).fail(ajaxAlertFail)
 
 
 $(document).on "pagebeforeshow", '#plugins', (event) ->
@@ -58,19 +64,18 @@ $(document).on "pageinit", '#plugins-browse', (event) ->
   $('#plugin-browse-list').on "click", '.add-to-config', (event, ui) ->
     li = $(this).parent('li')
     plugin = li.data('plugin')
-    $.post("/api/plugins/add", plugins: [plugin.name])
-      .done( (data) ->
-        text = null
-        if data.added.length > 0
-          text = __('Added %s to the config. Plugin will be auto installed on next start.', 
-                    plugin.name)
-          text +=  " " + __("Please restart pimatic.")
-          li.find('.add-to-config').addClass('ui-disabled') 
-        else
-          text = __('The plugin %s was already in the config.', plugin.name)
-        pimatic.showToast text
-        return
-      ).fail(ajaxAlertFail)
+    pimatic.client.rest.addPluginsToConfig(pluginNames: [plugin.name]).done( (data) ->
+      text = null
+      if data.added.length > 0
+        text = __('Added %s to the config. Plugin will be auto installed on next start.', 
+                  plugin.name)
+        text +=  " " + __("Please restart pimatic.")
+        li.find('.add-to-config').addClass('ui-disabled') 
+      else
+        text = __('The plugin %s was already in the config.', plugin.name)
+      pimatic.showToast text
+      return
+    ).fail(ajaxAlertFail)
     return
 
 pimatic.pages.plugins =

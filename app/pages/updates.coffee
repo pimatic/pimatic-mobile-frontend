@@ -59,7 +59,7 @@ $(document).on("pagecreate", '#updates', (event) ->
       )
 
     restart: ->
-      $.get('/api/restart').fail(ajaxAlertFail)
+      pimatic.client.rest.restart({}).fail(ajaxAlertFail)
 
     searchForPimaticUpdate: ->
       return pimatic.client.rest.isPimaticOutdated().done( (data) =>
