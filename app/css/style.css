@@ -96,12 +96,19 @@ box-shadow: none;
 }
 
 @media (max-width: 60em) {
+
   .ui-panel-page-content-display-reveal .content-overlay{
     background: rgba(0,0,0,0.4);
     -webkit-box-shadow: inset 10px 0 20px rgba(0,0,0,0.3);
     -moz-box-shadow: inset 10px 0 20px rgba(0,0,0,0.3);
     box-shadow: inset 10px 0 20px rgba(0,0,0,0.3);
   }
+
+  #index .ui-title {
+    text-align: left;
+    margin-left: 42px;
+  }
+
 }
 
 #item-tabs {
@@ -212,8 +219,6 @@ html .ui-loader {
   bottom: 10px;
   top: auto;
   font-size: 0.8em;
-  width: 80%;
-  margin-left: -40%;
 }
 
 body.ui-mobile-viewport, div.ui-mobile-viewport {
