@@ -21,7 +21,7 @@
 }
 
 .ui-header {
-  z-index: 1000;
+  z-index: 1004;
 }
 
 #item-lists .owl-item>div{
@@ -115,7 +115,10 @@ box-shadow: none;
   position: relative;
   z-index: 1002;
   box-shadow: 0px 3px 3px 0 rgba(0,0,0,.15);
+  overflow: hidden;
+  margin-bottom: -1px;
 }
+
 
 #index .ui-header .ui-controlgroup .ui-btn-icon-notext {
   padding: 0;
@@ -196,7 +199,7 @@ box-shadow: none;
     background: rgba(0, 0, 0, 0.3);
     display:none;
     position: fixed;
-    z-index:1001;
+    z-index:1011;
 }
 
 .ui-loading-blocking .ui-loader-background {
