@@ -7,7 +7,6 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
   class RulesViewModel
 
     enabledEditing: ko.observable(no)
-    ruleItemCssClass: ko.observable('')
     isSortingRules: ko.observable(no)
 
     constructor: () ->
@@ -38,6 +37,17 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
           if ko.utils.arrayIndexOf(groupedRules, r.id) is -1
             ungroupedRules.push r
         return ungroupedRules
+      )
+
+      @ruleCss = ko.computed( tc =>
+        css = ""
+        guiSettings = pimatic.guiSettings()
+        unless guiSettings? then return css
+        if guiSettings.hideRuleName
+          css += " hideRuleName"
+        if guiSettings.hideRuleText
+          css += " hideRuleText"
+        return css
       )
 
     afterRenderRule: (elements, rule) ->

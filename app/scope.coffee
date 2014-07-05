@@ -263,6 +263,7 @@ class Pimatic
       rememberme: no
       updateProcessStatus: 'idle'
       updateProcessMessages: []
+      guiSettings: null
     })
     @setupStorage()
 

@@ -29,6 +29,11 @@ $(document).on( "pagebeforecreate", (event) ->
         criteria:
           level: 'error'
     })
+    pimatic.socket.emit('call', {
+      id: 'guiSettings'
+      action: 'getGuiSetttings'
+      params: {}
+    })
   )
 
   pimatic.socket.on('callResult', (msg) ->
@@ -36,7 +41,13 @@ $(document).on( "pagebeforecreate", (event) ->
       when 'errorMessageCount'
         if msg.success
           pimatic.errorCount(msg.result.count)
-
+      when 'guiSettings'
+        if msg.success
+          guiSettings = msg.result.guiSettings
+          for k, v of guiSettings.defaults
+            unless guiSettings.config[k]?
+              guiSettings.config[k] = v
+          pimatic.guiSettings(guiSettings.config)
   )   
 
   pimatic.socket.on('devices', tc (devices) -> 
