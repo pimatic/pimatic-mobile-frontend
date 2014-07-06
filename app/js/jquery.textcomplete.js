@@ -452,16 +452,13 @@
           //count select
           this.displayCount++;
         }
-        console.log("render");
         this.$el.find('.autocomplete').append(html);
         if (this.data.autocomplete.length === 0 && data.format.length === 0) {
-          console.log("deactivate");
           this.deactivate();
         } else {
           if(this.data.autocomplete.length) {
             this.activateIndexedItem();
           } else {
-            console.log("reposition");
             this.reposition();
           }
         }

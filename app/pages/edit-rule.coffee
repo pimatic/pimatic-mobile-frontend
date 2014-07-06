@@ -120,13 +120,12 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
         editRulePage.autocompleteAjax?.abort()
         result = {autocomplete: [], format: []}
         if pimatic.pages.editRule.autocompleEnabled
-          editRulePage.autocompleteAjax = $.ajax('parseCondition',
-            type: 'POST'
-            data: {condition: term}
-            global: false
+          editRulePage.autocompleteAjax = pimatic.client.rest.getRuleConditionHints(
+            {conditionInput: term},
+            {global: false}
           ).done( (data) =>
-            result.autocomplete = data.context?.autocomplete or []
-            result.format = data.context?.format or []
+            result.autocomplete = data.hints?.autocomplete or []
+            result.format = data.hints?.format or []
             if data.error then console.log data.error
             @lastTerm = term
             callback result
@@ -146,13 +145,12 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
         result = {autocomplete: [], format: []}
         if pimatic.pages.editRule.autocompleEnabled
           editRulePage.autocompleteAjax?.abort()
-          editRulePage.autocompleteAjax = $.ajax('parseActions',
-            type: 'POST'
-            data: {action: term}
-            global: false
+          editRulePage.autocompleteAjax = pimatic.client.rest.getRuleActionsHints(
+            {actionsInput: term},
+            {global: false}
           ).done( (data) =>
-            result.autocomplete = data.context?.autocomplete or []
-            result.format = data.context?.format or []
+            result.autocomplete = data.hints?.autocomplete or []
+            result.format = data.hints?.format or []
             if data.message? and data.message.length > 0
               pimatic.showToast data.message[0]
             if data.error then console.log data.error

@@ -35,71 +35,12 @@ module.exports = (env) ->
     # ###init the frontend:
     init: (@app, @framework, @config) ->
 
-      app.get '/remember', (req, res) =>
-        rememberMe = req.query.rememberMe
-        # rememberMe is handled by the framework, so see if it was picked up:
-        if rememberMe is 'true' then rememberMe = yes
-        if rememberMe is 'false' then rememberMe = no
-
-        if req.session.rememberMe is rememberMe
-          res.send 200, { success: true,  message: 'done' }
-        else 
-          res.send 200, {success: false, message: 'illegal param'}
-        return
-        
-      app.post('/parseActions', (req, res) =>
-        actionString = req.body.action
-        error = null
-        context =  null
-        result = null
-        try
-          context = @framework.ruleManager.createParseContext()
-          result = @framework.ruleManager.parseRuleActions("id", actionString, context)
-          context.finalize()
-        catch e
-          error = e
-          res.send 200, {success: false, error: error.message}
-        unless error?
-          for a in result.actions
-            delete a.handler
-          res.send 200, {
-            success: true
-            tokens: result.tokens
-            actions: result.actions
-            context
-          }
-      )
-
-      app.post('/parseCondition', (req, res) =>
-        conditionString = req.body.condition
-        error = null
-        context =  null
-        result = null
-        try
-          context = @framework.ruleManager.createParseContext()
-          result = @framework.ruleManager.parseRuleCondition("id", conditionString, context)
-          context.finalize()
-        catch e
-          error = e
-          res.send 200, {success: false, error: error.message}
-        unless error?
-          for p in result.predicates
-            delete p.handler
-          res.send 200, {
-            success: true
-            tokens: result.tokens
-            predicates: result.predicates
-            context
-          }
-      )
-
       app.post('/client-error', (req, res) =>
         error = req.body.error
         env.logger.error("Client error:", error.message)
         env.logger.debug JSON.stringify(error, null, "  ")
         res.send 200
       )
-
 
       app.get('/login', (req, res) =>
         url = req.query.url
