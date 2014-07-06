@@ -3,11 +3,12 @@ module.exports = (env) ->
   # ##Dependencies
   # * from node.js
   util = require 'util'
-  fs = require 'fs'
+  fs = require 'fs'; 
   path = require 'path'
 
   # * pimatic imports.
-  Q = env.require 'q'
+  Promise = env.require 'bluebird'
+  Promise.promisifyAll(fs)
   assert = env.require 'cassert'
   express = env.require "express" 
   coffee = env.require 'coffee-script'
@@ -117,19 +118,14 @@ module.exports = (env) ->
         res.sendfile(certFile)
 
       @framework.on 'after init', (context)=>
-        deferred = Q.defer()
-        # Give the other plugins some time to register asset files
-        process.nextTick => 
-          # and then setup the assets and manifest
+        # and then setup the assets and manifest
+        finished = Promise.resolve().then( =>
           try
             @setupAssetsAndManifest()
           catch e
             env.logger.error "Error setting up assets in mobile-frontend: #{e.message}"
             env.logger.debug e.stack
-          finally
-            deferred.resolve()
-
-        finished = deferred.promise.then( =>
+            return
           # If we are ind evelopment mode then
           if @config.mode is "development"
             # render the index page at each load.
@@ -141,12 +137,12 @@ module.exports = (env) ->
                 env.logger.debug error.stack
                 res.send error
               ).done()
-            return Q()
+            return
           else 
             # In production mode render the index page on time and store it to a file
             return @renderIndex().then( (html) =>
               indexFile = __dirname + '/public/index.html'
-              Q.nfcall(fs.writeFile, indexFile, html)
+              fs.writeFileAsync(indexFile, html)
             )
           )
         context.waitForIt finished
@@ -155,6 +151,7 @@ module.exports = (env) ->
     renderIndex: () ->
       env.logger.info "rendering html"
       jade = require('jade')
+      Promise.promisifyAll(jade)
 
       theme = {
         headerSwatch: 'a'
@@ -177,18 +174,18 @@ module.exports = (env) ->
           switch path.extname(page)
             when '.jade'
               env.logger.debug("rendering: #{page}") if @config.debug
-              Q.ninvoke jade, 'renderFile', page, renderOptions
+              jade.renderFileAsync page, renderOptions
             when '.html'
-              Q.nfcall fs.readFile, page
+              fs.readFileAsync page
             else
               env.logger.error "Could not add page: #{page} unknown extension."
-              Q ""
+              Promise.resolve ""
 
-      Q.all(awaitingRenders).then( (htmlPages) =>
+      Promise.all(awaitingRenders).then( (htmlPages) =>
         renderOptions.additionalPages = _.reduce htmlPages, (html, page) => html + page
         layout = path.resolve __dirname, 'app/views/layout.jade' 
         env.logger.debug("rendering: #{layout}") if @config.debug
-        Q.ninvoke(jade, 'renderFile', layout, renderOptions).then( (html) =>
+        jade.renderFileAsync(layout, renderOptions).then( (html) =>
           env.logger.info "rendering html finished"
           return html
         )
