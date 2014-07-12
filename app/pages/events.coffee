@@ -54,6 +54,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
     chosenDevice: ko.observable()
     attributes: ko.observableArray(['All'])
     chosenAttribute: ko.observable()
+    eventsCount: ko.observable(null)
 
     constructor: ->
       @updateFromJs([])
@@ -71,8 +72,19 @@ $(document).on("pagecreate", '#events', tc (event) ->
       ).extend(rateLimit: {timeout: 10, method: "notifyAtFixedRate"})
 
       ko.computed( =>
+        @chosenDevice()
+        @chosenAttribute()
         @loadEvents()
       )
+
+      @eventsCountText = ko.computed( =>
+        count = @eventsCount()
+        return (
+          if count? then __("Showing %s of %s Messages", @displayedEvents().length, count)
+          else ""
+        )
+      )
+
 
       @updateListView = ko.computed( =>
         @displayedEvents()
@@ -89,6 +101,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
             value: attrEvent.value
           })
         )
+        @eventsCount(@eventsCount()+1)
       )
 
     updateFromJs: (data) ->
@@ -105,6 +118,8 @@ $(document).on("pagecreate", '#events', tc (event) ->
           order: "time"
           orderDirection: "DESC"
         }
+        criteria.deviceId = @chosenDevice() if @chosenDevice() isnt 'All'
+        criteria.attributeName = @chosenAttribute() if @chosenAttribute() isnt 'All'
 
         pimatic.client.rest.queryDeviceAttributeEvents( { criteria }).always( ->
           pimatic.loading "loading events", "hide"
@@ -124,21 +139,19 @@ $(document).on("pagecreate", '#events', tc (event) ->
       else @loadEventsAjax.done( => ajaxCall() )
 
 
-    # loadMessagesMeta: ->
-    #   $.ajax("/api/database/queryMessagesTags",
-    #     global: false # don't show loading indicator
-    #   ).done( tc (data) =>
-    #     if data.success
-    #       for t in data.tags
-    #         unless t in @tags() then @tags.push t
-    #   )
-    #   $.ajax("/api/database/queryMessagesCount",
-    #     global: false # don't show loading indicator
-    #   ).done( tc (data) =>
-    #     if data.success
-    #       @messageCount(data.count)
-    #   )
-
+    loadEventsMeta: ->
+      pimatic.client.rest.queryDeviceAttributeEventsDevices({}).done( tc (data) =>
+        if data.success
+          for item in data.devices
+            unless item.deviceId in @devices()
+              @devices.push item.deviceId
+            unless item.attributeName in @attributes()
+              @attributes.push item.attributeName
+      )
+      pimatic.client.rest.queryDeviceAttributeEventsCount({}).done( tc (data) =>
+        if data.success
+          @eventsCount(data.count)
+      )
     
   try
     pimatic.pages.events = eventsPage = new EventViewModel()
@@ -151,6 +164,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
 $(document).on("pagebeforeshow", '#events', tc (event) ->
   try
     pimatic.pages.events.loadEvents()
+    pimatic.pages.events.loadEventsMeta()
   catch e
     TraceKit.report(e)
 )

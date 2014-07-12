@@ -1,11 +1,13 @@
 div#events(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
+    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left(href='#graph-page')=__('Graph')
     h3=__('Events')
   div.ui-content.overthrow
     .controls
       select#select-device(name='select-device', data-mini="true", data-inline="true", data-bind="jqmoptions: devices, value: chosenDevice")
       select#select-attribute(name='select-attribute', data-mini="true", data-inline="true", data-bind="jqmoptions: attributes, value: chosenAttribute")
+      span(data-bind="text: eventsCountText")
     .outdent
       table#events-table.table-stroke.ui-table()
         thead
