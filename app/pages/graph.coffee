@@ -24,7 +24,10 @@ $(document).on "pagecreate", '#graph-page', (event) ->
   class TaskQuery
     query: []
     addTask: (task, prepend = false) ->
-      task.onComplete = => @next()
+      task.onComplete = ( => 
+        task.status = 'complete'
+        @next()
+      )
       if prepend
         @query.unshift task
       else
@@ -37,7 +40,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
       first.status = "running"
       first.start()
     next: ->
-      @query = (t for t in @query when t.status isnt "running")
+      @query = (t for t in @query when t.status isnt "complete")
       @start()
     clear: ->
       for t in @query

@@ -16,7 +16,7 @@ script#graph-attribute-template(type='text/template')
     div.color-label(data-bind="style: {'background-color': $data.serie().color}")
     <!-- /ko -->
     <!-- /ko -->
-    span.name(data-bind='text: name')
+    span.name(data-bind='text: label')
     div.controls(data-role="controlgroup")
       <!-- ko if: !$root.getDisplayedAttribute($parent, $data) -->
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.show-button()=__("Show")
