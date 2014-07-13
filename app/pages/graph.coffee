@@ -122,6 +122,10 @@ $(document).on "pagecreate", '#graph-page', (event) ->
             enabled: no
           credits:
             enabled: false
+          legend:
+            enabled: yes
+            borderWidth: 1
+            borderRadius: 3
           series: []
         }
 
@@ -181,6 +185,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                     last = result.events[eventsLength-1]
                     loadData(item, last.time+1, tillTime, onData, onError, yes)
                   onData(result.events, hasMore)
+                else
+                  onData(result.events, false)
             ).always( ->
               if task.status is "aborted" then return
               task.onComplete()
