@@ -18,7 +18,7 @@ Highcharts.Chart.prototype.callbacks.push(function(chart) {
             setTimeout(function() {
               try {
                 f(e);
-              } catch (e) {
+              } catch (error) {
                 ;//console.log("ignore:", e);
               }
             }, 1);

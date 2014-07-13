@@ -68,6 +68,10 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
+      @averageDurationText = ko.computed( tc =>
+        return __("Average values of %s.", @averageDuration()) 
+      )
+
       ko.computed( tc =>
         displayed = @displayedAttributes()
         $("#chart").highcharts()?.destroy()
@@ -118,6 +122,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               week: '%e. %b',
               month: '%b \'%y',
               year: '%Y'
+            tickPixelInterval: 40
+            labels : { y : 20, rotation: -30, align: 'right' }
           rangeSelector:
             enabled: no
           credits:
@@ -288,10 +294,10 @@ $(document).on "pagecreate", '#graph-page', (event) ->
     getGroupByTimeForRange: (range) ->
       time =(
         switch range
-          when "day" then 10*60*1000 #=10min
-          when "week" then 60*60*1000 #=1h
-          when "month" then 2*60*60*1000 #=2h
-          when "year" then 3*60*60*1000 #=3h
+          when "day" then 5*60*1000 #=5min
+          when "week" then 30*60*1000 #=30min
+          when "month" then 1*60*60*1000 #=1h
+          when "year" then 2*60*60*1000 #=2h
       )
       return time
 
@@ -313,7 +319,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
             text = "#{h}h #{m}min #{text}"
           else
             text = "#{h}h #{text}"
-      return text
+      return text.trim()
 
   pimatic.pages.graph = graphPage = new GraphPageViewModel()
 

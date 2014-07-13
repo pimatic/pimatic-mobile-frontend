@@ -43,9 +43,7 @@ div#graph-page(data-role='page')
       div#chart
       div#chart-info
         span(data-bind="if: averageDuration && displayedAttributes().length > 0")
-          |Average values of 
-          span(data-bind="text: averageDuration")
-          |.
+          span(data-bind="text: averageDurationText()")
     //-     span=__('Last Update: ')
     //-     span.last-update-time
     //-     span=' ('
