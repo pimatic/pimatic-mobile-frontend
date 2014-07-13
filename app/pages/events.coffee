@@ -80,7 +80,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
       @eventsCountText = ko.computed( =>
         count = @eventsCount()
         return (
-          if count? then __("Showing %s of %s Messages", @displayedEvents().length, count)
+          if count? then __("Showing %s of %s Events", @displayedEvents().length, count)
           else ""
         )
       )
