@@ -49,7 +49,7 @@ $(document).on("pagebeforecreate", (event) ->
       return false
 
     onRemove: ->
-      really = confirm(__("Do you really want to delete the %s variable?", rule.variableName()))
+      really = confirm(__("Do you really want to delete the %s variable?", variableName()))
       if really
         pimatic.client.rest.removeVariable({name: @variableName()})
           .done( (data) ->
