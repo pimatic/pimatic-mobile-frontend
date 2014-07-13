@@ -171,6 +171,7 @@ $(document).on( "pagebeforecreate", (event) ->
           @upBtn.removeClass('ui-state-disabled')
         ).fail(ajaxAlertFail)
     _updateButtons: (position) ->
+      unless @downBtn? then return
       switch position
         when 'up'
           @downBtn.removeClass('ui-btn-active')
