@@ -36,7 +36,7 @@ Highcharts.Chart.prototype.callbacks.push(function(chart) {
   };
 
   container.ontouchstart = callTrough(container.ontouchstart, 'touchstart');
-  container.onmousemove = callTrough(container.ontouchmove, 'touchmove');
-  container.ontouchmove = callTrough(container.onmousemove, 'mousemove');
+  container.ontouchmove = callTrough(container.ontouchmove, 'touchmove');
+  container.onmousemove = callTrough(container.onmousemove, 'mousemove');
  
 });
