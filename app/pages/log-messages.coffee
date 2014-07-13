@@ -98,7 +98,10 @@ $(document).on("pagecreate", '#log', tc (event) ->
         }
         criteria.tags = @chosenTag() if @chosenTag() isnt 'All'
 
-        pimatic.client.rest.queryMessages({criteria}).always( =>
+        pimatic.client.rest.queryMessages(
+          {criteria},
+          {timeout: 60000, global: no}
+        ).always( =>
           pimatic.loading "loading message", "hide"
         ).done( tc (data) =>
           @loadMessagesAjax = null

@@ -121,7 +121,10 @@ $(document).on("pagecreate", '#events', tc (event) ->
         criteria.deviceId = @chosenDevice() if @chosenDevice() isnt 'All'
         criteria.attributeName = @chosenAttribute() if @chosenAttribute() isnt 'All'
 
-        pimatic.client.rest.queryDeviceAttributeEvents( { criteria }).always( ->
+        pimatic.client.rest.queryDeviceAttributeEvents( 
+          {criteria},
+          {timeout: 60000, global: no}
+        ).always( ->
           pimatic.loading "loading events", "hide"
         ).done( tc (data) =>
           @loadEventsAjax = null
