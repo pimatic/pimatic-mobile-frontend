@@ -224,8 +224,8 @@ html .ui-loader {
   font-size: 0.8em;
 }
 
-body.ui-mobile-viewport, div.ui-mobile-viewport {
-  overflow-y: hidden;
+html, body.ui-mobile-viewport, div.ui-mobile-viewport {
+  overflow: hidden !important;
 }
 
 
