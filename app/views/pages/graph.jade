@@ -33,13 +33,15 @@ div#graph-page(data-role='page')
   div.ui-content.overthrow
     //-   li(data-role='list-divider')=__('Sensor values')
     div#chart-container
-      div(data-role='fieldcontain')
-        label(for='chart-select-range')=__('Show data of: ') + " "
-        select#chart-select-range(name='chart-select-range', data-bind="value: chosenRange")
-          option(value="day")=__('Last 24 hours')
-          option(value="week")=__('Last 7 days')
-          option(value="month")=__('Last 30 days')
-          option(value="year")=__('Last 365 days')
+      div.controls
+        span=__('Show data of ')
+        select#chart-select-range(name='chart-select-range', data-bind="value: chosenRange", data-inline="true", data-mini="true")
+          option(value="day")=__('24 hours')
+          option(value="week")=__('7 days')
+          option(value="month")=__('30 days')
+          option(value="year")=__('365 days')
+        span=__('up to ')
+        input#chart-select-date(type="text", data-role="date", data-mini="true", data-bind="value: chosenDate", data-date-format="yy-mm-dd")
       div#chart
       div#chart-info
         span(data-bind="if: averageDuration && displayedAttributes().length > 0")

@@ -171,7 +171,6 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
               "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
               "pimatic-mobile-frontend/app/js/jquery.pep.js"
-              "pimatic-mobile-frontend/app/js/jquery.mobile.simpledialog2.js"
               "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
               "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
               "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
@@ -181,6 +180,8 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/owl.carousel.js"
               "pimatic-mobile-frontend/app/js/highstock.js"
               "pimatic-mobile-frontend/app/js/touch-tooltip-fix.js"
+              "pimatic-mobile-frontend/app/js/jquery.ui.datepicker.js"
+              "pimatic-mobile-frontend/app/js/jquery.mobile.datepicker.mod.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -211,7 +212,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
             ] .concat themeCss .concat [
               "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
-              "pimatic-mobile-frontend/app/css/jquery.mobile.simpledialog.css"
+              "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
               "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
               "pimatic-mobile-frontend/app/css/owl.carousel.css"
             ] 

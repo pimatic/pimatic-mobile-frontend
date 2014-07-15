@@ -55,11 +55,18 @@ $(document).on "pagecreate", '#graph-page', (event) ->
     dateFrom: ko.observable()
     dateTo: ko.observable()
     chosenRange: ko.observable('day')
+    chosenDate: ko.observable()
     pageCreated: ko.observable(false)
     dataLoadingQuery: new TaskQuery()
     averageDuration: ko.observable(null)
+    dateFormat: "yy-mm-dd"
 
     constructor: ->
+
+      # $("#chart-select-date").date('onSelect', -> 
+      #   console.log "change"
+      # )
+
       ko.computed( tc =>
         unless @pageCreated() then return false
         g.devices() for g in pimatic.groups()
@@ -72,6 +79,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         return __("Average values of %s.", @averageDuration()) 
       )
 
+      @chosenDate($.datepicker.formatDate(@dateFormat, new Date()))
+
       ko.computed( tc =>
         displayed = @displayedAttributes()
         $("#chart").highcharts()?.destroy()
@@ -82,12 +91,13 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         @dataLoadingQuery.clear()
 
         range = @chosenRange()
+        chosenDate = @chosenDate()
         groupByTime = @getGroupByTimeForRange(range)
         @averageDuration(@timeDurationToText(groupByTime))
 
         units = []
         for item in displayed
-          if item.range? and item.range isnt range
+          if item.range? and (item.range isnt range or item.chosenDate isnt chosenDate)
             item.range = null
             item.data = null
           unless item.attribute.unit in units
@@ -208,6 +218,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
           serieConf = buildSeries(item, data)
           serie = chart.addSeries(serieConf, redraw=yes, animate=no)
           item.data = data
+          item.chosenDate = chosenDate
           item.range = range
           item.serie({
             id: serieConf.id
@@ -280,10 +291,24 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         item.device is device and item.attribute is attribute 
       )
 
+    isLive: () ->
+      now = new Date()
+      chosenDate = $.datepicker.parseDate(@dateFormat, @chosenDate())
+      return (
+        (chosenDate.getFullYear() is now.getFullYear()) and 
+        (chosenDate.getMonth() is now.getMonth()) and 
+        (chosenDate.getDate() is now.getDate())
+      )
+
     getDateRange: () ->
       range = @chosenRange()
-      to = new Date
-      from = new Date()
+      chosenDate = $.datepicker.parseDate(@dateFormat, @chosenDate())
+      unless @isLive()
+        to = new Date(chosenDate)
+        to.setDate(to.getDate()+1)
+      else
+        to = new Date()
+      from = new Date(to)
       switch range
         when "day" then from.setDate(to.getDate()-1)
         when "week" then from.setDate(to.getDate()-7)
@@ -362,6 +387,7 @@ $(document).on "pagehide", '#graph-page', (event) ->
 $(document).on "pagebeforeshow", '#graph-page', () ->
   page = pimatic.pages.graph
   pimatic.socket.on 'deviceAttributeChanged', sensorListener = (attrEvent) ->
+    unless page.isLive() then return
     for item in page.displayedAttributes()
       if item.device.id is attrEvent.deviceId and item.attribute.name is attrEvent.attributeName
         if item.serie? and item.data?

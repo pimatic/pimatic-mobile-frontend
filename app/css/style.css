@@ -1019,6 +1019,11 @@ li.item .attributes.contains-attr-type-number{
   font-size: 15px;
 }
 
+#graph-page #chart-container .ui-input-text{
+  display: inline-block;
+  vertical-align: middle;
+  width: 88px;
+}
 
 @media (max-width:28em) {
   #logger-attr-values li div.controls label {

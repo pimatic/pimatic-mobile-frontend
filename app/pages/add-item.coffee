@@ -65,62 +65,6 @@ $(document).on "pagecreate", '#add-item', tc (event) ->
     pimatic.pages.addItem.addDeviceToIndexPage(ko.dataFor(li[0]))
     return
 
-  $('#variable-items').on "click", 'li.item', tc ->
-    li = $(this)
-    pimatic.pages.addItem.addVariableToIndexPage(ko.dataFor(li[0]))
-    return
-
-  $('#add-other').on "click", '#add-a-header', tc ->
-    $("<div>").simpledialog2(
-      themeDialog: 'a'
-      themeButtonDefault: 'b'
-      mode: "button"
-      headerText: __("Name")
-      headerClose: true
-      buttonPrompt: __("Please enter a name")
-      buttonInput: true
-      zindex: 1001
-      buttons:
-        OK:
-          text: __('Add')
-          click: ->
-            name = $.mobile.sdLastInput
-            if name is ""
-              pimatic.showToast __("Please enter a name")
-            else
-              $.get("/add-header/#{name}").done((result) ->
-                pimatic.showToast __("Header added")
-              ).fail(ajaxAlertFail)
-    )
-    setTimeout ( -> $('.ui-simpledialog-input').focus() ), 1
-    return
-
-  $('#add-other').on "click", '#add-a-button', tc ->
-    $("<div>").simpledialog2(
-      themeDialog: 'a'
-      themeButtonDefault: 'b'
-      mode: "button"
-      headerText: __("Name")
-      headerClose: true
-      buttonPrompt: __("Please enter a name")
-      buttonInput: true
-      zindex: 1001
-      buttons:
-        OK:
-          text: __('Add')
-          click: ->
-            name = $.mobile.sdLastInput
-            if name is ""
-              pimatic.showToast __("Please enter a name")
-            else
-              $.get("/add-button/#{name}").done((result) ->
-                pimatic.showToast __("Button added")
-              ).fail(ajaxAlertFail)
-    )
-    setTimeout ( -> $('.ui-simpledialog-input').focus() ), 1
-    return
-  return
-
 $(document).on "pageshow", '#add-item', tc (event) ->
   return
 

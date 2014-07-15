@@ -4,6 +4,10 @@
 # scope this function
 ( ->
 
+  $.datepicker.setDefaults({
+    dateFormat: 'yy-mm-dd'
+  });
+
   pendingLoadings = {}
 
   # build a string containing all loading messages
