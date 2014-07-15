@@ -52,7 +52,7 @@ $(document).on("pagebeforecreate", (event) ->
           name: @ruleName()
           logging: @ruleLogging()
       }
-      console.log params
+      
       (
         switch @action()
           when 'add' then pimatic.client.rest.addRuleByString(params)

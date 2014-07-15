@@ -92,6 +92,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
 
         range = @chosenRange()
         chosenDate = @chosenDate()
+        unless $.datepicker.parseDate(@dateFormat, chosenDate)?
+          return
         groupByTime = @getGroupByTimeForRange(range)
         @averageDuration(@timeDurationToText(groupByTime))
 
@@ -294,6 +296,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
     isLive: () ->
       now = new Date()
       chosenDate = $.datepicker.parseDate(@dateFormat, @chosenDate())
+      if chosenDate is null then return false
       return (
         (chosenDate.getFullYear() is now.getFullYear()) and 
         (chosenDate.getMonth() is now.getMonth()) and 

@@ -1023,6 +1023,13 @@ li.item .attributes.contains-attr-type-number{
   display: inline-block;
   vertical-align: middle;
   width: 88px;
+  border-color:     #ccc /*{a-bup-border}*/;
+}
+
+#graph-page #chart-container .ui-input-text input{
+  padding-top: 0.50em;
+  padding-bottom: 0.50em;
+  background: white;
 }
 
 @media (max-width:28em) {
