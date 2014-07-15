@@ -359,7 +359,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
   $("#nav-panel").on('panelopen panelclose', tc (event) ->
     itemList = $('#item-lists')
     if itemList.is(":visible")
-      pimatic.try => itemList.data('owlCarousel').reload()
+      pimatic.try => itemList.data('owlCarousel').updateVars()
   )
   return
 )
@@ -370,7 +370,7 @@ $(document).on('click', '.content-overlay', tc (event) ->
 )
 
 $(document).on("pageshow", '#index', tc (event) ->
-  pimatic.try => $('#item-lists').data('owlCarousel').reload()
+  pimatic.try => $('#item-lists').data('owlCarousel').updateVars()
 )
 
 $(document).on("pagebeforeshow", '#index', tc (event) ->
