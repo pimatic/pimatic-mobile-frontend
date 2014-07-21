@@ -57,6 +57,10 @@ box-shadow: none;
   display: block;
 }
 
+html body .ui-panel-dismiss {
+  display: none;
+}
+
 @media (min-width:60em) {
 
   .ui-panel-page-content-display-reveal .content-overlay{
