@@ -123,7 +123,8 @@ class DevicePage
     devices:
       create: ({data, parent, skip}) => 
         device = pimatic.getDeviceById(data.deviceId)
-        unless device? then device = pimatic.nullDevice
+        unless device? 
+          device = pimatic.nullDevice
         itemClass = pimatic.templateClasses[device.template]
         unless itemClass?
           console.warn "Could not find a template class for #{data.template}"
@@ -140,13 +141,24 @@ class DevicePage
       return (
         for group in pimatic.groups()
           do (group) =>
-            devices = ko.computed( => (d for d in @devices() when d.device.group() is group) )
+            devices = ko.computed( => 
+              (d for d in @devices() when (
+                  d.device.group() is group and d.device isnt pimatic.nullDevice
+                )
+              ) 
+            )
             {group, devices} 
       )
     )
 
     @getUngroupedDevices = ko.computed( =>
-      d for d in @devices() when not d.device.group()?
+      devices = @devices()
+      ungrouped = (
+        d for d in devices when (
+          not d.device.group()? and d.device isnt pimatic.nullDevice
+        )
+      )
+      return ungrouped
     )
 
     deepEqual = (a, b) ->
