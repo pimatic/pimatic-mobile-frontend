@@ -300,8 +300,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   margin-top: 1px;
 }
 
-/* index-page */
-#index span.if, span.then {
+/* rules-page */
+#rules span.if, #rules span.then {
   font-weight: bold;
 }
 
