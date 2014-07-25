@@ -20,6 +20,7 @@ $(document).on("pagebeforecreate", (event) ->
       )
 
       editorEle = $('#device-json-editor')
+      pimatic.autoFillId(@deviceName, @deviceId, @action)
       
       editorSetConfig = (config) =>
         unless @editor? then return

@@ -5,7 +5,7 @@ div#edit-device(data-role='page')
     div#edit-device-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false" action="#")
       .ui-field-contain.has-device-name-input
         label(for='edit-device-name')=__('Name') + ': '
-        input#edit-device-name(placeholder="device-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceName")
+        input#edit-device-name(placeholder="device-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceName, valueUpdate: 'afterkeydown'")
       .ui-field-contain.has-device-id-input
         label(for='edit-device-id')=__('ID') + ': '
         input#edit-device-id(placeholder="device-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceId, jqmenabled: action() == 'add'")

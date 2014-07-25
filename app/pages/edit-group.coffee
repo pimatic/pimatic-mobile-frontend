@@ -14,6 +14,9 @@ $(document).on("pagebeforecreate", (event) ->
       @pageTitle = ko.computed( => 
         return (if @action() is 'add' then __('Add New Group') else __('Edit Group'))
       )
+
+      pimatic.autoFillId(@groupName, @groupId, @action)
+
     resetFields: () ->
       @groupName('')
       @groupId('')

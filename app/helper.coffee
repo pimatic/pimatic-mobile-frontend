@@ -174,6 +174,20 @@ pimatic.makeIdFromName = (str) =>
   str = str.replace(/[^a-z0-9 -]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-") # collapse dashes
   return str
 
+pimatic.autoFillId = (nameObservable, idObservable, actionObservable) =>
+  lastGeneratedId = ""
+  nameObservable.subscribe( (newName) =>
+    if actionObservable() isnt 'add'
+      lastGeneratedId = ""
+      return
+    currentId = idObservable()
+    generatedId = pimatic.makeIdFromName(newName)
+    if currentId is lastGeneratedId or currentId.length is 0
+      idObservable(generatedId)
+    lastGeneratedId = generatedId
+  )
+  return
+
 window.__ = (text, args...) -> 
   translated = text
   if locale[text]? then translated = locale[text]

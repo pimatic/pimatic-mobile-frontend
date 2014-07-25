@@ -23,17 +23,7 @@ $(document).on("pagebeforecreate", (event) ->
         return (if @action() is 'add' then __('Add new rule') else __('Edit rule'))
       )
 
-      lastGeneratedId = ""
-      @ruleName.subscribe( (newName) =>
-        if @action() isnt 'add'
-          lastGeneratedId = ""
-          return
-        currentId = @ruleId()
-        generatedId = pimatic.makeIdFromName(newName)
-        if currentId is lastGeneratedId or currentId.length is 0
-          @ruleId(generatedId)
-        lastGeneratedId = generatedId
-      )
+      pimatic.autoFillId(@ruleName, @ruleId, @action)
 
     resetFields: () ->
       @ruleId('')

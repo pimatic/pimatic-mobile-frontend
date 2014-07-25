@@ -14,6 +14,8 @@ $(document).on("pagebeforecreate", (event) ->
       @pageTitle = ko.computed( => 
         return (if @action() is 'add' then __('Add New Page') else __('Edit Page'))
       )
+      pimatic.autoFillId(@pageName, @pageId, @action)
+
     resetFields: () ->
       @pageName('')
       @pageId('')
