@@ -31,7 +31,7 @@ $(document).on("pagebeforecreate", (event) ->
           when 'update' then pimatic.client.rest.updatePage(params)
           else throw new Error("Illegal devicepage action: #{action()}")
       ).done( (data) ->
-        if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+        if data.success then $.mobile.changePage '#devicepages-page', {transition: 'slide', reverse: true}   
         else alert data.error
       ).fail(ajaxAlertFail)
       return false
@@ -41,7 +41,7 @@ $(document).on("pagebeforecreate", (event) ->
       if really
         pimatic.client.rest.removePage({pageId: @pageId()})
           .done( (data) ->
-            if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+            if data.success then $.mobile.changePage '#devicepages-page', {transition: 'slide', reverse: true}   
             else alert data.error
           ).fail(ajaxAlertFail)
         return false

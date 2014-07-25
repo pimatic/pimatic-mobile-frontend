@@ -395,6 +395,11 @@ class Pimatic
       @devicepages.push(page)
     else 
       page.update(pageData)
+  updatePageOrder: (order) ->
+    toIndex = (id) -> 
+      index = $.inArray(id, order)
+      return (if index is -1 then 999999 else index)
+    @devicepages.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )    
 
   # Groups
   getGroupById: (id) -> 

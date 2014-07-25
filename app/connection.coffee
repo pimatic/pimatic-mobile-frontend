@@ -96,6 +96,10 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.on("pageAdded", tc (page) -> 
     pimatic.updatePageFromJs(page)
   )
+  pimatic.socket.on("pageOrderChanged", tc (order) -> 
+    pimatic.updatePageOrder(order)
+  )
+
 
   pimatic.socket.on("groupChanged", tc (group) ->
     pimatic.updateGroupFromJs(group)

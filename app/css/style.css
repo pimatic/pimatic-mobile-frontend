@@ -339,7 +339,10 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   padding-right: 20px;
 }
 
-.items #add-a-item a, #rules #add-rule a, #variables #add-a-variable a{
+.items #add-a-item a, 
+#rules #add-rule a, 
+#variables #add-a-variable a
+#devicepages #add-a-devicepage a{
   font-weight: normal;
   color: #000;
 }
@@ -357,7 +360,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 .unlocked ul#variables li.sortable a,
 .unlocked ul#rules li.sortable a,
 .unlocked ul#groups li.sortable a,
-.unlocked ul#devices li.sortable a {
+.unlocked ul#devices li.sortable a,
+.unlocked ul#devicepages li.sortable a {
   padding-left: 36px;
 }
 

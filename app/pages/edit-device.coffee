@@ -80,7 +80,7 @@ $(document).on("pagebeforecreate", (event) ->
           when 'update' then pimatic.client.rest.updateDeviceByConfig({deviceConfig})
           else throw new Error("Illegal devicedevice action: #{action()}")
       ).done( (data) ->
-        if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+        if data.success then $.mobile.changePage '#devicepages-page', {transition: 'slide', reverse: true}   
         else alert data.error
       ).fail(ajaxAlertFail)
       return false
@@ -90,7 +90,7 @@ $(document).on("pagebeforecreate", (event) ->
       if really
         pimatic.client.rest.removeDevice({deviceId: @deviceId()})
           .done( (data) ->
-            if data.success then $.mobile.changePage '#index', {transition: 'slide', reverse: true}   
+            if data.success then $.mobile.changePage '#devicepages-page', {transition: 'slide', reverse: true}   
             else alert data.error
           ).fail(ajaxAlertFail)
       return false

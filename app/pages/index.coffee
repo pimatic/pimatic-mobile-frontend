@@ -57,14 +57,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
         else html = """<ul></ul>"""
         itemTabs.html(html)
         ko.applyBindings(this, itemTabs[0])
-        handleHTML = $('#edit-handle-template').text()
-        itemTabs.find('li a').each( ->
-          $(this).prepend($(handleHTML))
-        )
         if enabledEditing
-          itemTabs.find('ul').append(
-            """<li><a data-ajax="false" href="#edit-devicepage" id="add-devicepage-link">#{__('Add a Page...')}</a></li>"""
-          )
+          itemTabs.find('ul').append($('#edit-devicepage-link-template').text())
         if dPages.length > 0 or @enabledEditing()
           itemTabs.navbar()
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
@@ -82,6 +76,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
             changed = true
             break
         unless changed then return
+        console.log "rebuilding devicepages"
         itemLists = $('#item-lists')
         ko.cleanNode(itemLists[0])
         owl = itemLists.data('owlCarousel')
@@ -186,18 +181,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
     onPageTabClicked: (page) =>
       @activeDevicepage(page)
 
-    onAddPageClicked: =>
-      pimatic.pages.editDevicepage.resetFields()
-      pimatic.pages.editDevicepage.action('add')
-      return true
-
-    onEditPageClicked: (page) =>
-      pimatic.pages.editDevicepage.pageId(page.id)
-      pimatic.pages.editDevicepage.pageName(page.name())
-      pimatic.pages.editDevicepage.action('update')
-      jQuery.mobile.changePage '#edit-devicepage'
-      return true
-
     onAddItemClicked: =>
       return true
 
@@ -232,12 +215,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
     toggleEditing: =>
       @enabledEditing(not @enabledEditing())
-      pimatic.loading "enableediting", "show", text: __('Saving')
-      $.ajax("/enabledEditing/#{@enabledEditing()}",
-        global: false # don't show loading indicator
-      ).always( ->
-        pimatic.loading "enableediting", "hide"
-      ).done(ajaxShowToast)
 
     onItemsSorted: (item, eleBefore, eleAfter) =>
 
