@@ -50,7 +50,7 @@ $(document).on( "pagebeforecreate", '#devicepages-page', tc (event) ->
       really = confirm(__("Do you really want to delete the %s devicepage?", devicepage.name()))
       if really then (doDeletion = =>
           pimatic.loading "deletedevicepage", "show", text: __('Saving')
-          pimatic.client.rest.removePage(devicepageId: devicepage.id)
+          pimatic.client.rest.removePage(pageId: devicepage.id)
           .always( => 
             pimatic.loading "deletedevicepage", "hide"
           ).done(ajaxShowToast).fail(ajaxAlertFail)
