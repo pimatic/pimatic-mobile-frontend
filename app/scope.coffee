@@ -45,6 +45,7 @@ class Device
 
   }
   constructor: (data) ->
+    console.log "creating device", data.id
     ko.mapping.fromJS(data, @constructor.mapping, this)
     #@config = data.config
     @configObserve = ko.observable(data.config)
@@ -93,6 +94,7 @@ class Rule
     copy: ['id']
   }
   constructor: (data) ->
+    console.log "creating rule", data.id
     ko.mapping.fromJS(data, @constructor.mapping, this)
     @group = ko.computed( => pimatic.getGroupOfRule(@id) )
   update: (data) ->
@@ -135,6 +137,7 @@ class DevicePage
       key: (data) => data.deviceId
   }
   constructor: (data) ->
+    console.log "creating devicepage", data.id
     ko.mapping.fromJS(data, @constructor.mapping, this)
 
     @groupsWithDevices = ko.computed( =>
@@ -179,6 +182,7 @@ class Group
     copy: ['id']
   }
   constructor: (data) ->
+    console.log "creating group", data.id
     ko.mapping.fromJS(data, @constructor.mapping, this)
     @getDevices = ko.computed( =>
       devices = []
