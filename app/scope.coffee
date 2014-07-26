@@ -141,17 +141,21 @@ class DevicePage
     ko.mapping.fromJS(data, @constructor.mapping, this)
 
     @groupsWithDevices = ko.computed( =>
-      return (
+      gps = (
         for group in pimatic.groups()
           do (group) =>
             devices = ko.computed( => 
-              (d for d in @devices() when (
+              ds = (d for d in @devices() when (
                   d.device.group() is group and d.device isnt pimatic.nullDevice
                 )
-              ) 
+              )
+              console.log "ds in gps: ", @id, group.id, ds.length
+              return ds 
             )
             {group, devices} 
       )
+      console.log "gps", @id, gps.length
+      return gps
     )
 
     @getUngroupedDevices = ko.computed( =>
