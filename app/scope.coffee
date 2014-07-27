@@ -434,7 +434,7 @@ class Pimatic
   updateDeviceFromJs: (deviceData) ->
     device = @getDeviceById(deviceData.id)
     unless device?
-      device = Pimatic.mapping.devices.itemOptions.$create({data: deviceData})
+      device = Pimatic.mapping.devices.$itemOptions.$create(deviceData)
       @devices.push(device)
     else 
       device.update(deviceData)
@@ -454,7 +454,7 @@ class Pimatic
   updatePageFromJs: (pageData) ->
     page = @getPageById(pageData.id)
     unless page?
-      page = Pimatic.mapping.devicepages.itemOptions.$create({data: pageData})
+      page = Pimatic.mapping.devicepages.$itemOptions.$create(pageData)
       @devicepages.push(page)
     else 
       page.update(pageData)
@@ -472,7 +472,7 @@ class Pimatic
   updateGroupFromJs: (groupData) ->
     group = @getGroupById(groupData.id)
     unless group?
-      group = Pimatic.mapping.groups.itemOptions.$create({data: groupData})
+      group = Pimatic.mapping.groups.$itemOptions.$create(groupData)
       @groups.push(group)
     else 
       group.update(groupData)
@@ -495,7 +495,7 @@ class Pimatic
   updateRuleFromJs: (ruleData) ->
     rule = @getRuleById(ruleData.id)
     unless rule?
-      rule = Pimatic.mapping.rules.itemOptions.$create({data: ruleData})
+      rule = Pimatic.mapping.rules.$itemOptions.$create(ruleData)
       @rules.push(rule)
     else 
       rule.update(ruleData)
@@ -517,7 +517,7 @@ class Pimatic
   updateVariableFromJs: (variableData) ->
     variable = @getVariableByName(variableData.name)
     unless variable?
-      variable = Pimatic.mapping.variables.itemOptions.$create({data: variableData})
+      variable = Pimatic.mapping.variables.$itemOptions.$create(variableData)
       @variables.push(variable)
     else 
       variable.update(variableData)
