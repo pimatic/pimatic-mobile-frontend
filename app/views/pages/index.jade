@@ -52,7 +52,7 @@ script#edit-devicepage-link-template(type='text/template')
     a(data-ajax="false", href="#devicepages-page", id="edit-devicepages-link")
       div.edit-handle.no-carousel-slide
         div.ui-btn-icon-notext.ui-icon.ui-icon-gear.ui-alt-icon.ui-nodisc-icon
-      span!='&nbsp;'
+      span.edit-pages-handle-label=__('Edit Pages')
 script#page-menuentry-template(type='text/template')
   li(data-theme=theme.menuSwatch)
     a(href='#index', data-rel='close', data-transition="slidefade", data-bind="text: name, click: $root.showDevicePage")
