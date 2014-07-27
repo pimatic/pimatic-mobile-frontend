@@ -44,10 +44,13 @@ $(document).on("pagecreate", '#events', tc (event) ->
   class EventViewModel
 
     @mapping = {
+      $default: 'ignore'
       events:
-        create: ({data, parent, skip}) => new DeviceAttributeEvent(data)
-        key: (data) -> "#{data.time}-#{data.deviceId}-#{data.attributeName}" 
-      ignore: ['success']
+        $key: (data) -> "#{data.time}-#{data.deviceId}-#{data.attributeName}" 
+        $itemOptions:
+          $handler: 'callback'
+          $create: (data) -> new DeviceAttributeEvent(data)
+          $update: (data, target) -> target
     }
 
     devices: ko.observableArray(['All'])
@@ -94,7 +97,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
       pimatic.socket.on("deviceAttributeChanged", (attrEvent) => 
         unless @events? then return
         @events.unshift(
-          EventViewModel.mapping.events.create(data: {
+          new DeviceAttributeEvent({
             time: attrEvent.time,
             deviceId: attrEvent.deviceId, 
             attributeName: attrEvent.attributeName, 
@@ -105,7 +108,7 @@ $(document).on("pagecreate", '#events', tc (event) ->
       )
 
     updateFromJs: (data) ->
-      ko.mapping.fromJS({events: data}, EventViewModel.mapping, this)
+      ko.mapper.fromJS({events: data}, EventViewModel.mapping, this)
 
     loadEvents: ->
 

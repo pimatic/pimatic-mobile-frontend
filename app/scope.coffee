@@ -1,12 +1,32 @@
+ko.mapper.handlers.callback = {
+  fromJS: (value, options, target, wrap) ->
+    unless target? 
+      result = options.$create(value)
+    else
+      result = options.$update(value, target)
+    return result
+
+  toJS:(observable, options) -> observable.toJS()
+}
+ko.mapper.handlers.observe = ko.mapper.handlers.value
+
+
 class DeviceAttribute 
   @mapping = {
-    observe: ["value"]
+    $default: 'ignore'
+    description: "copy"
+    label: "copy"
+    labels: "copy"
+    name: "copy"
+    type: "copy"
+    value: "observe"
+    unit: 'copy'
   }
   constructor: (data) ->
     #console.log "creating device attribute", data
     # Allways create an observable for value:
     unless data.value? then data.value = null
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
     @valueText = ko.computed( =>
       value = @value()
       unless value?
@@ -20,7 +40,7 @@ class DeviceAttribute
     )
     @unitText = if @unit? then @unit else ''
   update: (data) -> 
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
 
   formatValue: (value) ->
     if @type is 'boolean'
@@ -29,24 +49,30 @@ class DeviceAttribute
     else
       if @unit? and @unit.length > 0 then "#{value} #{@unit}"
       else value
+  toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
 
 
 class Device
   @mapping = {
+    $default: 'ignore'
+    name: 'observe'
+    config: 'copy'
+    configDefaults: 'copy'
+    id: 'copy'
+    name: 'observe'
+    template: 'copy'
+    actions: 'copy'
     attributes:
-      create: ({data, parent, skip}) => new DeviceAttribute(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.name
-    observe: ["name", "attributes"]
-    copy: ["config"]
+      $key: 'name'
+      $itemOptions:
+        $handler: 'callback'
+        $create: (data) -> new DeviceAttribute(data)
+        $update: (data, target) -> target.update(data); target
 
   }
   constructor: (data) ->
-    console.log "creating device", data.id
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
     #@config = data.config
     @configObserve = ko.observable(data.config)
     @rest = {}
@@ -72,9 +98,10 @@ class Device
     )
 
   update: (data) -> 
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
     #@config = data.config if data.config?
     @configObserve(data.config)
+  toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
   getAttribute: (name) -> ko.utils.arrayFirst(@attributes(), (a) => a.name is name )
   updateAttribute: (attrName, attrValue) ->
@@ -90,72 +117,87 @@ class Device
 
 class Rule
   @mapping = {
-    key: (data) => data.id
-    copy: ['id']
+    $default: 'ignore'
+    id: 'copy'    
+    name: 'observe'
+    string: 'observe'   
+    actionsToken: 'observe'
+    conditionToken: 'observe'
+    error: 'observe'
+    active: 'observe'
+    logging: 'observe'
+    valid: 'observe'
   }
   constructor: (data) ->
-    console.log "creating rule", data.id
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
     @group = ko.computed( => pimatic.getGroupOfRule(@id) )
   update: (data) ->
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
+  toJS: () -> 
+    ko.mapper.toJS(this, @constructor.mapping)
 
 class Variable
   @mapping = {
-    key: (data) => data.name
-    observe: ['value', 'type', 'exprInputStr', 'exprTokens']
+    $default: 'ignore'
+    exprInputStr: 'observe'
+    exprTokens: 'observe'
+    name: 'copy'
+    readonly: 'observe'
+    type: 'observe'
+    value: 'observe'
   }
   constructor: (data) ->
     unless data.value? then data.value = null
     unless data.exprInputStr? then data.exprInputStr = null
     unless data.exprTokens? then data.exprTokens = null
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
     @displayName = ko.computed( => "$#{@name}" )
     @hasValue = ko.computed( => @value()? )
     @displayValue = ko.computed( => if @hasValue() then @value() else "null" )
     @group = ko.computed( => pimatic.getGroupOfVariable(@name) )
   isDeviceAttribute: -> $.inArray('.', @name) isnt -1
   update: (data) ->
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
+  toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
 class DevicePage
   @mapping = {
-    key: (data) => data.id
-    copy: ['id']
+    $default: 'ignore'
+    id: 'copy'
+    name: 'observe'
     devices:
-      create: ({data, parent, skip}) => 
-        device = pimatic.getDeviceById(data.deviceId)
-        unless device? 
-          device = pimatic.nullDevice
-        itemClass = pimatic.templateClasses[device.template]
-        unless itemClass?
-          console.warn "Could not find a template class for #{data.template}"
-          itemClass = pimatic.DeviceItem
-        unless device? then return console.error("Device should never be null")
-        #console.log "Creating #{itemClass.name} for #{device.id} (#{device.template})"
-        return new itemClass(data, device)
-      key: (data) => data.deviceId
+      $key: 'deviceId'
+      $itemOptions:
+        $handler: 'callback'
+        $create: (data) => 
+          device = pimatic.getDeviceById(data.deviceId)
+          unless device? 
+            device = pimatic.nullDevice
+          itemClass = pimatic.templateClasses[device.template]
+          unless itemClass?
+            console.warn "Could not find a template class for #{data.template}"
+            itemClass = pimatic.DeviceItem
+          unless device? then return console.error("Device should never be null")
+          #console.log "Creating #{itemClass.name} for #{device.id} (#{device.template})"
+          return new itemClass(data, device)
+        $update: (data, target) -> target.update(data); target
   }
+
   constructor: (data) ->
-    console.log "creating devicepage", data.id
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
 
     @groupsWithDevices = ko.computed( =>
-      gps = (
+      return (
         for group in pimatic.groups()
           do (group) =>
             devices = ko.computed( => 
-              ds = (d for d in @devices() when (
+              (d for d in @devices() when (
                   d.device.group() is group and d.device isnt pimatic.nullDevice
                 )
-              )
-              console.log "ds in gps: ", @id, group.id, ds.length
-              return ds 
+              ) 
             )
             {group, devices} 
       )
-      console.log "gps", @id, gps.length
-      return gps
     )
 
     @getUngroupedDevices = ko.computed( =>
@@ -175,19 +217,23 @@ class DevicePage
       return true
 
   update: (data) ->
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
   getDeviceTemplate: (data) -> data.getDeviceTemplate()
   afterRenderDevice: (elements, item) ->
-        item.afterRender(elements)
+    item.afterRender(elements)
+  toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
 class Group
   @mapping = {
-    key: (data) => data.id
-    copy: ['id']
+    $default: 'ignore'
+    id: 'copy'
+    name: 'observe'
+    rules: 'array'
+    devices: 'array'
+    variables: 'array'
   }
   constructor: (data) ->
-    console.log "creating group", data.id
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
     @getDevices = ko.computed( =>
       devices = []
       for deviceId in @devices()
@@ -210,7 +256,7 @@ class Group
       return variables
     )
   update: (data) ->
-    ko.mapping.fromJS(data, @constructor.mapping, this)
+    ko.mapper.fromJS(data, @constructor.mapping, this)
 
   getDevicesWithAttibute: (predicate) ->
     return ( d for d in @getDevices() when d.hasAttibuteWith(predicate) )
@@ -221,39 +267,47 @@ class Group
   containsDevice: (deviceId) ->
     index = ko.utils.arrayIndexOf(@devices(), deviceId)
     return (index isnt -1)
+  toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
 class Pimatic
   @mapping = {
+    $default: 'ignore'
     devices:
-      create: ({data, parent, skip}) => new Device(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.id
+      $key: 'id'
+      $itemOptions:
+        $handler: 'callback'
+        $create: (data) -> new Device(data)
+        $update: (data, target) -> target.update(data); target
     rules:
-      create: ({data, parent, skip}) => new Rule(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.id
+      $key: 'id'
+      $itemOptions:
+        $handler: 'callback'
+        $create: (data) -> new Rule(data)
+        $update: (data, target) -> target.update(data); target
     variables:
-      create: ({data, parent, skip}) => new Variable(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.name
+      $key: 'name'
+      $itemOptions:
+        $handler: 'callback'
+        $create: (data) -> new Variable(data)
+        $update: (data, target) -> target.update(data); target
     devicepages:
-      create: ({data, parent, skip}) => new DevicePage(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.id
+      $key: 'id'
+      $itemOptions:
+        $handler: 'callback'
+        $create: (data) -> new DevicePage(data)
+        $update: (data, target) -> target.update(data); target
     groups:
-      create: ({data, parent, skip}) => new Group(data)
-      update: ({data, parent, target}) =>
-        target.update(data)
-        return target
-      key: (data) => data.id
+        $key: 'id'
+        $itemOptions:
+          $handler: 'callback'
+          $create: (data) -> new Group(data)
+          $update: (data, target) -> target.update(data); target        
+
+    errorCount: 'observe'
+    rememberme: 'observe'
+    updateProcessStatus: 'observe'
+    updateProcessMessages: 'array'
+    guiSettings: 'observe'
   }
   socket: null
   inited: no
@@ -299,7 +353,7 @@ class Pimatic
 
     @autosave = ko.computed( =>
       unless @_dataLoaded() then return
-      data = ko.mapping.toJS(this)
+      data = @toJS()
       pimatic.storage.set('pimatic.scope', data)
     ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
 
@@ -342,8 +396,9 @@ class Pimatic
         window.location.reload()
 
 
-  updateFromJs: (data) ->
-    ko.mapping.fromJS(data, Pimatic.mapping, this)
+  updateFromJs: (data) -> ko.mapper.fromJS(data, Pimatic.mapping, this)
+
+  toJS: -> ko.mapper.toJS(this, Pimatic.mapping)
 
   setupStorage: ->
     if $.localStorage.isSet('pimatic')

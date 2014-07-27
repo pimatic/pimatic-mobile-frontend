@@ -174,7 +174,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
               "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
               "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
-              "pimatic-mobile-frontend/app/js/knockout.mapping.js"
+              "pimatic-mobile-frontend/app/js/knockout.mapper.js"
               "pimatic-mobile-frontend/app/js/overthrow.js"
               "pimatic-mobile-frontend/app/js/jsoneditor.js"
               "pimatic-mobile-frontend/app/js/owl.carousel.js"

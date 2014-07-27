@@ -12,9 +12,9 @@ $(document).on( "pagebeforecreate", (event) ->
   
   class Item
     constructor: (@templData) ->
-      ko.mapping.fromJS(templData, @constructor.mapping, this)
+      ko.mapper.fromJS(templData, @constructor.mapping, this)
     update: (templData) -> 
-      ko.mapping.fromJS(templData, @constructor.mapping, this)
+      ko.mapper.fromJS(templData, @constructor.mapping, this)
     afterRender: (elements) ->
       $(elements)
       .addClass('item')
@@ -34,7 +34,8 @@ $(document).on( "pagebeforecreate", (event) ->
 
   class DeviceItem extends Item
     @mapping = {
-      copy: ['deviceId']
+      $default: 'ignore'
+      deviceId: 'copy'
     }
     constructor: (templData, @device) ->
       super(templData)
@@ -58,6 +59,7 @@ $(document).on( "pagebeforecreate", (event) ->
           "Could not find a device with id: #{@templData.deviceId}"
         else null
       )
+    toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
 
   class SwitchItem extends DeviceItem

@@ -7,6 +7,9 @@ $(document).on("pagecreate", '#index', tc (event) ->
   class IndexViewModel
     # static property:
     @mapping = {
+      $default: 'ignore'
+      ruleItemCssClass: 'observe'
+      hasRootCACert: 'observe'
     }
 
     devicepages: pimatic.devicepages
@@ -156,7 +159,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
           window.location.reload()
 
       @autosave = ko.computed( =>
-        data = ko.mapping.toJS(this)
+        data = ko.mapper.toJS(this, IndexViewModel.mapping)
         pimatic.storage.set('pimatic.indexPage', data)
       ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
 
@@ -176,7 +179,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
       return true
 
     updateFromJs: (data) -> 
-      ko.mapping.fromJS(data, IndexViewModel.mapping, this)
+      ko.mapper.fromJS(data, IndexViewModel.mapping, this)
 
     onPageTabClicked: (page) =>
       @activeDevicepage(page)

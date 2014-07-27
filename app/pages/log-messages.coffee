@@ -6,10 +6,11 @@ $(document).on("pagecreate", '#log', tc (event) ->
   class LogMessageViewModel
 
     @mapping = {
+      $default: 'ignore'
       messages:
-        create: ({data, parent, skip}) => data
-        key: (data) -> data.id
-      ignore: ['success']
+        $key: 'id'
+        $itemOptions:
+          $handler: 'copy'
     }
     chosenLevels: ko.observableArray(['info', 'warn', 'error'])
     tags: ko.observableArray(['All', 'pimatic'])
@@ -52,18 +53,16 @@ $(document).on("pagecreate", '#log', tc (event) ->
       )
 
       pimatic.socket.on('messageLogged', tc (entry) => 
-        @messages.unshift(
-          LogMessageViewModel.mapping.messages.create(data: {
-            tags: entry.meta.tags
-            level: entry.level
-            text: entry.msg
-            time: entry.meta.timestamp
-          })
-        )
+        @messages.unshift({
+          tags: entry.meta.tags
+          level: entry.level
+          text: entry.msg
+          time: entry.meta.timestamp
+        })
       )
 
     updateFromJs: (data) ->
-      ko.mapping.fromJS({messages: data}, LogMessageViewModel.mapping, this)
+      ko.mapper.fromJS({messages: data}, LogMessageViewModel.mapping, this)
 
     timestampToDateTime: (time) ->
       pad = (n) => if n < 10 then "0#{n}" else "#{n}"
