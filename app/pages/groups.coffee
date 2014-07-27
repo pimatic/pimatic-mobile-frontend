@@ -6,7 +6,7 @@ $(document).on( "pagebeforecreate", '#groups-page', tc (event) ->
 
   class GroupsViewModel
 
-    enabledEditing: ko.observable(no)
+    enabledEditing: ko.observable(yes)
     isSortingGroups: ko.observable(no)
 
     constructor: () ->

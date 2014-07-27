@@ -6,7 +6,7 @@ $(document).on( "pagebeforecreate", '#devicepages-page', tc (event) ->
 
   class DevicepagesViewModel
 
-    enabledEditing: ko.observable(no)
+    enabledEditing: ko.observable(yes)
     isSortingDevicepages: ko.observable(no)
 
     constructor: () ->

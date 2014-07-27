@@ -5,8 +5,7 @@ script#devicepage-item-template(type="text/template")
 div#devicepages-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingDevicepages() }")
   div(data-theme=theme.headerSwatch, data-role='header')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
-    h3=__("Pages")
-    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
+    h3=__("Edit Pages")
       
   div.ui-content.overthrow
     ul#devicepages(data-role='listview', data-bind="sortable: {isSorting: isSortingDevicepages, sorted: onDevicepagesSorted, drop: onDropDevicepageOnTrash}")

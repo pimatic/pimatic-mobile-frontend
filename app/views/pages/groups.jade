@@ -6,7 +6,6 @@ div#groups-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing
   div(data-theme=theme.headerSwatch, data-role='header')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
     h3=__("Groups")
-    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
       
   div.ui-content.overthrow
     ul#groups(data-role='listview', data-bind="sortable: {isSorting: isSortingGroups, sorted: onGroupsSorted, drop: onDropGroupOnTrash}")
