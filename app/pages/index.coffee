@@ -187,6 +187,12 @@ $(document).on("pagecreate", '#index', tc (event) ->
     onAddItemClicked: =>
       return true
 
+    onLogMessageClicked: =>
+      jQuery.mobile.pageParams = {
+        selectErrors: yes
+      }
+      return true
+
     # afterRenderItem: (elements, item) ->
     #   item.afterRender(elements)
 

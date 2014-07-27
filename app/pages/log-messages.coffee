@@ -152,6 +152,12 @@ $(document).on("pagecreate", '#log', tc (event) ->
 $(document).on("pagebeforeshow", '#log', tc (event) ->
   try
     logPage = pimatic.pages.log
+
+    if jQuery.mobile.pageParams?
+      if jQuery.mobile.pageParams.selectErrors
+        logPage.chosenLevels(['error'])
+      jQuery.mobile.pageParams = null
+      
     logPage.loadMessages()
     logPage.loadMessagesMeta()
   catch e
