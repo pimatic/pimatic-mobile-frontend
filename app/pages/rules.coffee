@@ -56,12 +56,6 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
 
     toggleEditing: ->
       @enabledEditing(not @enabledEditing())
-      pimatic.loading "enableediting", "show", text: __('Saving')
-      $.ajax("/enabledEditing/#{@enabledEditing()}",
-        global: false # don't show loading indicator
-      ).always( ->
-        pimatic.loading "enableediting", "hide"
-      ).done(ajaxShowToast)
 
     onRulesSorted: (rule, eleBefore, eleAfter) =>
 

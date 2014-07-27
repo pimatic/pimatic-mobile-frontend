@@ -79,7 +79,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
             changed = true
             break
         unless changed then return
-        console.log "rebuilding devicepages"
         itemLists = $('#item-lists')
         ko.cleanNode(itemLists[0])
         owl = itemLists.data('owlCarousel')

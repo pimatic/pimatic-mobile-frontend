@@ -70,12 +70,6 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
 
     toggleEditing: ->
       @enabledEditing(not @enabledEditing())
-      pimatic.loading "enableediting", "show", text: __('Saving')
-      $.ajax("/enabledEditing/#{@enabledEditing()}",
-        global: false # don't show loading indicator
-      ).always( ->
-        pimatic.loading "enableediting", "hide"
-      ).done(ajaxShowToast)
 
     onVariablesSorted: (variable, eleBefore, eleAfter) =>
 
@@ -175,15 +169,6 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
         editVariablePage.action('update')
         return true
       else return false
-
-    toggleShowAttributeVars: () ->
-      @showAttributeVars(not @showAttributeVars())
-      pimatic.loading "showAttributeVars", "show", text: __('Saving')
-      $.ajax("/showAttributeVars/#{@showAttributeVars()}",
-        global: false # don't show loading indicator
-      ).always( ->
-        pimatic.loading "showAttributeVars", "hide"
-      ).done(ajaxShowToast)
 
 
   pimatic.pages.variables = variablePage = new VariablesViewModel()
