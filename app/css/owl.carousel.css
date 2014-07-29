@@ -22,7 +22,7 @@
 .owl-carousel .owl-wrapper{
 	display: none;
 	position: relative;
-	/*-webkit-transform: translate3d(0px, 0px, 0px);*/
+	-webkit-transform: translate3d(0px, 0px, 0px);
 }
 .owl-carousel .owl-wrapper-outer{
 	overflow: hidden;
@@ -36,7 +36,7 @@
 	-o-transition: height 500ms ease-in-out;
 	transition: height 500ms ease-in-out;
 }
-	
+
 .owl-carousel .owl-item{
 	float: left;
 }
@@ -55,17 +55,16 @@
 
 /* mouse grab icon */
 .grabbing { 
-    /*cursor:url(grabbing.png) 8 8, move;*/
+    cursor:url(grabbing.png) 8 8, move;
 }
 
 /* fix */
 .owl-carousel  .owl-wrapper,
 .owl-carousel  .owl-item{
-/*	-webkit-backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
 	-moz-backface-visibility:    hidden;
-	-ms-backface-visibility:     hidden;*/
-/*  -webkit-transform: translate3d(0,0,0);
+	-ms-backface-visibility:     hidden;
+  -webkit-transform: translate3d(0,0,0);
   -moz-transform: translate3d(0,0,0);
-  -ms-transform: translate3d(0,0,0);*/
+  -ms-transform: translate3d(0,0,0);
 }
-

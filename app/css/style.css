@@ -38,11 +38,11 @@
   z-index: 1010;
   /*display: none;*/
   background: rgba(0,0,0,0);
-  -webkit-transition: background 300ms ease;
-  -moz-transition: background 300ms ease;
-  -o-transition: background 300ms ease;
-  -ms-transition: background 300ms ease;
-  transition: background 300ms ease;
+  -webkit-transition: background 300ms linear;
+  -moz-transition: background 300ms linear;
+  -o-transition: background 300ms linear;
+  -ms-transition: background 300ms linear;
+  transition: background 300ms linear;
 }
 
 
