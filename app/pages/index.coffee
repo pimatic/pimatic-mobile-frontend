@@ -105,6 +105,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
               current = ele.data('owlCarousel').currentItem
               @activeDevicepage(@devicepages()[current])
           })
+          lastCarouselWidth = itemLists.width()
         else
           itemLists.html('')
         return
@@ -341,13 +342,26 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
   $("#items .handle").disableSelection()
 
+
+
   $("#nav-panel").on('panelopen panelclose', tc (event) ->
     itemList = $('#item-lists')
-    if itemList.is(":visible")
-      pimatic.try => itemList.data('owlCarousel').updateVars()
+    if itemList.is(":visible") then updateCarousel()
+      
+      
   )
   return
 )
+
+lastCarouselWidth = 0
+updateCarousel = ->
+  pimatic.try => 
+    itemList = $('#item-lists')
+    width = itemList.width()
+    if width isnt lastCarouselWidth
+      itemList.data('owlCarousel').updateVars()
+      itemList.data('owlCarousel').ju
+    lastCarouselWidth = width
 
 
 $(document).on('click', '.content-overlay', tc (event) ->
@@ -355,7 +369,7 @@ $(document).on('click', '.content-overlay', tc (event) ->
 )
 
 $(document).on("pageshow", '#index', tc (event) ->
-  pimatic.try => $('#item-lists').data('owlCarousel').updateVars()
+  updateCarousel()
 )
 
 $(document).on("pagebeforeshow", '#index', tc (event) ->

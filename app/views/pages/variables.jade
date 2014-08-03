@@ -32,10 +32,3 @@ div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEdit
       li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
       li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
         a(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
-  #variablesMenu(data-role='popup', data-theme='a', data-arrow="r")
-    ul(data-role='listview', data-inset='true', style='min-width: 210px;')
-        li(data-role='list-divider')=__('Choose an action')
-        li
-          a(href='#', data-rel="back", data-bind="text: toggleEditingText(), click: toggleEditing")=__('Change order')
-        li
-          a(href='#', data-rel="back", data-bind="text: showAttributeVarsText(), click: toggleShowAttributeVars")      
