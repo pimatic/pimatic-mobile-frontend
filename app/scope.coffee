@@ -145,7 +145,6 @@ class Device
 
   getAttribute: (name) -> ko.utils.arrayFirst(@attributes(), (a) => a.name is name )
   updateAttribute: (attrName, timestamp, attrValue) ->
-    #console.log "updating", attrName, attrValue
     attribute = @getAttribute(attrName)
     if attribute? then attribute.updateValue(timestamp, attrValue)
 
