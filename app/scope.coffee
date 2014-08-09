@@ -21,11 +21,14 @@ class DeviceAttribute
     type: "copy"
     value: "observe"
     unit: 'copy'
+    history: 'observe'
+    lastUpdate: 'observe'
   }
   constructor: (data) ->
     #console.log "creating device attribute", data
     # Allways create an observable for value:
     unless data.value? then data.value = null
+    @history = ko.observableArray([])
     ko.mapper.fromJS(data, @constructor.mapping, this)
     @valueText = ko.computed( =>
       value = @value()
@@ -39,8 +42,34 @@ class DeviceAttribute
       else return value.toString()
     )
     @unitText = if @unit? then @unit else ''
+    if @type is "number"
+      @sparklineHistory = ko.computed( => ([t, v] for {t,v} in @history()) )
+
+  showSparkline: -> @type is "number" and @history().length > 1
+
+  showLastUpdate: -> 
+    unless @type is "number" then return no
+    now = (new Date()).getTime()
+    lastUpdate = @lastUpdate()
+    return (now-lastUpdate) > (1000*60*30) # older than 30min
+
+  lastUpdateTimeText: ->
+    return ' @ ' + @formatTime(@lastUpdate()).replace(' ', '<br>')
+
+  tooltipFormatter: (sparkline, options, fields) => 
+    value = @formatValue(fields.y)
+    time = @formatTime(fields.x)
+    return "<span>#{value} @ #{time}</span>"
+
   update: (data) -> 
     ko.mapper.fromJS(data, @constructor.mapping, this)
+
+  updateValue: (timestamp, value) ->
+    @value(value)
+    @lastUpdate(timestamp)
+    if @history().length is 30
+      @history.shift()
+    @history.push({t:timestamp, v:value})
 
   formatValue: (value) ->
     if @type is 'boolean'
@@ -49,6 +78,17 @@ class DeviceAttribute
     else
       if @unit? and @unit.length > 0 then "#{value} #{@unit}"
       else value
+
+  formatTime: (time) -> 
+    day = Highcharts.dateFormat('%Y-%m-%d', time)
+    today = Highcharts.dateFormat('%Y-%m-%d', (new Date()).getTime())
+    return(
+      if day isnt today
+        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', time)
+      else
+        Highcharts.dateFormat('%H:%M:%S', time)
+    )
+
   toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
 
@@ -104,11 +144,10 @@ class Device
   toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
   getAttribute: (name) -> ko.utils.arrayFirst(@attributes(), (a) => a.name is name )
-  updateAttribute: (attrName, attrValue) ->
+  updateAttribute: (attrName, timestamp, attrValue) ->
     #console.log "updating", attrName, attrValue
     attribute = @getAttribute(attrName)
-    if attribute?
-      attribute.value(attrValue)
+    if attribute? then attribute.updateValue(timestamp, attrValue)
 
   hasAttibuteWith: (predicate) ->
     for attr in @attributes()
@@ -412,10 +451,10 @@ class Pimatic
       if index isnt -1 then return g
     return null
 
-  updateDeviceAttribute: (deviceId, attrName, attrValue) ->
+  updateDeviceAttribute: (deviceId, attrName, time, attrValue) ->
     for device in @devices()
       if device.id is deviceId
-        device.updateAttribute(attrName, attrValue)
+        device.updateAttribute(attrName, time, attrValue)
         break
   updateDeviceFromJs: (deviceData) ->
     device = @getDeviceById(deviceData.id)

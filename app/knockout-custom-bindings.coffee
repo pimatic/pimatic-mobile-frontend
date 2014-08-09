@@ -104,6 +104,26 @@
       return
     }
 
+  ko.bindingHandlers.sparkline = {
+    update: (element, valueAccessor) ->
+      value = valueAccessor()
+      valueUnwrapped = ko.unwrap(value)
+      data = ko.unwrap(valueUnwrapped.data)
+      tooltipFormatter = valueUnwrapped.tooltipFormatter
+      $(element).sparkline(data, {
+        type: 'line',
+        lineColor: '#7c7c7c',
+        fillColor: '#cccccc',
+        spotColor: '#666666',
+        minSpotColor: null,
+        maxSpotColor: null,
+        highlightSpotColor: null,
+        highlightLineColor: null,
+        drawNormalOnTop: false,
+        tooltipFormatter: tooltipFormatter
+      })
+    }
+
 
   ScrollArea = (element) ->
     @element = element

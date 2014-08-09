@@ -46,12 +46,14 @@ $(document).on( "pagebeforecreate", (event) ->
     getItemTemplate: -> @device.template
 
     afterAttributeRender: (elements, attribute) ->
-      $(elements)
+      ele = $(elements)
+      ele
         .addClass("attr-#{attribute.name}")
         .addClass("attr-type-#{attribute.type}")
-      .parent('.attributes')
-        .addClass("contains-attr-#{attribute.name}")
-        .addClass("contains-attr-type-#{attribute.type}")
+      ele
+        .parent('.attributes')
+          .addClass("contains-attr-#{attribute.name}")
+          .addClass("contains-attr-type-#{attribute.type}")
 
     error: ->
       return (

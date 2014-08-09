@@ -69,6 +69,7 @@ $(document).on( "pagebeforecreate", (event) ->
     pimatic.updateDeviceAttribute(
       attrEvent.deviceId, 
       attrEvent.attributeName, 
+      attrEvent.time,
       attrEvent.value
     )
   )

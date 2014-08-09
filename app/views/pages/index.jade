@@ -43,7 +43,13 @@ script#variable-item-template(type='text/template')
 script#attribute-template(type='text/template')
   span.attribute
     span.val(data-bind="text: $data.valueText")
-    span.unit(data-bind="text: $data.unitText") 
+    span.unit(data-bind="text: $data.unitText")
+    <!-- ko if: $data.showLastUpdate()  -->  
+    span.lastUpdate(data-bind="html: $data.lastUpdateTimeText(), css: {long: $data.lastUpdateTimeText().length > 12}")
+    <!-- /ko -->
+    <!-- ko if: $data.showSparkline()  -->
+    span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
+    <!-- /ko -->
 script#sortable-handle-template(type='text/template')
   div.handle.no-carousel-slide
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
