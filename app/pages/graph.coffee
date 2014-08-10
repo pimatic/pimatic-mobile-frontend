@@ -14,7 +14,7 @@ $(document).on "pagecreate", '#index', (event) ->
     }
     jQuery.mobile.changePage '#graph-page', transition: 'slide'
 
-$(document).on "pagecreate", '#graph-page', (event) ->
+$(document).on("pagecreate", '#graph-page', (event) ->
 
   Highcharts.setOptions(
     global:
@@ -368,6 +368,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
     graphPage.removeFromDisplayedAttributes(device, attribute)
     return
   )
+  return
+)
 
 $(document).on("pagebeforeshow", '#graph-page', (event) ->
   page = pimatic.pages.graph
@@ -378,8 +380,8 @@ $(document).on("pagebeforeshow", '#graph-page', (event) ->
     for attr in device.attributes()
       if attr.type is "number"
         toDisplay.push {device, attribute: attr, serie: ko.observable()}
-  page.displayedAttributes(toDisplay)
-
+    page.displayedAttributes(toDisplay)
+  return
 )
 
 
