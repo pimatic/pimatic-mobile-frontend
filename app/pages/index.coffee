@@ -127,6 +127,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
           @activeDevicepage(null)
         else unless @activeDevicepage()?
           @activeDevicepage(dps[0])
+        else if not (@activeDevicepage() in dps)
+          @activeDevicepage(dps[0])
       )
 
       @itemsListViewRefresh = ko.computed( tc =>
@@ -193,35 +195,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
       }
       return true
 
-    # afterRenderItem: (elements, item) ->
-    #   item.afterRender(elements)
-
-
-
-    # updateItemOrder: (order) ->
-    #   toIndex = (id) -> 
-    #     index = $.inArray(id, order)
-    #     if index is -1 # if not in array then move it to the back
-    #       index = 999999
-    #     return index
-    #   @items.sort( (left, right) => toIndex(left.itemId) - toIndex(right.itemId) )
-
-    # updateRuleOrder: (order) ->
-    #   toIndex = (id) -> 
-    #     index = $.inArray(id, order)
-    #     if index is -1 # if not in array then move it to the back
-    #       index = 999999
-    #     return index
-    #   @rules.sort( (left, right) => toIndex(left.id) - toIndex(right.id) )
-
-    # updateVariable: (varInfo) ->
-    #   for variable in @variables()
-    #     if variable.name is varInfo.name
-    #       variable.update(varInfo)
-    #   for item in @items()
-    #     if item.type is "variable" and item.name is varInfo.name
-    #       item.value(varInfo.value)
-
     toggleEditing: =>
       @enabledEditing(not @enabledEditing())
 
@@ -262,11 +235,10 @@ $(document).on("pagecreate", '#index', tc (event) ->
       
       if eleBefore?
         if eleBefore instanceof pimatic.DeviceItem then g1 = eleBefore.device.group()
-        else if eleBefore.group instanceof pimatic.Group then g1 = eleBefore.group
+        else if eleBefore instanceof pimatic.Group then g1 = eleBefore
         else g1 = null
         itemBefore = (if eleBefore instanceof pimatic.DeviceItem then eleBefore)
         g2 = item.device.group()
-
         if g1 isnt g2
           if g1?
             addToGroup(g1, itemBefore)
