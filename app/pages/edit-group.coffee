@@ -22,6 +22,10 @@ $(document).on("pagebeforecreate", (event) ->
       @groupId('')
 
     onSubmit: ->
+      unless pimatic.isValidId(@groupId())
+        alert __("Please enter a valid id.")
+        return
+
       params = {
         groupId: @groupId()
         group: 

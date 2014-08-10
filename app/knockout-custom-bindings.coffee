@@ -105,6 +105,11 @@
     }
 
   ko.bindingHandlers.sparkline = {
+    init: (element, valueAccessor) ->
+      ko.bindingHandlers.sparkline.update(element, valueAccessor)
+      setTimeout( ( -> $.sparkline_display_visible() ), 100 )
+      
+
     update: (element, valueAccessor) ->
       value = valueAccessor()
       valueUnwrapped = ko.unwrap(value)

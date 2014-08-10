@@ -21,6 +21,10 @@ $(document).on("pagebeforecreate", (event) ->
       @pageId('')
 
     onSubmit: ->
+      unless pimatic.isValidId(@pageId())
+        alert __("Please enter a valid id.")
+        return
+
       params = {
         pageId: @pageId()
         page: 

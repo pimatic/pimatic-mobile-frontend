@@ -136,8 +136,8 @@ window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   catch e 
     #ignore error
   message =
-    if data?.error?
-      data.error
+    if data?.message?
+      data.message
     else if errorThrown? and errorThrown != ""
       message = errorThrown
     else if textStatus is 'error'
@@ -155,6 +155,8 @@ $(document).ready( =>
   $('#toast').toast()
   pimatic.showToast = (msg) -> $('#toast').text(msg).toast('show')
 )
+
+pimatic.isValidId = (id) => id.match(/^[a-z0-9_-]+$/)?
 
 pimatic.makeIdFromName = (str) =>
   str = str.replace(/^\s+|\s+$/g, "") # trim

@@ -30,6 +30,9 @@ $(document).on("pagebeforecreate", (event) ->
 
 
     onSubmit: ->
+      unless pimatic.isValidId(@variableName())
+        alert __("Please enter a valid variable name.")
+        return
 
       params = {
         name: @variableName()
