@@ -100,7 +100,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         units = []
         for item in displayed
           item.added = no
-          if item.range? and (item.range isnt range or item.chosenDate isnt chosenDate)
+          if (item.range isnt range or item.chosenDate isnt chosenDate)
             item.range = null
             item.data = null
           unless item.attribute.unit in units
@@ -176,7 +176,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
             attributeName: item.attribute.name
             abort: onError
           }
-          task.start = =>
+          task.start = ( =>
             startTime = new Date().getTime()
             pimatic.client.rest.querySingleDeviceAttributeEvents({
               deviceId: item.device.id
@@ -200,10 +200,10 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                   limit = Math.floor(eventsLength * (3000 / timeDiff))
                   # Limit should be at least 100
                   limit = Math.max(limit, 100)
+                  onData(result.events, hasMore)
                   if hasMore
                     last = result.events[eventsLength-1]
                     loadData(item, last.time+1, tillTime, onData, onError, yes)
-                  onData(result.events, hasMore)
                 else
                   onData(result.events, false)
             ).always( ->
@@ -212,7 +212,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
             ).fail( ->
               onError()
             )
-
+          )
           @dataLoadingQuery.addTask(task, prepend)
         )
 
@@ -241,7 +241,6 @@ $(document).on "pagecreate", '#graph-page', (event) ->
               text: __("Loading data for #{item.device.name()}: #{item.attribute.label}")
               blocking: no
             })
-            item.data = null
             loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>
               data = ([time, value] for {time, value} in events)
               unless item.added
@@ -263,6 +262,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
                 chart.redraw()
                 #console.log "redraw:", (new Date().getTime() - t)
                 pimatic.loading(loadingId, "hide")
+              return
             ), onError = => pimatic.loading(loadingId, "hide") )
         )
 
@@ -397,7 +397,7 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
     unless page.isLive() then return
     for item in page.displayedAttributes()
       if item.device.id is attrEvent.deviceId and item.attribute.name is attrEvent.attributeName
-        if item.serie? and item.data?
+        if item.serie? and item.data? and item.added
           serie = $("#chart").highcharts().get(item.serie().id)
           point = [new Date(attrEvent.time).getTime(), attrEvent.value]
           shift = no
