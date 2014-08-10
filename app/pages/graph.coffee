@@ -99,6 +99,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
 
         units = []
         for item in displayed
+          item.added = no
           if item.range? and (item.range isnt range or item.chosenDate isnt chosenDate)
             item.range = null
             item.data = null
@@ -219,7 +220,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
           pimatic.try -> chart.reflow()
           serieConf = buildSeries(item, data)
           serie = chart.addSeries(serieConf, redraw=yes, animate=no)
-          item.data = data
+          item.added = yes
           item.chosenDate = chosenDate
           item.range = range
           item.serie({
@@ -243,7 +244,7 @@ $(document).on "pagecreate", '#graph-page', (event) ->
             item.data = null
             loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>
               data = ([time, value] for {time, value} in events)
-              unless item.data?
+              unless item.added
                 addSeriesToChart(item, data)
               else
                 #t = new Date().getTime()
@@ -324,8 +325,8 @@ $(document).on "pagecreate", '#graph-page', (event) ->
         switch range
           when "day" then 5*60*1000 #=5min
           when "week" then 30*60*1000 #=30min
-          when "month" then 1*60*60*1000 #=1h
-          when "year" then 2*60*60*1000 #=2h
+          when "month" then 2*60*60*1000 #=2h
+          when "year" then 4*60*60*1000 #=4h
       )
       return time
 
@@ -369,12 +370,15 @@ $(document).on "pagecreate", '#graph-page', (event) ->
   )
 
 $(document).on("pagebeforeshow", '#graph-page', (event) ->
+  page = pimatic.pages.graph
   device = jQuery.mobile.pageParams?.device
   jQuery.mobile.pageParams = {}
   if device?
+    toDisplay = []
     for attr in device.attributes()
       if attr.type is "number"
-        pimatic.pages.graph.addToDisplayedAttributes(device, attr)
+        toDisplay.push {device, attribute: attr, serie: ko.observable()}
+  page.displayedAttributes(toDisplay)
 
 )
 
