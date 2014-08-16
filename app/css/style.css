@@ -262,7 +262,9 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   position: relative;
 }
 
-#index .items .device label {
+#index .items .device label,
+#index .items .shutter-device label,
+#index .items .button label{
   float: left;
 }
 
@@ -274,7 +276,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index div.ui-flipswitch {
     margin: 5px 10px 5px 0 !important;
     position: absolute;
-    right: 0;
+    right: 6px;
     top: 0;
 }
 
@@ -290,13 +292,27 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 
 #index li.button div.buttons, #index li.shutter-device .shutter-buttons {
-  margin: 3px 10px 3px 0 !important;
-  position: absolute;
-  right: 0;
-  top: 0;
+  float: right;
+  max-width: 100%;
+  margin: 0;
+}
+
+#index li.button div.buttons {
+  margin-top: -4px;
+  margin-bottom: -4px;
+  text-align: right;
+  white-space: normal;
+}
+
+#index li.button div.buttons a {
+  margin: 0;
+  margin-left: 4px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 #index li.button a{
+
   margin-top: 1px;
 }
 
@@ -336,7 +352,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 
 #index .items li.sortable {
-  padding-right: 20px;
+  padding: 5px 16px;
 }
 
 .items #add-a-item a, 
@@ -362,7 +378,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 .unlocked ul#groups li.sortable a,
 .unlocked ul#devices li.sortable a,
 .unlocked ul#devicepages li.sortable a {
-  padding-left: 36px;
+  padding-left: 36px !important;
 }
 
 li.sortable .handle{
@@ -484,10 +500,19 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
 .items .attributes,
 .items .variable .var-value {
   float: right;
+  text-align:right;
+  white-space: normal;
 }
 
-.items .attributes > span{
+.items .attributes {
+  max-width: 100%;
+}
+
+.items .attributes .attribute {
+  margin: 5px 0px;
   margin-left: 0.5em;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .items .attribute .unit {
@@ -507,8 +532,7 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
 
 
 .ui-mobile  .items label {
-  margin: 0;
-  display: inline;
+  margin: 5px 0px;
 }
 
 .added label {
