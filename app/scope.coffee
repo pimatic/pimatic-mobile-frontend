@@ -29,6 +29,8 @@ class DeviceAttribute
     # Allways create an observable for value:
     unless data.value? then data.value = null
     @history = ko.observableArray([])
+    @lastUpdate = ko.observable(0)
+    
     ko.mapper.fromJS(data, @constructor.mapping, this)
     @valueText = ko.computed( =>
       value = @value()
