@@ -16,11 +16,6 @@ $(document).on "pagecreate", '#index', (event) ->
 
 $(document).on("pagecreate", '#graph-page', (event) ->
 
-  Highcharts.setOptions(
-    global:
-      useUTC: false
-  )
-
   class TaskQuery
     query: []
     addTask: (task, prepend = false) ->

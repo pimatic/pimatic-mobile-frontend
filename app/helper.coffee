@@ -4,6 +4,11 @@
 # scope this function
 ( ->
 
+  Highcharts.setOptions(
+    global:
+      useUTC: false
+  )
+
   $.datepicker.setDefaults({
     dateFormat: 'yy-mm-dd'
   });

@@ -15,5 +15,5 @@ $( document ).on( "mobileinit", function() {
       $('#nav-panel').css('height', screenHeight);
     },
 
-  $.mobile.toolbar.tapToggle = false;
+  $.mobile.toolbar.tapToggle = false; 
 });
