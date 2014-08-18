@@ -214,6 +214,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         addSeriesToChart = ( (item, data) =>
           pimatic.try -> chart.reflow()
           serieConf = buildSeries(item, data)
+          console.log "addSeries", serieConf.id, yes, no
           serie = chart.addSeries(serieConf, redraw=yes, animate=no)
           item.added = yes
           item.chosenDate = chosenDate
@@ -243,10 +244,12 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               else
                 #t = new Date().getTime()
                 serie = chart.get(item.serie().id)
+                console.log serie.id, "addPoint", data, no
                 for d in data
                   serie.addPoint(d, no)
                 #console.log "insert:", (new Date().getTime() - t)
               #t = new Date().getTime()
+              console.log "setExtremes", from, to
               xAxis.setExtremes(from.getTime(), to.getTime())
               #console.log "setExtremes:", (new Date().getTime() - t)
               allData = allData.concat data
@@ -254,7 +257,8 @@ $(document).on("pagecreate", '#graph-page', (event) ->
                 item.data = allData
                 item.range = range
                 #t = new Date().getTime()
-                chart.redraw()
+                #console.log "redraw"
+                #chart.redraw()
                 #console.log "redraw:", (new Date().getTime() - t)
                 pimatic.loading(loadingId, "hide")
               return
@@ -405,6 +409,7 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
             {from, to} = page.getDateRange()
             if firstPoint[0] < from.getTime()
               shift = yes
+          console.log serie.id, "addPoint", point, yes, shift, yes
           serie.addPoint(point, redraw=yes, shift, animate=yes)
           pimatic.showToast __('%s: %s value: %s',
             item.device.name(),
