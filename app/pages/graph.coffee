@@ -244,22 +244,19 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               else
                 #t = new Date().getTime()
                 serie = chart.get(item.serie().id)
-                console.log serie.id, "addPoint", data, no
+                console.log serie.options.id, "addPoint", data, no
                 for d in data
                   serie.addPoint(d, no)
                 #console.log "insert:", (new Date().getTime() - t)
               #t = new Date().getTime()
               console.log "setExtremes", from, to
               xAxis.setExtremes(from.getTime(), to.getTime())
+              chart.redraw()
               #console.log "setExtremes:", (new Date().getTime() - t)
               allData = allData.concat data
               unless hasMore
                 item.data = allData
                 item.range = range
-                #t = new Date().getTime()
-                #console.log "redraw"
-                #chart.redraw()
-                #console.log "redraw:", (new Date().getTime() - t)
                 pimatic.loading(loadingId, "hide")
               return
             ), onError = => pimatic.loading(loadingId, "hide") )
@@ -409,7 +406,7 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
             {from, to} = page.getDateRange()
             if firstPoint[0] < from.getTime()
               shift = yes
-          console.log serie.id, "addPoint", point, yes, shift, yes
+          console.log serie.options.id, "addPoint", point, yes, shift, yes
           serie.addPoint(point, redraw=yes, shift, animate=yes)
           pimatic.showToast __('%s: %s value: %s',
             item.device.name(),
