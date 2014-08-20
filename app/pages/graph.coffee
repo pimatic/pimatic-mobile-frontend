@@ -57,11 +57,6 @@ $(document).on("pagecreate", '#graph-page', (event) ->
     dateFormat: "yy-mm-dd"
 
     constructor: ->
-
-      # $("#chart-select-date").date('onSelect', -> 
-      #   console.log "change"
-      # )
-
       ko.computed( tc =>
         unless @pageCreated() then return false
         g.devices() for g in pimatic.groups()
@@ -214,7 +209,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         addSeriesToChart = ( (item, data) =>
           pimatic.try -> chart.reflow()
           serieConf = buildSeries(item, data)
-          console.log "addSeries", serieConf.id, yes, no
+          #console.log "addSeries", serieConf.id, yes, no
           serie = chart.addSeries(serieConf, redraw=yes, animate=no)
           item.added = yes
           item.chosenDate = chosenDate
@@ -244,14 +239,14 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               else
                 #t = new Date().getTime()
                 serie = chart.get(item.serie().id)
-                console.log serie.options.id, "addPoint", data, no
+                #console.log serie.options.id, "addPoint", data, no
                 for d in data
                   serie.addPoint(d, no)
                 #console.log "insert:", (new Date().getTime() - t)
               #t = new Date().getTime()
-              console.log "setExtremes", from, to
+              #console.log "setExtremes", from, to
               xAxis.setExtremes(from.getTime(), to.getTime())
-              chart.redraw()
+              #chart.redraw()
               #console.log "setExtremes:", (new Date().getTime() - t)
               allData = allData.concat data
               unless hasMore
@@ -406,7 +401,7 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
             {from, to} = page.getDateRange()
             if firstPoint[0] < from.getTime()
               shift = yes
-          console.log serie.options.id, "addPoint", point, yes, shift, yes
+          #console.log serie.options.id, "addPoint", point, yes, shift, yes
           serie.addPoint(point, redraw=yes, shift, animate=yes)
           pimatic.showToast __('%s: %s value: %s',
             item.device.name(),
