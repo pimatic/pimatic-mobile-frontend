@@ -15,6 +15,10 @@ module.exports = {
       # http://driftyco.github.io/graphite/
       enum: ["classic", "aloe", "candy", "melon", "mint", "royal", "sand", "slate", "water"]
       default: 'water'
+    flat:
+      doc: "Use a flat style if the theme supports it."
+      type: "boolean"
+      default: true
     debug:
       doc: "that to true to get additional debug outputs"
       type: "boolean"

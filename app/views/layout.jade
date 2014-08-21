@@ -20,7 +20,7 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     script(type='text/javascript')!="locale = " + JSON.stringify(i18n.getCatalog()) + ";"
     script(type='text/javascript')!="api = " + JSON.stringify(api) + ";"
     != nap.js('main')
-  body
+  body(class=(theme.flat ? 'flat' : ''))
     include pages/index
     include pages/rules
     include pages/variables

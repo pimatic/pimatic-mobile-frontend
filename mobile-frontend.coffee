@@ -94,6 +94,7 @@ module.exports = (env) ->
       Promise.promisifyAll(jade)
 
       theme = {
+        flat: @config.flat
         headerSwatch: 'a'
         dividerSwatch: 'a'
         menuSwatch: 'f'
