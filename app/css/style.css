@@ -1021,7 +1021,7 @@ li.with-button a.ui-btn {
 }
 
 .graph-device-attribute div.controls{
-  margin: 3px 10px 10px 0 !important;
+  margin: 3px 0px 10px 0 !important;
   position: absolute;
   right: 0;
   top: -3px;
@@ -1141,7 +1141,7 @@ html head + body.flat .ui-btn.ui-btn-a {
 .flat .ui-btn-icon-left:after, 
 .flat .ui-btn-icon-right:after {
   top: 50%;
-  margin-top: -10px;
+  margin-top: -11px;
 }
 
 .flat .ui-bar-a, .ui-page-theme-a .ui-bar-inherit, 
