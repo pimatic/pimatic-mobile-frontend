@@ -23,20 +23,4 @@ module.exports = {
       doc: "that to true to get additional debug outputs"
       type: "boolean"
       default: false
-    enabledEditing:
-      doc: "enabled or disabled the drag and drop of items"
-      type: "boolean"
-      default: true
-    showAttributeVars:
-      doc: "show variables for device attributes"
-      type: "boolean"
-      default: false
-    ruleItemCssClass:
-      doc: "additional css classes for rule items: hideRuleName, hideRuleText"
-      type: "string"
-      default: "" # For example: "hideRuleName" or 
-    rules:
-      doc: "order of the rules"
-      type: "array"
-      default: []
 }

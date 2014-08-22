@@ -9,18 +9,8 @@ Example config:
 
     {
       "plugin": "mobile-frontend",
-      "items": [
-        {
-          "type": "device",
-          "id": "my-tv"
-        },
-        {
-          "type": "device",
-          "id": "my-work-lampe"
-        },
-        {
-          "type": "sensor",
-          "id": "my-temperature-sensor"
-        }
-      ]
+      "theme": "water",
+      "flat": true,
+      "debug": false,
+      "mode": "production"
     }
