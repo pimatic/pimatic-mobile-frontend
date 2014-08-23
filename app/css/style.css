@@ -427,6 +427,8 @@ li .edit-handle .ui-icon:after{
 }
 
 html.ui-mobile body .delete-link,
+html.ui-mobile body .delete-link:active,
+html.ui-mobile body .delete-link:visited,
 html.ui-mobile body .delete-link.ui-btn.ui-btn-active{
   background-color: #cc2929;
   border-color: #AA0000;
