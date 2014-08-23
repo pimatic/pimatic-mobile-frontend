@@ -1160,7 +1160,6 @@ html body.flat .ui-group-theme-a .ui-bar-inherit {
 .flat .ui-btn-corner-all,
 .flat .ui-btn.ui-corner-all,
 .flat [data-role="button"],
-.flat .ui-grid-a .ui-btn,
 /* Count bubble */
 .flat .ui-li-count {
   -webkit-border-radius:        0.8em /*{global-radii-buttons}*/;
