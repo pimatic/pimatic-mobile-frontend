@@ -35,7 +35,7 @@ $(document).on("pagebeforecreate", (event) ->
 
     onSubmit: ->
       unless pimatic.isValidId(@ruleId())
-        alert __("Please enter a valid id.")
+        alert __(pimatic.invalidIdMessage)
         return
 
       params = {

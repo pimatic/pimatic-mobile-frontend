@@ -162,6 +162,15 @@ $(document).ready( =>
 )
 
 pimatic.isValidId = (id) => id.match(/^[a-z0-9_-]+$/)?
+pimatic.isValidVariableName = (id) => id.match(/^[a-zA-Z0-9_-]+$/)?
+pimatic.invalidIdMessage = (
+  "The entered ID is not valid. Please use only lowercase alphanumeric characters" +
+  ", \"_\" and \"-\"."
+)
+pimatic.invalidVariableNameMessage = (
+  "The entered variable name is not valid. Please use only alphanumeric characters" +
+  ", \"_\" and \"-\"."
+)
 
 pimatic.makeIdFromName = (str) =>
   str = str.replace(/^\s+|\s+$/g, "") # trim
