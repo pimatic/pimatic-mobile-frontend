@@ -206,6 +206,20 @@ $(document).on( "pagebeforecreate", (event) ->
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
 
+  class MuscicplayerItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @currentTitle = @device.getAttribute('currentTitle').value;
+
+    getItemTemplate: => 'musicplayer'
+
+    sendPlayerAction: (action) =>
+      @device.rest[action]({})
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+
+
   # class VariableItem extends Item
   #   @mapping = {
   #     copy: Item.mapping.copy.concat ['name']
@@ -229,6 +243,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.PresenceItem = PresenceItem
   pimatic.ShutterItem = ShutterItem
   pimatic.ContactItem = ContactItem
+  pimatic.MuscicplayerItem = MuscicplayerItem
 
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
@@ -242,6 +257,7 @@ $(document).on( "pagebeforecreate", (event) ->
     presence: pimatic.PresenceItem
     contact: pimatic.ContactItem
     shutter: pimatic.ShutterItem
+    musicplayer: pimatic.MuscicplayerItem
   }
 
   $(document).trigger("templateinit", [ ])
