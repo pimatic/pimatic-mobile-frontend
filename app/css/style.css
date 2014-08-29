@@ -1229,13 +1229,13 @@ border-bottom-left-radius: inherit;
 }
 
 .ui-icon-step-forward:after,
-.ui-icon-step-backward:after
+.ui-icon-step-backward:after,
+.ui-icon-play:after
 {
   background-position: 6px 3px;
 }
 
-.ui-icon-pause:after,
-.ui-icon-play:after
+.ui-icon-pause:after
 {
   background-position: 4px 3px;
 }
