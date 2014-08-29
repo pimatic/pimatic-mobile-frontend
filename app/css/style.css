@@ -1207,3 +1207,16 @@ border-top-left-radius: inherit;
 -webkit-border-bottom-left-radius: inherit;
 border-bottom-left-radius: inherit;
 }
+
+.ui-icon-step-forward:after,
+.ui-icon-step-backward:after
+{
+  background-position: 6px 3px;
+}
+
+.ui-icon-pause:after,
+.ui-icon-play:after
+{
+  background-position: 4px 3px;
+}
+

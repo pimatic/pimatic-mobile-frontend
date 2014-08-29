@@ -212,12 +212,28 @@ $(document).on( "pagebeforecreate", (event) ->
       super(templData, @device)
       @currentTitle = @device.getAttribute('currentTitle').value;
 
+      @playButtonIcon = ko.computed( =>
+        state = @device.getAttribute('state').value
+        return (
+          if state() is 'play' then 'pause'
+          else 'play'
+        )
+      )
+
     getItemTemplate: => 'musicplayer'
 
     sendPlayerAction: (action) =>
       @device.rest[action]({})
         .done(ajaxShowToast)
         .fail(ajaxAlertFail)
+
+    togglePlay: () =>
+      state = @device.getAttribute('state').value
+      if state() is 'play'
+        action = 'pause'
+      else
+        action = 'play'
+      @sendPlayerAction(action)
 
 
   # class VariableItem extends Item
