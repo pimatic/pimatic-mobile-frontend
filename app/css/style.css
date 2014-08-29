@@ -264,7 +264,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 #index .items .device label,
 #index .items .shutter-device label,
-#index .items .button label{
+#index .items .button label,
+#index .items .musicplayer label {
   float: left;
 }
 
@@ -291,20 +292,39 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 
-#index li.button div.buttons, #index li.shutter-device .shutter-buttons {
+#index li.button div.buttons, 
+#index li.shutter-device .shutter-buttons,
+#index li.musicplayer div.controls {
   float: right;
   max-width: 100%;
   margin: 0;
 }
 
-#index li.button div.buttons {
+#index li.button div.buttons,
+#index li.musicplayer div.controls {
   margin-top: -4px;
   margin-bottom: -4px;
   text-align: right;
   white-space: normal;
 }
 
+#index li.musicplayer div.controls span {
+  margin-top: 4px;
+}
+
+#index li.musicplayer div.controls {
+  margin-top: -1px;
+}
+
 #index li.button div.buttons a {
+  margin: 0;
+  margin-left: 4px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+
+#index li.musicplayer div.controls a {
   margin: 0;
   margin-left: 4px;
   margin-top: 2px;
@@ -1220,3 +1240,6 @@ border-bottom-left-radius: inherit;
   background-position: 4px 3px;
 }
 
+.empty-list {
+  font-style: italic;
+}

@@ -37,9 +37,9 @@ script#buttons-template(type='text/template')
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
 script#musicplayer-template(type='text/template')
-  li.sortable.button.no-header
+  li.sortable.musicplayer.no-header
     label.device-label(data-bind="text: name")
-    div.buttons()
+    div.controls()
       span.songTitle(data-bind="text: $data.currentTitle")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-step-backward(data-bind="click: function(){$data.sendPlayerAction('previous');}")=__('Previous')
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon(data-bind="jqmbutton: {icon: $data.playButtonIcon}, click: $data.togglePlay")
@@ -76,6 +76,9 @@ script#devicepage-template(type='text/template')
   div(data-bind="id: 'device-page-'+$data.id()")
     ul(data-role="listview", class="items", 
       data-bind="sortable: {isSorting: $root.isSortingItems, sorted: $root.onItemsSorted, drop: $root.onDropItemOnTrash, droppable: '.droppable-' + $data.id}")
+      <!-- ko if: ! $root.enabledEditing() && $data.devices().length === 0  -->
+      li.empty-list()=__("I'm an empty page, add some items!")
+      <!-- /ko -->      
       <!-- ko template: { name: 'device-group-template', foreach: $root.groups} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $data.getUngroupedDevices().length > 0  -->
       li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
