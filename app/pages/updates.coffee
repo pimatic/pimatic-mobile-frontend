@@ -17,17 +17,17 @@ $(document).on("pagecreate", '#updates', (event) ->
       @updateProcessMessages = pimatic.updateProcessMessages
 
       @hasUpdates = ko.computed( =>
-        return (@pimaticUpdateInfo()?.isOutdated) or (@outdatedPlugins().length > 0)
+        return (@pimaticUpdateInfo()?.outdated) or (@outdatedPlugins().length > 0)
       )
 
       @pimaticUpdateInfoText = ko.computed( =>
         info = @pimaticUpdateInfo()
         unless info? then return ''
-        if info.isOutdated
+        if info.outdated
           return __('Found update for %s: current version is %s, latest version is: %s', 
             'pimatic', 
-            info.isOutdated.current, 
-            info.isOutdated.latest
+            info.outdated.current, 
+            info.outdated.latest
           )
         else
           return __('pimatic is up to date.')
@@ -48,7 +48,7 @@ $(document).on("pagecreate", '#updates', (event) ->
       )
 
     installUpdatesClicked: ->
-      modules = (if @pimaticUpdateInfo().isOutdated then ['pimatic'] else [])
+      modules = (if @pimaticUpdateInfo().outdated then ['pimatic'] else [])
       modules = modules.concat (p.plugin for p in @outdatedPlugins())
 
       pimatic.client.rest.installUpdatesAsync({modules})
