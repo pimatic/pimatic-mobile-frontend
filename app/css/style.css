@@ -147,8 +147,7 @@ html body .ui-panel-dismiss {
   border-bottom-right-radius: 3px;
 }
 
-#index .items .ui-btn,
-#index .items .ui-flipswitch {
+#index .items .ui-btn{
   overflow: visible;
 }
 
