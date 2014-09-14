@@ -11,7 +11,7 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     link(rel='apple-touch-icon-precomposed', sizes='120x120', href='apple-touch-icon-120x120-precomposed.png')
     link(rel='apple-touch-icon-precomposed', sizes='76x76', href='apple-touch-icon-76x76-precomposed.png')
     link(rel='apple-touch-icon-precomposed', href='apple-touch-icon-precomposed.png')
-    title pimatic
+    title=customTitle
     != nap.css('theme')
     != nap.css('style')
     != nap.js('jquery')

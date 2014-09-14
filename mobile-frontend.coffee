@@ -106,6 +106,7 @@ module.exports = (env) ->
         globals: ["__", "nap", "i18n"]
         mode: @config.mode,
         api: env.api.all
+        customTitle: @config.customTitle
         theme
       }
 

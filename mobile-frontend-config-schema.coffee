@@ -19,6 +19,10 @@ module.exports = {
       doc: "Use a flat style if the theme supports it."
       type: "boolean"
       default: true
+    customTitle:
+      doc: "Custimg title to use for the pimatic installation"
+      type: "string"
+      default: "pimatic"
     debug:
       doc: "that to true to get additional debug outputs"
       type: "boolean"
