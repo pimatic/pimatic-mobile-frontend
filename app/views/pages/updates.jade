@@ -12,11 +12,11 @@ div#updates(data-role='page')
       <!-- /ko -->
     a#install-updates(data-bind="visible: hasUpdates() && updateProcessStatus() == 'idle', click: installUpdatesClicked",
       data-role="button", data-icon="check",  data-inline="true", data-theme="b", data-mini="true")=__('Install Updates')
-    div.message
+    div.message.process-message(data-bind="visible: updateProcessMessages().length > 0")
       <!-- ko foreach: updateProcessMessages() -->
       p(data-bind="text: $data")
       <!-- /ko -->
-      p(data-bind="visible: updateProcessStatus() == 'error'")=__('There was an error installing the updates.')
-      p(data-bind="visible: updateProcessStatus() == 'done'")=__('Updates were successful. Please restart pimatic.')
+    p(data-bind="visible: updateProcessStatus() == 'error'")=__('There was an error installing the updates, please check the log.')
+    p(data-bind="visible: updateProcessStatus() == 'done'")=__('Updates were successful. Please restart pimatic.')
     a.restart-now(data-bind="visible: updateProcessStatus() == 'done', click: restart",
       data-role="button", data-icon="refresh",  data-inline="true", data-theme="b", data-mini="true")=__('Restart pimatic')

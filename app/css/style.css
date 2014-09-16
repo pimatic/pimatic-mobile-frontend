@@ -1247,3 +1247,15 @@ border-bottom-left-radius: inherit;
 .empty-list {
   font-style: italic;
 }
+
+.process-message {
+  background: rgb(48, 48, 48);
+  color: white;
+  text-shadow: none;
+  font-family: monospace;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+}
+

@@ -29,11 +29,19 @@ $(document).on( "pagebeforecreate", (event) ->
         criteria:
           level: 'error'
     })
+
     pimatic.socket.emit('call', {
       id: 'guiSettings'
       action: 'getGuiSetttings'
       params: {}
     })
+
+    pimatic.socket.emit('call', {
+      id: 'updateProcessStatus'
+      action: 'getUpdateProcessStatus'
+      params: {}
+    })
+
   )
 
   pimatic.socket.on('callResult', (msg) ->
@@ -48,6 +56,10 @@ $(document).on( "pagebeforecreate", (event) ->
             unless guiSettings.config[k]?
               guiSettings.config[k] = v
           pimatic.guiSettings(guiSettings.config)
+      when 'updateProcessStatus'
+        info = msg.result.info
+        pimatic.updateProcessStatus(info.status)
+        pimatic.updateProcessMessages(info.messages)
   )   
 
   pimatic.socket.on('devices', tc (devices) -> 
@@ -149,6 +161,7 @@ $(document).on( "pagebeforecreate", (event) ->
     pimatic.updateProcessStatus(statusEvent.status)
   )
   pimatic.socket.on("updateProcessMessage", tc (msgEvent) -> 
+    console.log msgEvent
     pimatic.updateProcessMessages.push(msgEvent.message)
   )
   
