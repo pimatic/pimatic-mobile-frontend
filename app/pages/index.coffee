@@ -22,6 +22,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
     constructor: () ->
       @groups = pimatic.groups
       @rememberme = pimatic.rememberme
+      @permissions = pimatic.permissions
 
       @updateFromJs(
         ruleItemCssClass: ''
@@ -42,7 +43,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
         itemTabs = $("#item-tabs")
         pimatic.try => itemTabs.navbar "destroy"
         ko.cleanNode(itemTabs[0])
-        if dPages.length > 0
+        if dPages.length > 0 and @hasPermission('pages', 'read')
           html = """
             <ul data-bind="foreach: devicepages">
               <li>
@@ -62,7 +63,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
         ko.applyBindings(this, itemTabs[0])
         if enabledEditing
           itemTabs.find('ul').append($('#edit-devicepage-link-template').text())
-        if dPages.length > 0 or @enabledEditing()
+        if (dPages.length > 0 or @enabledEditing()) and @hasPermission('pages', 'read')
           itemTabs.navbar()
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
@@ -84,13 +85,12 @@ $(document).on("pagecreate", '#index', tc (event) ->
         owl = itemLists.data('owlCarousel')
         if owl?
           owl.destroy()
-        if dPages.length > 0
+        if dPages.length > 0 and @hasPermission('pages', 'read')
           html = $('#devicepages-template').text()
           itemLists.html(html)
           ko.applyBindings(this, itemLists[0]) if ko.dataFor($('#index')[0])?
           itemLists.find('[data-role="listview"]').listview()
           itemLists.owlCarousel({
-            navigation: true
             slideSpeed: 300
             paginationSpeed: 400
             singleItem: true  
@@ -177,7 +177,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
     showDevicePage: (devicePage) =>
       @activeDevicepage(devicePage)
-      $("#nav-panel").panel( "close" );
+      $("#nav-panel").panel( "close" )
       return true
 
     updateFromJs: (data) -> 
@@ -254,19 +254,26 @@ $(document).on("pagecreate", '#index', tc (event) ->
     onDropItemOnTrash: (item) =>
       really = confirm(__("Do you really want to delete the item?"))
       if really then (doDeletion = =>
-          activePage = @activeDevicepage()
-          pimatic.loading "deleteitem", "show", text: __('Saving')
-          pimatic.client.rest.removeDeviceFromPage(
-            deviceId: item.deviceId
-            pageId: activePage.id
-          ).always( => 
-            pimatic.loading "deleteitem", "hide"
-          ).done(ajaxShowToast).fail(ajaxAlertFail)
-        )()
+        activePage = @activeDevicepage()
+        pimatic.loading "deleteitem", "show", text: __('Saving')
+        pimatic.client.rest.removeDeviceFromPage(
+          deviceId: item.deviceId
+          pageId: activePage.id
+        ).always( => 
+          pimatic.loading "deleteitem", "hide"
+        ).done(ajaxShowToast).fail(ajaxAlertFail)
+      )()
 
     toLoginPage: ->
       urlEncoded = encodeURIComponent(window.location.href)
       window.location.href = "/login?url=#{urlEncoded}"
+
+    hasPermission: (scope, access) ->
+      permissions = @permissions()[scope]
+      switch access
+        when 'read' then (permissions is "read" or permissions is "write")
+        when 'write' then (permissions is "write")
+        else no
 
   pimatic.pages.index = indexPage = new IndexViewModel()
 

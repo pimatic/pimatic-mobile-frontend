@@ -102,7 +102,6 @@ class Device
     config: 'copy'
     configDefaults: 'copy'
     id: 'copy'
-    name: 'observe'
     template: 'copy'
     actions: 'copy'
     attributes:
@@ -323,17 +322,20 @@ class Pimatic
         $create: (data) -> new DevicePage(data)
         $update: (data, target) -> target.update(data); target
     groups:
-        $key: 'id'
-        $itemOptions:
-          $handler: 'callback'
-          $create: (data) -> new Group(data)
-          $update: (data, target) -> target.update(data); target        
+      $key: 'id'
+      $itemOptions:
+        $handler: 'callback'
+        $create: (data) -> new Group(data)
+        $update: (data, target) -> target.update(data); target        
 
     errorCount: 'observe'
     rememberme: 'observe'
     updateProcessStatus: 'observe'
     updateProcessMessages: 'array'
     guiSettings: 'observe'
+    username: 'observe'
+    role: 'observe'
+    permissions: 'observe'
   }
   socket: null
   inited: no
@@ -364,6 +366,19 @@ class Pimatic
       updateProcessStatus: 'idle'
       updateProcessMessages: []
       guiSettings: null
+      username: null
+      role: null
+      permissions: [
+        pages: "none",
+        rules: "none",
+        variables: "none",
+        messages: "none",
+        events: "none",
+        devices: "none",
+        groups: "none",
+        plugins: "none",
+        updates: "none"
+      ]
     })
     @setupStorage()
 

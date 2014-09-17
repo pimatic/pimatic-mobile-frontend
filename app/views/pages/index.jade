@@ -99,37 +99,67 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
     a#nav-button.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(href='#nav-panel')=__('Menu')
     h3=customTitle
     div.ui-mini.ui-btn-right(data-role="controlgroup" data-type="horizontal")
+      <!-- ko if: $root.hasPermission('messages', 'read') -->
       a#error-count.ui-btn.ui-btn-inline.ui-mini.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0, click: onLogMessageClicked")
+      <!-- /ko -->
+      <!-- ko if: $root.hasPermission('pages', 'write') -->
       a.ui-btn.ui-btn-inline.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
+      <!-- /ko -->
   div.ui-content.overthrow(data-role="main", tabindex="1")
     div#item-tabs(data-insert="false")
     div#item-lists.owl-carousel()
+    <!-- ko if: !$root.hasPermission('pages', 'write') -->
+    div.denied=__('Permission denied')
+    <!-- /ko -->
   div.content-overlay.ui-content
   div#nav-panel.overthrow(data-role='panel', data-position='left', data-position-fixed='false', data-display='reveal', data-theme=theme.menuSwatch, tabindex="0")
     ul.nav-panel-menu(data-role='listview', data-theme=theme.menuSwatch, data-divider-theme=theme.menuSwatch, style='margin-top: -16px;')
       li(data-icon='delete', data-theme=theme.menuSwatch)
         a(href='#', data-rel='close')=__("Close menu")
+      <!-- ko if: $root.hasPermission('pages', 'read') -->
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Pages')
       <!-- ko template: { name: 'page-menuentry-template', foreach:devicepages} --><!-- /ko -->
+      <!-- /ko -->
+      <!-- ko if: $root.hasPermission('rules', 'read') || $root.hasPermission('variables', 'read') -->
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Automation')
+      <!-- ko if: $root.hasPermission('rules', 'read') -->
       li(data-theme=theme.menuSwatch)
         a(href='#rules-page', data-transition="slidefade")=__('Rules')
+      <!-- /ko -->
+      <!-- ko if: $root.hasPermission('variables', 'read') -->
       li(data-theme=theme.menuSwatch)
-        a(href='#variables-page', data-transition="slidefade")=__('Variables')        
+        a(href='#variables-page', data-transition="slidefade")=__('Variables')
+      <!-- /ko -->   
+      <!-- /ko -->
+      <!-- ko if: $root.hasPermission('messages', 'read') || $root.hasPermission('events', 'read') -->
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Log')
+      <!-- ko if: $root.hasPermission('messages', 'read') -->
       li(data-theme=theme.menuSwatch)
         a(href='#log', data-transition="slidefade")=__('Messages')
+      <!-- /ko --> 
+      <!-- ko if: $root.hasPermission('events', 'read') -->
       li(data-theme=theme.menuSwatch)
         a(href='#events', data-transition="slidefade")=__('Events') 
+      <!-- /ko -->
+      <!-- /ko --> 
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Settings')
+      <!-- ko if: $root.hasPermission('devices', 'read') -->
       li(data-theme=theme.menuSwatch)  
-        a(href='#devices-page', data-transition="slidefade")=__('Devices') 
+        a(href='#devices-page', data-transition="slidefade")=__('Devices')
+      <!-- /ko --> 
+      <!-- ko if: $root.hasPermission('groups', 'read') -->
       li(data-theme=theme.menuSwatch)  
         a(href='#groups-page', data-transition="slidefade")=__('Groups') 
-      li(data-theme=theme.menuSwatch)  
+     
+      <!-- /ko --> 
+      <!-- ko if: $root.hasPermission('plugins', 'read') -->
+      li(data-theme=theme.menuSwatch)
         a(href='#plugins', data-transition="slidefade")=__('Plugins') 
+      <!-- /ko --> 
+      <!-- ko if: $root.hasPermission('updates', 'read') -->
       li(data-theme=theme.menuSwatch)
         a(href='#updates', data-transition="slidefade")=__('Updates')
+      <!-- /ko --> 
       li#import-ca-cert(data-theme=theme.menuSwatch)
         a(href='root-ca-cert.crt', data-ajax="false", data-bind="visible: hasRootCACert")=__('Show CA root certificate')
       //- Not yet implemented:

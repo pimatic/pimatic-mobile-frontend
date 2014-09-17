@@ -62,6 +62,12 @@ $(document).on( "pagebeforecreate", (event) ->
         pimatic.updateProcessMessages(info.messages)
   )   
 
+  pimatic.socket.on('hello', tc (userInfo) -> 
+    pimatic.username(userInfo.username)
+    pimatic.role(userInfo.role)
+    pimatic.permissions(userInfo.permissions)
+  )
+
   pimatic.socket.on('devices', tc (devices) -> 
     pimatic.updateFromJs({devices})
   )
