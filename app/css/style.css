@@ -323,8 +323,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index li.button div.buttons a {
   margin: 0;
   margin-left: 4px;
-  margin-top: 2px;
-  margin-bottom: 2px;
+  margin-top: 1px;
+  margin-bottom: 1px;
 }
 
 
@@ -1259,3 +1259,19 @@ border-bottom-left-radius: inherit;
   border-radius: 10px;
 }
 
+.attr-presence {
+  display: inline-block;
+  border-radius: 20px;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border: 3px solid rgb(0, 125, 205);
+}
+
+.attr-presence .val{
+  display: none;
+}
+
+.attr-presence.value-present {
+  background: rgb(0, 125, 205);
+}

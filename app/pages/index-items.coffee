@@ -131,7 +131,33 @@ $(document).on( "pagebeforecreate", (event) ->
     getItemTemplate: => 'device'
 
   class PresenceItem extends DeviceItem
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @getAttribute('presence').value.subscribe( =>
+        @updateClass()
+      )
+
     getItemTemplate: => 'device'
+
+    afterRender: (elements) ->
+      super(elements)
+      @presenceEle = $(elements).find('.attr-presence')
+      @updateClass()
+
+    updateClass: ->
+      value = @getAttribute('presence').value()
+      if @presenceEle?
+        switch value
+          when true
+            @presenceEle.addClass('value-present')
+            @presenceEle.removeClass('value-absent')
+          when false
+            @presenceEle.removeClass('value-present')
+            @presenceEle.addClass('value-absent')
+          else
+            @presenceEle.removeClass('value-absent')
+            @presenceEle.removeClass('value-present')
+      return
 
   class ContactItem extends DeviceItem
     getItemTemplate: => 'device'
