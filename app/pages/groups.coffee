@@ -11,6 +11,7 @@ $(document).on( "pagebeforecreate", '#groups-page', tc (event) ->
 
     constructor: () ->
       @groups = pimatic.groups
+      @hasPermission = pimatic.hasPermission
 
       @groupsListViewRefresh = ko.computed( tc =>
         @groups()
@@ -62,7 +63,10 @@ $(document).on( "pagebeforecreate", '#groups-page', tc (event) ->
       editGroupPage.action('add')
       return true
 
-    onEditGroupClicked: (group)->
+    onEditGroupClicked: (group) =>
+      unless @hasPermission('groups', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to edit this group."))
+        return false
       editGroupPage = pimatic.pages.editGroup
       editGroupPage.action('update')
       editGroupPage.groupId(group.id)

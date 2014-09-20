@@ -20,8 +20,9 @@ div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(
   div(data-theme=theme.headerSwatch, data-role='header')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
     h3=__("Rules")
+    <!-- ko if: $root.hasPermission('rules', 'write') -->
     a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
-      
+    <!-- /ko -->
   div.ui-content.overthrow
     ul#rules(data-role='listview', data-bind="sortable: {isSorting: isSortingRules, sorted: onRulesSorted, drop: onDropRuleOnTrash}, dragslide: {}, css: ruleCss")
       <!-- ko template: { name: 'rule-groups-template', foreach: groups} --><!-- /ko -->
@@ -36,3 +37,6 @@ div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(
       li#add-rule(data-bind="visible: $root.enabledEditing() && !$root.isSortingRules() ")
         a(data-transition='slidefade', href='#edit-rule', data-bind="click: $root.onAddRuleClicked")=__('Add a new rule')+'...'
        div.drag-message
+    <!-- ko if: !$root.hasPermission('rules', 'read') -->
+    div.denied=__('Permission denied')
+    <!-- /ko -->

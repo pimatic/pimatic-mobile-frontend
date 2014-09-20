@@ -22,7 +22,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
     constructor: () ->
       @groups = pimatic.groups
       @rememberme = pimatic.rememberme
-      @permissions = pimatic.permissions
+      @hasPermission = pimatic.hasPermission
 
       @updateFromJs(
         ruleItemCssClass: ''
@@ -267,13 +267,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
     toLoginPage: ->
       urlEncoded = encodeURIComponent(window.location.href)
       window.location.href = "/login?url=#{urlEncoded}"
-
-    hasPermission: (scope, access) ->
-      permissions = @permissions()[scope]
-      switch access
-        when 'read' then (permissions is "read" or permissions is "write")
-        when 'write' then (permissions is "write")
-        else no
 
   pimatic.pages.index = indexPage = new IndexViewModel()
 

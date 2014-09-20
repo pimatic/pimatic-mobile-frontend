@@ -12,6 +12,7 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
     constructor: () ->
       @rules = pimatic.rules
       @groups = pimatic.groups
+      @hasPermission = pimatic.hasPermission
 
       @rulesListViewRefresh = ko.computed( tc =>
         @rules()
@@ -129,12 +130,12 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
     onDropRuleOnTrash: (rule) ->
       really = confirm(__("Do you really want to delete the %s rule?", rule.name()))
       if really then (doDeletion = =>
-          pimatic.loading "deleterule", "show", text: __('Saving')
-          pimatic.client.rest.removeRule(ruleId: rule.id)
-          .always( => 
-            pimatic.loading "deleterule", "hide"
-          ).done(ajaxShowToast).fail(ajaxAlertFail)
-        )()
+        pimatic.loading "deleterule", "show", text: __('Saving')
+        pimatic.client.rest.removeRule(ruleId: rule.id)
+        .always( => 
+          pimatic.loading "deleterule", "hide"
+        ).done(ajaxShowToast).fail(ajaxAlertFail)
+      )()
 
     onAddRuleClicked: ->
       editRulePage = pimatic.pages.editRule
@@ -143,7 +144,10 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       editRulePage.ruleEnabled(yes)
       return true
 
-    onEditRuleClicked: (rule)->
+    onEditRuleClicked: (rule) =>
+      unless @hasPermission('rules', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to edit this rule."))
+        return false
       editRulePage = pimatic.pages.editRule
       editRulePage.action('update')
       editRulePage.ruleId(rule.id)

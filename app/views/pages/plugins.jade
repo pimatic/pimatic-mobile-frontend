@@ -37,11 +37,14 @@ div#plugins(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
       data-inline='true', data-transition="slidefade", data-direction="reverse")=__('Back')
+    <!-- ko if: $root.hasPermission('plugins', 'write') -->
     a.restart-now(data-role="button", data-icon="refresh",  data-iconpos='left', data-inline="true")=__('Restart')
+    <!-- /ko -->
     h3=__('Installed Plugins')
   div.ui-content.overthrow
     form
       ul#plugin-list.checkbox-list(data-role='listview', data-inset='true')
+      <!-- ko if: $root.hasPermission('plugins', 'write') -->
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           select#select-plugin-action(name='select-plugin-action')
@@ -52,6 +55,7 @@ div#plugins(data-role='page')
           a#plugin-do-action(data-icon="arrow-r", data-theme="a", data-role="button")=__('Do it!')
       .ui-field-contain
           a#plugin-install(href="#plugins-browse", data-icon="plus", data-role="button")=__('Install a Plugin')
+      <!-- /ko -->
 div#plugins-browse(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     a(href='#plugins', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true', data-transition="slidefade")=__('Back')

@@ -108,7 +108,7 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
   div.ui-content.overthrow(data-role="main", tabindex="1")
     div#item-tabs(data-insert="false")
     div#item-lists.owl-carousel()
-    <!-- ko if: !$root.hasPermission('pages', 'write') -->
+    <!-- ko if: !$root.hasPermission('pages', 'read') -->
     div.denied=__('Permission denied')
     <!-- /ko -->
   div.content-overlay.ui-content
@@ -150,7 +150,6 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
       <!-- ko if: $root.hasPermission('groups', 'read') -->
       li(data-theme=theme.menuSwatch)  
         a(href='#groups-page', data-transition="slidefade")=__('Groups') 
-     
       <!-- /ko --> 
       <!-- ko if: $root.hasPermission('plugins', 'read') -->
       li(data-theme=theme.menuSwatch)
@@ -169,3 +168,5 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
           label(for="rememberme")=__('Remember me')
           input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
             data-bind="jqmchecked: rememberme")
+      li(data-theme=theme.menuSwatch)
+        a(href='/logout',)=__('Logout')

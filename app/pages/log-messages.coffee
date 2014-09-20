@@ -18,6 +18,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
     messageCount: ko.observable(null)
 
     constructor: ->
+      @hasPermission = pimatic.hasPermission
       @updateFromJs([])
       @displayedMessages = ko.computed( =>
         chosenLevels = @chosenLevels()

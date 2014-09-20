@@ -573,6 +573,13 @@ class Pimatic
       if index isnt -1 then return g
     return null
 
+  hasPermission: (scope, access) =>
+    permissions = @permissions()[scope]
+    switch access
+      when 'read' then (permissions is "read" or permissions is "write")
+      when 'write' then (permissions is "write")
+      else no
+
 
 window.pimatic = new Pimatic()
 window.pimatic.Device = Device

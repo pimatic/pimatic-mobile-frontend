@@ -12,7 +12,8 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
     constructor: () ->
       @devices = pimatic.devices
       @groups = pimatic.groups
-
+      @hasPermission = pimatic.hasPermission
+      
       @devicesListViewRefresh = ko.computed( tc =>
         @devices()
         @isSortingDevices()
@@ -118,24 +119,27 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
     onDropDeviceOnTrash: (device) ->
       really = confirm(__("Do you really want to delete the %s device?", device.name()))
       if really then (doDeletion = =>
-          pimatic.loading "deletedevice", "show", text: __('Saving')
-          pimatic.client.rest.removeDevice(deviceId: device.id)
-          .always( => 
-            pimatic.loading "deletedevice", "hide"
-          ).done(ajaxShowToast).fail(ajaxAlertFail)
-        )()
+        pimatic.loading "deletedevice", "show", text: __('Saving')
+        pimatic.client.rest.removeDevice(deviceId: device.id)
+        .always( => 
+          pimatic.loading "deletedevice", "hide"
+        ).done(ajaxShowToast).fail(ajaxAlertFail)
+      )()
 
     onAddDeviceClicked: ->
-      pimatic.showToast("Sorry that operation is not supported yet.");
+      pimatic.showToast("Sorry that operation is not supported yet.")
       return false
       editDevicePage = pimatic.pages.editDevice
       editDevicePage.resetFields()
       editDevicePage.action('add')
       return true
 
-    onEditDeviceClicked: (device)->
-      pimatic.showToast("Sorry that operation is not supported yet.");
+    onEditDeviceClicked: (device) =>
+      pimatic.showToast("Sorry that operation is not supported yet.")
       return false
+      unless @hasPermission('devices', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to edit this device."))
+        return false
       editDevicePage = pimatic.pages.editDevice
       editDevicePage.action('update')
       editDevicePage.deviceId(device.id)
