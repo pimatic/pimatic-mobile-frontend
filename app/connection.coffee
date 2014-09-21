@@ -9,6 +9,7 @@ $(document).on( "pagebeforecreate", (event) ->
     reconnectionDelay: 1000
     reconnectionDelayMax: 3000
     timeout: 20000
+    forceNew: true
   })
 
   pimatic.socket.io.on 'open', () ->
