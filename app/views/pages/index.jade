@@ -161,12 +161,9 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
       <!-- /ko --> 
       li#import-ca-cert(data-theme=theme.menuSwatch)
         a(href='root-ca-cert.crt', data-ajax="false", data-bind="visible: hasRootCACert")=__('Show CA root certificate')
-      //- Not yet implemented:
-      //- li(data-theme=theme.menuSwatch)
-      //-   a(href='#', data-transition="slide")=__('Logout')
       li(data-theme=theme.menuSwatch).rememberme.ui-btn.ui-btn-f
           label(for="rememberme")=__('Remember me')
           input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
             data-bind="jqmchecked: rememberme")
       li(data-theme=theme.menuSwatch)
-        a(href='/logout',)=__('Logout')
+        a(href='/logout',data-bind="text: $root.logoutText")=__('Logout')

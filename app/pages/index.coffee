@@ -36,6 +36,13 @@ $(document).on("pagecreate", '#index', tc (event) ->
         }
       )
 
+      @logoutText = ko.computed( tc =>
+        if typeof pimatic.username() is "string"
+          return __('Logout') + ' (' + pimatic.username() + ")"
+        else
+          return __('Logout')
+      )
+
       @devicepagesTabsRefresh = ko.computed( tc =>
         unless @bindingsApplied() then return
         dPages =  @devicepages()
