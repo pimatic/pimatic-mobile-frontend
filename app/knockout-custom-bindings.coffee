@@ -91,7 +91,7 @@
       value = valueAccessor()
       $ele = $(element)
       $ele.val(value())
-      $ele.selectmenu( "refresh", true );
+      $ele.selectmenu( "refresh", true )
       return
     }
 
@@ -129,6 +129,25 @@
       })
     }
 
+  ko.bindingHandlers.toast = {
+    init: (element, valueAccessor) ->
+      text = valueAccessor()
+      textUnwrapped = ko.unwrap(text)
+      $ele = $(element)
+      $ele.text(textUnwrapped)
+      $ele.toast()
+      $ele.toast('show')
+      height = $ele.outerHeight() + 2
+      $ele.parent().find('.ui-toast').each( ->
+        if this is element then return
+        $toast = $(this)
+        $toast.addClass('animated-toast')
+        newTop = $toast.data('top') + height
+        $toast.css('top', newTop + 'px')
+        $toast.data('top', newTop)
+        return
+      )
+  }
 
   ScrollArea = (element) ->
     @element = element

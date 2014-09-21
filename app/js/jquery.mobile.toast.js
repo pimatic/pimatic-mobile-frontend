@@ -41,17 +41,12 @@ $.widget( "mobile.toast", $.mobile.widget, {
 		
 		var top = (bh*3/4) - $el.height()/2
 		var left = bw/2 - $el.outerWidth()/2
-		
+		$el.data('top', top)
 		$el.css('top', top+'px')
 		$el.css('left', left+'px')
 		
 		// fade in and fade out after the given time
-		var millis = 3000
-		if (this.options.duration === 'short') millis = 2000
-		else if (this.options.duration === 'long') millis = 6000
-		else if (! isNaN(this.options.duration)) millis = parseInt(this.options.duration)
-		else jQuery.error('mobile.toast: options.duration has to be short, long or a integer value')
-		
+		var millis = 4000;
 		$el.fadeIn().delay(millis).fadeOut('slow')
 	},
 	/**

@@ -45,6 +45,14 @@
   transition: background 300ms linear;
 }
 
+.animated-toast {
+  -webkit-transition: top 100ms ease-out;
+  -moz-transition: top 100ms ease-out;
+  -o-transition: top 100ms ease-out;
+  -ms-transition: top 100ms ease-out;
+  transition: top 100ms ease-out;
+}
+
 
 .ui-panel-display-reveal {
 -webkit-box-shadow: none;

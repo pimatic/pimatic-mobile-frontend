@@ -11,7 +11,7 @@
 
   $.datepicker.setDefaults({
     dateFormat: 'yy-mm-dd'
-  });
+  })
 
   pendingLoadings = {}
 
@@ -156,9 +156,23 @@ window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   , 1)
   return true
 
+
+
 $(document).ready( => 
-  $('#toast').toast()
-  pimatic.showToast = (msg) -> $('#toast').text(msg).toast('show')
+  toastMessages = ko.observableArray([])
+  ko.applyBindings({toastMessages}, $('#toasts')[0])
+  #$('#toasts').toast()
+  pimatic.showToast = (msg) -> 
+    message = {
+      message: msg
+    }
+    toastMessages.push(message)
+    setTimeout( =>
+      toastMessages.remove(message)
+    4500)
+    #$('#toasts').toast('show')
+    return
+  return
 )
 
 pimatic.isValidId = (id) => id.match(/^[a-z0-9_-]+$/)?
