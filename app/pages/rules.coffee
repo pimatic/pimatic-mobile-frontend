@@ -145,7 +145,7 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       return true
 
     onEditRuleClicked: (rule) =>
-      unless @hasPermission('rules', 'write')
+      unless @hasPermission('rules', 'write') or pimatic.isDemo()
         pimatic.showToast(__("Sorry, you have no permissions to edit this rule."))
         return false
       editRulePage = pimatic.pages.editRule

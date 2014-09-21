@@ -102,7 +102,7 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
       <!-- ko if: $root.hasPermission('messages', 'read') -->
       a#error-count.ui-btn.ui-btn-inline.ui-mini.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0, click: onLogMessageClicked")
       <!-- /ko -->
-      <!-- ko if: $root.hasPermission('pages', 'write') -->
+      <!-- ko if: $root.hasPermission('pages', 'write') || pimatic.isDemo() -->
       a.ui-btn.ui-btn-inline.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
       <!-- /ko -->
   div.ui-content.overthrow(data-role="main", tabindex="1")

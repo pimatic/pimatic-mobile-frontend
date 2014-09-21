@@ -15,7 +15,7 @@ div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEdit
   div(data-theme=theme.headerSwatch, data-role='header')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
     h3=__("Variables")
-    <!-- ko if: $root.hasPermission('variables', 'write') -->
+    <!-- ko if: $root.hasPermission('variables', 'write') || pimatic.isDemo() -->
     a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing")
     <!-- /ko -->
   div.ui-content.overthrow

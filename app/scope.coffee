@@ -580,6 +580,7 @@ class Pimatic
       when 'write' then (permissions is "write")
       else no
 
+  isDemo: => @guiSettings()?.demo
 
 window.pimatic = new Pimatic()
 window.pimatic.Device = Device

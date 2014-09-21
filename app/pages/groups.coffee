@@ -50,12 +50,12 @@ $(document).on( "pagebeforecreate", '#groups-page', tc (event) ->
     onDropGroupOnTrash: (group) ->
       really = confirm(__("Do you really want to delete the %s group?", group.name()))
       if really then (doDeletion = =>
-          pimatic.loading "deletegroup", "show", text: __('Saving')
-          pimatic.client.rest.removeGroup(groupId: group.id)
-          .always( => 
-            pimatic.loading "deletegroup", "hide"
-          ).done(ajaxShowToast).fail(ajaxAlertFail)
-        )()
+        pimatic.loading "deletegroup", "show", text: __('Saving')
+        pimatic.client.rest.removeGroup(groupId: group.id)
+        .always( => 
+          pimatic.loading "deletegroup", "hide"
+        ).done(ajaxShowToast).fail(ajaxAlertFail)
+      )()
 
     onAddGroupClicked: ->
       editGroupPage = pimatic.pages.editGroup
@@ -64,7 +64,7 @@ $(document).on( "pagebeforecreate", '#groups-page', tc (event) ->
       return true
 
     onEditGroupClicked: (group) =>
-      unless @hasPermission('groups', 'write')
+      unless @hasPermission('groups', 'write') or pimatic.isDemo()
         pimatic.showToast(__("Sorry, you have no permissions to edit this group."))
         return false
       editGroupPage = pimatic.pages.editGroup

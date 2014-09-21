@@ -160,7 +160,7 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
       return true
 
     onEditVariableClicked: (variable) =>
-      unless @hasPermission('variables', 'write')
+      unless @hasPermission('variables', 'write') || pimatic.isDemo()
         pimatic.showToast(__("Sorry, you have no permissions to edit this variable."))
         return false
       unless variable.isDeviceAttribute()
