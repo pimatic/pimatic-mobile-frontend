@@ -9,7 +9,7 @@ $(document).on( "pagebeforecreate", (event) ->
     reconnectionDelay: 1000
     reconnectionDelayMax: 3000
     timeout: 20000
-    forceNew: true
+    forceNew: yes
   })
 
   pimatic.socket.io.on 'open', () ->
@@ -216,6 +216,21 @@ $(document).on( "pagebeforecreate", (event) ->
       text: __("connect timed out")
       blocking: no
     })
+  )
+
+  connectionLostErrroCount = 0
+  pimatic.socket.on('error', (error) ->
+    connectionLostErrroCount++
+    #console.log "m: error"
+    pimatic.loading("socket", "show", {
+      text: __("connection lost: %s", error)
+      blocking: no
+    })
+    pimatic.socket.io.disconnect()
+    setTimeout( (=>
+      pimatic.socket.io.connect()
+    ), (if connectionLostErrroCount == 1 then 300 else 3000) )
+    
   )
 
 
