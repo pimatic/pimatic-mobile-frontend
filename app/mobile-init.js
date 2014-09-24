@@ -9,11 +9,10 @@ $( document ).on( "mobileinit", function() {
 
   // monkeypatch resetActivePageHeight function because we are using overthrow
   $.mobile.resetActivePageHeight = function( height ) {
-      var page = $( "." + $.mobile.activePageClass );
-      var screenHeight = $.mobile.getScreenHeight();
-      page.css( "min-height", screenHeight);
-      $('#nav-panel').css('height', screenHeight);
-    },
-
+    var page = $( "." + $.mobile.activePageClass );
+    var screenHeight = $.mobile.getScreenHeight();
+    page.css( "min-height", screenHeight);
+    $('#nav-panel').css('height', screenHeight);
+  };
   $.mobile.toolbar.tapToggle = false; 
 });
