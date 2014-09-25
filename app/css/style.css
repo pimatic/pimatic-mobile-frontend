@@ -310,6 +310,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   float: right;
   max-width: 100%;
   margin: 0;
+  overflow: hidden;
 }
 
 #index li.button div.buttons,
