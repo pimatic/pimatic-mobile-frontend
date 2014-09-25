@@ -21,24 +21,10 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     script(type='text/javascript')!="api = " + JSON.stringify(api) + ";"
     != nap.js('main')
   body(class=(theme.flat ? 'flat' : ''))
-    include pages/index
-    include pages/rules
-    include pages/variables
-    include pages/groups
-    include pages/add-item
-    include pages/edit-rule
-    include pages/edit-variable
-    include pages/edit-devicepage
-    include pages/edit-group
-    include pages/edit-device
-    include pages/log-messages
-    include pages/graph
-    include pages/events
-    include pages/devices
-    include pages/plugins
-    include pages/updates
-    include pages/devicepages
-    | !{additionalPages}
+    if page == 'main'
+        include main
+    else if page == 'login'
+        include login
     #toasts(data-bind="foreach: toastMessages")
       ui-toast.ui-corner-all(data-role='toast', data-bind="toast: $data.message")
     div.ui-loader-background

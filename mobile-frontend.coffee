@@ -15,6 +15,10 @@ module.exports = (env) ->
   S = env.require 'string'
   M = env.matcher
 
+  jade = require('jade')
+  Promise.promisifyAll(jade)
+
+
   global.i18n = env.require('i18n')
   global.__ = i18n.__
   _ = env.require 'lodash'
@@ -42,9 +46,21 @@ module.exports = (env) ->
       )
 
       app.get('/login', (req, res) =>
-        url = req.query.url
-        unless url then url = "/"
-        res.redirect 302, url
+        # url = req.query.url
+        # unless url then url = "/"
+        # res.redirect 302, url
+
+        if @config.mode is "development"
+          @renderLogin().then( (html) =>
+            res.send html
+          ).catch( (error) =>
+            env.logger.error error.message
+            env.logger.debug error.stack
+            res.send error
+          ).done()
+        else
+          res.sendfile('/public/login.html', {root: __dirname })
+        return
       )
 
       certFile =  path.resolve(
@@ -79,20 +95,23 @@ module.exports = (env) ->
               ).done()
             return
           else 
-            # In production mode render the index page on time and store it to a file
-            return @renderIndex().then( (html) =>
-              indexFile = __dirname + '/public/index.html'
-              fs.writeFileAsync(indexFile, html)
-            )
+            # In production mode render the login and index page on time and store it to a file
+            return Promise.all [
+              @renderIndex().then( (html) =>
+                indexFile = __dirname + '/public/index.html'
+                fs.writeFileAsync(indexFile, html)
+              ),
+              @renderLogin().then( (html) =>
+                loginFile = __dirname + '/public/login.html'
+                fs.writeFileAsync(loginFile, html)
+              )
+            ]
           )
         context.waitForIt finished
         return
 
-    renderIndex: () ->
-      env.logger.info "rendering html"
-      jade = require('jade')
-      Promise.promisifyAll(jade)
 
+    _getRenderOptions: () ->
       theme = {
         flat: @config.flat
         headerSwatch: 'a'
@@ -100,7 +119,7 @@ module.exports = (env) ->
         menuSwatch: 'f'
       }
 
-      renderOptions = {
+      return renderOptions = {
         pretty: @config.mode is "development"
         compileDebug: @config.mode is "development"
         globals: ["__", "nap", "i18n"]
@@ -109,6 +128,14 @@ module.exports = (env) ->
         customTitle: @config.customTitle
         theme
       }
+
+    _getLayoutPath: () -> path.resolve __dirname, 'app/views/layout.jade' 
+
+
+    renderIndex: () ->
+      env.logger.info "rendering index html"
+      renderOptions = @_getRenderOptions()
+      renderOptions.page = 'main'
 
       awaitingRenders = 
         for page in @additionalAssetFiles['html']
@@ -125,14 +152,23 @@ module.exports = (env) ->
 
       Promise.all(awaitingRenders).then( (htmlPages) =>
         renderOptions.additionalPages = _.reduce htmlPages, (html, page) => html + page
-        layout = path.resolve __dirname, 'app/views/layout.jade' 
+        layout = @_getLayoutPath()
         env.logger.debug("rendering: #{layout}") if @config.debug
         jade.renderFileAsync(layout, renderOptions).then( (html) =>
-          env.logger.info "rendering html finished"
+          env.logger.info "rendering index html finished"
           return html
         )
       )
 
+    renderLogin: () ->
+      env.logger.info "rendering login html"
+      layout = @_getLayoutPath()
+      renderOptions = @_getRenderOptions()
+      renderOptions.page = 'login'
+      jade.renderFileAsync(layout, renderOptions).then( (html) =>
+        env.logger.info "rendering login html finished"
+        return html
+      )
 
     registerAssetFile: (type, file) ->
       assert type is 'css' or type is 'js' or type is 'html'
