@@ -15,6 +15,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.io.on 'open', () ->
     #console.log "m: open"
     pimatic.loading "socket", "hide"
+    pimatic.pages.index?.hideLoginDialog()
 
     if window.applicationCache?
       try
@@ -218,18 +219,19 @@ $(document).on( "pagebeforecreate", (event) ->
     })
   )
 
-  connectionLostErrroCount = 0
+  # connectionLostErrroCount = 0
   pimatic.socket.on('error', (error) ->
-    connectionLostErrroCount++
+    # connectionLostErrroCount++
     #console.log "m: error"
-    pimatic.loading("socket", "show", {
-      text: __("connection lost: %s", error)
-      blocking: no
-    })
+    # pimatic.loading("socket", "show", {
+    #   text: __("connection lost: %s", error)
+    #   blocking: no
+    # })
     pimatic.socket.io.disconnect()
-    setTimeout( (=>
-      pimatic.socket.io.connect()
-    ), (if connectionLostErrroCount == 1 then 300 else 3000) )
+    pimatic.pages.index?.showLoginDialog()
+    # setTimeout( (=>
+    #   pimatic.socket.io.connect()
+    # ), (if connectionLostErrroCount == 1 then 300 else 3000) )
     
   )
 

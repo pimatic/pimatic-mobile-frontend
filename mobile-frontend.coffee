@@ -3,7 +3,7 @@ module.exports = (env) ->
   # ##Dependencies
   # * from node.js
   util = require 'util'
-  fs = require 'fs'; 
+  fs = require 'fs'
   path = require 'path'
 
   # * pimatic imports.
@@ -39,12 +39,6 @@ module.exports = (env) ->
         env.logger.error("Client error:", error.message)
         env.logger.debug JSON.stringify(error, null, "  ")
         res.send 200
-      )
-
-      app.get('/login', (req, res) =>
-        url = req.query.url
-        unless url then url = "/"
-        res.redirect 302, url
       )
 
       certFile =  path.resolve(
@@ -238,6 +232,28 @@ module.exports = (env) ->
           for f, i in files
             files[i] = minPath f
 
+
+      assets = [
+        '/',
+        '/socket.io/socket.io.js'
+        '/api/decl-api-client.js'
+      ]
+      for f in fs.readdirSync  __dirname + '/public/assets'
+        assets.push "/assets/#{f}"
+      for f in fs.readdirSync  __dirname + '/public'
+        if not (f in ['index.html', 'info.md']) and
+        fs.lstatSync("#{__dirname}/public/#{f}").isFile()
+          assets.push "/#{f}"
+
+      @framework.userManager.addAllowPublicAccessCallback( (req) =>
+        return req.url.match(/^\/socket\.io\/.*$/)? or (req.url in assets)
+      )
+
+      if @config.mode is "development"
+        @framework.userManager.addAllowPublicAccessCallback( (req) =>
+          return req.url.match(/^\/assets\/.*$/)?
+        )
+
       # When the config mode 
       manifest = (switch @config.mode 
         # is production
@@ -250,21 +266,11 @@ module.exports = (env) ->
           # function to create the app manifest
           createAppManifest = =>
             # Collect all files in "public"
-            assets = []
-            for f in fs.readdirSync  __dirname + '/public/assets'
-              assets.push "/assets/#{f}"
-            for f in fs.readdirSync  __dirname + '/public'
-              if not (f in ['index.html', 'info.md']) and
-              fs.lstatSync("#{__dirname}/public/#{f}").isFile()
-                assets.push "/#{f}"
+
 
             # render the app manifest
             return renderManifest(
-              cache: assets.concat [
-                '/',
-                '/socket.io/socket.io.js'
-                '/api/decl-api-client.js'
-              ]
+              cache: assets
               network: ['*']
               fallback: []
               lastModified: new Date()

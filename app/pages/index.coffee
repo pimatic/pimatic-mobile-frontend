@@ -275,6 +275,29 @@ $(document).on("pagecreate", '#index', tc (event) ->
       urlEncoded = encodeURIComponent(window.location.href)
       window.location.href = "/login?url=#{urlEncoded}"
 
+    showLoginDialog: ->
+      jQuery.mobile.changePage '#login-page', transition: 'flip'
+      console.log $("#loginForm").length
+      $("#loginForm").submit( (event) ->
+        console.log "submit"
+        $.ajax({
+          type: "POST"
+          url: '/login'
+          data: $("#loginForm").serialize()
+        }).done( ->
+          console.log('done')
+          setTimeout( ( ->
+            pimatic.socket.io.disconnect()
+            pimatic.socket.io.connect()
+          ), 1)
+        )
+        event.preventDefault()
+        return false
+      )
+
+    hideLoginDialog: ->
+      jQuery.mobile.changePage '#index', transition: 'flip'
+
   pimatic.pages.index = indexPage = new IndexViewModel()
 
   try

@@ -1,0 +1,13 @@
+div#login-page(data-role='page', data-dialog='true', data-close-btn="none")
+  div(data-theme=theme.headerSwatch, data-role='header')
+    h3=__("Login")
+  div.ui-content
+    form#loginForm
+      div(data-role='fieldcontain')
+        label(for='Username')=__('Username') + ':'
+        input#firstName(type='text', name='username', value='')
+      div(data-role='fieldcontain')
+        label(for='password')=__('Password') + ':'
+        input#password(type='password', name='password', value='', autocomplete='off')
+      div(data-role='fieldcontain')
+        button#submit(data-theme='b', type='submit')=__('Login')

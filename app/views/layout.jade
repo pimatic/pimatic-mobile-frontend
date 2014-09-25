@@ -38,6 +38,7 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     include pages/plugins
     include pages/updates
     include pages/devicepages
+    include login
     | !{additionalPages}
     #toasts(data-bind="foreach: toastMessages")
       ui-toast.ui-corner-all(data-role='toast', data-bind="toast: $data.message")
