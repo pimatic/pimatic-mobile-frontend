@@ -87,7 +87,7 @@
     return
 
   $(document).on "vclick", ".ui-loader", =>
-    pimatic.pages.index?.toLoginPage()
+    window.location.reload()
 
 
   # Disable jquerys scroll to top on transitions when we scroll inside the page divs
@@ -114,7 +114,7 @@ $(document).ready =>
       if window.applicationCache.status is window.applicationCache.UPDATEREADY 
         window.applicationCache.swapCache()
         if confirm('A new version of this site is available. Load it?')
-          window.location.reload();
+          window.location.reload()
     , false
 , false
 

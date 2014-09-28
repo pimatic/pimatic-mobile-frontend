@@ -15,7 +15,6 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.io.on 'open', () ->
     #console.log "m: open"
     pimatic.loading "socket", "hide"
-    pimatic.pages.index?.hideLoginDialog()
 
     if window.applicationCache?
       try
@@ -23,7 +22,14 @@ $(document).on( "pagebeforecreate", (event) ->
       catch e
         console.log e
 
+  pimatic.socket.io.on 'close', ->
+    if pimatic.socket.io.connected
+      pimatic.socket.io.reconnect()
+
+  connectionLostErrroCount = 0
   pimatic.socket.on('connect', ->
+    pimatic.pages.login?.hideLoginDialog()
+    connectionLostErrroCount = 0
     pimatic.socket.emit('call', {
       id: 'errorMessageCount'
       action: 'queryMessagesCount'
@@ -196,15 +202,15 @@ $(document).on( "pagebeforecreate", (event) ->
   })
 
   pimatic.socket.io.on('reconnect_attempt', -> 
-    #console.log "m: reconnect attemp"
+    console.log "m: reconnect attemp"
     pimatic.loading("socket", "show", {
-      text: __("connection lost, retrying")
+      text: __("Reconnectiong")
       blocking: no
     })
   )
 
   pimatic.socket.io.on('connect_error', (error) -> 
-    #console.log "m: connect_error", error
+    console.log "m: connect_error", error
     pimatic.loading("socket", "show", {
       text: __("could not connect (%s), retrying", error.message)
       blocking: no
@@ -212,28 +218,27 @@ $(document).on( "pagebeforecreate", (event) ->
   )
 
   pimatic.socket.io.on('connect_timeout', -> 
-    #console.log "m: connect_timeout"
+    console.log "m: connect_timeout"
     pimatic.loading("socket", "show", {
       text: __("connect timed out")
       blocking: no
     })
   )
 
-  # connectionLostErrroCount = 0
   pimatic.socket.on('error', (error) ->
-    # connectionLostErrroCount++
-    #console.log "m: error"
-    # pimatic.loading("socket", "show", {
-    #   text: __("connection lost: %s", error)
-    #   blocking: no
-    # })
+    connectionLostErrroCount++
+    console.log "m: ",error
     pimatic.socket.io.disconnect()
-    pimatic.pages.index?.showLoginDialog()
-    # setTimeout( (=>
-    #   pimatic.socket.io.connect()
-    # ), (if connectionLostErrroCount == 1 then 300 else 3000) )
-    
+    if error is "Authentication error" and pimatic.pages?.login?
+      pimatic.pages.login.showLoginDialog()
+    else
+      pimatic.loading("socket", "show", {
+        text: __("connection lost: %s", error)
+        blocking: no
+      })
+      setTimeout( (=>
+        pimatic.socket.io.connect()
+      ), (if connectionLostErrroCount == 1 then 300 else 3000) )
   )
-
 
 )

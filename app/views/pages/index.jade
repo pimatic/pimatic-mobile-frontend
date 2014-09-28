@@ -166,4 +166,4 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
           input(type='checkbox', name='rememberme', id='rememberme' data-mini="true", 
             data-bind="jqmchecked: rememberme")
       li(data-theme=theme.menuSwatch)
-        a(href='/logout',data-bind="text: $root.logoutText")=__('Logout')
+        a(href='/logout',data-bind="text: $root.logoutText, click: onLogoutClicked")=__('Logout')

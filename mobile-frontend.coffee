@@ -191,6 +191,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/edit-group.coffee"
               "pimatic-mobile-frontend/app/pages/edit-device.coffee"
               "pimatic-mobile-frontend/app/pages/index.coffee"
+              "pimatic-mobile-frontend/app/pages/login.coffee"
               "pimatic-mobile-frontend/app/pages/rules.coffee"
               "pimatic-mobile-frontend/app/pages/groups.coffee"
               "pimatic-mobile-frontend/app/pages/devicepages.coffee"
