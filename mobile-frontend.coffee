@@ -236,6 +236,7 @@ module.exports = (env) ->
 
       assets = [
         '/',
+        '/application.manifest'
         '/socket.io/socket.io.js'
         '/api/decl-api-client.js'
       ]
