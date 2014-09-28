@@ -1,6 +1,6 @@
 script#switch-template(type='text/template')
   li.sortable.switch-device.no-header
-    label.device-label(data-bind="text: name, attr: { for: switchId }")
+    label.device-label(data-bind="text: name")
     | 
     select.switch(
       data-bind="attr: { id: switchId }, value: switchState")
@@ -49,12 +49,9 @@ script#variable-item-template(type='text/template')
     label(data-bind="text: name")
     span.var-value(data-bind="text: value")
 script#attribute-template(type='text/template')
-  span.attribute
+  span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
     span.val(data-bind="text: $data.valueText")
     span.unit(data-bind="text: $data.unitText")
-    <!-- ko if: $data.showLastUpdate()  -->  
-    span.lastUpdate(data-bind="html: $data.lastUpdateTimeText(), css: {long: $data.lastUpdateTimeText().length > 12}")
-    <!-- /ko -->
     <!-- ko if: $data.showSparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->

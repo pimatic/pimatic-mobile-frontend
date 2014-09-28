@@ -7,8 +7,9 @@ tc = pimatic.tryCatch
 
 $(document).on "pagecreate", '#index', (event) ->
 
-  $('#index').on "click", '#item-lists li.item .attributes.contains-attr-type-number', ->
-    device = ko.dataFor($(this).parent('.item')[0])?.device
+  $(document).on "click", '#to-graph-page', ->
+    deviceId = $('#to-graph-page').attr('data-deviceId')
+    device = pimatic.getDeviceById(deviceId)
     jQuery.mobile.pageParams = {
       device: device
     }

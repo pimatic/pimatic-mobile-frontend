@@ -589,7 +589,7 @@ table#events-table {
   text-align: right;
 }
 
-@media ( max-width: 40em ) {
+@media (max-width: 40em) {
 
   #events-table tbody td{
     border: none;
@@ -1059,18 +1059,8 @@ li.item .attributes .sparkline canvas{
   }
 }
 
-li.item .attributes .lastUpdate {
-  font-size: 0.8em;
-  vertical-align: middle;
-  display: inline-block;
-  text-align: right;
-  height: 19px;
+li.item .attributes .outOfDate {
   color: #888888;
-}
-
-li.item .attributes .lastUpdate.long {
-  font-size: 0.6em;
-  margin-top: -9px;
 }
 
 
@@ -1255,4 +1245,63 @@ border-bottom-left-radius: inherit;
 
 .attr-presence.value-present {
   background: rgb(0, 125, 205);
+}
+
+
+#tooltip
+{
+  font-weight: bold;
+  font-size: 0.8em;
+  text-align: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  z-index: 1010;
+  padding: 8px;
+  text-shadow: none;
+}
+
+#tooltip a {
+  color: white;
+  border: 1px solid black;
+  border-radius: 5px;
+  display: inline-block;
+  padding: 2px 4px;
+  margin: 3px 6px;
+  background: black;
+}
+ 
+#tooltip:after /* triangle decoration */
+{
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid rgba(0, 0, 0, 0.8);
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  margin-left: -5px;
+}
+
+#tooltip.top:after
+{
+  border-top-color: transparent;
+  border-bottom: 5px solid rgba(0, 0, 0, 0.8);
+  top: -10px;
+  bottom: auto;
+}
+
+#tooltip.left:after
+{
+  left: 5px;
+  margin: 0;
+}
+
+#tooltip.right:after
+{
+  right: 5px;
+  left: auto;
+  margin: 0;
 }

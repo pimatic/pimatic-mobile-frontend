@@ -24,7 +24,7 @@ class DeviceAttribute
     history: 'observe'
     lastUpdate: 'observe'
   }
-  constructor: (data) ->
+  constructor: (data, @device) ->
     #console.log "creating device attribute", data
     # Allways create an observable for value:
     unless data.value? then data.value = null
@@ -49,14 +49,24 @@ class DeviceAttribute
 
   showSparkline: -> @type is "number" and @history().length > 1
 
-  showLastUpdate: -> 
+  tooltipHtml: => 
+    @label + ': ' +
+    @formatValue(@value()) + 
+    ' ' + @lastUpdateTimeText() + 
+    (if @type is "number" then """
+      <a href="#" id="to-graph-page"
+        data-attributeName="#{@name}"
+        data-deviceId="#{@device.id}">Graph</a>
+    """ else '')
+
+  outOfDate: -> 
     unless @type is "number" then return no
     now = (new Date()).getTime()
     lastUpdate = @lastUpdate()
     return (now-lastUpdate) > (1000*60*30) # older than 30min
 
   lastUpdateTimeText: ->
-    return ' @ ' + @formatTime(@lastUpdate()).replace(' ', '<br>')
+    return ' @ ' + @formatTime(@lastUpdate())
 
   tooltipFormatter: (sparkline, options, fields) => 
     value = @formatValue(fields.y)
@@ -108,11 +118,12 @@ class Device
       $key: 'name'
       $itemOptions:
         $handler: 'callback'
-        $create: (data) -> new DeviceAttribute(data)
+        $create: (data) -> new DeviceAttribute(data, Device.mapping.device)
         $update: (data, target) -> target.update(data); target
 
   }
   constructor: (data) ->
+    Device.mapping.device = this
     ko.mapper.fromJS(data, @constructor.mapping, this)
     #@config = data.config
     @configObserve = ko.observable(data.config)
@@ -139,6 +150,7 @@ class Device
     )
 
   update: (data) -> 
+    Device.mapping.device = this
     ko.mapper.fromJS(data, @constructor.mapping, this)
     #@config = data.config if data.config?
     @configObserve(data.config)

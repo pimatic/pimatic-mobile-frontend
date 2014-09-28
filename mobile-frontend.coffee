@@ -232,11 +232,10 @@ module.exports = (env) ->
         for sec, files of napAsserts.assets.js
           for f, i in files
             files[i] = minPath f
-
-      # then pack the static assets in "public/assets/"
-      env.logger.info "packing static assets"
-      nap.package()
-      env.logger.info "packing static assets finished"
+        # then pack the static assets in "public/assets/"
+        env.logger.info "packing static assets"
+        nap.package()
+        env.logger.info "packing static assets finished"
 
       # Collect all files in "public" and other static content
       assets = [
