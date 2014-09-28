@@ -9,5 +9,7 @@ div#login-page(data-role='page', data-dialog='true', data-close-btn="none")
       div(data-role='fieldcontain')
         label(for='password')=__('Password') + ':'
         input#password(type='password', name='password', value='', autocomplete='off')
+      input#rememberMe(type='checkbox', name='rememberMe')
+      label(for='rememberMe')=__('Keep me logged in')
       div(data-role='fieldcontain')
         button#submit(data-theme='b', type='submit')=__('Login')

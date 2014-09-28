@@ -28,5 +28,5 @@ div#edit-rule(data-role='page')
       div(data-bind="visible: action() == 'update'")
         a#edit-rule-remove.delete-link.ui-btn.ui-icon-delete.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
           data-bind="click: onRemove", data-role="button", href='#rules-page')=__('Delete This Rule')
-        a#edit-rule-copy.ui-btn.ui-icon-delete.ui-btn-icon-left(
+        a#edit-rule-copy.ui-btn.ui-icon-plus.ui-btn-icon-left(
           data-bind="click: onCopy", data-role="button", href='#rules-page')=__('Copy as New')

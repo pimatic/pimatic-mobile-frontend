@@ -398,17 +398,7 @@ class Pimatic
       pimatic.storage.set('pimatic.scope', data)
     ).extend(rateLimit: {timeout: 500, method: "notifyWhenChangesStop"})
 
-    sendToServer = yes
     @rememberme.subscribe( (shouldRememberMe) =>
-      if sendToServer
-        $.get("remember", rememberMe: shouldRememberMe)
-          .done(ajaxShowToast)
-          .fail( => 
-            sendToServer = no
-            @rememberme(not shouldRememberMe)
-          ).fail(ajaxAlertFail)
-      else 
-        sendToServer = yes
       # swap storage
       allData = pimatic.storage.get('pimatic')
       pimatic.storage.removeAll()
@@ -423,7 +413,6 @@ class Pimatic
     @getUngroupedDevices = ko.computed( =>
       d for d in @devices() when not d.group()?
     )
-
 
   loadDataFromStorage: ->
     @_dataLoaded(yes)

@@ -21,7 +21,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
     constructor: () ->
       @groups = pimatic.groups
-      @rememberme = pimatic.rememberme
       @hasPermission = pimatic.hasPermission
 
       @updateFromJs(
@@ -209,8 +208,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
       }).fail( (jqXHR, textStatus, errorThrown) =>
         if textStatus is 'Unauthorized' or errorThrown is 'Unauthorized'
           setTimeout( =>
-            unless pimatic.rememberme()
-              pimatic.storage.removeAll()
+            pimatic.storage.removeAll()
             alert(jqXHR.responseText)
             window.location.reload()
           , 100)

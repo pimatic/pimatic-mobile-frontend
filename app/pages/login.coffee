@@ -21,21 +21,30 @@ $(document).on("pagebeforeshow", '#login-page', (event) ->
   return true
 )
 
-$(document).on("submit", '#login-page #loginForm', tc (event) ->
+$(document).on("submit", '#login-page #loginForm', tc (event) -> 
+  rememberMe = $("#loginForm #rememberMe").val()
+  pimatic.loading("socket", "show", {
+    text: __("Logging in")
+    blocking: yes
+  })
   $.ajax({
     type: "POST"
     url: '/login'
     data: $("#loginForm").serialize()
-  }).done( ->
+    global: false
+  }).done( (result)->
     pimatic.loading("socket", "show", {
       text: __("Connecting")
-      blocking: no
+      blocking: yes
     })
     setTimeout( ( ->
+      pimatic.rememberme(result.rememberMe)
       pimatic.socket.io.disconnect()
       pimatic.socket.io.reconnect()
     ), 1)
-  ).fail(ajaxAlertFail)
+  )
+  .fail( => pimatic.loading("socket", "hide"))
+  .fail(ajaxAlertFail)
   event.preventDefault()
   return false
 )

@@ -657,34 +657,6 @@ table#events-table {
   font-weight: bold;
 }
 
-li.rememberme, li.rememberme .ui-checkbox{
-  padding: 0 !important;
-  margin: 0 !important;
-
-}
-
-
-li.rememberme .ui-checkbox{
-  padding-left: 8px !important;
-  border-left-width: 0 !important;
-  border-right-width: 0 !important;
-  -webkit-border-radius: 0 !important;
-  -moz-border-radius: 0 !important;
-  border-radius: 0 !important;
-}
-
-
-li.rememberme label {
-  font-size: 16px !important;
-  background-image: none !important;
-  background-color: transparent !important;
-  border-width: 0 !important;
-}
-
-#rememberme {
-  opacity: 0;
-}
-
 /* device info */
 .info-label {
   font-weight: bold;
