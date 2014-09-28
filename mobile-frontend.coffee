@@ -233,7 +233,12 @@ module.exports = (env) ->
           for f, i in files
             files[i] = minPath f
 
+      # then pack the static assets in "public/assets/"
+      env.logger.info "packing static assets"
+      nap.package()
+      env.logger.info "packing static assets finished"
 
+      # Collect all files in "public" and other static content
       assets = [
         '/',
         '/application.manifest'
@@ -260,16 +265,9 @@ module.exports = (env) ->
       manifest = (switch @config.mode 
         # is production
         when "production"
-          # then pack the static assets in "public/assets/"
-          env.logger.info "packing static assets"
-          nap.package()
-          env.logger.info "packing static assets finished"
           renderManifest = require "render-appcache-manifest"
           # function to create the app manifest
           createAppManifest = =>
-            # Collect all files in "public"
-
-
             # render the app manifest
             return renderManifest(
               cache: assets
