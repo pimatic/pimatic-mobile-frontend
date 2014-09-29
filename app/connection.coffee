@@ -204,7 +204,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.io.on('reconnect_attempt', -> 
     console.log "m: reconnect attemp"
     pimatic.loading("socket", "show", {
-      text: __("Reconnectiong")
+      text: __("Reconnecting")
       blocking: no
     })
   )
@@ -212,7 +212,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.io.on('connect_error', (error) -> 
     console.log "m: connect_error", error
     pimatic.loading("socket", "show", {
-      text: __("could not connect (%s), retrying", error.message)
+      text: __("Could not connect (%s), retrying", error.message)
       blocking: no
     })
   )
@@ -220,7 +220,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.socket.io.on('connect_timeout', -> 
     console.log "m: connect_timeout"
     pimatic.loading("socket", "show", {
-      text: __("connect timed out")
+      text: __("Connect timed out")
       blocking: no
     })
   )
@@ -233,7 +233,7 @@ $(document).on( "pagebeforecreate", (event) ->
       pimatic.pages.login.showLoginDialog()
     else
       pimatic.loading("socket", "show", {
-        text: __("connection lost: %s", error)
+        text: __("Connection lost: %s", error)
         blocking: no
       })
       setTimeout( (=>

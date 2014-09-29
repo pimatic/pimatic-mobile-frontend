@@ -209,7 +209,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
         if textStatus is 'Unauthorized' or errorThrown is 'Unauthorized'
           setTimeout( =>
             pimatic.storage.removeAll()
-            alert(jqXHR.responseText)
+            pimatic.showToast(jqXHR.responseText)
             window.location.reload()
           , 100)
         else
