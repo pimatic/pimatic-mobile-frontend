@@ -1295,13 +1295,13 @@ border-bottom-left-radius: inherit;
 
 #tooltip.left:after
 {
-  left: 5px;
+  left: 15px;
   margin: 0;
 }
 
 #tooltip.right:after
 {
-  right: 5px;
+  right: 15px;
   left: auto;
   margin: 0;
 }

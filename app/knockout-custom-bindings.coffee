@@ -153,7 +153,6 @@
   ko.bindingHandlers.tooltip = {
 
     init_tooltip: (target, tooltip) ->
-      target.data('tooltip', yes)
       if $(window).width() < tooltip.outerWidth() * 1.5
         tooltip.css "max-width", $(window).width() / 2
       else
@@ -187,7 +186,6 @@
       return tooltip
 
     remove_tooltip: (target, tooltip) ->
-      target.data('tooltip', null)
       tooltip.animate(
         top: "-=10"
         opacity: 0
@@ -205,11 +203,13 @@
         return false  if not tip or tip is ""
         tooltip = $("#tooltip")
         if tooltip.length is 0
-          tooltip = $("<div id=\"tooltip\"></div>")
+          tooltip = $("<div id=\"tooltip\" class=\"ui-corner-all\"></div>")
           tooltip.css("opacity", 0).html(tip).appendTo('body')
+        ko.bindingHandlers.tooltip.subscribtion?.dispose()
         clearInterval(ko.bindingHandlers.tooltip.interval)
+        clearTimeout(ko.bindingHandlers.tooltip.timeout)
         ko.bindingHandlers.tooltip.init_tooltip(target, tooltip)
-        subscribtion = ko.computed( =>
+        ko.bindingHandlers.tooltip.subscribtion = ko.computed( =>
           tip = valueAccessor()()
           tooltip.html(tip)
           ko.bindingHandlers.tooltip.init_tooltip(target, tooltip)
@@ -219,21 +219,27 @@
         # $(window).resize(init_tooltip)
         removeTooltip = ( => 
           clearInterval(ko.bindingHandlers.tooltip.interval)
-          subscribtion.dispose()
+          clearTimeout(ko.bindingHandlers.tooltip.timeout)
+          ko.bindingHandlers.tooltip.subscribtion.dispose()
           ko.bindingHandlers.tooltip.remove_tooltip(target, tooltip)
           container.off("scroll", removeTooltip)
           tooltip.off("vclick", removeTooltip)
-          target.off("mouseleave", mouseleave)
+          target.off("mouseleave", mouseleave) if mouseleave?
           return true
         )
-        target.one("mouseleave", mouseleave = (e) =>
-          clearInterval(ko.bindingHandlers.tooltip.interval)
-          ko.bindingHandlers.tooltip.interval = setInterval( =>
-            if $("#tooltip:hover").length is 0
-              removeTooltip()
-          , 1000)
-        )
-        tooltip.one("vclick", removeTooltip)
+        isTouchSupported = 'ontouchstart' in window
+        unless isTouchSupported
+          target.one("mouseleave", mouseleave = (e)  ->
+            clearInterval(ko.bindingHandlers.tooltip.interval)
+            ko.bindingHandlers.tooltip.interval = setInterval(  ->
+              if $("#tooltip:hover").length is 0
+                removeTooltip()
+            , 1000)
+          )
+        ko.bindingHandlers.tooltip.timeout = setTimeout( ->
+          tooltip.one("vclick", removeTooltip)
+        , 300)
+        
         container.one("scroll", removeTooltip)
         return
       )

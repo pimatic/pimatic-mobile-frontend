@@ -41,6 +41,12 @@ module.exports = (env) ->
         res.send 200
       )
 
+      app.get('/refresh', (req, res) =>
+        url = req.query.url
+        unless url then url = "/"
+        res.redirect 302, url
+      )
+
       certFile =  path.resolve(
         @framework.maindir, 
         '../..', 
