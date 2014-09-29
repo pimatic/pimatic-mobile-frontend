@@ -1247,6 +1247,10 @@ border-bottom-left-radius: inherit;
   background: rgb(0, 125, 205);
 }
 
+.ui-field-contain {
+  border-bottom: none;
+  padding-bottom: 3px;
+}
 
 #tooltip
 {
