@@ -548,6 +548,7 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   margin-left: 0.5em;
   display: inline-block;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .items .attribute .unit {
