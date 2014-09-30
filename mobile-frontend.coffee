@@ -246,7 +246,6 @@ module.exports = (env) ->
       # Collect all files in "public" and other static content
       assets = [
         '/',
-        '/application.manifest'
         '/socket.io/socket.io.js'
         '/api/decl-api-client.js'
       ]
@@ -258,7 +257,11 @@ module.exports = (env) ->
           assets.push "/#{f}"
 
       @framework.userManager.addAllowPublicAccessCallback( (req) =>
-        return req.url.match(/^\/socket\.io\/.*$/)? or (req.url in assets)
+        return (
+          req.url.match(/^\/socket\.io\/.*$/)? or 
+          (req.url in assets) or 
+          (req.url is '/application.manifest')
+        )
       )
 
       if @config.mode is "development"
