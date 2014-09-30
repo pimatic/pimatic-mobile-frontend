@@ -236,6 +236,7 @@
                 removeTooltip()
             , 1000)
           )
+        clearTimeout(ko.bindingHandlers.tooltip.timeout)
         ko.bindingHandlers.tooltip.timeout = setTimeout( ->
           tooltip.one("vclick", removeTooltip)
         , 300)
