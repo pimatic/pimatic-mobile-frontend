@@ -5,11 +5,18 @@ $(document).ready( tc (event) ->
 
   class LogiViewModel
     showLoginDialog: ->
+      @redirectPage = $.mobile.activePage.attr("id")
+      if @redirectPage is 'login-page'
+        @redirectPage = 'index'
       pimatic.socket.io.disconnect()
       jQuery.mobile.changePage '#login-page', transition: 'flip'
     hideLoginDialog: ->
-      jQuery.mobile.changePage '#index', transition: 'flip'
-
+      activePage = $.mobile.activePage.attr("id")
+      if activePage is 'login-page'
+        jQuery.mobile.changePage(
+          '#' + (@redirectPage or 'index'), 
+          transition: 'flip'
+        )
   pimatic.pages.login = loginPage = new LogiViewModel()
 
 )
