@@ -46,8 +46,8 @@ $(document).on("submit", '#login-page #loginForm', tc (event) ->
     })
     setTimeout( ( ->
       pimatic.rememberme(result.rememberMe)
-      pimatic.socket.io.disconnect()
-      pimatic.socket.io.reconnect()
+      pimatic.socket.io.reconnection(yes)
+      pimatic.socket.io.connect()
     ), 1)
   )
   .fail( => pimatic.loading("socket", "hide"))

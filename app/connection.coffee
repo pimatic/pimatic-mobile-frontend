@@ -22,9 +22,6 @@ $(document).on( "pagebeforecreate", (event) ->
       catch e
         console.log e
 
-  pimatic.socket.io.on 'close', ->
-    if pimatic.socket.io.connected
-      pimatic.socket.io.reconnect()
 
   connectionLostErrroCount = 0
   pimatic.socket.on('connect', ->
@@ -175,7 +172,7 @@ $(document).on( "pagebeforecreate", (event) ->
     pimatic.updateProcessStatus(statusEvent.status)
   )
   pimatic.socket.on("updateProcessMessage", tc (msgEvent) -> 
-    console.log msgEvent
+    #console.log msgEvent
     pimatic.updateProcessMessages.push(msgEvent.message)
   )
   
@@ -202,7 +199,7 @@ $(document).on( "pagebeforecreate", (event) ->
   })
 
   pimatic.socket.io.on('reconnect_attempt', -> 
-    console.log "m: reconnect attemp"
+    #console.log "m: reconnect attemp"
     pimatic.loading("socket", "show", {
       text: __("Reconnecting")
       blocking: no
@@ -210,7 +207,7 @@ $(document).on( "pagebeforecreate", (event) ->
   )
 
   pimatic.socket.io.on('connect_error', (error) -> 
-    console.log "m: connect_error", error
+    #console.log "m: connect_error", error
     pimatic.loading("socket", "show", {
       text: __("Could not connect (%s), retrying", error.message)
       blocking: no
@@ -218,27 +215,77 @@ $(document).on( "pagebeforecreate", (event) ->
   )
 
   pimatic.socket.io.on('connect_timeout', -> 
-    console.log "m: connect_timeout"
+    #console.log "m: connect_timeout"
     pimatic.loading("socket", "show", {
       text: __("Connect timed out")
       blocking: no
     })
   )
 
+  pimatic.socket.io.on 'close', ->
+    if pimatic.socket.io.reconnection() is yes
+      #console.log "force reconnect"
+      pimatic.socket.io.reconnect()
+
+
   pimatic.socket.on('error', (error) ->
     connectionLostErrroCount++
-    console.log "m: ",error
+    #console.log "m: ",error
     pimatic.socket.io.disconnect()
     if error is "Authentication error" and pimatic.pages?.login?
+      pimatic.socket.io.reconnection(no)
       pimatic.pages.login.showLoginDialog()
     else
       pimatic.loading("socket", "show", {
         text: __("Connection lost: %s", error)
         blocking: no
       })
-      setTimeout( (=>
-        pimatic.socket.io.connect()
-      ), (if connectionLostErrroCount == 1 then 300 else 3000) )
   )
 
+
+  (->
+    hidden = null
+    visibilityChange = null
+    socketDisconnectTimeout = null
+    # Set the name of the hidden property and the change event for visibility
+    # Chrome, Opera 12.10 and Firefox 18 and later support 
+
+    handleVisibilityChange = ->
+      if document[hidden]
+        #console.log "hidden"
+        clearTimeout(socketDisconnectTimeout)
+        socketDisconnectTimeout = setTimeout( ->
+          pimatic.socket.io.reconnection(no)
+          pimatic.socket.io.disconnect()
+          #console.log "disconnected"
+        , 10*1000)
+      else
+        clearTimeout(socketDisconnectTimeout)
+        pimatic.socket.io.reconnection(yes)
+        pimatic.socket.io.connect()
+        #console.log "reconnect"
+      return
+
+    if document.hidden?
+      hidden = "hidden"
+      visibilityChange = "visibilitychange"
+    else if document.mozHidden?
+      hidden = "mozHidden"
+      visibilityChange = "mozvisibilitychange"
+    else if document.msHidden?
+      hidden = "msHidden"
+      visibilityChange = "msvisibilitychange"
+    else if document.webkitHidden?
+      hidden = "webkitHidden"
+      visibilityChange = "webkitvisibilitychange"
+
+    # Warn if the browser doesn't support addEventListener or the Page Visibility API
+    if document.addEventListener? and document[hidden]?
+      # Handle page visibility change   
+      document.addEventListener visibilityChange, handleVisibilityChange, false
+
+  )()
+
+
+  
 )
