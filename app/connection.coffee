@@ -252,18 +252,23 @@ $(document).on( "pagebeforecreate", (event) ->
 
     handleVisibilityChange = ->
       if document[hidden]
-        #console.log "hidden"
+        # console.log "hidden"
         clearTimeout(socketDisconnectTimeout)
         socketDisconnectTimeout = setTimeout( ->
           pimatic.socket.io.reconnection(no)
           pimatic.socket.io.disconnect()
-          #console.log "disconnected"
+          # console.log "disconnected"
         , 10*1000)
       else
         clearTimeout(socketDisconnectTimeout)
         pimatic.socket.io.reconnection(yes)
-        pimatic.socket.io.connect()
-        #console.log "reconnect"
+        unless pimatic.socket.connected
+          pimatic.loading("socket", "show", {
+            text: __("Reconnecting")
+            blocking: no
+          })
+          pimatic.socket.io.connect()
+          #console.log "reconnect"
       return
 
     if document.hidden?
