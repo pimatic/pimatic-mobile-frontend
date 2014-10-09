@@ -238,6 +238,15 @@ module.exports = (env) ->
         for sec, files of napAsserts.assets.js
           for f, i in files
             files[i] = minPath f
+
+        # make absolute pathes to relative ones on windows
+        for assetType of napAsserts.assets
+          for sec, files of napAsserts.assets[assetType]
+            for f, i in files
+              # continue if already relative
+              unless S(f).startsWith(parentDir) then continue
+              files[i] = path.relative(parentDir, f)
+
         # then pack the static assets in "public/assets/"
         env.logger.info "packing static assets"
         nap.package()
