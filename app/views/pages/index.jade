@@ -1,6 +1,6 @@
 script#switch-template(type='text/template')
   li.sortable.switch-device.no-header
-    label.device-label(data-bind="text: name")
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     | 
     select.switch(
       data-bind="attr: { id: switchId }, value: switchState")
@@ -8,7 +8,7 @@ script#switch-template(type='text/template')
       option(value="on")=__('On')
 script#shutter-template(type='text/template')
   li.sortable.shutter-device.no-header
-    label.device-label(data-bind="text: name")
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     | 
     div.shutter-buttons.ui-mini.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced="true")
       div.ui-controlgroup-controls
@@ -17,13 +17,13 @@ script#shutter-template(type='text/template')
 script#dimmer-template(type='text/template')
   li.sortable.dimmer-device.no-header
     div.item-inner
-      label.device-label(data-bind="text: name")
+      label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
       | 
       input.dimmer(min="0", max="100", step="5", data-highlight="true",
         data-bind="attr: { id: sliderId }, value: sliderValue")
 script#device-template(type='text/template')     
   li.sortable.device.no-header
-    label.device-label(data-bind="text: name")
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     | 
     span.error(data-bind="text: ($data.error() ? $data.error() : '') ")
     | 
@@ -33,12 +33,12 @@ script#header-template(type='text/template')
     label(data-bind="text: title")
 script#buttons-template(type='text/template')
   li.sortable.button.no-header
-    label.device-label(data-bind="text: name")
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
 script#musicplayer-template(type='text/template')
   li.sortable.musicplayer.no-header
-    label.device-label(data-bind="text: name")
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.controls()
       span.songTitle(data-bind="text: $data.currentTitle")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-step-backward(data-bind="click: function(){$data.sendPlayerAction('previous');}")=__('Previous')
@@ -46,7 +46,7 @@ script#musicplayer-template(type='text/template')
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-step-forward(data-bind="click: function(){$data.sendPlayerAction('next');}")=__('Next')
 script#variable-item-template(type='text/template')
   li.sortable.variable.no-header
-    label(data-bind="text: name")
+    label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     span.var-value(data-bind="text: value")
 script#attribute-template(type='text/template')
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")

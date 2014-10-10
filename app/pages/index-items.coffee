@@ -63,6 +63,14 @@ $(document).on( "pagebeforecreate", (event) ->
       )
     toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
 
+    labelTooltipHtml: => 
+      html = """
+        <div>ID: #{@deviceId}</div>
+        <div>Class: #{@device.config.class}</div>
+      """
+      if @device.config.xLink
+        html += """<div><a href="#{@device.config.xLink}" target="_blank">Link</a></div>"""
+      return html
 
   class SwitchItem extends DeviceItem
 
