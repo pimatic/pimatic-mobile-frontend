@@ -76,24 +76,47 @@ $(document).on( "pagebeforecreate", (event) ->
       )
     onSwitchChange: ->
       stateToSet = (@switchState() is 'on')
-      if stateToSet is @getAttribute('state').value()
+      value = !!@getAttribute('state').value()
+      if stateToSet is value
         return
       @sliderEle.flipswitch('disable')
       deviceAction = (if @switchState() is 'on' then 'turnOn' else 'turnOff')
-      pimatic.loading "switch-on-#{@switchId}", "show", text: __("switching #{@switchState()}")
-      @device.rest[deviceAction]({}, global: no)
-        .done( ajaxShowToast)
-        .fail( => 
-          @switchState(if @switchState() is 'on' then 'off' else 'on')
-          pimatic.try( => @sliderEle.flipswitch('refresh'))
-        ).always( => 
-          pimatic.loading "switch-on-#{@switchId}", "hide"
-          # element could be not existing anymore
-          pimatic.try( => @sliderEle.flipswitch('enable'))
-        ).fail(ajaxAlertFail)
+
+      doIt = (
+        if @device.config.xConfirm then confirm __("""
+          Do you really want to turn %s #{@switchState()}? 
+        """, @device.name())
+        else yes
+      ) 
+
+      restoreState = (if @switchState() is 'on' then 'off' else 'on')
+
+      if doIt
+        pimatic.loading "switch-on-#{@switchId}", "show", text: __("switching #{@switchState()}")
+        @device.rest[deviceAction]({}, global: no)
+          .done(ajaxShowToast)
+          .fail( => 
+            @switchState(restoreState)
+            pimatic.try( => @sliderEle.flipswitch('refresh'))
+          ).always( => 
+            pimatic.loading "switch-on-#{@switchId}", "hide"
+            # element could be not existing anymore
+            pimatic.try( => @sliderEle.flipswitch('enable'))
+          ).fail(ajaxAlertFail)
+      else
+        @switchState(restoreState)
+        pimatic.try( => @sliderEle.flipswitch('enable'))
+        pimatic.try( => @sliderEle.flipswitch('refresh'))
+
     afterRender: (elements) ->
       super(elements)
       @sliderEle = $(elements).find('select')
+      state = @getAttribute('state')
+      if state.labels?
+        capitaliseFirstLetter = (s) -> s.charAt(0).toUpperCase() + s.slice(1)
+        @sliderEle.find('option[value=on]').text(capitaliseFirstLetter state.labels[0])
+        @sliderEle.find('option[value=off]').text(capitaliseFirstLetter state.labels[1])
+
       @sliderEle.flipswitch()
       $(elements).find('.ui-flipswitch').addClass('no-carousel-slide')
 
