@@ -176,24 +176,25 @@
         pos_top = target.offset().top + target.outerHeight() - 10
         tooltip.addClass "top"
         
-      tooltip.css(
+      tooltip
+      .removeClass('animated-tooltip')
+      .css(
         left: pos_left
         top: pos_top
+        opacity: 0
+      )
+      tooltip[0].offsetWidth = tooltip[0].offsetWidth #retrigger the transition
+      tooltip.addClass('animated-tooltip').css(
+        top: pos_top + 20
       ).animate(
-        top: "+=10"
         opacity: 1
-      , 50)
+      , 100)
       return tooltip
 
     remove_tooltip: (target, tooltip) ->
       tooltip.animate(
-        top: "-=10"
         opacity: 0
-      , 50, ->
-        $(this).remove()
-        return
-      )
-      return
+      , 100, ( => tooltip.removeClass('animated-tooltip').remove() ) )
 
     init: (element, valueAccessor) ->
       target = $(element)
