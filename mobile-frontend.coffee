@@ -244,7 +244,7 @@ module.exports = (env) ->
           for sec, files of napAsserts.assets[assetType]
             for f, i in files
               # continue if already relative
-              unless S(f).startsWith(parentDir) then continue
+              unless S(f).startsWith(parentDir.replace(/\\/g,'/')) then continue
               files[i] = path.relative(parentDir, f)
 
         # then pack the static assets in "public/assets/"
