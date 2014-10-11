@@ -158,7 +158,7 @@ module.exports = (env) ->
       )
 
       # Configure static assets with nap
-      napAsserts = nap(
+      napAssets = nap(
         appDir: parentDir
         publicDir: "pimatic-mobile-frontend/public"
         mode: @config.mode
@@ -235,13 +235,13 @@ module.exports = (env) ->
         return p
 
       if @config.mode is "production"
-        for sec, files of napAsserts.assets.js
+        for sec, files of napAssets.assets.js
           for f, i in files
             files[i] = minPath f
 
         # make absolute pathes to relative ones on windows
-        for assetType of napAsserts.assets
-          for sec, files of napAsserts.assets[assetType]
+        for assetType of napAssets.assets
+          for sec, files of napAssets.assets[assetType]
             for f, i in files
               # continue if already relative
               unless S(f).startsWith(parentDir.replace(/\\/g,'/')) then continue
