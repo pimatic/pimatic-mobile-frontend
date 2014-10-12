@@ -182,9 +182,11 @@ html body .ui-panel-dismiss {
   border: none;
   border-bottom: 2px solid #005994;
   border-top: 1px solid #ccc;
-  margin-bottom: -2px;
-  z-index: 10;
   overflow: visible;
+}
+
+.ui-mobile .ui-li-divider + li {
+  border-top-width: 0px;
 }
 
 .ui-mobile .ui-page-theme-a #item-lists .ui-li-divider {
@@ -200,21 +202,21 @@ html body .ui-panel-dismiss {
   text-shadow: none;
 }
 
-.ui-mobile .ui-page-theme-a .ui-li-divider label{
-  margin-bottom: 0;
+.ui-mobile .ui-page-theme-a #item-lists .ui-first-child{
+  padding-top: 8px;
 }
 
 /* make the jquery mobile loader to block all elements */
 .ui-loader-background {
-    width:100%;
-    height:100%;
-    left:0;
-    top:0;
-    margin: 0;
-    background: rgba(0, 0, 0, 0.3);
-    display:none;
-    position: fixed;
-    z-index:1011;
+  width:100%;
+  height:100%;
+  left:0;
+  top:0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display:none;
+  position: fixed;
+  z-index:1011;
 }
 
 .ui-loading-blocking .ui-loader-background {
