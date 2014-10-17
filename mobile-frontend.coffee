@@ -177,7 +177,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/knockout-3.1.0.js"
               "pimatic-mobile-frontend/app/js/knockout.mapper.js"
               "pimatic-mobile-frontend/app/js/overthrow.js"
-              "pimatic-mobile-frontend/app/js/jsoneditor.js"
+              "pimatic-mobile-frontend/app/js/jsoneditor-schema.js"
               "pimatic-mobile-frontend/app/js/owl.carousel.js"
               "pimatic-mobile-frontend/app/js/highstock.js"
               "pimatic-mobile-frontend/app/js/touch-tooltip-fix.js"
@@ -206,11 +206,16 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/log-messages.coffee"
               "pimatic-mobile-frontend/app/pages/events.coffee"
               "pimatic-mobile-frontend/app/pages/plugins.coffee"
+              "pimatic-mobile-frontend/app/pages/config.coffee"
               "pimatic-mobile-frontend/app/pages/updates.coffee"
               "pimatic-mobile-frontend/app/pages/edit-devicepage.coffee"
               "pimatic-mobile-frontend/app/pages/graph.coffee"
             ] .concat @additionalAssetFiles['js']
-            
+            editor: [
+              "pimatic-mobile-frontend/app/js/jsoneditor.js"
+              "pimatic-mobile-frontend/app/js/ace.js"
+              "pimatic-mobile-frontend/app/js/jsonlint.js"
+            ]
           css:
             theme: [
               "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
@@ -224,6 +229,9 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/css/style.css"
               "pimatic-mobile-frontend/app/css/jqm-icon-pack-fa.css"
             ] .concat @additionalAssetFiles['css']
+            editor: [
+               "pimatic-mobile-frontend/app/css/jsoneditor.css"
+            ]
       )
 
       # Returns p.min.file versions of p.file when it exist
@@ -257,6 +265,7 @@ module.exports = (env) ->
         '/',
         '/socket.io/socket.io.js'
         '/api/decl-api-client.js'
+        "/worker-json.js"
       ]
       for f in fs.readdirSync  __dirname + '/public/assets'
         assets.push "/assets/#{f}"

@@ -25,4 +25,4 @@ walk = (dir) ->
         console.log name
         cssIncImages name
 
-walk __dirname + '/../app/css/themes/'
+walk __dirname + '/../app/css'

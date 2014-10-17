@@ -1,6930 +1,6264 @@
-/*! JSON Editor v0.6.16 - JSON Schema -> HTML Editor
- * By Jeremy Dorn - https://github.com/jdorn/json-editor/
- * Released under the MIT license
+/*!
+ * jsoneditor.js
  *
- * Date: 2014-06-18
+ * @brief
+ * JSONEditor is a web-based tool to view, edit, and format JSON.
+ * It shows data a clear, editable treeview.
+ *
+ * Supported browsers: Chrome, Firefox, Safari, Opera, Internet Explorer 8+
+ *
+ * @license
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ * Copyright (c) 2011-2014 Jos de Jong, http://jsoneditoronline.org
+ *
+ * @author  Jos de Jong, <wjosdejong@gmail.com>
+ * @version 3.1.2
+ * @date    2014-09-03
  */
-
-/**
- * See README.md for requirements and usage info
- */
-
-(function() {
-
-/*jshint loopfunc: true */
-/* Simple JavaScript Inheritance
- * By John Resig http://ejohn.org/
- * MIT Licensed.
- */
-// Inspired by base2 and Prototype
-(function(){
-  var initializing = false, fnTest = /xyz/.test(function(){postMessage("xyz");}) ? /\b_super\b/ : /.*/;
- 
-  // The base Class implementation (does nothing)
-  this.Class = function(){};
- 
-  // Create a new Class that inherits from this class
-  Class.extend = function(prop) {
-    var _super = this.prototype;
-   
-    // Instantiate a base class (but only create the instance,
-    // don't run the init constructor)
-    initializing = true;
-    var prototype = new this();
-    initializing = false;
-   
-    // Copy the properties over onto the new prototype
-    for (var name in prop) {
-      // Check if we're overwriting an existing function
-      prototype[name] = typeof prop[name] == "function" &&
-        typeof _super[name] == "function" && fnTest.test(prop[name]) ?
-        (function(name, fn){
-          return function() {
-            var tmp = this._super;
-           
-            // Add a new ._super() method that is the same method
-            // but on the super-class
-            this._super = _super[name];
-           
-            // The method only need to be bound temporarily, so we
-            // remove it when we're done executing
-            var ret = fn.apply(this, arguments);        
-            this._super = tmp;
-           
-            return ret;
-          };
-        })(name, prop[name]) :
-        prop[name];
-    }
-   
-    // The dummy class constructor
-    function Class() {
-      // All construction is actually done in the init method
-      if ( !initializing && this.init )
-        this.init.apply(this, arguments);
-    }
-   
-    // Populate our constructed prototype object
-    Class.prototype = prototype;
-   
-    // Enforce the constructor to be what we expect
-    Class.prototype.constructor = Class;
- 
-    // And make this class extendable
-    Class.extend = arguments.callee;
-   
-    return Class;
-  };
-})();
-
-// CustomEvent constructor polyfill
-// From MDN
-(function () {
-  function CustomEvent ( event, params ) {
-    params = params || { bubbles: false, cancelable: false, detail: undefined };
-    var evt = document.createEvent( 'CustomEvent' );
-    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-    return evt;
-  }
-
-  CustomEvent.prototype = window.Event.prototype;
-
-  window.CustomEvent = CustomEvent;
-})();
-
-// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
-// MIT license
-(function() {
-    var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || 
-                                      window[vendors[x]+'CancelRequestAnimationFrame'];
-    }
- 
-    if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-              timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        };
- 
-    if (!window.cancelAnimationFrame)
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
-}());
-
-var $isplainobject = function( obj ) {
-  // Not own constructor property must be Object
-  if ( obj.constructor &&
-    !obj.hasOwnProperty('constructor') &&
-    !obj.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
-    return false;
-  }
-
-  // Own properties are enumerated firstly, so to speed up,
-  // if last one is own, then all properties are own.
-
-  var key;
-  for ( key in obj ) {}
-
-  return key === undefined || obj.hasOwnProperty(key);
-};
-
-var $extend = function(destination) {
-  var source, i,property;
-  for(i=1; i<arguments.length; i++) {
-    source = arguments[i];
-    for (property in source) {
-      if(source[property] && $isplainobject(source[property])) {
-        destination[property] = destination[property] || {};
-        $extend(destination[property], source[property]);
-      }
-      else {
-        destination[property] = source[property];
-      }
-    }
-  }
-  return destination;
-};
-
-var $each = function(obj,callback) {
-  if(!obj) return;
-  var i;
-  if(typeof obj.length !== 'undefined') {
-    for(i=0; i<obj.length; i++) {
-      if(callback(i,obj[i])===false) return;
-    }
-  }
-  else {
-    for(i in obj) {
-      if(!obj.hasOwnProperty(i)) continue;
-      if(callback(i,obj[i])===false) return;
-    }
-  }
-};
-
-var $trigger = function(el,event) {
-  var e = document.createEvent('HTMLEvents');
-  e.initEvent(event, true, true);
-  el.dispatchEvent(e);
-};
-var $triggerc = function(el,event) {
-  var e = new CustomEvent(event,{
-    bubbles: true,
-    cancelable: true
-  });
-
-  el.dispatchEvent(e);
-};
-
-var JSONEditor = function(element,options) {
-  options = $extend({},JSONEditor.defaults.options,options||{});
-  this.element = element;
-  this.options = options;
-  this.init();
-};
-JSONEditor.prototype = {
-  init: function() {
-    var self = this;
-    
-    this.ready = false;
-
-    var theme_class = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme];
-    if(!theme_class) throw "Unknown theme " + (this.options.theme || JSONEditor.defaults.theme);
-    
-    this.schema = this.options.schema;
-    this.theme = new theme_class();
-    this.template = this.options.template;
-    this.uuid = 0;
-    this.__data = {};
-    
-    var icon_class = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib];
-    if(icon_class) this.iconlib = new icon_class();
-
-    this.root_container = this.theme.getContainer();
-    this.element.appendChild(this.root_container);
-
-    this.validator = new JSONEditor.Validator(this.schema,{
-      ajax: this.options.ajax,
-      refs: this.options.refs,
-      no_additional_properties: this.options.no_additional_properties,
-      required_by_default: this.options.required_by_default
-    });
-    
-    this.validator.ready(function(expanded) {
-      if(self.ready) return;
-      
-      self.schema = expanded;
-      
-      // Create the root editor
-      var editor_class = self.getEditorClass(self.schema);
-      self.root = self.createEditor(editor_class, {
-        jsoneditor: self,
-        schema: self.schema,
-        container: self.root_container,
-        required: true
-      });
-
-      // Starting data
-      if(self.options.startval) self.root.setValue(self.options.startval);
-
-      self.validation_results = self.validator.validate(self.root.getValue());
-      self.root.showValidationErrors(self.validation_results);
-      self.ready = true;
-
-      // Fire ready event asynchronously
-      requestAnimationFrame(function() {
-        self.validation_results = self.validator.validate(self.root.getValue());
-        self.root.showValidationErrors(self.validation_results);
-        self.trigger('ready');
-        self.trigger('change');
-      });
-    });
-  },
-  getValue: function() {
-    if(!this.ready) throw "JSON Editor not ready yet.  Listen for 'ready' event before getting the value";
-
-    return this.root.getValue();
-  },
-  setValue: function(value) {
-    if(!this.ready) throw "JSON Editor not ready yet.  Listen for 'ready' event before setting the value";
-
-    this.root.setValue(value);
-    return this;
-  },
-  validate: function(value) {
-    if(!this.ready) throw "JSON Editor not ready yet.  Listen for 'ready' event before validating";
-    
-    // Custom value
-    if(arguments.length === 1) {
-      return this.validator.validate(value);
-    }
-    // Current value (use cached result)
-    else {
-      return this.validation_results;
-    }
-  },
-  destroy: function() {
-    if(this.destroyed) return;
-    if(!this.ready) return;
-    
-    this.schema = null;
-    this.options = null;
-    this.root.destroy();
-    this.root = null;
-    this.root_container = null;
-    this.validator = null;
-    this.validation_results = null;
-    this.theme = null;
-    this.iconlib = null;
-    this.template = null;
-    this.__data = null;
-    this.ready = false;
-    this.element.innerHTML = '';
-    
-    this.destroyed = true;
-  },
-  on: function(event, callback) {
-    this.callbacks = this.callbacks || {};
-    this.callbacks[event] = this.callbacks[event] || [];
-    this.callbacks[event].push(callback);
-  },
-  off: function(event, callback) {
-    // Specific callback
-    if(event && callback) {
-      this.callbacks = this.callbacks || {};
-      this.callbacks[event] = this.callbacks[event] || [];
-      var newcallbacks = [];
-      for(var i=0; i<this.callbacks[event].length; i++) {
-        if(this.callbacks[event][i]===callback) continue;
-        newcallbacks.push(this.callbacks[event][i]);
-      }
-      this.callbacks[event] = newcallbacks;
-    }
-    // All callbacks for a specific event
-    else if(event) {
-      this.callbacks = this.callbacks || {};
-      this.callbacks[event] = [];
-    }
-    // All callbacks for all events
-    else {
-      this.callbacks = {};
-    }
-  },
-  trigger: function(event) {
-    if(this.callbacks && this.callbacks[event] && this.callbacks[event].length) {
-      for(var i=0; i<this.callbacks[event].length; i++) {
-        this.callbacks[event][i]();
-      }
-    }
-  },
-  getEditorClass: function(schema, editor) {
-    var classname;
-
-    $each(JSONEditor.defaults.resolvers,function(i,resolver) {
-      var tmp = resolver(schema);
-      if(tmp) {
-        if(JSONEditor.defaults.editors[tmp]) {
-          classname = tmp;
-          return false;
-        }
-      }
-    });
-
-    if(!classname) throw "Unknown editor for schema "+JSON.stringify(schema);
-    if(!JSONEditor.defaults.editors[classname]) throw "Unknown editor "+classname;
-
-    return JSONEditor.defaults.editors[classname];
-  },
-  createEditor: function(editor_class, options) {
-    options = $extend({},editor_class.options||{},options);
-    return new editor_class(options);
-  },
-  onChange: function() {
-    if(!this.ready) return;
-    
-    if(this.firing_change) return;
-    this.firing_change = true;
-    
-    var self = this;
-    
-    requestAnimationFrame(function() {
-      self.firing_change = false;
-      
-      // Validate and cache results
-      self.validation_results = self.validator.validate(self.root.getValue());
-      self.root.showValidationErrors(self.validation_results);
-      
-      // Fire change event
-      self.trigger('change');
-    });
-  },
-  compileTemplate: function(template, name) {
-    name = name || JSONEditor.defaults.template;
-
-    var engine;
-
-    // Specifying a preset engine
-    if(typeof name === 'string') {
-      if(!JSONEditor.defaults.templates[name]) throw "Unknown template engine "+name;
-      engine = JSONEditor.defaults.templates[name]();
-
-      if(!engine) throw "Template engine "+name+" missing required library.";
-    }
-    // Specifying a custom engine
-    else {
-      engine = name;
-    }
-
-    if(!engine) throw "No template engine set";
-    if(!engine.compile) throw "Invalid template engine set";
-
-    return engine.compile(template);
-  },
-  _data: function(el,key,value) {
-    // Setting data
-    if(arguments.length === 3) {
-      var uuid;
-      if(el.hasAttribute('data-jsoneditor-'+key)) {
-        uuid = el.getAttribute('data-jsoneditor-'+key);
-      }
-      else {
-        uuid = this.uuid++;
-        el.setAttribute('data-jsoneditor-'+key,uuid);
-      }
-
-      this.__data[uuid] = value;
-    }
-    // Getting data
-    else {
-      // No data stored
-      if(!el.hasAttribute('data-jsoneditor-'+key)) return null;
-      
-      return this.__data[el.getAttribute('data-jsoneditor-'+key)];
-    }
-  },
-  registerEditor: function(editor) {
-    this.editors = this.editors || {};
-    this.editors[editor.path] = editor;
-    return this;
-  },
-  unregisterEditor: function(editor) {
-    this.editors = this.editors || {};
-    this.editors[editor.path] = null;
-    return this;
-  },
-  getEditor: function(path) {
-    if(!this.editors) return;
-    return this.editors[path];
-  },
-  watch: function(path,callback) {
-    this.watchlist = this.watchlist || {};
-    this.watchlist[path] = this.watchlist[path] || [];
-    this.watchlist[path].push(callback);
-    
-    return this;
-  },
-  unwatch: function(path,callback) {
-    if(!this.watchlist || !this.watchlist[path]) return this;
-    // If removing all callbacks for a path
-    if(!callback) {
-      this.watchlist[path] = null;
-      return this;
-    }
-    
-    var newlist = [];
-    for(var i=0; i<this.watchlist[path].length; i++) {
-      if(this.watchlist[path][i] === callback) continue;
-      else newlist.push(this.watchlist[path][i]);
-    }
-    this.watchlist[path] = newlist.length? newlist : null;
-    return this;
-  },
-  notifyWatchers: function(path) {
-    if(!this.watchlist || !this.watchlist[path]) return this;
-    for(var i=0; i<this.watchlist[path].length; i++) {
-      this.watchlist[path][i]();
-    }
-  },
-  isEnabled: function() {
-    return !this.root || this.root.isEnabled();
-  },
-  enable: function() {
-    this.root.enable();
-  },
-  disable: function() {
-    this.root.disable();
-  }
-};
-
-JSONEditor.defaults = {
-  themes: {},
-  templates: {},
-  iconlibs: {},
-  editors: {},
-  resolvers: [],
-  custom_validators: []
-};
-
-JSONEditor.Validator = Class.extend({
-  init: function(schema, options) {
-    this.original_schema = schema;
-    this.options = options || {};
-    this.refs = this.options.refs || {};
-
-    this.ready_callbacks = [];
-
-    if(this.options.ready) this.ready(this.options.ready);
-    // Store any $ref and definitions
-    this.getRefs();
-  },
-  ready: function(callback) {
-    if(this.is_ready) callback.apply(this,[this.expanded]);
-    else {
-      this.ready_callbacks.push(callback);
-    }
-
-    return this;
-  },
-  getRefs: function() {
-    var self = this;
-    this._getRefs(this.original_schema, function(schema) {
-      self.schema = schema;
-      self.expanded = self.expandSchema(self.schema);
-
-      self.is_ready = true;
-      $each(self.ready_callbacks,function(i,callback) {
-        callback.apply(self,[self.expanded]);
-      });
-    });
-  },
-  _getRefs: function(schema,callback) {
-    var self = this;
-    var is_root = schema === this.original_schema;
-
-    var waiting, finished, check_if_finished, called;
-
-    // Work on a deep copy of the schema
-    schema = $extend({},schema);
-
-    // First expand out any definition in the root node
-    if(is_root && schema.definitions) {
-      var defs = schema.definitions;
-      delete schema.definitions;
-
-      waiting = finished = 0;
-      check_if_finished = function(schema) {
-        if(finished >= waiting) {
-          if(called) return;
-          called = true;
-          self._getRefs(schema,callback);
-        }
-      };
-
-      $each(defs,function() {
-        waiting++;
-      });
-
-      if(waiting) {
-        $each(defs,function(i,definition) {
-          // Expand the definition recursively
-          self._getRefs(definition,function(def_schema) {
-            self.refs['#/definitions/'+i] = def_schema;
-            finished++;
-            check_if_finished(schema);
-          });
-        });
-      }
-      else {
-        check_if_finished(schema);
-      }
-    }
-    // Expand out any references
-    else if(schema.$ref) {
-      var ref = schema.$ref;
-      delete schema.$ref;
-
-      // If we're currently loading this external reference, wait for it to be done
-      if(self.refs[ref] && self.refs[ref] instanceof Array) {
-        self.refs[ref].push(function() {
-          schema = $extend({},self.refs[ref],schema);
-          callback(schema);
-        });
-      }
-      // If this reference has already been loaded
-      else if(self.refs[ref]) {
-        schema = $extend({},self.refs[ref],schema);
-        callback(schema);
-      }
-      // Otherwise, it needs to be loaded via ajax
-      else {
-        if(!self.options.ajax) throw "Must set ajax option to true to load external url "+ref;
-      
-        var r = new XMLHttpRequest(); 
-        r.open("GET", ref, true);
-        r.onreadystatechange = function () {
-          if (r.readyState != 4) return; 
-          if(r.status === 200) {
-            var response = JSON.parse(r.responseText);
-            self.refs[ref] = [];
-
-            // Recursively expand this schema
-            self._getRefs(response, function(ref_schema) {
-              var list = self.refs[ref];
-              self.refs[ref] = ref_schema;
-              schema = $extend({},self.refs[ref],schema);
-              callback(schema);
-
-              // If anything is waiting on this to load
-              $each(list,function(i,v) {
-                v();
-              });
-            });
-            return;
-          }
-          
-          // Request failed
-          throw "Failed to fetch ref via ajax- "+ref;
-        };
-        r.send();
-      }
-    }
-    // Expand out any subschemas
-    else {
-      waiting = finished = 0;
-      check_if_finished = function(schema) {
-        if(finished >= waiting) {
-          if(called) return;
-          called = true;
-
-          callback(schema);
-        }
-      };
-
-      $each(schema, function(key, value) {
-        // Arrays that need to be expanded
-        if(typeof value === "object" && value && value instanceof Array) {
-          $each(value,function(j,item) {
-            if(typeof item === "object" && item && !(item instanceof Array)) {
-              waiting++;
-            }
-          });
-        }
-        // Objects that need to be expanded
-        else if(typeof value === "object" && value) {
-          waiting++;
-        }
-      });
-
-      if(waiting) {
-        $each(schema, function(key, value) {
-          // Arrays that need to be expanded
-          if(typeof value === "object" && value && value instanceof Array) {
-            $each(value,function(j,item) {
-              if(typeof item === "object" && item && !(item instanceof Array)) {
-                self._getRefs(item,function(expanded) {
-                  schema[key][j] = expanded;
-
-                  finished++;
-                  check_if_finished(schema);
-                });
-              }
-            });
-          }
-          // Objects that need to be expanded
-          else if(typeof value === "object" && value) {
-            self._getRefs(value,function(expanded) {
-              schema[key] = expanded;
-
-              finished++;
-              check_if_finished(schema);
-            });
-          }
-        });
-      }
-      else {
-        check_if_finished(schema);
-      }
-    }
-  },
-  validate: function(value) {
-    return this._validateSchema(this.schema, value);
-  },
-  _validateSchema: function(schema,value,path) {
-    var errors = [];
-    var valid, i, j;
-    var stringified = JSON.stringify(value);
-
-    path = path || 'root';
-
-    // Work on a copy of the schema
-    schema = $extend({},schema);
-
-    /*
-     * Type Agnostic Validation
-     */
-
-    // Version 3 `required`
-    if(schema.required && schema.required === true) {
-      if(typeof value === "undefined") {
-        errors.push({
-          path: path,
-          property: 'required',
-          message: 'Property must be set'
-        });
-
-        // Can't do any more validation at this point
-        return errors;
-      }
-    }
-    // Value not defined
-    else if(typeof value === "undefined") {
-      // If required_by_default is set, all fields are required
-      if(this.options.required_by_default) {
-        errors.push({
-          path: path,
-          property: 'required',
-          message: 'Property must be set'
-        });
-      }
-      // Not required, no further validation needed
-      else {
-        return errors;
-      }
-    }
-
-    // `enum`
-    if(schema.enum) {
-      valid = false;
-      for(i=0; i<schema.enum.length; i++) {
-        if(stringified === JSON.stringify(schema.enum[i])) valid = true;
-      }
-      if(!valid) {
-        errors.push({
-          path: path,
-          property: 'enum',
-          message: 'Value must be one of the enumerated values'
-        });
-      }
-    }
-
-    // `extends` (version 3)
-    if(schema.extends) {
-      for(i=0; i<schema.extends.length; i++) {
-        errors = errors.concat(this._validateSchema(schema.extends[i],value,path));
-      }
-    }
-
-    // `allOf`
-    if(schema.allOf) {
-      for(i=0; i<schema.allOf.length; i++) {
-        errors = errors.concat(this._validateSchema(schema.allOf[i],value,path));
-      }
-    }
-
-    // `anyOf`
-    if(schema.anyOf) {
-      valid = false;
-      for(i=0; i<schema.anyOf.length; i++) {
-        if(!this._validateSchema(schema.anyOf[i],value,path).length) {
-          valid = true;
-          break;
-        }
-      }
-      if(!valid) {
-        errors.push({
-          path: path,
-          property: 'anyOf',
-          message: 'Value must validate against at least one of the provided schemas'
-        });
-      }
-    }
-
-    // `oneOf`
-    if(schema.oneOf) {
-      valid = 0;
-      var oneof_errors = [];
-      for(i=0; i<schema.oneOf.length; i++) {
-        // Set the error paths to be path.oneOf[i].rest.of.path
-        var tmp = this._validateSchema(schema.oneOf[i],value,path);
-        if(!tmp.length) {
-          valid++;
-        }
-
-        for(j=0; j<tmp.length; j++) {
-          tmp[j].path = path+'.oneOf['+i+']'+tmp[j].path.substr(path.length);
-        }
-        oneof_errors = oneof_errors.concat(tmp);
-
-      }
-      if(valid !== 1) {
-        errors.push({
-          path: path,
-          property: 'oneOf',
-          message: 'Value must validate against exactly one of the provided schemas. '+
-            'It currently validates against '+valid+' of the schemas.'
-        });
-        errors = errors.concat(oneof_errors);
-      }
-    }
-
-    // `not`
-    if(schema.not) {
-      if(!this._validateSchema(schema.not,value,path).length) {
-        errors.push({
-          path: path,
-          property: 'not',
-          message: 'Value must not validate against the provided schema'
-        });
-      }
-    }
-
-    // `type` (both Version 3 and Version 4 support)
-    if(schema.type) {
-      // Union type
-      if(schema.type instanceof Array) {
-        valid = false;
-        for(i=0;i<schema.type.length;i++) {
-          if(this._checkType(schema.type[i], value)) {
-            valid = true;
-            break;
-          }
-        }
-        if(!valid) {
-          errors.push({
-            path: path,
-            property: 'type',
-            message: 'Value must be one of the provided types'
-          });
-        }
-      }
-      // Simple type
-      else {
-        if(!this._checkType(schema.type, value)) {
-          errors.push({
-            path: path,
-            property: 'type',
-            message: 'Value must be of type '+schema.type
-          });
-        }
-      }
-    }
-
-
-    // `disallow` (version 3)
-    if(schema.disallow) {
-      // Union type
-      if(schema.disallow instanceof Array) {
-        valid = true;
-        for(i=0;i<schema.disallow.length;i++) {
-          if(this._checkType(schema.disallow[i], value)) {
-            valid = false;
-            break;
-          }
-        }
-        if(!valid) {
-          errors.push({
-            path: path,
-            property: 'disallow',
-            message: 'Value must not be one of the provided disallowed types'
-          });
-        }
-      }
-      // Simple type
-      else {
-        if(this._checkType(schema.disallow, value)) {
-          errors.push({
-            path: path,
-            property: 'disallow',
-            message: 'Value must not be of type '+schema.disallow
-          });
-        }
-      }
-    }
-
-    /*
-     * Type Specific Validation
-     */
-
-    // Number Specific Validation
-    if(typeof value === "number") {
-      // `multipleOf` and `divisibleBy`
-      if(schema.multipleOf || schema.divisibleBy) {
-        valid = value / (schema.multipleOf || schema.divisibleBy);
-        if(valid !== Math.floor(valid)) {
-          errors.push({
-            path: path,
-            property: schema.multipleOf? 'multipleOf' : 'divisibleBy',
-            message: 'Value must be a multiple of '+(schema.multipleOf || schema.divisibleBy)
-          });
-        }
-      }
-
-      // `maximum`
-      if(schema.maximum) {
-        if(schema.exclusiveMaximum && value >= schema.maximum) {
-          errors.push({
-            path: path,
-            property: 'maximum',
-            message: 'Value must be less than '+schema.maximum
-          });
-        }
-        else if(!schema.exclusiveMaximum && value > schema.maximum) {
-          errors.push({
-            path: path,
-            property: 'maximum',
-            message: 'Value must be at most '+schema.maximum
-          });
-        }
-      }
-
-      // `minimum`
-      if(schema.minimum) {
-        if(schema.exclusiveMinimum && value <= schema.minimum) {
-          errors.push({
-            path: path,
-            property: 'minimum',
-            message: 'Value must be greater than '+schema.minimum
-          });
-        }
-        else if(!schema.exclusiveMinimum && value < schema.minimum) {
-          errors.push({
-            path: path,
-            property: 'minimum',
-            message: 'Value must be at least '+schema.minimum
-          });
-        }
-      }
-    }
-    // String specific validation
-    else if(typeof value === "string") {
-      // `maxLength`
-      if(schema.maxLength) {
-        if((value+"").length > schema.maxLength) {
-          errors.push({
-            path: path,
-            property: 'maxLength',
-            message: 'Value must be at most '+schema.maxLength+' characters long'
-          });
-        }
-      }
-
-      // `minLength`
-      if(schema.minLength) {
-        if((value+"").length < schema.minLength) {
-          errors.push({
-            path: path,
-            property: 'minLength',
-            message: 'Value must be at least '+schema.minLength+' characters long'
-          });
-        }
-      }
-
-      // `pattern`
-      if(schema.pattern) {
-        if(!(new RegExp(schema.pattern)).test(value)) {
-          errors.push({
-            path: path,
-            property: 'pattern',
-            message: 'Value must match the provided pattern'
-          });
-        }
-      }
-    }
-    // Array specific validation
-    else if(typeof value === "object" && value !== null && value instanceof Array) {
-      // `items` and `additionalItems`
-      if(schema.items) {
-        // `items` is an array
-        if(schema.items instanceof Array) {
-          for(i=0; i<value.length; i++) {
-            // If this item has a specific schema tied to it
-            // Validate against it
-            if(schema.items[i]) {
-              errors = errors.concat(this._validateSchema(schema.items[i],value[i],path+'.'+i));
-            }
-            // If all additional items are allowed
-            else if(schema.additionalItems === true) {
-              break;
-            }
-            // If additional items is a schema
-            // TODO: Incompatibility between version 3 and 4 of the spec
-            else if(schema.additionalItems) {
-              errors = errors.concat(this._validateSchema(schema.additionalItems,value[i],path+'.'+i));
-            }
-            // If no additional items are allowed
-            else if(schema.additionalItems === false) {
-              errors.push({
-                path: path,
-                property: 'additionalItems',
-                message: 'No additional items allowed in this array'
-              });
-              break;
-            }
-            // Default for `additionalItems` is an empty schema
-            else {
-              break;
-            }
-          }
-        }
-        // `items` is a schema
-        else {
-          // Each item in the array must validate against the schema
-          for(i=0; i<value.length; i++) {
-            errors = errors.concat(this._validateSchema(schema.items,value[i],path+'.'+i));
-          }
-        }
-      }
-
-      // `maxItems`
-      if(schema.maxItems) {
-        if(value.length > schema.maxItems) {
-          errors.push({
-            path: path,
-            property: 'maxItems',
-            message: 'Value must have at most '+schema.maxItems+' items'
-          });
-        }
-      }
-
-      // `minItems`
-      if(schema.minItems) {
-        if(value.length < schema.minItems) {
-          errors.push({
-            path: path,
-            property: 'minItems',
-            message: 'Value must have at least '+schema.minItems+' items'
-          });
-        }
-      }
-
-      // `uniqueItems`
-      if(schema.uniqueItems) {
-        var seen = {};
-        for(i=0; i<value.length; i++) {
-          valid = JSON.stringify(value[i]);
-          if(seen[valid]) {
-            errors.push({
-              path: path,
-              property: 'uniqueItems',
-              message: 'Array must have unique items'
-            });
-            break;
-          }
-          seen[valid] = true;
-        }
-      }
-    }
-    // Object specific validation
-    else if(typeof value === "object" && value !== null) {
-      // `maxProperties`
-      if(schema.maxProperties) {
-        valid = 0;
-        for(i in value) {
-          if(!value.hasOwnProperty(i)) continue;
-          valid++;
-        }
-        if(valid > schema.maxProperties) {
-          errors.push({
-            path: path,
-            property: 'maxProperties',
-            message: 'Object must have at most '+schema.maxProperties+' properties'
-          });
-        }
-      }
-
-      // `minProperties`
-      if(schema.minProperties) {
-        valid = 0;
-        for(i in value) {
-          if(!value.hasOwnProperty(i)) continue;
-          valid++;
-        }
-        if(valid < schema.minProperties) {
-          errors.push({
-            path: path,
-            property: 'minProperties',
-            message: 'Object must have at least '+schema.minProperties+' properties'
-          });
-        }
-      }
-
-      // Version 4 `required`
-      if(schema.required && schema.required instanceof Array) {
-        for(i=0; i<schema.required.length; i++) {
-          if(typeof value[schema.required[i]] === "undefined") {
-            errors.push({
-              path: path,
-              property: 'required',
-              message: 'Object is missing the required property '+schema.required[i]
-            });
-          }
-        }
-      }
-
-      // `properties`
-      var validated_properties = {};
-      if(schema.properties) {
-        for(i in schema.properties) {
-          if(!schema.properties.hasOwnProperty(i)) continue;
-          validated_properties[i] = true;
-          errors = errors.concat(this._validateSchema(schema.properties[i],value[i],path+'.'+i));
-        }
-      }
-
-      // `patternProperties`
-      if(schema.patternProperties) {
-        for(i in schema.patternProperties) {
-          if(!schema.patternProperties.hasOwnProperty(i)) continue;
-
-          var regex = new RegExp(i);
-
-          // Check which properties match
-          for(j in value) {
-            if(!value.hasOwnProperty(j)) continue;
-            if(regex.test(j)) {
-              validated_properties[j] = true;
-              errors = errors.concat(this._validateSchema(schema.patternProperties[i],value[j],path+'.'+j));
-            }
-          }
-        }
-      }
-
-      // The no_additional_properties option currently doesn't work with extended schemas that use oneOf or anyOf
-      if(typeof schema.additionalProperties === "undefined" && this.options.no_additional_properties && !schema.oneOf && !schema.anyOf) {
-        schema.additionalProperties = false;
-      }
-
-      // `additionalProperties`
-      if(typeof schema.additionalProperties !== "undefined") {
-        for(i in value) {
-          if(!value.hasOwnProperty(i)) continue;
-          if(!validated_properties[i]) {
-            // No extra properties allowed
-            if(!schema.additionalProperties) {
-              errors.push({
-                path: path,
-                property: 'additionalProperties',
-                message: 'No additional properties allowed, but property '+i+' is set'
-              });
-              break;
-            }
-            // Allowed
-            else if(schema.additionalProperties === true) {
-              break;
-            }
-            // Must match schema
-            // TODO: incompatibility between version 3 and 4 of the spec
-            else {
-              errors = errors.concat(this._validateSchema(schema.additionalProperties,value[i],path+'.'+i));
-            }
-          }
-        }
-      }
-
-      // `dependencies`
-      if(schema.dependencies) {
-        for(i in schema.dependencies) {
-          if(!schema.dependencies.hasOwnProperty(i)) continue;
-
-          // Doesn't need to meet the dependency
-          if(typeof value[i] === "undefined") continue;
-
-          // Property dependency
-          if(schema.dependencies[i] instanceof Array) {
-            for(j=0; j<schema.dependencies[i].length; j++) {
-              if(typeof value[schema.dependencies[i][j]] === "undefined") {
-                errors.push({
-                  path: path,
-                  property: 'dependencies',
-                  message: 'Must have property '+schema.dependencies[i][j]
-                });
-              }
-            }
-          }
-          // Schema dependency
-          else {
-            errors = errors.concat(this._validateSchema(schema.dependencies[i],value,path));
-          }
-        }
-      }
-    }
-
-    // Custom type validation
-    $each(JSONEditor.defaults.custom_validators,function(i,validator) {
-      errors = errors.concat(validator(schema,value,path));
-    });
-
-    return errors;
-  },
-  _checkType: function(type, value) {
-    // Simple types
-    if(typeof type === "string") {
-      if(type==="string") return typeof value === "string";
-      else if(type==="number") return typeof value === "number";
-      else if(type==="integer") return typeof value === "number" && value === Math.floor(value);
-      else if(type==="boolean") return typeof value === "boolean";
-      else if(type==="array") return value instanceof Array;
-      else if(type === "object") return value !== null && !(value instanceof Array) && typeof value === "object";
-      else if(type === "null") return value === null;
-      else return true;
-    }
-    // Schema
-    else {
-      return !this._validateSchema(type,value).length;
-    }
-  },
-  expandSchema: function(schema) {
-    var self = this;
-    var extended = schema;
-    var i;
-
-    // Version 3 `type`
-    if(typeof schema.type === 'object') {
-      // Array of types
-      if(schema.type instanceof Array) {
-        $each(schema.type, function(key,value) {
-          // Schema
-          if(typeof value === 'object') {
-            schema.type[key] = self.expandSchema(value);
-          }
-        });
-      }
-      // Schema
-      else {
-        schema.type = self.expandSchema(schema.type);
-      }
-    }
-    // Version 3 `disallow`
-    if(typeof schema.disallow === 'object') {
-      // Array of types
-      if(schema.disallow instanceof Array) {
-        $each(schema.disallow, function(key,value) {
-          // Schema
-          if(typeof value === 'object') {
-            schema.disallow[key] = self.expandSchema(value);
-          }
-        });
-      }
-      // Schema
-      else {
-        schema.disallow = self.expandSchema(schema.disallow);
-      }
-    }
-    // Version 4 `anyOf`
-    if(schema.anyOf) {
-      $each(schema.anyOf, function(key,value) {
-        schema.anyOf[key] = self.expandSchema(value);
-      });
-    }
-    // Version 4 `dependencies` (schema dependencies)
-    if(schema.dependencies) {
-      $each(schema.dependencies,function(key,value) {
-        if(typeof value === "object" && !(value instanceof Array)) {
-          schema.dependencies[key] = self.expandSchema(value);
-        }
-      });
-    }
-    // `items`
-    if(schema.items) {
-      // Array of items
-      if(schema.items instanceof Array) {
-        $each(schema.items, function(key,value) {
-          // Schema
-          if(typeof value === 'object') {
-            schema.items[key] = self.expandSchema(value);
-          }
-        });
-      }
-      // Schema
-      else {
-        schema.items = self.expandSchema(schema.items);
-      }
-    }
-    // `properties`
-    if(schema.properties) {
-      $each(schema.properties,function(key,value) {
-        if(typeof value === "object" && !(value instanceof Array)) {
-          schema.properties[key] = self.expandSchema(value);
-        }
-      });
-    }
-    // `patternProperties`
-    if(schema.patternProperties) {
-      $each(schema.patternProperties,function(key,value) {
-        if(typeof value === "object" && !(value instanceof Array)) {
-          schema.patternProperties[key] = self.expandSchema(value);
-        }
-      });
-    }
-    // Version 4 `not`
-    if(schema.not) {
-      schema.not = this.expandSchema(schema.not);
-    }
-    // `additionalProperties`
-    if(schema.additionalProperties && typeof schema.additionalProperties === "object") {
-      schema.additionalProperties = self.expandSchema(schema.additionalProperties);
-    }
-    // `additionalItems`
-    if(schema.additionalItems && typeof schema.additionalItems === "object") {
-      schema.additionalItems = self.expandSchema(schema.additionalItems);
-    }
-
-    // allOf schemas should be merged into the parent
-    if(schema.allOf) {
-      for(i=0; i<schema.allOf.length; i++) {
-        extended = this.extend(extended,this.expandSchema(schema.allOf[i]));
-      }
-      delete extended.allOf;
-    }
-    // extends schemas should be merged into parent
-    if(schema.extends) {
-      // If extends is a schema
-      if(!(schema.extends instanceof Array)) {
-        extended = this.extend(extended,this.expandSchema(schema.extends));
-      }
-      // If extends is an array of schemas
-      else {
-        for(i=0; i<schema.extends.length; i++) {
-          extended = this.extend(extended,this.expandSchema(schema.extends[i]));
-        }
-      }
-      delete extended.extends;
-    }
-    // parent should be merged into oneOf schemas
-    if(schema.oneOf) {
-      var tmp = $extend({},extended);
-      delete tmp.oneOf;
-      for(i=0; i<schema.oneOf.length; i++) {
-        extended.oneOf[i] = this.extend(this.expandSchema(schema.oneOf[i]),tmp);
-      }
-    }
-
-    return extended;
-  },
-  extend: function(obj1, obj2) {
-    obj1 = $extend({},obj1);
-    obj2 = $extend({},obj2);
-
-    var self = this;
-    var extended = {};
-    $each(obj1, function(prop,val) {
-      // If this key is also defined in obj2, merge them
-      if(typeof obj2[prop] !== "undefined") {
-        // Required arrays should be unioned together
-        if(prop === 'required' && typeof val === "object" && val instanceof Array) {
-          // Union arrays and unique
-          extended.required = val.concat(obj2[prop]).reduce(function(p, c) {
-            if (p.indexOf(c) < 0) p.push(c);
-            return p;
-          }, []);
-        }
-        // Type should be intersected and is either an array or string
-        else if(prop === 'type') {
-          // Make sure we're dealing with arrays
-          if(typeof val !== "object") val = [val];
-          if(typeof obj2.type !== "object") obj2.type = [obj2.type];
-
-
-          extended.type = val.filter(function(n) {
-            return obj2.type.indexOf(n) !== -1;
-          });
-
-          // If there's only 1 type and it's a primitive, use a string instead of array
-          if(extended.type.length === 1 && typeof extended.type[0] === "string") {
-            extended.type = extended.type[0];
-          }
-        }
-        // All other arrays should be intersected (enum, etc.)
-        else if(typeof val === "object" && val instanceof Array){
-          extended[prop] = val.filter(function(n) {
-            return obj2[prop].indexOf(n) !== -1;
-          });
-        }
-        // Objects should be recursively merged
-        else if(typeof val === "object" && val !== null) {
-          extended[prop] = self.extend(val,obj2[prop]);
-        }
-        // Otherwise, use the first value
-        else {
-          extended[prop] = val;
-        }
-      }
-      // Otherwise, just use the one in obj1
-      else {
-        extended[prop] = val;
-      }
-    });
-    // Properties in obj2 that aren't in obj1
-    $each(obj2, function(prop,val) {
-      if(typeof obj1[prop] === "undefined") {
-        extended[prop] = val;
-      }
-    });
-
-    return extended;
-  }
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define(factory);
+	else if(typeof exports === 'object')
+		exports["JSONEditor"] = factory();
+	else
+		root["JSONEditor"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(2), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (treemode, textmode, util) {
+
+	  /**
+	   * @constructor JSONEditor
+	   * @param {Element} container    Container element
+	   * @param {Object}  [options]    Object with options. available options:
+	   *                               {String} mode      Editor mode. Available values:
+	   *                                                  'tree' (default), 'view',
+	   *                                                  'form', 'text', and 'code'.
+	   *                               {function} change  Callback method, triggered
+	   *                                                  on change of contents
+	   *                               {Boolean} search   Enable search box.
+	   *                                                  True by default
+	   *                                                  Only applicable for modes
+	   *                                                  'tree', 'view', and 'form'
+	   *                               {Boolean} history  Enable history (undo/redo).
+	   *                                                  True by default
+	   *                                                  Only applicable for modes
+	   *                                                  'tree', 'view', and 'form'
+	   *                               {String} name      Field name for the root node.
+	   *                                                  Only applicable for modes
+	   *                                                  'tree', 'view', and 'form'
+	   *                               {Number} indentation   Number of indentation
+	   *                                                      spaces. 4 by default.
+	   *                                                      Only applicable for
+	   *                                                      modes 'text' and 'code'
+	   * @param {Object | undefined} json JSON object
+	   */
+	  function JSONEditor (container, options, json) {
+	    if (!(this instanceof JSONEditor)) {
+	      throw new Error('JSONEditor constructor called without "new".');
+	    }
+
+	    // check for unsupported browser (IE8 and older)
+	    var ieVersion = util.getInternetExplorerVersion();
+	    if (ieVersion != -1 && ieVersion < 9) {
+	      throw new Error('Unsupported browser, IE9 or newer required. ' +
+	          'Please install the newest version of your browser.');
+	    }
+
+	    if (arguments.length) {
+	      this._create(container, options, json);
+	    }
+	  }
+
+	  /**
+	   * Configuration for all registered modes. Example:
+	   * {
+	   *     tree: {
+	   *         mixin: TreeEditor,
+	   *         data: 'json'
+	   *     },
+	   *     text: {
+	   *         mixin: TextEditor,
+	   *         data: 'text'
+	   *     }
+	   * }
+	   *
+	   * @type { Object.<String, {mixin: Object, data: String} > }
+	   */
+	  JSONEditor.modes = {};
+
+	  /**
+	   * Create the JSONEditor
+	   * @param {Element} container    Container element
+	   * @param {Object}  [options]    See description in constructor
+	   * @param {Object | undefined} json JSON object
+	   * @private
+	   */
+	  JSONEditor.prototype._create = function (container, options, json) {
+	    this.container = container;
+	    this.options = options || {};
+	    this.json = json || {};
+
+	    var mode = this.options.mode || 'tree';
+	    this.setMode(mode);
+	  };
+
+	  /**
+	   * Detach the editor from the DOM
+	   * @private
+	   */
+	  JSONEditor.prototype._delete = function () {};
+
+	  /**
+	   * Set JSON object in editor
+	   * @param {Object | undefined} json      JSON data
+	   */
+	  JSONEditor.prototype.set = function (json) {
+	    this.json = json;
+	  };
+
+	  /**
+	   * Get JSON from the editor
+	   * @returns {Object} json
+	   */
+	  JSONEditor.prototype.get = function () {
+	    return this.json;
+	  };
+
+	  /**
+	   * Set string containing JSON for the editor
+	   * @param {String | undefined} jsonText
+	   */
+	  JSONEditor.prototype.setText = function (jsonText) {
+	    this.json = util.parse(jsonText);
+	  };
+
+	  /**
+	   * Get stringified JSON contents from the editor
+	   * @returns {String} jsonText
+	   */
+	  JSONEditor.prototype.getText = function () {
+	    return JSON.stringify(this.json);
+	  };
+
+	  /**
+	   * Set a field name for the root node.
+	   * @param {String | undefined} name
+	   */
+	  JSONEditor.prototype.setName = function (name) {
+	    if (!this.options) {
+	      this.options = {};
+	    }
+	    this.options.name = name;
+	  };
+
+	  /**
+	   * Get the field name for the root node.
+	   * @return {String | undefined} name
+	   */
+	  JSONEditor.prototype.getName = function () {
+	    return this.options && this.options.name;
+	  };
+
+	  /**
+	   * Change the mode of the editor.
+	   * JSONEditor will be extended with all methods needed for the chosen mode.
+	   * @param {String} mode     Available modes: 'tree' (default), 'view', 'form',
+	   *                          'text', and 'code'.
+	   */
+	  JSONEditor.prototype.setMode = function (mode) {
+	    var container = this.container,
+	        options = util.extend({}, this.options),
+	        data,
+	        name;
+
+	    options.mode = mode;
+	    var config = JSONEditor.modes[mode];
+	    if (config) {
+	      try {
+	        var asText = (config.data == 'text');
+	        name = this.getName();
+	        data = this[asText ? 'getText' : 'get'](); // get text or json
+
+	        this._delete();
+	        util.clear(this);
+	        util.extend(this, config.mixin);
+	        this.create(container, options);
+
+	        this.setName(name);
+	        this[asText ? 'setText' : 'set'](data); // set text or json
+
+	        if (typeof config.load === 'function') {
+	          try {
+	            config.load.call(this);
+	          }
+	          catch (err) {}
+	        }
+	      }
+	      catch (err) {
+	        this._onError(err);
+	      }
+	    }
+	    else {
+	      throw new Error('Unknown mode "' + options.mode + '"');
+	    }
+	  };
+
+	  /**
+	   * Throw an error. If an error callback is configured in options.error, this
+	   * callback will be invoked. Else, a regular error is thrown.
+	   * @param {Error} err
+	   * @private
+	   */
+	  JSONEditor.prototype._onError = function(err) {
+	    // TODO: onError is deprecated since version 2.2.0. cleanup some day
+	    if (typeof this.onError === 'function') {
+	      util.log('WARNING: JSONEditor.onError is deprecated. ' +
+	          'Use options.error instead.');
+	      this.onError(err);
+	    }
+
+	    if (this.options && typeof this.options.error === 'function') {
+	      this.options.error(err);
+	    }
+	    else {
+	      throw err;
+	    }
+	  };
+
+	  /**
+	   * Register a plugin with one ore multiple modes for the JSON Editor.
+	   *
+	   * A mode is described as an object with properties:
+	   *
+	   * - `mode: String`           The name of the mode.
+	   * - `mixin: Object`          An object containing the mixin functions which
+	   *                            will be added to the JSONEditor. Must contain functions
+	   *                            create, get, getText, set, and setText. May have
+	   *                            additional functions.
+	   *                            When the JSONEditor switches to a mixin, all mixin
+	   *                            functions are added to the JSONEditor, and then
+	   *                            the function `create(container, options)` is executed.
+	   * - `data: 'text' | 'json'`  The type of data that will be used to load the mixin.
+	   * - `[load: function]`       An optional function called after the mixin
+	   *                            has been loaded.
+	   *
+	   * @param {Object | Array} mode  A mode object or an array with multiple mode objects.
+	   */
+	  JSONEditor.registerMode = function (mode) {
+	    var i, prop;
+
+	    if (util.isArray(mode)) {
+	      // multiple modes
+	      for (i = 0; i < mode.length; i++) {
+	        JSONEditor.registerMode(mode[i]);
+	      }
+	    }
+	    else {
+	      // validate the new mode
+	      if (!('mode' in mode)) throw new Error('Property "mode" missing');
+	      if (!('mixin' in mode)) throw new Error('Property "mixin" missing');
+	      if (!('data' in mode)) throw new Error('Property "data" missing');
+	      var name = mode.mode;
+	      if (name in JSONEditor.modes) {
+	        throw new Error('Mode "' + name + '" already registered');
+	      }
+
+	      // validate the mixin
+	      if (typeof mode.mixin.create !== 'function') {
+	        throw new Error('Required function "create" missing on mixin');
+	      }
+	      var reserved = ['setMode', 'registerMode', 'modes'];
+	      for (i = 0; i < reserved.length; i++) {
+	        prop = reserved[i];
+	        if (prop in mode.mixin) {
+	          throw new Error('Reserved property "' + prop + '" not allowed in mixin');
+	        }
+	      }
+
+	      JSONEditor.modes[name] = mode;
+	    }
+	  };
+
+	  // register tree and text modes
+	  JSONEditor.registerMode(treemode);
+	  JSONEditor.registerMode(textmode);
+
+	  return JSONEditor;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(4), __webpack_require__(5), __webpack_require__(6), __webpack_require__(7), __webpack_require__(8), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (Highlighter, History, SearchBox, Node, modeswitcher, util) {
+
+	  // create a mixin with the functions for tree mode
+	  var treemode = {};
+	      
+	  /**
+	   * Create a tree editor
+	   * @param {Element} container    Container element
+	   * @param {Object}  [options]    Object with options. available options:
+	   *                               {String} mode      Editor mode. Available values:
+	   *                                                  'tree' (default), 'view',
+	   *                                                  and 'form'.
+	   *                               {Boolean} search   Enable search box.
+	   *                                                  True by default
+	   *                               {Boolean} history  Enable history (undo/redo).
+	   *                                                  True by default
+	   *                               {function} change  Callback method, triggered
+	   *                                                  on change of contents
+	   *                               {String} name      Field name for the root node.
+	   * @private
+	   */
+	  treemode.create = function (container, options) {
+	    if (!container) {
+	      throw new Error('No container element provided.');
+	    }
+	    this.container = container;
+	    this.dom = {};
+	    this.highlighter = new Highlighter();
+	    this.selection = undefined; // will hold the last input selection
+
+	    this._setOptions(options);
+
+	    if (this.options.history && this.options.mode !== 'view') {
+	      this.history = new History(this);
+	    }
+
+	    this._createFrame();
+	    this._createTable();
+	  };
+
+	  /**
+	   * Detach the editor from the DOM
+	   * @private
+	   */
+	  treemode._delete = function () {
+	    if (this.frame && this.container && this.frame.parentNode == this.container) {
+	      this.container.removeChild(this.frame);
+	    }
+	  };
+
+	  /**
+	   * Initialize and set default options
+	   * @param {Object}  [options]    See description in constructor
+	   * @private
+	   */
+	  treemode._setOptions = function (options) {
+	    this.options = {
+	      search: true,
+	      history: true,
+	      mode: 'tree',
+	      name: undefined   // field name of root node
+	    };
+
+	    // copy all options
+	    if (options) {
+	      for (var prop in options) {
+	        if (options.hasOwnProperty(prop)) {
+	          this.options[prop] = options[prop];
+	        }
+	      }
+	    }
+	  };
+
+	  // node currently being edited
+	  var focusNode = undefined;
+
+	  // dom having focus
+	  var domFocus = null;
+
+	  /**
+	   * Set JSON object in editor
+	   * @param {Object | undefined} json      JSON data
+	   * @param {String}             [name]    Optional field name for the root node.
+	   *                                       Can also be set using setName(name).
+	   */
+	  treemode.set = function (json, name) {
+	    // adjust field name for root node
+	    if (name) {
+	      // TODO: deprecated since version 2.2.0. Cleanup some day.
+	      util.log('Warning: second parameter "name" is deprecated. ' +
+	          'Use setName(name) instead.');
+	      this.options.name = name;
+	    }
+
+	    // verify if json is valid JSON, ignore when a function
+	    if (json instanceof Function || (json === undefined)) {
+	      this.clear();
+	    }
+	    else {
+	      this.content.removeChild(this.table);  // Take the table offline
+
+	      // replace the root node
+	      var params = {
+	        'field': this.options.name,
+	        'value': json
+	      };
+	      var node = new Node(this, params);
+	      this._setRoot(node);
+
+	      // expand
+	      var recurse = false;
+	      this.node.expand(recurse);
+
+	      this.content.appendChild(this.table);  // Put the table online again
+	    }
+
+	    // TODO: maintain history, store last state and previous document
+	    if (this.history) {
+	      this.history.clear();
+	    }
+	  };
+
+	  /**
+	   * Get JSON object from editor
+	   * @return {Object | undefined} json
+	   */
+	  treemode.get = function () {
+	    // remove focus from currently edited node
+	    if (focusNode) {
+	      focusNode.blur();
+	    }
+
+	    if (this.node) {
+	      return this.node.getValue();
+	    }
+	    else {
+	      return undefined;
+	    }
+	  };
+
+	  /**
+	   * Get the text contents of the editor
+	   * @return {String} jsonText
+	   */
+	  treemode.getText = function() {
+	    return JSON.stringify(this.get());
+	  };
+
+	  /**
+	   * Set the text contents of the editor
+	   * @param {String} jsonText
+	   */
+	  treemode.setText = function(jsonText) {
+	    this.set(util.parse(jsonText));
+	  };
+
+	  /**
+	   * Set a field name for the root node.
+	   * @param {String | undefined} name
+	   */
+	  treemode.setName = function (name) {
+	    this.options.name = name;
+	    if (this.node) {
+	      this.node.updateField(this.options.name);
+	    }
+	  };
+
+	  /**
+	   * Get the field name for the root node.
+	   * @return {String | undefined} name
+	   */
+	  treemode.getName = function () {
+	    return this.options.name;
+	  };
+
+	  /**
+	   * Remove the root node from the editor
+	   */
+	  treemode.clear = function () {
+	    if (this.node) {
+	      this.node.collapse();
+	      this.tbody.removeChild(this.node.getDom());
+	      delete this.node;
+	    }
+	  };
+
+	  /**
+	   * Set the root node for the json editor
+	   * @param {Node} node
+	   * @private
+	   */
+	  treemode._setRoot = function (node) {
+	    this.clear();
+
+	    this.node = node;
+
+	    // append to the dom
+	    this.tbody.appendChild(node.getDom());
+	  };
+
+	  /**
+	   * Search text in all nodes
+	   * The nodes will be expanded when the text is found one of its childs,
+	   * else it will be collapsed. Searches are case insensitive.
+	   * @param {String} text
+	   * @return {Object[]} results  Array with nodes containing the search results
+	   *                             The result objects contains fields:
+	   *                             - {Node} node,
+	   *                             - {String} elem  the dom element name where
+	   *                                              the result is found ('field' or
+	   *                                              'value')
+	   */
+	  treemode.search = function (text) {
+	    var results;
+	    if (this.node) {
+	      this.content.removeChild(this.table);  // Take the table offline
+	      results = this.node.search(text);
+	      this.content.appendChild(this.table);  // Put the table online again
+	    }
+	    else {
+	      results = [];
+	    }
+
+	    return results;
+	  };
+
+	  /**
+	   * Expand all nodes
+	   */
+	  treemode.expandAll = function () {
+	    if (this.node) {
+	      this.content.removeChild(this.table);  // Take the table offline
+	      this.node.expand();
+	      this.content.appendChild(this.table);  // Put the table online again
+	    }
+	  };
+
+	  /**
+	   * Collapse all nodes
+	   */
+	  treemode.collapseAll = function () {
+	    if (this.node) {
+	      this.content.removeChild(this.table);  // Take the table offline
+	      this.node.collapse();
+	      this.content.appendChild(this.table);  // Put the table online again
+	    }
+	  };
+
+	  /**
+	   * The method onChange is called whenever a field or value is changed, created,
+	   * deleted, duplicated, etc.
+	   * @param {String} action  Change action. Available values: "editField",
+	   *                         "editValue", "changeType", "appendNode",
+	   *                         "removeNode", "duplicateNode", "moveNode", "expand",
+	   *                         "collapse".
+	   * @param {Object} params  Object containing parameters describing the change.
+	   *                         The parameters in params depend on the action (for
+	   *                         example for "editValue" the Node, old value, and new
+	   *                         value are provided). params contains all information
+	   *                         needed to undo or redo the action.
+	   * @private
+	   */
+	  treemode._onAction = function (action, params) {
+	    // add an action to the history
+	    if (this.history) {
+	      this.history.add(action, params);
+	    }
+
+	    // trigger the onChange callback
+	    if (this.options.change) {
+	      try {
+	        this.options.change();
+	      }
+	      catch (err) {
+	        util.log('Error in change callback: ', err);
+	      }
+	    }
+	  };
+
+	  /**
+	   * Start autoscrolling when given mouse position is above the top of the
+	   * editor contents, or below the bottom.
+	   * @param {Number} mouseY  Absolute mouse position in pixels
+	   */
+	  treemode.startAutoScroll = function (mouseY) {
+	    var me = this;
+	    var content = this.content;
+	    var top = util.getAbsoluteTop(content);
+	    var height = content.clientHeight;
+	    var bottom = top + height;
+	    var margin = 24;
+	    var interval = 50; // ms
+
+	    if ((mouseY < top + margin) && content.scrollTop > 0) {
+	      this.autoScrollStep = ((top + margin) - mouseY) / 3;
+	    }
+	    else if (mouseY > bottom - margin &&
+	        height + content.scrollTop < content.scrollHeight) {
+	      this.autoScrollStep = ((bottom - margin) - mouseY) / 3;
+	    }
+	    else {
+	      this.autoScrollStep = undefined;
+	    }
+
+	    if (this.autoScrollStep) {
+	      if (!this.autoScrollTimer) {
+	        this.autoScrollTimer = setInterval(function () {
+	          if (me.autoScrollStep) {
+	            content.scrollTop -= me.autoScrollStep;
+	          }
+	          else {
+	            me.stopAutoScroll();
+	          }
+	        }, interval);
+	      }
+	    }
+	    else {
+	      this.stopAutoScroll();
+	    }
+	  };
+
+	  /**
+	   * Stop auto scrolling. Only applicable when scrolling
+	   */
+	  treemode.stopAutoScroll = function () {
+	    if (this.autoScrollTimer) {
+	      clearTimeout(this.autoScrollTimer);
+	      delete this.autoScrollTimer;
+	    }
+	    if (this.autoScrollStep) {
+	      delete this.autoScrollStep;
+	    }
+	  };
+
+
+	  /**
+	   * Set the focus to an element in the editor, set text selection, and
+	   * set scroll position.
+	   * @param {Object} selection  An object containing fields:
+	   *                            {Element | undefined} dom     The dom element
+	   *                                                          which has focus
+	   *                            {Range | TextRange} range     A text selection
+	   *                            {Number} scrollTop            Scroll position
+	   */
+	  treemode.setSelection = function (selection) {
+	    if (!selection) {
+	      return;
+	    }
+
+	    if ('scrollTop' in selection && this.content) {
+	      // TODO: animated scroll
+	      this.content.scrollTop = selection.scrollTop;
+	    }
+	    if (selection.range) {
+	      util.setSelectionOffset(selection.range);
+	    }
+	    if (selection.dom) {
+	      selection.dom.focus();
+	    }
+	  };
+
+	  /**
+	   * Get the current focus
+	   * @return {Object} selection An object containing fields:
+	   *                            {Element | undefined} dom     The dom element
+	   *                                                          which has focus
+	   *                            {Range | TextRange} range     A text selection
+	   *                            {Number} scrollTop            Scroll position
+	   */
+	  treemode.getSelection = function () {
+	    return {
+	      dom: domFocus,
+	      scrollTop: this.content ? this.content.scrollTop : 0,
+	      range: util.getSelectionOffset()
+	    };
+	  };
+
+	  /**
+	   * Adjust the scroll position such that given top position is shown at 1/4
+	   * of the window height.
+	   * @param {Number} top
+	   * @param {function(boolean)} [callback]   Callback, executed when animation is
+	   *                                         finished. The callback returns true
+	   *                                         when animation is finished, or false
+	   *                                         when not.
+	   */
+	  treemode.scrollTo = function (top, callback) {
+	    var content = this.content;
+	    if (content) {
+	      var editor = this;
+	      // cancel any running animation
+	      if (editor.animateTimeout) {
+	        clearTimeout(editor.animateTimeout);
+	        delete editor.animateTimeout;
+	      }
+	      if (editor.animateCallback) {
+	        editor.animateCallback(false);
+	        delete editor.animateCallback;
+	      }
+
+	      // calculate final scroll position
+	      var height = content.clientHeight;
+	      var bottom = content.scrollHeight - height;
+	      var finalScrollTop = Math.min(Math.max(top - height / 4, 0), bottom);
+
+	      // animate towards the new scroll position
+	      var animate = function () {
+	        var scrollTop = content.scrollTop;
+	        var diff = (finalScrollTop - scrollTop);
+	        if (Math.abs(diff) > 3) {
+	          content.scrollTop += diff / 3;
+	          editor.animateCallback = callback;
+	          editor.animateTimeout = setTimeout(animate, 50);
+	        }
+	        else {
+	          // finished
+	          if (callback) {
+	            callback(true);
+	          }
+	          content.scrollTop = finalScrollTop;
+	          delete editor.animateTimeout;
+	          delete editor.animateCallback;
+	        }
+	      };
+	      animate();
+	    }
+	    else {
+	      if (callback) {
+	        callback(false);
+	      }
+	    }
+	  };
+
+	  /**
+	   * Create main frame
+	   * @private
+	   */
+	  treemode._createFrame = function () {
+	    // create the frame
+	    this.frame = document.createElement('div');
+	    this.frame.className = 'jsoneditor';
+	    this.container.appendChild(this.frame);
+
+	    // create one global event listener to handle all events from all nodes
+	    var editor = this;
+	    function onEvent(event) {
+	      editor._onEvent(event);
+	    }
+	    this.frame.onclick = function (event) {
+	      var target = event.target;// || event.srcElement;
+
+	      onEvent(event);
+
+	      // prevent default submit action of buttons when editor is located
+	      // inside a form
+	      if (target.nodeName == 'BUTTON') {
+	        event.preventDefault();
+	      }
+	    };
+	    this.frame.oninput = onEvent;
+	    this.frame.onchange = onEvent;
+	    this.frame.onkeydown = onEvent;
+	    this.frame.onkeyup = onEvent;
+	    this.frame.oncut = onEvent;
+	    this.frame.onpaste = onEvent;
+	    this.frame.onmousedown = onEvent;
+	    this.frame.onmouseup = onEvent;
+	    this.frame.onmouseover = onEvent;
+	    this.frame.onmouseout = onEvent;
+	    // Note: focus and blur events do not propagate, therefore they defined
+	    // using an eventListener with useCapture=true
+	    // see http://www.quirksmode.org/blog/archives/2008/04/delegating_the.html
+	    util.addEventListener(this.frame, 'focus', onEvent, true);
+	    util.addEventListener(this.frame, 'blur', onEvent, true);
+	    this.frame.onfocusin = onEvent;  // for IE
+	    this.frame.onfocusout = onEvent; // for IE
+
+	    // create menu
+	    this.menu = document.createElement('div');
+	    this.menu.className = 'menu';
+	    this.frame.appendChild(this.menu);
+
+	    // create expand all button
+	    var expandAll = document.createElement('button');
+	    expandAll.className = 'expand-all';
+	    expandAll.title = 'Expand all fields';
+	    expandAll.onclick = function () {
+	      editor.expandAll();
+	    };
+	    this.menu.appendChild(expandAll);
+
+	    // create expand all button
+	    var collapseAll = document.createElement('button');
+	    collapseAll.title = 'Collapse all fields';
+	    collapseAll.className = 'collapse-all';
+	    collapseAll.onclick = function () {
+	      editor.collapseAll();
+	    };
+	    this.menu.appendChild(collapseAll);
+
+	    // create undo/redo buttons
+	    if (this.history) {
+	      // create undo button
+	      var undo = document.createElement('button');
+	      undo.className = 'undo separator';
+	      undo.title = 'Undo last action (Ctrl+Z)';
+	      undo.onclick = function () {
+	        editor._onUndo();
+	      };
+	      this.menu.appendChild(undo);
+	      this.dom.undo = undo;
+
+	      // create redo button
+	      var redo = document.createElement('button');
+	      redo.className = 'redo';
+	      redo.title = 'Redo (Ctrl+Shift+Z)';
+	      redo.onclick = function () {
+	        editor._onRedo();
+	      };
+	      this.menu.appendChild(redo);
+	      this.dom.redo = redo;
+
+	      // register handler for onchange of history
+	      this.history.onChange = function () {
+	        undo.disabled = !editor.history.canUndo();
+	        redo.disabled = !editor.history.canRedo();
+	      };
+	      this.history.onChange();
+	    }
+
+	    // create mode box
+	    if (this.options && this.options.modes && this.options.modes.length) {
+	      var modeBox = modeswitcher.create(this, this.options.modes, this.options.mode);
+	      this.menu.appendChild(modeBox);
+	      this.dom.modeBox = modeBox;
+	    }
+
+	    // create search box
+	    if (this.options.search) {
+	      this.searchBox = new SearchBox(this, this.menu);
+	    }
+	  };
+
+	  /**
+	   * Perform an undo action
+	   * @private
+	   */
+	  treemode._onUndo = function () {
+	    if (this.history) {
+	      // undo last action
+	      this.history.undo();
+
+	      // trigger change callback
+	      if (this.options.change) {
+	        this.options.change();
+	      }
+	    }
+	  };
+
+	  /**
+	   * Perform a redo action
+	   * @private
+	   */
+	  treemode._onRedo = function () {
+	    if (this.history) {
+	      // redo last action
+	      this.history.redo();
+
+	      // trigger change callback
+	      if (this.options.change) {
+	        this.options.change();
+	      }
+	    }
+	  };
+
+	  /**
+	   * Event handler
+	   * @param event
+	   * @private
+	   */
+	  treemode._onEvent = function (event) {
+	    var target = event.target;
+
+	    if (event.type == 'keydown') {
+	      this._onKeyDown(event);
+	    }
+
+	    if (event.type == 'focus') {
+	      domFocus = target;
+	    }
+
+	    var node = Node.getNodeFromTarget(target);
+	    if (node) {
+	      node.onEvent(event);
+	    }
+	  };
+
+	  /**
+	   * Event handler for keydown. Handles shortcut keys
+	   * @param {Event} event
+	   * @private
+	   */
+	  treemode._onKeyDown = function (event) {
+	    var keynum = event.which || event.keyCode;
+	    var ctrlKey = event.ctrlKey;
+	    var shiftKey = event.shiftKey;
+	    var handled = false;
+
+	    if (keynum == 9) { // Tab or Shift+Tab
+	      setTimeout(function () {
+	        // select all text when moving focus to an editable div
+	        util.selectContentEditable(domFocus);
+	      }, 0);
+	    }
+
+	    if (this.searchBox) {
+	      if (ctrlKey && keynum == 70) { // Ctrl+F
+	        this.searchBox.dom.search.focus();
+	        this.searchBox.dom.search.select();
+	        handled = true;
+	      }
+	      else if (keynum == 114 || (ctrlKey && keynum == 71)) { // F3 or Ctrl+G
+	        var focus = true;
+	        if (!shiftKey) {
+	          // select next search result (F3 or Ctrl+G)
+	          this.searchBox.next(focus);
+	        }
+	        else {
+	          // select previous search result (Shift+F3 or Ctrl+Shift+G)
+	          this.searchBox.previous(focus);
+	        }
+
+	        handled = true;
+	      }
+	    }
+
+	    if (this.history) {
+	      if (ctrlKey && !shiftKey && keynum == 90) { // Ctrl+Z
+	        // undo
+	        this._onUndo();
+	        handled = true;
+	      }
+	      else if (ctrlKey && shiftKey && keynum == 90) { // Ctrl+Shift+Z
+	        // redo
+	        this._onRedo();
+	        handled = true;
+	      }
+	    }
+
+	    if (handled) {
+	      event.preventDefault();
+	      event.stopPropagation();
+	    }
+	  };
+
+	  /**
+	   * Create main table
+	   * @private
+	   */
+	  treemode._createTable = function () {
+	    var contentOuter = document.createElement('div');
+	    contentOuter.className = 'outer';
+	    this.contentOuter = contentOuter;
+
+	    this.content = document.createElement('div');
+	    this.content.className = 'tree';
+	    contentOuter.appendChild(this.content);
+
+	    this.table = document.createElement('table');
+	    this.table.className = 'tree';
+	    this.content.appendChild(this.table);
+
+	    // create colgroup where the first two columns don't have a fixed
+	    // width, and the edit columns do have a fixed width
+	    var col;
+	    this.colgroupContent = document.createElement('colgroup');
+	    if (this.options.mode === 'tree') {
+	      col = document.createElement('col');
+	      col.width = "24px";
+	      this.colgroupContent.appendChild(col);
+	    }
+	    col = document.createElement('col');
+	    col.width = "24px";
+	    this.colgroupContent.appendChild(col);
+	    col = document.createElement('col');
+	    this.colgroupContent.appendChild(col);
+	    this.table.appendChild(this.colgroupContent);
+
+	    this.tbody = document.createElement('tbody');
+	    this.table.appendChild(this.tbody);
+
+	    this.frame.appendChild(contentOuter);
+	  };
+
+	  // define modes
+	  return [
+	    {
+	      mode: 'tree',
+	      mixin: treemode,
+	      data: 'json'
+	    },
+	    {
+	      mode: 'view',
+	      mixin: treemode,
+	      data: 'json'
+	    },
+	    {
+	      mode: 'form',
+	      mixin: treemode,
+	      data: 'json'
+	    }
+	  ];
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(8), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (modeswitcher, util) {
+
+	  // create a mixin with the functions for text mode
+	  var textmode = {};
+
+	  /**
+	   * Create a text editor
+	   * @param {Element} container
+	   * @param {Object} [options]         Object with options. available options:
+	   *                                   {String} mode         Available values:
+	   *                                                         "text" (default)
+	   *                                                         or "code".
+	   *                                   {Number} indentation  Number of indentation
+	   *                                                         spaces. 2 by default.
+	   *                                   {function} change     Callback method
+	   *                                                         triggered on change
+	   * @private
+	   */
+	  textmode.create = function (container, options) {
+	    // read options
+	    options = options || {};
+	    this.options = options;
+	    if (options.indentation) {
+	      this.indentation = Number(options.indentation);
+	    }
+	    else {
+	      this.indentation = 2;       // number of spaces
+	    }
+	    this.mode = (options.mode == 'code') ? 'code' : 'text';
+	    if (this.mode == 'code') {
+	      // verify whether Ace editor is available and supported
+	      if (typeof ace === 'undefined') {
+	        this.mode = 'text';
+	        util.log('WARNING: Cannot load code editor, Ace library not loaded. ' +
+	            'Falling back to plain text editor');
+	      }
+	    }
+
+	    var me = this;
+	    this.container = container;
+	    this.dom = {};
+	    this.editor = undefined;    // ace code editor
+	    this.textarea = undefined;  // plain text editor (fallback when Ace is not available)
+
+	    this.width = container.clientWidth;
+	    this.height = container.clientHeight;
+
+	    this.frame = document.createElement('div');
+	    this.frame.className = 'jsoneditor';
+	    this.frame.onclick = function (event) {
+	      // prevent default submit action when the editor is located inside a form
+	      event.preventDefault();
+	    };
+
+	    // create menu
+	    this.menu = document.createElement('div');
+	    this.menu.className = 'menu';
+	    this.frame.appendChild(this.menu);
+
+	    // create format button
+	    var buttonFormat = document.createElement('button');
+	    buttonFormat.className = 'format';
+	    buttonFormat.title = 'Format JSON data, with proper indentation and line feeds';
+	    this.menu.appendChild(buttonFormat);
+	    buttonFormat.onclick = function () {
+	      try {
+	        me.format();
+	      }
+	      catch (err) {
+	        me._onError(err);
+	      }
+	    };
+
+	    // create compact button
+	    var buttonCompact = document.createElement('button');
+	    buttonCompact.className = 'compact';
+	    buttonCompact.title = 'Compact JSON data, remove all whitespaces';
+	    this.menu.appendChild(buttonCompact);
+	    buttonCompact.onclick = function () {
+	      try {
+	        me.compact();
+	      }
+	      catch (err) {
+	        me._onError(err);
+	      }
+	    };
+
+	    // create mode box
+	    if (this.options && this.options.modes && this.options.modes.length) {
+	      var modeBox = modeswitcher.create(this, this.options.modes, this.options.mode);
+	      this.menu.appendChild(modeBox);
+	      this.dom.modeBox = modeBox;
+	    }
+
+	    this.content = document.createElement('div');
+	    this.content.className = 'outer';
+	    this.frame.appendChild(this.content);
+
+	    this.container.appendChild(this.frame);
+
+	    if (this.mode == 'code') {
+	      this.editorDom = document.createElement('div');
+	      this.editorDom.style.height = '100%'; // TODO: move to css
+	      this.editorDom.style.width = '100%'; // TODO: move to css
+	      this.content.appendChild(this.editorDom);
+
+	      var editor = ace.edit(this.editorDom);
+	      editor.setTheme('ace/theme/jsoneditor');
+	      editor.setShowPrintMargin(false);
+	      editor.setFontSize(13);
+	      editor.getSession().setMode('ace/mode/json');
+	      editor.getSession().setTabSize(2);
+	      editor.getSession().setUseSoftTabs(true);
+	      editor.getSession().setUseWrapMode(true);
+	      this.editor = editor;
+
+	      var poweredBy = document.createElement('a');
+	      poweredBy.appendChild(document.createTextNode('powered by ace'));
+	      poweredBy.href = 'http://ace.ajax.org';
+	      poweredBy.target = '_blank';
+	      poweredBy.className = 'poweredBy';
+	      poweredBy.onclick = function () {
+	        // TODO: this anchor falls below the margin of the content,
+	        // therefore the normal a.href does not work. We use a click event
+	        // for now, but this should be fixed.
+	        window.open(poweredBy.href, poweredBy.target);
+	      };
+	      this.menu.appendChild(poweredBy);
+
+	      if (options.change) {
+	        // register onchange event
+	        editor.on('change', function () {
+	          options.change();
+	        });
+	      }
+	    }
+	    else {
+	      // load a plain text textarea
+	      var textarea = document.createElement('textarea');
+	      textarea.className = 'text';
+	      textarea.spellcheck = false;
+	      this.content.appendChild(textarea);
+	      this.textarea = textarea;
+
+	      if (options.change) {
+	        // register onchange event
+	        if (this.textarea.oninput === null) {
+	          this.textarea.oninput = function () {
+	            options.change();
+	          }
+	        }
+	        else {
+	          // oninput is undefined. For IE8-
+	          this.textarea.onchange = function () {
+	            options.change();
+	          }
+	        }
+	      }
+	    }
+	  };
+
+	  /**
+	   * Detach the editor from the DOM
+	   * @private
+	   */
+	  textmode._delete = function () {
+	    if (this.frame && this.container && this.frame.parentNode == this.container) {
+	      this.container.removeChild(this.frame);
+	    }
+	  };
+
+	  /**
+	   * Throw an error. If an error callback is configured in options.error, this
+	   * callback will be invoked. Else, a regular error is thrown.
+	   * @param {Error} err
+	   * @private
+	   */
+	  textmode._onError = function(err) {
+	    // TODO: onError is deprecated since version 2.2.0. cleanup some day
+	    if (typeof this.onError === 'function') {
+	      util.log('WARNING: JSONEditor.onError is deprecated. ' +
+	          'Use options.error instead.');
+	      this.onError(err);
+	    }
+
+	    if (this.options && typeof this.options.error === 'function') {
+	      this.options.error(err);
+	    }
+	    else {
+	      throw err;
+	    }
+	  };
+
+	  /**
+	   * Compact the code in the formatter
+	   */
+	  textmode.compact = function () {
+	    var json = util.parse(this.getText());
+	    this.setText(JSON.stringify(json));
+	  };
+
+	  /**
+	   * Format the code in the formatter
+	   */
+	  textmode.format = function () {
+	    var json = util.parse(this.getText());
+	    this.setText(JSON.stringify(json, null, this.indentation));
+	  };
+
+	  /**
+	   * Set focus to the formatter
+	   */
+	  textmode.focus = function () {
+	    if (this.textarea) {
+	      this.textarea.focus();
+	    }
+	    if (this.editor) {
+	      this.editor.focus();
+	    }
+	  };
+
+	  /**
+	   * Resize the formatter
+	   */
+	  textmode.resize = function () {
+	    if (this.editor) {
+	      var force = false;
+	      this.editor.resize(force);
+	    }
+	  };
+
+	  /**
+	   * Set json data in the formatter
+	   * @param {Object} json
+	   */
+	  textmode.set = function(json) {
+	    this.setText(JSON.stringify(json, null, this.indentation));
+	  };
+
+	  /**
+	   * Get json data from the formatter
+	   * @return {Object} json
+	   */
+	  textmode.get = function() {
+	    return util.parse(this.getText());
+	  };
+
+	  /**
+	   * Get the text contents of the editor
+	   * @return {String} jsonText
+	   */
+	  textmode.getText = function() {
+	    if (this.textarea) {
+	      return this.textarea.value;
+	    }
+	    if (this.editor) {
+	      return this.editor.getValue();
+	    }
+	    return '';
+	  };
+
+	  /**
+	   * Set the text contents of the editor
+	   * @param {String} jsonText
+	   */
+	  textmode.setText = function(jsonText) {
+	    if (this.textarea) {
+	      this.textarea.value = jsonText;
+	    }
+	    if (this.editor) {
+	      this.editor.setValue(jsonText, -1);
+	    }
+	  };
+
+	  // define modes
+	  return [
+	    {
+	      mode: 'text',
+	      mixin: textmode,
+	      data: 'text',
+	      load: textmode.format
+	    },
+	    {
+	      mode: 'code',
+	      mixin: textmode,
+	      data: 'text',
+	      load: textmode.format
+	    }
+	  ];
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+
+	  // create namespace
+	  var util = {};
+
+	  /**
+	   * Parse JSON using the parser built-in in the browser.
+	   * On exception, the jsonString is validated and a detailed error is thrown.
+	   * @param {String} jsonString
+	   * @return {JSON} json
+	   */
+	  util.parse = function parse(jsonString) {
+	    try {
+	      return JSON.parse(jsonString);
+	    }
+	    catch (err) {
+	      // try to load as JavaScript instead of JSON (like "{a: 2}" instead of "{"a": 2}"
+	      try {
+	        return util.parseJS(jsonString);
+	      }
+	      catch(err2) {
+	        // ok no luck loading as JavaScript
+
+	        // try to throw a more detailed error message using validate
+	        util.validate(jsonString);
+
+	        // rethrow the original error
+	        throw err;
+	      }
+	    }
+	  };
+
+	  /**
+	   * Parse a string containing an object in JavaScript notation into a JSON.
+	   * Throws an error when not successful. This function can for example parse
+	   * a string like "{a: 2, 'b': {c: 'd'}".
+	   * @param {string} jsString
+	   * @returns {JSON} json
+	   */
+	  util.parseJS = function (jsString) {
+	    // escape all single and double quotes inside strings
+	    var chars = [];
+	    var inString = false;
+	    var i = 0;
+	    while(i < jsString.length) {
+	      var c = jsString.charAt(i);
+	      var isEscaped = jsString.charAt(i - 1) === '\\';
+
+	      if ((c === '"' || c === '\'') && !isEscaped) {
+	        if (c === inString) {
+	          // end of string
+	          inString = false;
+	        }
+	        else if (!inString) {
+	          // start of string
+	          inString = c;
+	        }
+	        else {
+	          // add escape character
+	          chars.push('\\');
+	        }
+	      }
+
+	      chars.push(c);
+	      i++;
+	    }
+	    var jsonString = chars.join('');
+
+	    // replace unescaped single quotes with double quotes,
+	    // and replace escaped single quotes with unescaped single quotes
+	    // TODO: we could do this step immediately in the previous step
+	    jsonString = jsonString.replace(/(.?)'/g, function ($0, $1) {
+	      return ($1 == '\\') ? '\'' : $1 + '"';
+	    });
+
+	    // enclose unquoted object keys with double quotes
+	    jsonString = jsonString.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)(\s*:)/g, function ($0, $1, $2, $3) {
+	      return $1 + '"' + $2 + '"' + $3;
+	    });
+
+	    return JSON.parse(jsonString);
+	  };
+
+	  /**
+	   * Validate a string containing a JSON object
+	   * This method uses JSONLint to validate the String. If JSONLint is not
+	   * available, the built-in JSON parser of the browser is used.
+	   * @param {String} jsonString   String with an (invalid) JSON object
+	   * @throws Error
+	   */
+	  util.validate = function validate(jsonString) {
+	    if (typeof(jsonlint) != 'undefined') {
+	      jsonlint.parse(jsonString);
+	    }
+	    else {
+	      JSON.parse(jsonString);
+	    }
+	  };
+
+	  /**
+	   * Extend object a with the properties of object b
+	   * @param {Object} a
+	   * @param {Object} b
+	   * @return {Object} a
+	   */
+	  util.extend = function extend(a, b) {
+	    for (var prop in b) {
+	      if (b.hasOwnProperty(prop)) {
+	        a[prop] = b[prop];
+	      }
+	    }
+	    return a;
+	  };
+
+	  /**
+	   * Remove all properties from object a
+	   * @param {Object} a
+	   * @return {Object} a
+	   */
+	  util.clear = function clear (a) {
+	    for (var prop in a) {
+	      if (a.hasOwnProperty(prop)) {
+	        delete a[prop];
+	      }
+	    }
+	    return a;
+	  };
+
+	  /**
+	   * Output text to the console, if console is available
+	   * @param {...*} args
+	   */
+	  util.log = function log (args) {
+	    if (typeof console !== 'undefined' && typeof console.log === 'function') {
+	      console.log.apply(console, arguments);
+	    }
+	  };
+
+	  /**
+	   * Get the type of an object
+	   * @param {*} object
+	   * @return {String} type
+	   */
+	  util.type = function type (object) {
+	    if (object === null) {
+	      return 'null';
+	    }
+	    if (object === undefined) {
+	      return 'undefined';
+	    }
+	    if ((object instanceof Number) || (typeof object === 'number')) {
+	      return 'number';
+	    }
+	    if ((object instanceof String) || (typeof object === 'string')) {
+	      return 'string';
+	    }
+	    if ((object instanceof Boolean) || (typeof object === 'boolean')) {
+	      return 'boolean';
+	    }
+	    if ((object instanceof RegExp) || (typeof object === 'regexp')) {
+	      return 'regexp';
+	    }
+	    if (util.isArray(object)) {
+	      return 'array';
+	    }
+
+	    return 'object';
+	  };
+
+	  /**
+	   * Test whether a text contains a url (matches when a string starts
+	   * with 'http://*' or 'https://*' and has no whitespace characters)
+	   * @param {String} text
+	   */
+	  var isUrlRegex = /^https?:\/\/\S+$/;
+	  util.isUrl = function isUrl (text) {
+	    return (typeof text == 'string' || text instanceof String) &&
+	        isUrlRegex.test(text);
+	  };
+
+	  /**
+	   * Tes whether given object is an Array
+	   * @param {*} obj
+	   * @returns {boolean} returns true when obj is an array
+	   */
+	  util.isArray = function (obj) {
+	    return Object.prototype.toString.call(obj) === '[object Array]';
+	  };
+
+	  /**
+	   * Retrieve the absolute left value of a DOM element
+	   * @param {Element} elem    A dom element, for example a div
+	   * @return {Number} left    The absolute left position of this element
+	   *                          in the browser page.
+	   */
+	  util.getAbsoluteLeft = function getAbsoluteLeft(elem) {
+	    var rect = elem.getBoundingClientRect();
+	    return rect.left + window.pageXOffset || document.scrollLeft || 0;
+	  };
+
+	  /**
+	   * Retrieve the absolute top value of a DOM element
+	   * @param {Element} elem    A dom element, for example a div
+	   * @return {Number} top     The absolute top position of this element
+	   *                          in the browser page.
+	   */
+	  util.getAbsoluteTop = function getAbsoluteTop(elem) {
+	    var rect = elem.getBoundingClientRect();
+	    return rect.top + window.pageYOffset || document.scrollTop || 0;
+	  };
+
+	  /**
+	   * add a className to the given elements style
+	   * @param {Element} elem
+	   * @param {String} className
+	   */
+	  util.addClassName = function addClassName(elem, className) {
+	    var classes = elem.className.split(' ');
+	    if (classes.indexOf(className) == -1) {
+	      classes.push(className); // add the class to the array
+	      elem.className = classes.join(' ');
+	    }
+	  };
+
+	  /**
+	   * add a className to the given elements style
+	   * @param {Element} elem
+	   * @param {String} className
+	   */
+	  util.removeClassName = function removeClassName(elem, className) {
+	    var classes = elem.className.split(' ');
+	    var index = classes.indexOf(className);
+	    if (index != -1) {
+	      classes.splice(index, 1); // remove the class from the array
+	      elem.className = classes.join(' ');
+	    }
+	  };
+
+	  /**
+	   * Strip the formatting from the contents of a div
+	   * the formatting from the div itself is not stripped, only from its childs.
+	   * @param {Element} divElement
+	   */
+	  util.stripFormatting = function stripFormatting(divElement) {
+	    var childs = divElement.childNodes;
+	    for (var i = 0, iMax = childs.length; i < iMax; i++) {
+	      var child = childs[i];
+
+	      // remove the style
+	      if (child.style) {
+	        // TODO: test if child.attributes does contain style
+	        child.removeAttribute('style');
+	      }
+
+	      // remove all attributes
+	      var attributes = child.attributes;
+	      if (attributes) {
+	        for (var j = attributes.length - 1; j >= 0; j--) {
+	          var attribute = attributes[j];
+	          if (attribute.specified == true) {
+	            child.removeAttribute(attribute.name);
+	          }
+	        }
+	      }
+
+	      // recursively strip childs
+	      util.stripFormatting(child);
+	    }
+	  };
+
+	  /**
+	   * Set focus to the end of an editable div
+	   * code from Nico Burns
+	   * http://stackoverflow.com/users/140293/nico-burns
+	   * http://stackoverflow.com/questions/1125292/how-to-move-cursor-to-end-of-contenteditable-entity
+	   * @param {Element} contentEditableElement   A content editable div
+	   */
+	  util.setEndOfContentEditable = function setEndOfContentEditable(contentEditableElement) {
+	    var range, selection;
+	    if(document.createRange) {
+	      range = document.createRange();//Create a range (a range is a like the selection but invisible)
+	      range.selectNodeContents(contentEditableElement);//Select the entire contents of the element with the range
+	      range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+	      selection = window.getSelection();//get the selection object (allows you to change selection)
+	      selection.removeAllRanges();//remove any selections already made
+	      selection.addRange(range);//make the range you have just created the visible selection
+	    }
+	  };
+
+	  /**
+	   * Select all text of a content editable div.
+	   * http://stackoverflow.com/a/3806004/1262753
+	   * @param {Element} contentEditableElement   A content editable div
+	   */
+	  util.selectContentEditable = function selectContentEditable(contentEditableElement) {
+	    if (!contentEditableElement || contentEditableElement.nodeName != 'DIV') {
+	      return;
+	    }
+
+	    var sel, range;
+	    if (window.getSelection && document.createRange) {
+	      range = document.createRange();
+	      range.selectNodeContents(contentEditableElement);
+	      sel = window.getSelection();
+	      sel.removeAllRanges();
+	      sel.addRange(range);
+	    }
+	  };
+
+	  /**
+	   * Get text selection
+	   * http://stackoverflow.com/questions/4687808/contenteditable-selected-text-save-and-restore
+	   * @return {Range | TextRange | null} range
+	   */
+	  util.getSelection = function getSelection() {
+	    if (window.getSelection) {
+	      var sel = window.getSelection();
+	      if (sel.getRangeAt && sel.rangeCount) {
+	        return sel.getRangeAt(0);
+	      }
+	    }
+	    return null;
+	  };
+
+	  /**
+	   * Set text selection
+	   * http://stackoverflow.com/questions/4687808/contenteditable-selected-text-save-and-restore
+	   * @param {Range | TextRange | null} range
+	   */
+	  util.setSelection = function setSelection(range) {
+	    if (range) {
+	      if (window.getSelection) {
+	        var sel = window.getSelection();
+	        sel.removeAllRanges();
+	        sel.addRange(range);
+	      }
+	    }
+	  };
+
+	  /**
+	   * Get selected text range
+	   * @return {Object} params  object containing parameters:
+	   *                              {Number}  startOffset
+	   *                              {Number}  endOffset
+	   *                              {Element} container  HTML element holding the
+	   *                                                   selected text element
+	   *                          Returns null if no text selection is found
+	   */
+	  util.getSelectionOffset = function getSelectionOffset() {
+	    var range = util.getSelection();
+
+	    if (range && 'startOffset' in range && 'endOffset' in range &&
+	        range.startContainer && (range.startContainer == range.endContainer)) {
+	      return {
+	        startOffset: range.startOffset,
+	        endOffset: range.endOffset,
+	        container: range.startContainer.parentNode
+	      };
+	    }
+
+	    return null;
+	  };
+
+	  /**
+	   * Set selected text range in given element
+	   * @param {Object} params   An object containing:
+	   *                              {Element} container
+	   *                              {Number} startOffset
+	   *                              {Number} endOffset
+	   */
+	  util.setSelectionOffset = function setSelectionOffset(params) {
+	    if (document.createRange && window.getSelection) {
+	      var selection = window.getSelection();
+	      if(selection) {
+	        var range = document.createRange();
+	        // TODO: do not suppose that the first child of the container is a textnode,
+	        //       but recursively find the textnodes
+	        range.setStart(params.container.firstChild, params.startOffset);
+	        range.setEnd(params.container.firstChild, params.endOffset);
+
+	        util.setSelection(range);
+	      }
+	    }
+	  };
+
+	  /**
+	   * Get the inner text of an HTML element (for example a div element)
+	   * @param {Element} element
+	   * @param {Object} [buffer]
+	   * @return {String} innerText
+	   */
+	  util.getInnerText = function getInnerText(element, buffer) {
+	    var first = (buffer == undefined);
+	    if (first) {
+	      buffer = {
+	        'text': '',
+	        'flush': function () {
+	          var text = this.text;
+	          this.text = '';
+	          return text;
+	        },
+	        'set': function (text) {
+	          this.text = text;
+	        }
+	      };
+	    }
+
+	    // text node
+	    if (element.nodeValue) {
+	      return buffer.flush() + element.nodeValue;
+	    }
+
+	    // divs or other HTML elements
+	    if (element.hasChildNodes()) {
+	      var childNodes = element.childNodes;
+	      var innerText = '';
+
+	      for (var i = 0, iMax = childNodes.length; i < iMax; i++) {
+	        var child = childNodes[i];
+
+	        if (child.nodeName == 'DIV' || child.nodeName == 'P') {
+	          var prevChild = childNodes[i - 1];
+	          var prevName = prevChild ? prevChild.nodeName : undefined;
+	          if (prevName && prevName != 'DIV' && prevName != 'P' && prevName != 'BR') {
+	            innerText += '\n';
+	            buffer.flush();
+	          }
+	          innerText += util.getInnerText(child, buffer);
+	          buffer.set('\n');
+	        }
+	        else if (child.nodeName == 'BR') {
+	          innerText += buffer.flush();
+	          buffer.set('\n');
+	        }
+	        else {
+	          innerText += util.getInnerText(child, buffer);
+	        }
+	      }
+
+	      return innerText;
+	    }
+	    else {
+	      if (element.nodeName == 'P' && util.getInternetExplorerVersion() != -1) {
+	        // On Internet Explorer, a <p> with hasChildNodes()==false is
+	        // rendered with a new line. Note that a <p> with
+	        // hasChildNodes()==true is rendered without a new line
+	        // Other browsers always ensure there is a <br> inside the <p>,
+	        // and if not, the <p> does not render a new line
+	        return buffer.flush();
+	      }
+	    }
+
+	    // br or unknown
+	    return '';
+	  };
+
+	  /**
+	   * Returns the version of Internet Explorer or a -1
+	   * (indicating the use of another browser).
+	   * Source: http://msdn.microsoft.com/en-us/library/ms537509(v=vs.85).aspx
+	   * @return {Number} Internet Explorer version, or -1 in case of an other browser
+	   */
+	  util.getInternetExplorerVersion = function getInternetExplorerVersion() {
+	    if (_ieVersion == -1) {
+	      var rv = -1; // Return value assumes failure.
+	      if (navigator.appName == 'Microsoft Internet Explorer')
+	      {
+	        var ua = navigator.userAgent;
+	        var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+	        if (re.exec(ua) != null) {
+	          rv = parseFloat( RegExp.$1 );
+	        }
+	      }
+
+	      _ieVersion = rv;
+	    }
+
+	    return _ieVersion;
+	  };
+
+	  /**
+	   * Test whether the current browser is Firefox
+	   * @returns {boolean} isFirefox
+	   */
+	  util.isFirefox = function isFirefox () {
+	    return (navigator.userAgent.indexOf("Firefox") != -1);
+	  };
+
+	  /**
+	   * cached internet explorer version
+	   * @type {Number}
+	   * @private
+	   */
+	  var _ieVersion = -1;
+
+	  /**
+	   * Add and event listener. Works for all browsers
+	   * @param {Element}     element    An html element
+	   * @param {string}      action     The action, for example "click",
+	   *                                 without the prefix "on"
+	   * @param {function}    listener   The callback function to be executed
+	   * @param {boolean}     [useCapture] false by default
+	   * @return {function}   the created event listener
+	   */
+	  util.addEventListener = function addEventListener(element, action, listener, useCapture) {
+	    if (element.addEventListener) {
+	      if (useCapture === undefined)
+	        useCapture = false;
+
+	      if (action === "mousewheel" && util.isFirefox()) {
+	        action = "DOMMouseScroll";  // For Firefox
+	      }
+
+	      element.addEventListener(action, listener, useCapture);
+	      return listener;
+	    } else if (element.attachEvent) {
+	      // Old IE browsers
+	      var f = function () {
+	        return listener.call(element, window.event);
+	      };
+	      element.attachEvent("on" + action, f);
+	      return f;
+	    }
+	  };
+
+	  /**
+	   * Remove an event listener from an element
+	   * @param {Element}  element   An html dom element
+	   * @param {string}   action    The name of the event, for example "mousedown"
+	   * @param {function} listener  The listener function
+	   * @param {boolean}  [useCapture]   false by default
+	   */
+	  util.removeEventListener = function removeEventListener(element, action, listener, useCapture) {
+	    if (element.removeEventListener) {
+	      if (useCapture === undefined)
+	        useCapture = false;
+
+	      if (action === "mousewheel" && util.isFirefox()) {
+	        action = "DOMMouseScroll";  // For Firefox
+	      }
+
+	      element.removeEventListener(action, listener, useCapture);
+	    } else if (element.detachEvent) {
+	      // Old IE browsers
+	      element.detachEvent("on" + action, listener);
+	    }
+	  };
+
+	  return util;
+	}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+
+	  /**
+	   * The highlighter can highlight/unhighlight a node, and
+	   * animate the visibility of a context menu.
+	   * @constructor Highlighter
+	   */
+	  function Highlighter () {
+	    this.locked = false;
+	  }
+
+	  /**
+	   * Hightlight given node and its childs
+	   * @param {Node} node
+	   */
+	  Highlighter.prototype.highlight = function (node) {
+	    if (this.locked) {
+	      return;
+	    }
+
+	    if (this.node != node) {
+	      // unhighlight current node
+	      if (this.node) {
+	        this.node.setHighlight(false);
+	      }
+
+	      // highlight new node
+	      this.node = node;
+	      this.node.setHighlight(true);
+	    }
+
+	    // cancel any current timeout
+	    this._cancelUnhighlight();
+	  };
+
+	  /**
+	   * Unhighlight currently highlighted node.
+	   * Will be done after a delay
+	   */
+	  Highlighter.prototype.unhighlight = function () {
+	    if (this.locked) {
+	      return;
+	    }
+
+	    var me = this;
+	    if (this.node) {
+	      this._cancelUnhighlight();
+
+	      // do the unhighlighting after a small delay, to prevent re-highlighting
+	      // the same node when moving from the drag-icon to the contextmenu-icon
+	      // or vice versa.
+	      this.unhighlightTimer = setTimeout(function () {
+	        me.node.setHighlight(false);
+	        me.node = undefined;
+	        me.unhighlightTimer = undefined;
+	      }, 0);
+	    }
+	  };
+
+	  /**
+	   * Cancel an unhighlight action (if before the timeout of the unhighlight action)
+	   * @private
+	   */
+	  Highlighter.prototype._cancelUnhighlight = function () {
+	    if (this.unhighlightTimer) {
+	      clearTimeout(this.unhighlightTimer);
+	      this.unhighlightTimer = undefined;
+	    }
+	  };
+
+	  /**
+	   * Lock highlighting or unhighlighting nodes.
+	   * methods highlight and unhighlight do not work while locked.
+	   */
+	  Highlighter.prototype.lock = function () {
+	    this.locked = true;
+	  };
+
+	  /**
+	   * Unlock highlighting or unhighlighting nodes
+	   */
+	  Highlighter.prototype.unlock = function () {
+	    this.locked = false;
+	  };
+
+	  return Highlighter;
+	}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (util) {
+
+	  /**
+	   * @constructor History
+	   * Store action history, enables undo and redo
+	   * @param {JSONEditor} editor
+	   */
+	  function History (editor) {
+	    this.editor = editor;
+	    this.clear();
+
+	    // map with all supported actions
+	    this.actions = {
+	      'editField': {
+	        'undo': function (params) {
+	          params.node.updateField(params.oldValue);
+	        },
+	        'redo': function (params) {
+	          params.node.updateField(params.newValue);
+	        }
+	      },
+	      'editValue': {
+	        'undo': function (params) {
+	          params.node.updateValue(params.oldValue);
+	        },
+	        'redo': function (params) {
+	          params.node.updateValue(params.newValue);
+	        }
+	      },
+	      'appendNode': {
+	        'undo': function (params) {
+	          params.parent.removeChild(params.node);
+	        },
+	        'redo': function (params) {
+	          params.parent.appendChild(params.node);
+	        }
+	      },
+	      'insertBeforeNode': {
+	        'undo': function (params) {
+	          params.parent.removeChild(params.node);
+	        },
+	        'redo': function (params) {
+	          params.parent.insertBefore(params.node, params.beforeNode);
+	        }
+	      },
+	      'insertAfterNode': {
+	        'undo': function (params) {
+	          params.parent.removeChild(params.node);
+	        },
+	        'redo': function (params) {
+	          params.parent.insertAfter(params.node, params.afterNode);
+	        }
+	      },
+	      'removeNode': {
+	        'undo': function (params) {
+	          var parent = params.parent;
+	          var beforeNode = parent.childs[params.index] || parent.append;
+	          parent.insertBefore(params.node, beforeNode);
+	        },
+	        'redo': function (params) {
+	          params.parent.removeChild(params.node);
+	        }
+	      },
+	      'duplicateNode': {
+	        'undo': function (params) {
+	          params.parent.removeChild(params.clone);
+	        },
+	        'redo': function (params) {
+	          params.parent.insertAfter(params.clone, params.node);
+	        }
+	      },
+	      'changeType': {
+	        'undo': function (params) {
+	          params.node.changeType(params.oldType);
+	        },
+	        'redo': function (params) {
+	          params.node.changeType(params.newType);
+	        }
+	      },
+	      'moveNode': {
+	        'undo': function (params) {
+	          params.startParent.moveTo(params.node, params.startIndex);
+	        },
+	        'redo': function (params) {
+	          params.endParent.moveTo(params.node, params.endIndex);
+	        }
+	      },
+	      'sort': {
+	        'undo': function (params) {
+	          var node = params.node;
+	          node.hideChilds();
+	          node.sort = params.oldSort;
+	          node.childs = params.oldChilds;
+	          node.showChilds();
+	        },
+	        'redo': function (params) {
+	          var node = params.node;
+	          node.hideChilds();
+	          node.sort = params.newSort;
+	          node.childs = params.newChilds;
+	          node.showChilds();
+	        }
+	      }
+
+	      // TODO: restore the original caret position and selection with each undo
+	      // TODO: implement history for actions "expand", "collapse", "scroll", "setDocument"
+	    };
+	  }
+
+	  /**
+	   * The method onChange is executed when the History is changed, and can
+	   * be overloaded.
+	   */
+	  History.prototype.onChange = function () {};
+
+	  /**
+	   * Add a new action to the history
+	   * @param {String} action  The executed action. Available actions: "editField",
+	   *                         "editValue", "changeType", "appendNode",
+	   *                         "removeNode", "duplicateNode", "moveNode"
+	   * @param {Object} params  Object containing parameters describing the change.
+	   *                         The parameters in params depend on the action (for
+	   *                         example for "editValue" the Node, old value, and new
+	   *                         value are provided). params contains all information
+	   *                         needed to undo or redo the action.
+	   */
+	  History.prototype.add = function (action, params) {
+	    this.index++;
+	    this.history[this.index] = {
+	      'action': action,
+	      'params': params,
+	      'timestamp': new Date()
+	    };
+
+	    // remove redo actions which are invalid now
+	    if (this.index < this.history.length - 1) {
+	      this.history.splice(this.index + 1, this.history.length - this.index - 1);
+	    }
+
+	    // fire onchange event
+	    this.onChange();
+	  };
+
+	  /**
+	   * Clear history
+	   */
+	  History.prototype.clear = function () {
+	    this.history = [];
+	    this.index = -1;
+
+	    // fire onchange event
+	    this.onChange();
+	  };
+
+	  /**
+	   * Check if there is an action available for undo
+	   * @return {Boolean} canUndo
+	   */
+	  History.prototype.canUndo = function () {
+	    return (this.index >= 0);
+	  };
+
+	  /**
+	   * Check if there is an action available for redo
+	   * @return {Boolean} canRedo
+	   */
+	  History.prototype.canRedo = function () {
+	    return (this.index < this.history.length - 1);
+	  };
+
+	  /**
+	   * Undo the last action
+	   */
+	  History.prototype.undo = function () {
+	    if (this.canUndo()) {
+	      var obj = this.history[this.index];
+	      if (obj) {
+	        var action = this.actions[obj.action];
+	        if (action && action.undo) {
+	          action.undo(obj.params);
+	          if (obj.params.oldSelection) {
+	            this.editor.setSelection(obj.params.oldSelection);
+	          }
+	        }
+	        else {
+	          util.log('Error: unknown action "' + obj.action + '"');
+	        }
+	      }
+	      this.index--;
+
+	      // fire onchange event
+	      this.onChange();
+	    }
+	  };
+
+	  /**
+	   * Redo the last action
+	   */
+	  History.prototype.redo = function () {
+	    if (this.canRedo()) {
+	      this.index++;
+
+	      var obj = this.history[this.index];
+	      if (obj) {
+	        var action = this.actions[obj.action];
+	        if (action && action.redo) {
+	          action.redo(obj.params);
+	          if (obj.params.newSelection) {
+	            this.editor.setSelection(obj.params.newSelection);
+	          }
+	        }
+	        else {
+	          util.log('Error: unknown action "' + obj.action + '"');
+	        }
+	      }
+
+	      // fire onchange event
+	      this.onChange();
+	    }
+	  };
+
+	  return History;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+
+	  /**
+	   * @constructor SearchBox
+	   * Create a search box in given HTML container
+	   * @param {JSONEditor} editor    The JSON Editor to attach to
+	   * @param {Element} container               HTML container element of where to
+	   *                                          create the search box
+	   */
+	  function SearchBox (editor, container) {
+	    var searchBox = this;
+
+	    this.editor = editor;
+	    this.timeout = undefined;
+	    this.delay = 200; // ms
+	    this.lastText = undefined;
+
+	    this.dom = {};
+	    this.dom.container = container;
+
+	    var table = document.createElement('table');
+	    this.dom.table = table;
+	    table.className = 'search';
+	    container.appendChild(table);
+	    var tbody = document.createElement('tbody');
+	    this.dom.tbody = tbody;
+	    table.appendChild(tbody);
+	    var tr = document.createElement('tr');
+	    tbody.appendChild(tr);
+
+	    var td = document.createElement('td');
+	    tr.appendChild(td);
+	    var results = document.createElement('div');
+	    this.dom.results = results;
+	    results.className = 'results';
+	    td.appendChild(results);
+
+	    td = document.createElement('td');
+	    tr.appendChild(td);
+	    var divInput = document.createElement('div');
+	    this.dom.input = divInput;
+	    divInput.className = 'frame';
+	    divInput.title = 'Search fields and values';
+	    td.appendChild(divInput);
+
+	    // table to contain the text input and search button
+	    var tableInput = document.createElement('table');
+	    divInput.appendChild(tableInput);
+	    var tbodySearch = document.createElement('tbody');
+	    tableInput.appendChild(tbodySearch);
+	    tr = document.createElement('tr');
+	    tbodySearch.appendChild(tr);
+
+	    var refreshSearch = document.createElement('button');
+	    refreshSearch.className = 'refresh';
+	    td = document.createElement('td');
+	    td.appendChild(refreshSearch);
+	    tr.appendChild(td);
+
+	    var search = document.createElement('input');
+	    this.dom.search = search;
+	    search.oninput = function (event) {
+	      searchBox._onDelayedSearch(event);
+	    };
+	    search.onchange = function (event) { // For IE 9
+	      searchBox._onSearch(event);
+	    };
+	    search.onkeydown = function (event) {
+	      searchBox._onKeyDown(event);
+	    };
+	    search.onkeyup = function (event) {
+	      searchBox._onKeyUp(event);
+	    };
+	    refreshSearch.onclick = function (event) {
+	      search.select();
+	    };
+
+	    // TODO: ESC in FF restores the last input, is a FF bug, https://bugzilla.mozilla.org/show_bug.cgi?id=598819
+	    td = document.createElement('td');
+	    td.appendChild(search);
+	    tr.appendChild(td);
+
+	    var searchNext = document.createElement('button');
+	    searchNext.title = 'Next result (Enter)';
+	    searchNext.className = 'next';
+	    searchNext.onclick = function () {
+	      searchBox.next();
+	    };
+	    td = document.createElement('td');
+	    td.appendChild(searchNext);
+	    tr.appendChild(td);
+
+	    var searchPrevious = document.createElement('button');
+	    searchPrevious.title = 'Previous result (Shift+Enter)';
+	    searchPrevious.className = 'previous';
+	    searchPrevious.onclick = function () {
+	      searchBox.previous();
+	    };
+	    td = document.createElement('td');
+	    td.appendChild(searchPrevious);
+	    tr.appendChild(td);
+	  }
+
+	  /**
+	   * Go to the next search result
+	   * @param {boolean} [focus]   If true, focus will be set to the next result
+	   *                            focus is false by default.
+	   */
+	  SearchBox.prototype.next = function(focus) {
+	    if (this.results != undefined) {
+	      var index = (this.resultIndex != undefined) ? this.resultIndex + 1 : 0;
+	      if (index > this.results.length - 1) {
+	        index = 0;
+	      }
+	      this._setActiveResult(index, focus);
+	    }
+	  };
+
+	  /**
+	   * Go to the prevous search result
+	   * @param {boolean} [focus]   If true, focus will be set to the next result
+	   *                            focus is false by default.
+	   */
+	  SearchBox.prototype.previous = function(focus) {
+	    if (this.results != undefined) {
+	      var max = this.results.length - 1;
+	      var index = (this.resultIndex != undefined) ? this.resultIndex - 1 : max;
+	      if (index < 0) {
+	        index = max;
+	      }
+	      this._setActiveResult(index, focus);
+	    }
+	  };
+
+	  /**
+	   * Set new value for the current active result
+	   * @param {Number} index
+	   * @param {boolean} [focus]   If true, focus will be set to the next result.
+	   *                            focus is false by default.
+	   * @private
+	   */
+	  SearchBox.prototype._setActiveResult = function(index, focus) {
+	    // de-activate current active result
+	    if (this.activeResult) {
+	      var prevNode = this.activeResult.node;
+	      var prevElem = this.activeResult.elem;
+	      if (prevElem == 'field') {
+	        delete prevNode.searchFieldActive;
+	      }
+	      else {
+	        delete prevNode.searchValueActive;
+	      }
+	      prevNode.updateDom();
+	    }
+
+	    if (!this.results || !this.results[index]) {
+	      // out of range, set to undefined
+	      this.resultIndex = undefined;
+	      this.activeResult = undefined;
+	      return;
+	    }
+
+	    this.resultIndex = index;
+
+	    // set new node active
+	    var node = this.results[this.resultIndex].node;
+	    var elem = this.results[this.resultIndex].elem;
+	    if (elem == 'field') {
+	      node.searchFieldActive = true;
+	    }
+	    else {
+	      node.searchValueActive = true;
+	    }
+	    this.activeResult = this.results[this.resultIndex];
+	    node.updateDom();
+
+	    // TODO: not so nice that the focus is only set after the animation is finished
+	    node.scrollTo(function () {
+	      if (focus) {
+	        node.focus(elem);
+	      }
+	    });
+	  };
+
+	  /**
+	   * Cancel any running onDelayedSearch.
+	   * @private
+	   */
+	  SearchBox.prototype._clearDelay = function() {
+	    if (this.timeout != undefined) {
+	      clearTimeout(this.timeout);
+	      delete this.timeout;
+	    }
+	  };
+
+	  /**
+	   * Start a timer to execute a search after a short delay.
+	   * Used for reducing the number of searches while typing.
+	   * @param {Event} event
+	   * @private
+	   */
+	  SearchBox.prototype._onDelayedSearch = function (event) {
+	    // execute the search after a short delay (reduces the number of
+	    // search actions while typing in the search text box)
+	    this._clearDelay();
+	    var searchBox = this;
+	    this.timeout = setTimeout(function (event) {
+	          searchBox._onSearch(event);
+	        },
+	        this.delay);
+	  };
+
+	  /**
+	   * Handle onSearch event
+	   * @param {Event} event
+	   * @param {boolean} [forceSearch]  If true, search will be executed again even
+	   *                                 when the search text is not changed.
+	   *                                 Default is false.
+	   * @private
+	   */
+	  SearchBox.prototype._onSearch = function (event, forceSearch) {
+	    this._clearDelay();
+
+	    var value = this.dom.search.value;
+	    var text = (value.length > 0) ? value : undefined;
+	    if (text != this.lastText || forceSearch) {
+	      // only search again when changed
+	      this.lastText = text;
+	      this.results = this.editor.search(text);
+	      this._setActiveResult(undefined);
+
+	      // display search results
+	      if (text != undefined) {
+	        var resultCount = this.results.length;
+	        switch (resultCount) {
+	          case 0: this.dom.results.innerHTML = 'no&nbsp;results'; break;
+	          case 1: this.dom.results.innerHTML = '1&nbsp;result'; break;
+	          default: this.dom.results.innerHTML = resultCount + '&nbsp;results'; break;
+	        }
+	      }
+	      else {
+	        this.dom.results.innerHTML = '';
+	      }
+	    }
+	  };
+
+	  /**
+	   * Handle onKeyDown event in the input box
+	   * @param {Event} event
+	   * @private
+	   */
+	  SearchBox.prototype._onKeyDown = function (event) {
+	    var keynum = event.which;
+	    if (keynum == 27) { // ESC
+	      this.dom.search.value = '';  // clear search
+	      this._onSearch(event);
+	      event.preventDefault();
+	      event.stopPropagation();
+	    }
+	    else if (keynum == 13) { // Enter
+	      if (event.ctrlKey) {
+	        // force to search again
+	        this._onSearch(event, true);
+	      }
+	      else if (event.shiftKey) {
+	        // move to the previous search result
+	        this.previous();
+	      }
+	      else {
+	        // move to the next search result
+	        this.next();
+	      }
+	      event.preventDefault();
+	      event.stopPropagation();
+	    }
+	  };
+
+	  /**
+	   * Handle onKeyUp event in the input box
+	   * @param {Event} event
+	   * @private
+	   */
+	  SearchBox.prototype._onKeyUp = function (event) {
+	    var keynum = event.keyCode;
+	    if (keynum != 27 && keynum != 13) { // !show and !Enter
+	      this._onDelayedSearch(event);   // For IE 9
+	    }
+	  };
+
+	  return SearchBox;
+	}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(9), __webpack_require__(10), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (ContextMenu, appendNodeFactory, util) {
+
+	  /**
+	   * @constructor Node
+	   * Create a new Node
+	   * @param {TreeEditor} editor
+	   * @param {Object} [params] Can contain parameters:
+	   *                          {string}  field
+	   *                          {boolean} fieldEditable
+	   *                          {*}       value
+	   *                          {String}  type  Can have values 'auto', 'array',
+	   *                                          'object', or 'string'.
+	   */
+	  function Node (editor, params) {
+	    /** @type {TreeEditor} */
+	    this.editor = editor;
+	    this.dom = {};
+	    this.expanded = false;
+
+	    if(params && (params instanceof Object)) {
+	      this.setField(params.field, params.fieldEditable);
+	      this.setValue(params.value, params.type);
+	    }
+	    else {
+	      this.setField('');
+	      this.setValue(null);
+	    }
+	  }
+
+	  /**
+	   * Determine whether the field and/or value of this node are editable
+	   * @private
+	   */
+	  Node.prototype._updateEditability = function () {
+	    this.editable = {
+	      field: true,
+	      value: true
+	    };
+
+	    if (this.editor) {
+	      this.editable.field = this.editor.options.mode === 'tree';
+	      this.editable.value = this.editor.options.mode !== 'view';
+
+	      if (this.editor.options.mode === 'tree' && (typeof this.editor.options.editable === 'function')) {
+	        var editable = this.editor.options.editable({
+	          field: this.field,
+	          value: this.value,
+	          path: this.path()
+	        });
+
+	        if (typeof editable === 'boolean') {
+	          this.editable.field = editable;
+	          this.editable.value = editable;
+	        }
+	        else {
+	          if (typeof editable.field === 'boolean') this.editable.field = editable.field;
+	          if (typeof editable.value === 'boolean') this.editable.value = editable.value;
+	        }
+	      }
+	    }
+	  };
+
+	  /**
+	   * Get the path of this node
+	   * @return {String[]} Array containing the path to this node
+	   */
+	  Node.prototype.path = function () {
+	    var node = this;
+	    var path = [];
+	    while (node) {
+	      var field = node.field || node.index;
+	      if (field !== undefined) {
+	        path.unshift(field);
+	      }
+	      node = node.parent;
+	    }
+	    return path;
+	  };
+
+	  /**
+	   * Set parent node
+	   * @param {Node} parent
+	   */
+	  Node.prototype.setParent = function(parent) {
+	    this.parent = parent;
+	  };
+
+	  /**
+	   * Set field
+	   * @param {String}  field
+	   * @param {boolean} [fieldEditable]
+	   */
+	  Node.prototype.setField = function(field, fieldEditable) {
+	    this.field = field;
+	    this.fieldEditable = (fieldEditable == true);
+	  };
+
+	  /**
+	   * Get field
+	   * @return {String}
+	   */
+	  Node.prototype.getField = function() {
+	    if (this.field === undefined) {
+	      this._getDomField();
+	    }
+
+	    return this.field;
+	  };
+
+	  /**
+	   * Set value. Value is a JSON structure or an element String, Boolean, etc.
+	   * @param {*} value
+	   * @param {String} [type]  Specify the type of the value. Can be 'auto',
+	   *                         'array', 'object', or 'string'
+	   */
+	  Node.prototype.setValue = function(value, type) {
+	    var childValue, child;
+
+	    // first clear all current childs (if any)
+	    var childs = this.childs;
+	    if (childs) {
+	      while (childs.length) {
+	        this.removeChild(childs[0]);
+	      }
+	    }
+
+	    // TODO: remove the DOM of this Node
+
+	    this.type = this._getType(value);
+
+	    // check if type corresponds with the provided type
+	    if (type && type != this.type) {
+	      if (type == 'string' && this.type == 'auto') {
+	        this.type = type;
+	      }
+	      else {
+	        throw new Error('Type mismatch: ' +
+	            'cannot cast value of type "' + this.type +
+	            ' to the specified type "' + type + '"');
+	      }
+	    }
+
+	    if (this.type == 'array') {
+	      // array
+	      this.childs = [];
+	      for (var i = 0, iMax = value.length; i < iMax; i++) {
+	        childValue = value[i];
+	        if (childValue !== undefined && !(childValue instanceof Function)) {
+	          // ignore undefined and functions
+	          child = new Node(this.editor, {
+	            value: childValue
+	          });
+	          this.appendChild(child);
+	        }
+	      }
+	      this.value = '';
+	    }
+	    else if (this.type == 'object') {
+	      // object
+	      this.childs = [];
+	      for (var childField in value) {
+	        if (value.hasOwnProperty(childField)) {
+	          childValue = value[childField];
+	          if (childValue !== undefined && !(childValue instanceof Function)) {
+	            // ignore undefined and functions
+	            child = new Node(this.editor, {
+	              field: childField,
+	              value: childValue
+	            });
+	            this.appendChild(child);
+	          }
+	        }
+	      }
+	      this.value = '';
+	    }
+	    else {
+	      // value
+	      this.childs = undefined;
+	      this.value = value;
+	      /* TODO
+	       if (typeof(value) == 'string') {
+	       var escValue = JSON.stringify(value);
+	       this.value = escValue.substring(1, escValue.length - 1);
+	       util.log('check', value, this.value);
+	       }
+	       else {
+	       this.value = value;
+	       }
+	       */
+	    }
+	  };
+
+	  /**
+	   * Get value. Value is a JSON structure
+	   * @return {*} value
+	   */
+	  Node.prototype.getValue = function() {
+	    //var childs, i, iMax;
+
+	    if (this.type == 'array') {
+	      var arr = [];
+	      this.childs.forEach (function (child) {
+	        arr.push(child.getValue());
+	      });
+	      return arr;
+	    }
+	    else if (this.type == 'object') {
+	      var obj = {};
+	      this.childs.forEach (function (child) {
+	        obj[child.getField()] = child.getValue();
+	      });
+	      return obj;
+	    }
+	    else {
+	      if (this.value === undefined) {
+	        this._getDomValue();
+	      }
+
+	      return this.value;
+	    }
+	  };
+
+	  /**
+	   * Get the nesting level of this node
+	   * @return {Number} level
+	   */
+	  Node.prototype.getLevel = function() {
+	    return (this.parent ? this.parent.getLevel() + 1 : 0);
+	  };
+
+	  /**
+	   * Create a clone of a node
+	   * The complete state of a clone is copied, including whether it is expanded or
+	   * not. The DOM elements are not cloned.
+	   * @return {Node} clone
+	   */
+	  Node.prototype.clone = function() {
+	    var clone = new Node(this.editor);
+	    clone.type = this.type;
+	    clone.field = this.field;
+	    clone.fieldInnerText = this.fieldInnerText;
+	    clone.fieldEditable = this.fieldEditable;
+	    clone.value = this.value;
+	    clone.valueInnerText = this.valueInnerText;
+	    clone.expanded = this.expanded;
+
+	    if (this.childs) {
+	      // an object or array
+	      var cloneChilds = [];
+	      this.childs.forEach(function (child) {
+	        var childClone = child.clone();
+	        childClone.setParent(clone);
+	        cloneChilds.push(childClone);
+	      });
+	      clone.childs = cloneChilds;
+	    }
+	    else {
+	      // a value
+	      clone.childs = undefined;
+	    }
+
+	    return clone;
+	  };
+
+	  /**
+	   * Expand this node and optionally its childs.
+	   * @param {boolean} [recurse] Optional recursion, true by default. When
+	   *                            true, all childs will be expanded recursively
+	   */
+	  Node.prototype.expand = function(recurse) {
+	    if (!this.childs) {
+	      return;
+	    }
+
+	    // set this node expanded
+	    this.expanded = true;
+	    if (this.dom.expand) {
+	      this.dom.expand.className = 'expanded';
+	    }
+
+	    this.showChilds();
+
+	    if (recurse != false) {
+	      this.childs.forEach(function (child) {
+	        child.expand(recurse);
+	      });
+	    }
+	  };
+
+	  /**
+	   * Collapse this node and optionally its childs.
+	   * @param {boolean} [recurse] Optional recursion, true by default. When
+	   *                            true, all childs will be collapsed recursively
+	   */
+	  Node.prototype.collapse = function(recurse) {
+	    if (!this.childs) {
+	      return;
+	    }
+
+	    this.hideChilds();
+
+	    // collapse childs in case of recurse
+	    if (recurse != false) {
+	      this.childs.forEach(function (child) {
+	        child.collapse(recurse);
+	      });
+
+	    }
+
+	    // make this node collapsed
+	    if (this.dom.expand) {
+	      this.dom.expand.className = 'collapsed';
+	    }
+	    this.expanded = false;
+	  };
+
+	  /**
+	   * Recursively show all childs when they are expanded
+	   */
+	  Node.prototype.showChilds = function() {
+	    var childs = this.childs;
+	    if (!childs) {
+	      return;
+	    }
+	    if (!this.expanded) {
+	      return;
+	    }
+
+	    var tr = this.dom.tr;
+	    var table = tr ? tr.parentNode : undefined;
+	    if (table) {
+	      // show row with append button
+	      var append = this.getAppend();
+	      var nextTr = tr.nextSibling;
+	      if (nextTr) {
+	        table.insertBefore(append, nextTr);
+	      }
+	      else {
+	        table.appendChild(append);
+	      }
+
+	      // show childs
+	      this.childs.forEach(function (child) {
+	        table.insertBefore(child.getDom(), append);
+	        child.showChilds();
+	      });
+	    }
+	  };
+
+	  /**
+	   * Hide the node with all its childs
+	   */
+	  Node.prototype.hide = function() {
+	    var tr = this.dom.tr;
+	    var table = tr ? tr.parentNode : undefined;
+	    if (table) {
+	      table.removeChild(tr);
+	    }
+	    this.hideChilds();
+	  };
+
+
+	  /**
+	   * Recursively hide all childs
+	   */
+	  Node.prototype.hideChilds = function() {
+	    var childs = this.childs;
+	    if (!childs) {
+	      return;
+	    }
+	    if (!this.expanded) {
+	      return;
+	    }
+
+	    // hide append row
+	    var append = this.getAppend();
+	    if (append.parentNode) {
+	      append.parentNode.removeChild(append);
+	    }
+
+	    // hide childs
+	    this.childs.forEach(function (child) {
+	      child.hide();
+	    });
+	  };
+
+
+	  /**
+	   * Add a new child to the node.
+	   * Only applicable when Node value is of type array or object
+	   * @param {Node} node
+	   */
+	  Node.prototype.appendChild = function(node) {
+	    if (this._hasChilds()) {
+	      // adjust the link to the parent
+	      node.setParent(this);
+	      node.fieldEditable = (this.type == 'object');
+	      if (this.type == 'array') {
+	        node.index = this.childs.length;
+	      }
+	      this.childs.push(node);
+
+	      if (this.expanded) {
+	        // insert into the DOM, before the appendRow
+	        var newTr = node.getDom();
+	        var appendTr = this.getAppend();
+	        var table = appendTr ? appendTr.parentNode : undefined;
+	        if (appendTr && table) {
+	          table.insertBefore(newTr, appendTr);
+	        }
+
+	        node.showChilds();
+	      }
+
+	      this.updateDom({'updateIndexes': true});
+	      node.updateDom({'recurse': true});
+	    }
+	  };
+
+
+	  /**
+	   * Move a node from its current parent to this node
+	   * Only applicable when Node value is of type array or object
+	   * @param {Node} node
+	   * @param {Node} beforeNode
+	   */
+	  Node.prototype.moveBefore = function(node, beforeNode) {
+	    if (this._hasChilds()) {
+	      // create a temporary row, to prevent the scroll position from jumping
+	      // when removing the node
+	      var tbody = (this.dom.tr) ? this.dom.tr.parentNode : undefined;
+	      if (tbody) {
+	        var trTemp = document.createElement('tr');
+	        trTemp.style.height = tbody.clientHeight + 'px';
+	        tbody.appendChild(trTemp);
+	      }
+
+	      if (node.parent) {
+	        node.parent.removeChild(node);
+	      }
+
+	      if (beforeNode instanceof AppendNode) {
+	        this.appendChild(node);
+	      }
+	      else {
+	        this.insertBefore(node, beforeNode);
+	      }
+
+	      if (tbody) {
+	        tbody.removeChild(trTemp);
+	      }
+	    }
+	  };
+
+	  /**
+	   * Move a node from its current parent to this node
+	   * Only applicable when Node value is of type array or object.
+	   * If index is out of range, the node will be appended to the end
+	   * @param {Node} node
+	   * @param {Number} index
+	   */
+	  Node.prototype.moveTo = function (node, index) {
+	    if (node.parent == this) {
+	      // same parent
+	      var currentIndex = this.childs.indexOf(node);
+	      if (currentIndex < index) {
+	        // compensate the index for removal of the node itself
+	        index++;
+	      }
+	    }
+
+	    var beforeNode = this.childs[index] || this.append;
+	    this.moveBefore(node, beforeNode);
+	  };
+
+	  /**
+	   * Insert a new child before a given node
+	   * Only applicable when Node value is of type array or object
+	   * @param {Node} node
+	   * @param {Node} beforeNode
+	   */
+	  Node.prototype.insertBefore = function(node, beforeNode) {
+	    if (this._hasChilds()) {
+	      if (beforeNode == this.append) {
+	        // append to the child nodes
+
+	        // adjust the link to the parent
+	        node.setParent(this);
+	        node.fieldEditable = (this.type == 'object');
+	        this.childs.push(node);
+	      }
+	      else {
+	        // insert before a child node
+	        var index = this.childs.indexOf(beforeNode);
+	        if (index == -1) {
+	          throw new Error('Node not found');
+	        }
+
+	        // adjust the link to the parent
+	        node.setParent(this);
+	        node.fieldEditable = (this.type == 'object');
+	        this.childs.splice(index, 0, node);
+	      }
+
+	      if (this.expanded) {
+	        // insert into the DOM
+	        var newTr = node.getDom();
+	        var nextTr = beforeNode.getDom();
+	        var table = nextTr ? nextTr.parentNode : undefined;
+	        if (nextTr && table) {
+	          table.insertBefore(newTr, nextTr);
+	        }
+
+	        node.showChilds();
+	      }
+
+	      this.updateDom({'updateIndexes': true});
+	      node.updateDom({'recurse': true});
+	    }
+	  };
+
+	  /**
+	   * Insert a new child before a given node
+	   * Only applicable when Node value is of type array or object
+	   * @param {Node} node
+	   * @param {Node} afterNode
+	   */
+	  Node.prototype.insertAfter = function(node, afterNode) {
+	    if (this._hasChilds()) {
+	      var index = this.childs.indexOf(afterNode);
+	      var beforeNode = this.childs[index + 1];
+	      if (beforeNode) {
+	        this.insertBefore(node, beforeNode);
+	      }
+	      else {
+	        this.appendChild(node);
+	      }
+	    }
+	  };
+
+	  /**
+	   * Search in this node
+	   * The node will be expanded when the text is found one of its childs, else
+	   * it will be collapsed. Searches are case insensitive.
+	   * @param {String} text
+	   * @return {Node[]} results  Array with nodes containing the search text
+	   */
+	  Node.prototype.search = function(text) {
+	    var results = [];
+	    var index;
+	    var search = text ? text.toLowerCase() : undefined;
+
+	    // delete old search data
+	    delete this.searchField;
+	    delete this.searchValue;
+
+	    // search in field
+	    if (this.field != undefined) {
+	      var field = String(this.field).toLowerCase();
+	      index = field.indexOf(search);
+	      if (index != -1) {
+	        this.searchField = true;
+	        results.push({
+	          'node': this,
+	          'elem': 'field'
+	        });
+	      }
+
+	      // update dom
+	      this._updateDomField();
+	    }
+
+	    // search in value
+	    if (this._hasChilds()) {
+	      // array, object
+
+	      // search the nodes childs
+	      if (this.childs) {
+	        var childResults = [];
+	        this.childs.forEach(function (child) {
+	          childResults = childResults.concat(child.search(text));
+	        });
+	        results = results.concat(childResults);
+	      }
+
+	      // update dom
+	      if (search != undefined) {
+	        var recurse = false;
+	        if (childResults.length == 0) {
+	          this.collapse(recurse);
+	        }
+	        else {
+	          this.expand(recurse);
+	        }
+	      }
+	    }
+	    else {
+	      // string, auto
+	      if (this.value != undefined ) {
+	        var value = String(this.value).toLowerCase();
+	        index = value.indexOf(search);
+	        if (index != -1) {
+	          this.searchValue = true;
+	          results.push({
+	            'node': this,
+	            'elem': 'value'
+	          });
+	        }
+	      }
+
+	      // update dom
+	      this._updateDomValue();
+	    }
+
+	    return results;
+	  };
+
+	  /**
+	   * Move the scroll position such that this node is in the visible area.
+	   * The node will not get the focus
+	   * @param {function(boolean)} [callback]
+	   */
+	  Node.prototype.scrollTo = function(callback) {
+	    if (!this.dom.tr || !this.dom.tr.parentNode) {
+	      // if the node is not visible, expand its parents
+	      var parent = this.parent;
+	      var recurse = false;
+	      while (parent) {
+	        parent.expand(recurse);
+	        parent = parent.parent;
+	      }
+	    }
+
+	    if (this.dom.tr && this.dom.tr.parentNode) {
+	      this.editor.scrollTo(this.dom.tr.offsetTop, callback);
+	    }
+	  };
+
+
+	// stores the element name currently having the focus
+	  Node.focusElement = undefined;
+
+	  /**
+	   * Set focus to this node
+	   * @param {String} [elementName]  The field name of the element to get the
+	   *                                focus available values: 'drag', 'menu',
+	   *                                'expand', 'field', 'value' (default)
+	   */
+	  Node.prototype.focus = function(elementName) {
+	    Node.focusElement = elementName;
+
+	    if (this.dom.tr && this.dom.tr.parentNode) {
+	      var dom = this.dom;
+
+	      switch (elementName) {
+	        case 'drag':
+	          if (dom.drag) {
+	            dom.drag.focus();
+	          }
+	          else {
+	            dom.menu.focus();
+	          }
+	          break;
+
+	        case 'menu':
+	          dom.menu.focus();
+	          break;
+
+	        case 'expand':
+	          if (this._hasChilds()) {
+	            dom.expand.focus();
+	          }
+	          else if (dom.field && this.fieldEditable) {
+	            dom.field.focus();
+	            util.selectContentEditable(dom.field);
+	          }
+	          else if (dom.value && !this._hasChilds()) {
+	            dom.value.focus();
+	            util.selectContentEditable(dom.value);
+	          }
+	          else {
+	            dom.menu.focus();
+	          }
+	          break;
+
+	        case 'field':
+	          if (dom.field && this.fieldEditable) {
+	            dom.field.focus();
+	            util.selectContentEditable(dom.field);
+	          }
+	          else if (dom.value && !this._hasChilds()) {
+	            dom.value.focus();
+	            util.selectContentEditable(dom.value);
+	          }
+	          else if (this._hasChilds()) {
+	            dom.expand.focus();
+	          }
+	          else {
+	            dom.menu.focus();
+	          }
+	          break;
+
+	        case 'value':
+	        default:
+	          if (dom.value && !this._hasChilds()) {
+	            dom.value.focus();
+	            util.selectContentEditable(dom.value);
+	          }
+	          else if (dom.field && this.fieldEditable) {
+	            dom.field.focus();
+	            util.selectContentEditable(dom.field);
+	          }
+	          else if (this._hasChilds()) {
+	            dom.expand.focus();
+	          }
+	          else {
+	            dom.menu.focus();
+	          }
+	          break;
+	      }
+	    }
+	  };
+
+	  /**
+	   * Select all text in an editable div after a delay of 0 ms
+	   * @param {Element} editableDiv
+	   */
+	  Node.select = function(editableDiv) {
+	    setTimeout(function () {
+	      util.selectContentEditable(editableDiv);
+	    }, 0);
+	  };
+
+	  /**
+	   * Update the values from the DOM field and value of this node
+	   */
+	  Node.prototype.blur = function() {
+	    // retrieve the actual field and value from the DOM.
+	    this._getDomValue(false);
+	    this._getDomField(false);
+	  };
+
+	  /**
+	   * Duplicate given child node
+	   * new structure will be added right before the cloned node
+	   * @param {Node} node           the childNode to be duplicated
+	   * @return {Node} clone         the clone of the node
+	   * @private
+	   */
+	  Node.prototype._duplicate = function(node) {
+	    var clone = node.clone();
+
+	    /* TODO: adjust the field name (to prevent equal field names)
+	     if (this.type == 'object') {
+	     }
+	     */
+
+	    this.insertAfter(clone, node);
+
+	    return clone;
+	  };
+
+	  /**
+	   * Check if given node is a child. The method will check recursively to find
+	   * this node.
+	   * @param {Node} node
+	   * @return {boolean} containsNode
+	   */
+	  Node.prototype.containsNode = function(node) {
+	    if (this == node) {
+	      return true;
+	    }
+
+	    var childs = this.childs;
+	    if (childs) {
+	      // TODO: use the js5 Array.some() here?
+	      for (var i = 0, iMax = childs.length; i < iMax; i++) {
+	        if (childs[i].containsNode(node)) {
+	          return true;
+	        }
+	      }
+	    }
+
+	    return false;
+	  };
+
+	  /**
+	   * Move given node into this node
+	   * @param {Node} node           the childNode to be moved
+	   * @param {Node} beforeNode     node will be inserted before given
+	   *                                         node. If no beforeNode is given,
+	   *                                         the node is appended at the end
+	   * @private
+	   */
+	  Node.prototype._move = function(node, beforeNode) {
+	    if (node == beforeNode) {
+	      // nothing to do...
+	      return;
+	    }
+
+	    // check if this node is not a child of the node to be moved here
+	    if (node.containsNode(this)) {
+	      throw new Error('Cannot move a field into a child of itself');
+	    }
+
+	    // remove the original node
+	    if (node.parent) {
+	      node.parent.removeChild(node);
+	    }
+
+	    // create a clone of the node
+	    var clone = node.clone();
+	    node.clearDom();
+
+	    // insert or append the node
+	    if (beforeNode) {
+	      this.insertBefore(clone, beforeNode);
+	    }
+	    else {
+	      this.appendChild(clone);
+	    }
+
+	    /* TODO: adjust the field name (to prevent equal field names)
+	     if (this.type == 'object') {
+	     }
+	     */
+	  };
+
+	  /**
+	   * Remove a child from the node.
+	   * Only applicable when Node value is of type array or object
+	   * @param {Node} node   The child node to be removed;
+	   * @return {Node | undefined} node  The removed node on success,
+	   *                                             else undefined
+	   */
+	  Node.prototype.removeChild = function(node) {
+	    if (this.childs) {
+	      var index = this.childs.indexOf(node);
+
+	      if (index != -1) {
+	        node.hide();
+
+	        // delete old search results
+	        delete node.searchField;
+	        delete node.searchValue;
+
+	        var removedNode = this.childs.splice(index, 1)[0];
+
+	        this.updateDom({'updateIndexes': true});
+
+	        return removedNode;
+	      }
+	    }
+
+	    return undefined;
+	  };
+
+	  /**
+	   * Remove a child node node from this node
+	   * This method is equal to Node.removeChild, except that _remove firex an
+	   * onChange event.
+	   * @param {Node} node
+	   * @private
+	   */
+	  Node.prototype._remove = function (node) {
+	    this.removeChild(node);
+	  };
+
+	  /**
+	   * Change the type of the value of this Node
+	   * @param {String} newType
+	   */
+	  Node.prototype.changeType = function (newType) {
+	    var oldType = this.type;
+
+	    if (oldType == newType) {
+	      // type is not changed
+	      return;
+	    }
+
+	    if ((newType == 'string' || newType == 'auto') &&
+	        (oldType == 'string' || oldType == 'auto')) {
+	      // this is an easy change
+	      this.type = newType;
+	    }
+	    else {
+	      // change from array to object, or from string/auto to object/array
+	      var table = this.dom.tr ? this.dom.tr.parentNode : undefined;
+	      var lastTr;
+	      if (this.expanded) {
+	        lastTr = this.getAppend();
+	      }
+	      else {
+	        lastTr = this.getDom();
+	      }
+	      var nextTr = (lastTr && lastTr.parentNode) ? lastTr.nextSibling : undefined;
+
+	      // hide current field and all its childs
+	      this.hide();
+	      this.clearDom();
+
+	      // adjust the field and the value
+	      this.type = newType;
+
+	      // adjust childs
+	      if (newType == 'object') {
+	        if (!this.childs) {
+	          this.childs = [];
+	        }
+
+	        this.childs.forEach(function (child, index) {
+	          child.clearDom();
+	          delete child.index;
+	          child.fieldEditable = true;
+	          if (child.field == undefined) {
+	            child.field = '';
+	          }
+	        });
+
+	        if (oldType == 'string' || oldType == 'auto') {
+	          this.expanded = true;
+	        }
+	      }
+	      else if (newType == 'array') {
+	        if (!this.childs) {
+	          this.childs = [];
+	        }
+
+	        this.childs.forEach(function (child, index) {
+	          child.clearDom();
+	          child.fieldEditable = false;
+	          child.index = index;
+	        });
+
+	        if (oldType == 'string' || oldType == 'auto') {
+	          this.expanded = true;
+	        }
+	      }
+	      else {
+	        this.expanded = false;
+	      }
+
+	      // create new DOM
+	      if (table) {
+	        if (nextTr) {
+	          table.insertBefore(this.getDom(), nextTr);
+	        }
+	        else {
+	          table.appendChild(this.getDom());
+	        }
+	      }
+	      this.showChilds();
+	    }
+
+	    if (newType == 'auto' || newType == 'string') {
+	      // cast value to the correct type
+	      if (newType == 'string') {
+	        this.value = String(this.value);
+	      }
+	      else {
+	        this.value = this._stringCast(String(this.value));
+	      }
+
+	      this.focus();
+	    }
+
+	    this.updateDom({'updateIndexes': true});
+	  };
+
+	  /**
+	   * Retrieve value from DOM
+	   * @param {boolean} [silent]  If true (default), no errors will be thrown in
+	   *                            case of invalid data
+	   * @private
+	   */
+	  Node.prototype._getDomValue = function(silent) {
+	    if (this.dom.value && this.type != 'array' && this.type != 'object') {
+	      this.valueInnerText = util.getInnerText(this.dom.value);
+	    }
+
+	    if (this.valueInnerText != undefined) {
+	      try {
+	        // retrieve the value
+	        var value;
+	        if (this.type == 'string') {
+	          value = this._unescapeHTML(this.valueInnerText);
+	        }
+	        else {
+	          var str = this._unescapeHTML(this.valueInnerText);
+	          value = this._stringCast(str);
+	        }
+	        if (value !== this.value) {
+	          var oldValue = this.value;
+	          this.value = value;
+	          this.editor._onAction('editValue', {
+	            'node': this,
+	            'oldValue': oldValue,
+	            'newValue': value,
+	            'oldSelection': this.editor.selection,
+	            'newSelection': this.editor.getSelection()
+	          });
+	        }
+	      }
+	      catch (err) {
+	        this.value = undefined;
+	        // TODO: sent an action with the new, invalid value?
+	        if (silent != true) {
+	          throw err;
+	        }
+	      }
+	    }
+	  };
+
+	  /**
+	   * Update dom value:
+	   * - the text color of the value, depending on the type of the value
+	   * - the height of the field, depending on the width
+	   * - background color in case it is empty
+	   * @private
+	   */
+	  Node.prototype._updateDomValue = function () {
+	    var domValue = this.dom.value;
+	    if (domValue) {
+	      // set text color depending on value type
+	      // TODO: put colors in css
+	      var v = this.value;
+	      var t = (this.type == 'auto') ? util.type(v) : this.type;
+	      var isUrl = (t == 'string' && util.isUrl(v));
+	      var color = '';
+	      if (isUrl && !this.editable.value) { // TODO: when to apply this?
+	        color = '';
+	      }
+	      else if (t == 'string') {
+	        color = 'green';
+	      }
+	      else if (t == 'number') {
+	        color = 'red';
+	      }
+	      else if (t == 'boolean') {
+	        color = 'darkorange';
+	      }
+	      else if (this._hasChilds()) {
+	        color = '';
+	      }
+	      else if (v === null) {
+	        color = '#004ED0';  // blue
+	      }
+	      else {
+	        // invalid value
+	        color = 'black';
+	      }
+	      domValue.style.color = color;
+
+	      // make background color light-gray when empty
+	      var isEmpty = (String(this.value) == '' && this.type != 'array' && this.type != 'object');
+	      if (isEmpty) {
+	        util.addClassName(domValue, 'empty');
+	      }
+	      else {
+	        util.removeClassName(domValue, 'empty');
+	      }
+
+	      // underline url
+	      if (isUrl) {
+	        util.addClassName(domValue, 'url');
+	      }
+	      else {
+	        util.removeClassName(domValue, 'url');
+	      }
+
+	      // update title
+	      if (t == 'array' || t == 'object') {
+	        var count = this.childs ? this.childs.length : 0;
+	        domValue.title = this.type + ' containing ' + count + ' items';
+	      }
+	      else if (t == 'string' && util.isUrl(v)) {
+	        if (this.editable.value) {
+	          domValue.title = 'Ctrl+Click or Ctrl+Enter to open url in new window';
+	        }
+	      }
+	      else {
+	        domValue.title = '';
+	      }
+
+	      // highlight when there is a search result
+	      if (this.searchValueActive) {
+	        util.addClassName(domValue, 'highlight-active');
+	      }
+	      else {
+	        util.removeClassName(domValue, 'highlight-active');
+	      }
+	      if (this.searchValue) {
+	        util.addClassName(domValue, 'highlight');
+	      }
+	      else {
+	        util.removeClassName(domValue, 'highlight');
+	      }
+
+	      // strip formatting from the contents of the editable div
+	      util.stripFormatting(domValue);
+	    }
+	  };
+
+	  /**
+	   * Update dom field:
+	   * - the text color of the field, depending on the text
+	   * - the height of the field, depending on the width
+	   * - background color in case it is empty
+	   * @private
+	   */
+	  Node.prototype._updateDomField = function () {
+	    var domField = this.dom.field;
+	    if (domField) {
+	      // make backgound color lightgray when empty
+	      var isEmpty = (String(this.field) == '' && this.parent.type != 'array');
+	      if (isEmpty) {
+	        util.addClassName(domField, 'empty');
+	      }
+	      else {
+	        util.removeClassName(domField, 'empty');
+	      }
+
+	      // highlight when there is a search result
+	      if (this.searchFieldActive) {
+	        util.addClassName(domField, 'highlight-active');
+	      }
+	      else {
+	        util.removeClassName(domField, 'highlight-active');
+	      }
+	      if (this.searchField) {
+	        util.addClassName(domField, 'highlight');
+	      }
+	      else {
+	        util.removeClassName(domField, 'highlight');
+	      }
+
+	      // strip formatting from the contents of the editable div
+	      util.stripFormatting(domField);
+	    }
+	  };
+
+	  /**
+	   * Retrieve field from DOM
+	   * @param {boolean} [silent]  If true (default), no errors will be thrown in
+	   *                            case of invalid data
+	   * @private
+	   */
+	  Node.prototype._getDomField = function(silent) {
+	    if (this.dom.field && this.fieldEditable) {
+	      this.fieldInnerText = util.getInnerText(this.dom.field);
+	    }
+
+	    if (this.fieldInnerText != undefined) {
+	      try {
+	        var field = this._unescapeHTML(this.fieldInnerText);
+
+	        if (field !== this.field) {
+	          var oldField = this.field;
+	          this.field = field;
+	          this.editor._onAction('editField', {
+	            'node': this,
+	            'oldValue': oldField,
+	            'newValue': field,
+	            'oldSelection': this.editor.selection,
+	            'newSelection': this.editor.getSelection()
+	          });
+	        }
+	      }
+	      catch (err) {
+	        this.field = undefined;
+	        // TODO: sent an action here, with the new, invalid value?
+	        if (silent != true) {
+	          throw err;
+	        }
+	      }
+	    }
+	  };
+
+	  /**
+	   * Clear the dom of the node
+	   */
+	  Node.prototype.clearDom = function() {
+	    // TODO: hide the node first?
+	    //this.hide();
+	    // TODO: recursively clear dom?
+
+	    this.dom = {};
+	  };
+
+	  /**
+	   * Get the HTML DOM TR element of the node.
+	   * The dom will be generated when not yet created
+	   * @return {Element} tr    HTML DOM TR Element
+	   */
+	  Node.prototype.getDom = function() {
+	    var dom = this.dom;
+	    if (dom.tr) {
+	      return dom.tr;
+	    }
+
+	    this._updateEditability();
+
+	    // create row
+	    dom.tr = document.createElement('tr');
+	    dom.tr.node = this;
+
+	    if (this.editor.options.mode === 'tree') { // note: we take here the global setting
+	      var tdDrag = document.createElement('td');
+	      if (this.editable.field) {
+	        // create draggable area
+	        if (this.parent) {
+	          var domDrag = document.createElement('button');
+	          dom.drag = domDrag;
+	          domDrag.className = 'dragarea';
+	          domDrag.title = 'Drag to move this field (Alt+Shift+Arrows)';
+	          tdDrag.appendChild(domDrag);
+	        }
+	      }
+	      dom.tr.appendChild(tdDrag);
+
+	      // create context menu
+	      var tdMenu = document.createElement('td');
+	      var menu = document.createElement('button');
+	      dom.menu = menu;
+	      menu.className = 'contextmenu';
+	      menu.title = 'Click to open the actions menu (Ctrl+M)';
+	      tdMenu.appendChild(dom.menu);
+	      dom.tr.appendChild(tdMenu);
+	    }
+
+	    // create tree and field
+	    var tdField = document.createElement('td');
+	    dom.tr.appendChild(tdField);
+	    dom.tree = this._createDomTree();
+	    tdField.appendChild(dom.tree);
+
+	    this.updateDom({'updateIndexes': true});
+
+	    return dom.tr;
+	  };
+
+	  /**
+	   * DragStart event, fired on mousedown on the dragarea at the left side of a Node
+	   * @param {Event} event
+	   * @private
+	   */
+	  Node.prototype._onDragStart = function (event) {
+	    var node = this;
+	    if (!this.mousemove) {
+	      this.mousemove = util.addEventListener(document, 'mousemove',
+	          function (event) {
+	            node._onDrag(event);
+	          });
+	    }
+
+	    if (!this.mouseup) {
+	      this.mouseup = util.addEventListener(document, 'mouseup',
+	          function (event ) {
+	            node._onDragEnd(event);
+	          });
+	    }
+
+	    this.editor.highlighter.lock();
+	    this.drag = {
+	      'oldCursor': document.body.style.cursor,
+	      'startParent': this.parent,
+	      'startIndex': this.parent.childs.indexOf(this),
+	      'mouseX': event.pageX,
+	      'level': this.getLevel()
+	    };
+	    document.body.style.cursor = 'move';
+
+	    event.preventDefault();
+	  };
+
+	  /**
+	   * Drag event, fired when moving the mouse while dragging a Node
+	   * @param {Event} event
+	   * @private
+	   */
+	  Node.prototype._onDrag = function (event) {
+	    // TODO: this method has grown too large. Split it in a number of methods
+	    var mouseY = event.pageY;
+	    var mouseX = event.pageX;
+
+	    var trThis, trPrev, trNext, trFirst, trLast, trRoot;
+	    var nodePrev, nodeNext;
+	    var topThis, topPrev, topFirst, heightThis, bottomNext, heightNext;
+	    var moved = false;
+
+	    // TODO: add an ESC option, which resets to the original position
+
+	    // move up/down
+	    trThis = this.dom.tr;
+	    topThis = util.getAbsoluteTop(trThis);
+	    heightThis = trThis.offsetHeight;
+	    if (mouseY < topThis) {
+	      // move up
+	      trPrev = trThis;
+	      do {
+	        trPrev = trPrev.previousSibling;
+	        nodePrev = Node.getNodeFromTarget(trPrev);
+	        topPrev = trPrev ? util.getAbsoluteTop(trPrev) : 0;
+	      }
+	      while (trPrev && mouseY < topPrev);
+
+	      if (nodePrev && !nodePrev.parent) {
+	        nodePrev = undefined;
+	      }
+
+	      if (!nodePrev) {
+	        // move to the first node
+	        trRoot = trThis.parentNode.firstChild;
+	        trPrev = trRoot ? trRoot.nextSibling : undefined;
+	        nodePrev = Node.getNodeFromTarget(trPrev);
+	        if (nodePrev == this) {
+	          nodePrev = undefined;
+	        }
+	      }
+
+	      if (nodePrev) {
+	        // check if mouseY is really inside the found node
+	        trPrev = nodePrev.dom.tr;
+	        topPrev = trPrev ? util.getAbsoluteTop(trPrev) : 0;
+	        if (mouseY > topPrev + heightThis) {
+	          nodePrev = undefined;
+	        }
+	      }
+
+	      if (nodePrev) {
+	        nodePrev.parent.moveBefore(this, nodePrev);
+	        moved = true;
+	      }
+	    }
+	    else {
+	      // move down
+	      trLast = (this.expanded && this.append) ? this.append.getDom() : this.dom.tr;
+	      trFirst = trLast ? trLast.nextSibling : undefined;
+	      if (trFirst) {
+	        topFirst = util.getAbsoluteTop(trFirst);
+	        trNext = trFirst;
+	        do {
+	          nodeNext = Node.getNodeFromTarget(trNext);
+	          if (trNext) {
+	            bottomNext = trNext.nextSibling ?
+	                util.getAbsoluteTop(trNext.nextSibling) : 0;
+	            heightNext = trNext ? (bottomNext - topFirst) : 0;
+
+	            if (nodeNext.parent.childs.length == 1 && nodeNext.parent.childs[0] == this) {
+	              // We are about to remove the last child of this parent,
+	              // which will make the parents appendNode visible.
+	              topThis += 24 - 1;
+	              // TODO: dangerous to suppose the height of the appendNode a constant of 24-1 px.
+	            }
+	          }
+
+	          trNext = trNext.nextSibling;
+	        }
+	        while (trNext && mouseY > topThis + heightNext);
+
+	        if (nodeNext && nodeNext.parent) {
+	          // calculate the desired level
+	          var diffX = (mouseX - this.drag.mouseX);
+	          var diffLevel = Math.round(diffX / 24 / 2);
+	          var level = this.drag.level + diffLevel; // desired level
+	          var levelNext = nodeNext.getLevel();     // level to be
+
+	          // find the best fitting level (move upwards over the append nodes)
+	          trPrev = nodeNext.dom.tr.previousSibling;
+	          while (levelNext < level && trPrev) {
+	            nodePrev = Node.getNodeFromTarget(trPrev);
+	            if (nodePrev == this || nodePrev._isChildOf(this)) {
+	              // neglect itself and its childs
+	            }
+	            else if (nodePrev instanceof AppendNode) {
+	              var childs = nodePrev.parent.childs;
+	              if (childs.length > 1 ||
+	                  (childs.length == 1 && childs[0] != this)) {
+	                // non-visible append node of a list of childs
+	                // consisting of not only this node (else the
+	                // append node will change into a visible "empty"
+	                // text when removing this node).
+	                nodeNext = Node.getNodeFromTarget(trPrev);
+	                levelNext = nodeNext.getLevel();
+	              }
+	              else {
+	                break;
+	              }
+	            }
+	            else {
+	              break;
+	            }
+
+	            trPrev = trPrev.previousSibling;
+	          }
+
+	          // move the node when its position is changed
+	          if (trLast.nextSibling != nodeNext.dom.tr) {
+	            nodeNext.parent.moveBefore(this, nodeNext);
+	            moved = true;
+	          }
+	        }
+	      }
+	    }
+
+	    if (moved) {
+	      // update the dragging parameters when moved
+	      this.drag.mouseX = mouseX;
+	      this.drag.level = this.getLevel();
+	    }
+
+	    // auto scroll when hovering around the top of the editor
+	    this.editor.startAutoScroll(mouseY);
+
+	    event.preventDefault();
+	  };
+
+	  /**
+	   * Drag event, fired on mouseup after having dragged a node
+	   * @param {Event} event
+	   * @private
+	   */
+	  Node.prototype._onDragEnd = function (event) {
+	    var params = {
+	      'node': this,
+	      'startParent': this.drag.startParent,
+	      'startIndex': this.drag.startIndex,
+	      'endParent': this.parent,
+	      'endIndex': this.parent.childs.indexOf(this)
+	    };
+	    if ((params.startParent != params.endParent) ||
+	        (params.startIndex != params.endIndex)) {
+	      // only register this action if the node is actually moved to another place
+	      this.editor._onAction('moveNode', params);
+	    }
+
+	    document.body.style.cursor = this.drag.oldCursor;
+	    this.editor.highlighter.unlock();
+	    delete this.drag;
+
+	    if (this.mousemove) {
+	      util.removeEventListener(document, 'mousemove', this.mousemove);
+	      delete this.mousemove;}
+	    if (this.mouseup) {
+	      util.removeEventListener(document, 'mouseup', this.mouseup);
+	      delete this.mouseup;
+	    }
+
+	    // Stop any running auto scroll
+	    this.editor.stopAutoScroll();
+
+	    event.preventDefault();
+	  };
+
+	  /**
+	   * Test if this node is a child of an other node
+	   * @param {Node} node
+	   * @return {boolean} isChild
+	   * @private
+	   */
+	  Node.prototype._isChildOf = function (node) {
+	    var n = this.parent;
+	    while (n) {
+	      if (n == node) {
+	        return true;
+	      }
+	      n = n.parent;
+	    }
+
+	    return false;
+	  };
+
+	  /**
+	   * Create an editable field
+	   * @return {Element} domField
+	   * @private
+	   */
+	  Node.prototype._createDomField = function () {
+	    return document.createElement('div');
+	  };
+
+	  /**
+	   * Set highlighting for this node and all its childs.
+	   * Only applied to the currently visible (expanded childs)
+	   * @param {boolean} highlight
+	   */
+	  Node.prototype.setHighlight = function (highlight) {
+	    if (this.dom.tr) {
+	      this.dom.tr.className = (highlight ? 'highlight' : '');
+
+	      if (this.append) {
+	        this.append.setHighlight(highlight);
+	      }
+
+	      if (this.childs) {
+	        this.childs.forEach(function (child) {
+	          child.setHighlight(highlight);
+	        });
+	      }
+	    }
+	  };
+
+	  /**
+	   * Update the value of the node. Only primitive types are allowed, no Object
+	   * or Array is allowed.
+	   * @param {String | Number | Boolean | null} value
+	   */
+	  Node.prototype.updateValue = function (value) {
+	    this.value = value;
+	    this.updateDom();
+	  };
+
+	  /**
+	   * Update the field of the node.
+	   * @param {String} field
+	   */
+	  Node.prototype.updateField = function (field) {
+	    this.field = field;
+	    this.updateDom();
+	  };
+
+	  /**
+	   * Update the HTML DOM, optionally recursing through the childs
+	   * @param {Object} [options] Available parameters:
+	   *                          {boolean} [recurse]         If true, the
+	   *                          DOM of the childs will be updated recursively.
+	   *                          False by default.
+	   *                          {boolean} [updateIndexes]   If true, the childs
+	   *                          indexes of the node will be updated too. False by
+	   *                          default.
+	   */
+	  Node.prototype.updateDom = function (options) {
+	    // update level indentation
+	    var domTree = this.dom.tree;
+	    if (domTree) {
+	      domTree.style.marginLeft = this.getLevel() * 24 + 'px';
+	    }
+
+	    // update field
+	    var domField = this.dom.field;
+	    if (domField) {
+	      if (this.fieldEditable) {
+	        // parent is an object
+	        domField.contentEditable = this.editable.field;
+	        domField.spellcheck = false;
+	        domField.className = 'field';
+	      }
+	      else {
+	        // parent is an array this is the root node
+	        domField.className = 'readonly';
+	      }
+
+	      var field;
+	      if (this.index != undefined) {
+	        field = this.index;
+	      }
+	      else if (this.field != undefined) {
+	        field = this.field;
+	      }
+	      else if (this._hasChilds()) {
+	        field = this.type;
+	      }
+	      else {
+	        field = '';
+	      }
+	      domField.innerHTML = this._escapeHTML(field);
+	    }
+
+	    // update value
+	    var domValue = this.dom.value;
+	    if (domValue) {
+	      var count = this.childs ? this.childs.length : 0;
+	      if (this.type == 'array') {
+	        domValue.innerHTML = '[' + count + ']';
+	      }
+	      else if (this.type == 'object') {
+	        domValue.innerHTML = '{' + count + '}';
+	      }
+	      else {
+	        domValue.innerHTML = this._escapeHTML(this.value);
+	      }
+	    }
+
+	    // update field and value
+	    this._updateDomField();
+	    this._updateDomValue();
+
+	    // update childs indexes
+	    if (options && options.updateIndexes == true) {
+	      // updateIndexes is true or undefined
+	      this._updateDomIndexes();
+	    }
+
+	    if (options && options.recurse == true) {
+	      // recurse is true or undefined. update childs recursively
+	      if (this.childs) {
+	        this.childs.forEach(function (child) {
+	          child.updateDom(options);
+	        });
+	      }
+	    }
+
+	    // update row with append button
+	    if (this.append) {
+	      this.append.updateDom();
+	    }
+	  };
+
+	  /**
+	   * Update the DOM of the childs of a node: update indexes and undefined field
+	   * names.
+	   * Only applicable when structure is an array or object
+	   * @private
+	   */
+	  Node.prototype._updateDomIndexes = function () {
+	    var domValue = this.dom.value;
+	    var childs = this.childs;
+	    if (domValue && childs) {
+	      if (this.type == 'array') {
+	        childs.forEach(function (child, index) {
+	          child.index = index;
+	          var childField = child.dom.field;
+	          if (childField) {
+	            childField.innerHTML = index;
+	          }
+	        });
+	      }
+	      else if (this.type == 'object') {
+	        childs.forEach(function (child) {
+	          if (child.index != undefined) {
+	            delete child.index;
+
+	            if (child.field == undefined) {
+	              child.field = '';
+	            }
+	          }
+	        });
+	      }
+	    }
+	  };
+
+	  /**
+	   * Create an editable value
+	   * @private
+	   */
+	  Node.prototype._createDomValue = function () {
+	    var domValue;
+
+	    if (this.type == 'array') {
+	      domValue = document.createElement('div');
+	      domValue.className = 'readonly';
+	      domValue.innerHTML = '[...]';
+	    }
+	    else if (this.type == 'object') {
+	      domValue = document.createElement('div');
+	      domValue.className = 'readonly';
+	      domValue.innerHTML = '{...}';
+	    }
+	    else {
+	      if (!this.editable.value && util.isUrl(this.value)) {
+	        // create a link in case of read-only editor and value containing an url
+	        domValue = document.createElement('a');
+	        domValue.className = 'value';
+	        domValue.href = this.value;
+	        domValue.target = '_blank';
+	        domValue.innerHTML = this._escapeHTML(this.value);
+	      }
+	      else {
+	        // create an editable or read-only div
+	        domValue = document.createElement('div');
+	        domValue.contentEditable = this.editable.value;
+	        domValue.spellcheck = false;
+	        domValue.className = 'value';
+	        domValue.innerHTML = this._escapeHTML(this.value);
+	      }
+	    }
+
+	    return domValue;
+	  };
+
+	  /**
+	   * Create an expand/collapse button
+	   * @return {Element} expand
+	   * @private
+	   */
+	  Node.prototype._createDomExpandButton = function () {
+	    // create expand button
+	    var expand = document.createElement('button');
+	    if (this._hasChilds()) {
+	      expand.className = this.expanded ? 'expanded' : 'collapsed';
+	      expand.title =
+	          'Click to expand/collapse this field (Ctrl+E). \n' +
+	          'Ctrl+Click to expand/collapse including all childs.';
+	    }
+	    else {
+	      expand.className = 'invisible';
+	      expand.title = '';
+	    }
+
+	    return expand;
+	  };
+
+
+	  /**
+	   * Create a DOM tree element, containing the expand/collapse button
+	   * @return {Element} domTree
+	   * @private
+	   */
+	  Node.prototype._createDomTree = function () {
+	    var dom = this.dom;
+	    var domTree = document.createElement('table');
+	    var tbody = document.createElement('tbody');
+	    domTree.style.borderCollapse = 'collapse'; // TODO: put in css
+	    domTree.className = 'values';
+	    domTree.appendChild(tbody);
+	    var tr = document.createElement('tr');
+	    tbody.appendChild(tr);
+
+	    // create expand button
+	    var tdExpand = document.createElement('td');
+	    tdExpand.className = 'tree';
+	    tr.appendChild(tdExpand);
+	    dom.expand = this._createDomExpandButton();
+	    tdExpand.appendChild(dom.expand);
+	    dom.tdExpand = tdExpand;
+
+	    // create the field
+	    var tdField = document.createElement('td');
+	    tdField.className = 'tree';
+	    tr.appendChild(tdField);
+	    dom.field = this._createDomField();
+	    tdField.appendChild(dom.field);
+	    dom.tdField = tdField;
+
+	    // create a separator
+	    var tdSeparator = document.createElement('td');
+	    tdSeparator.className = 'tree';
+	    tr.appendChild(tdSeparator);
+	    if (this.type != 'object' && this.type != 'array') {
+	      tdSeparator.appendChild(document.createTextNode(':'));
+	      tdSeparator.className = 'separator';
+	    }
+	    dom.tdSeparator = tdSeparator;
+
+	    // create the value
+	    var tdValue = document.createElement('td');
+	    tdValue.className = 'tree';
+	    tr.appendChild(tdValue);
+	    dom.value = this._createDomValue();
+	    tdValue.appendChild(dom.value);
+	    dom.tdValue = tdValue;
+
+	    return domTree;
+	  };
+
+	  /**
+	   * Handle an event. The event is catched centrally by the editor
+	   * @param {Event} event
+	   */
+	  Node.prototype.onEvent = function (event) {
+	    var type = event.type,
+	        target = event.target || event.srcElement,
+	        dom = this.dom,
+	        node = this,
+	        focusNode,
+	        expandable = this._hasChilds();
+
+	    // check if mouse is on menu or on dragarea.
+	    // If so, highlight current row and its childs
+	    if (target == dom.drag || target == dom.menu) {
+	      if (type == 'mouseover') {
+	        this.editor.highlighter.highlight(this);
+	      }
+	      else if (type == 'mouseout') {
+	        this.editor.highlighter.unhighlight();
+	      }
+	    }
+
+	    // drag events
+	    if (type == 'mousedown' && target == dom.drag) {
+	      this._onDragStart(event);
+	    }
+
+	    // context menu events
+	    if (type == 'click' && target == dom.menu) {
+	      var highlighter = node.editor.highlighter;
+	      highlighter.highlight(node);
+	      highlighter.lock();
+	      util.addClassName(dom.menu, 'selected');
+	      this.showContextMenu(dom.menu, function () {
+	        util.removeClassName(dom.menu, 'selected');
+	        highlighter.unlock();
+	        highlighter.unhighlight();
+	      });
+	    }
+
+	    // expand events
+	    if (type == 'click' && target == dom.expand) {
+	      if (expandable) {
+	        var recurse = event.ctrlKey; // with ctrl-key, expand/collapse all
+	        this._onExpand(recurse);
+	      }
+	    }
+
+	    // value events
+	    var domValue = dom.value;
+	    if (target == domValue) {
+	      //noinspection FallthroughInSwitchStatementJS
+	      switch (type) {
+	        case 'focus':
+	          focusNode = this;
+	          break;
+
+	        case 'blur':
+	        case 'change':
+	          this._getDomValue(true);
+	          this._updateDomValue();
+	          if (this.value) {
+	            domValue.innerHTML = this._escapeHTML(this.value);
+	          }
+	          break;
+
+	        case 'input':
+	          this._getDomValue(true);
+	          this._updateDomValue();
+	          break;
+
+	        case 'keydown':
+	        case 'mousedown':
+	          this.editor.selection = this.editor.getSelection();
+	          break;
+
+	        case 'click':
+	          if (event.ctrlKey || !this.editable.value) {
+	            if (util.isUrl(this.value)) {
+	              window.open(this.value, '_blank');
+	            }
+	          }
+	          break;
+
+	        case 'keyup':
+	          this._getDomValue(true);
+	          this._updateDomValue();
+	          break;
+
+	        case 'cut':
+	        case 'paste':
+	          setTimeout(function () {
+	            node._getDomValue(true);
+	            node._updateDomValue();
+	          }, 1);
+	          break;
+	      }
+	    }
+
+	    // field events
+	    var domField = dom.field;
+	    if (target == domField) {
+	      switch (type) {
+	        case 'focus':
+	          focusNode = this;
+	          break;
+
+	        case 'blur':
+	        case 'change':
+	          this._getDomField(true);
+	          this._updateDomField();
+	          if (this.field) {
+	            domField.innerHTML = this._escapeHTML(this.field);
+	          }
+	          break;
+
+	        case 'input':
+	          this._getDomField(true);
+	          this._updateDomField();
+	          break;
+
+	        case 'keydown':
+	        case 'mousedown':
+	          this.editor.selection = this.editor.getSelection();
+	          break;
+
+	        case 'keyup':
+	          this._getDomField(true);
+	          this._updateDomField();
+	          break;
+
+	        case 'cut':
+	        case 'paste':
+	          setTimeout(function () {
+	            node._getDomField(true);
+	            node._updateDomField();
+	          }, 1);
+	          break;
+	      }
+	    }
+
+	    // focus
+	    // when clicked in whitespace left or right from the field or value, set focus
+	    var domTree = dom.tree;
+	    if (target == domTree.parentNode) {
+	      switch (type) {
+	        case 'click':
+	          var left = (event.offsetX != undefined) ?
+	              (event.offsetX < (this.getLevel() + 1) * 24) :
+	              (event.pageX < util.getAbsoluteLeft(dom.tdSeparator));// for FF
+	          if (left || expandable) {
+	            // node is expandable when it is an object or array
+	            if (domField) {
+	              util.setEndOfContentEditable(domField);
+	              domField.focus();
+	            }
+	          }
+	          else {
+	            if (domValue) {
+	              util.setEndOfContentEditable(domValue);
+	              domValue.focus();
+	            }
+	          }
+	          break;
+	      }
+	    }
+	    if ((target == dom.tdExpand && !expandable) || target == dom.tdField ||
+	        target == dom.tdSeparator) {
+	      switch (type) {
+	        case 'click':
+	          if (domField) {
+	            util.setEndOfContentEditable(domField);
+	            domField.focus();
+	          }
+	          break;
+	      }
+	    }
+
+	    if (type == 'keydown') {
+	      this.onKeyDown(event);
+	    }
+	  };
+
+	  /**
+	   * Key down event handler
+	   * @param {Event} event
+	   */
+	  Node.prototype.onKeyDown = function (event) {
+	    var keynum = event.which || event.keyCode;
+	    var target = event.target || event.srcElement;
+	    var ctrlKey = event.ctrlKey;
+	    var shiftKey = event.shiftKey;
+	    var altKey = event.altKey;
+	    var handled = false;
+	    var prevNode, nextNode, nextDom, nextDom2;
+	    var editable = this.editor.options.mode === 'tree';
+
+	    // util.log(ctrlKey, keynum, event.charCode); // TODO: cleanup
+	    if (keynum == 13) { // Enter
+	      if (target == this.dom.value) {
+	        if (!this.editable.value || event.ctrlKey) {
+	          if (util.isUrl(this.value)) {
+	            window.open(this.value, '_blank');
+	            handled = true;
+	          }
+	        }
+	      }
+	      else if (target == this.dom.expand) {
+	        var expandable = this._hasChilds();
+	        if (expandable) {
+	          var recurse = event.ctrlKey; // with ctrl-key, expand/collapse all
+	          this._onExpand(recurse);
+	          target.focus();
+	          handled = true;
+	        }
+	      }
+	    }
+	    else if (keynum == 68) {  // D
+	      if (ctrlKey && editable) {   // Ctrl+D
+	        this._onDuplicate();
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 69) { // E
+	      if (ctrlKey) {       // Ctrl+E and Ctrl+Shift+E
+	        this._onExpand(shiftKey);  // recurse = shiftKey
+	        target.focus(); // TODO: should restore focus in case of recursing expand (which takes DOM offline)
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 77 && editable) { // M
+	      if (ctrlKey) { // Ctrl+M
+	        this.showContextMenu(target);
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 46 && editable) { // Del
+	      if (ctrlKey) {       // Ctrl+Del
+	        this._onRemove();
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 45 && editable) { // Ins
+	      if (ctrlKey && !shiftKey) {       // Ctrl+Ins
+	        this._onInsertBefore();
+	        handled = true;
+	      }
+	      else if (ctrlKey && shiftKey) {   // Ctrl+Shift+Ins
+	        this._onInsertAfter();
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 35) { // End
+	      if (altKey) { // Alt+End
+	        // find the last node
+	        var lastNode = this._lastNode();
+	        if (lastNode) {
+	          lastNode.focus(Node.focusElement || this._getElementName(target));
+	        }
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 36) { // Home
+	      if (altKey) { // Alt+Home
+	        // find the first node
+	        var firstNode = this._firstNode();
+	        if (firstNode) {
+	          firstNode.focus(Node.focusElement || this._getElementName(target));
+	        }
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 37) {        // Arrow Left
+	      if (altKey && !shiftKey) {  // Alt + Arrow Left
+	        // move to left element
+	        var prevElement = this._previousElement(target);
+	        if (prevElement) {
+	          this.focus(this._getElementName(prevElement));
+	        }
+	        handled = true;
+	      }
+	      else if (altKey && shiftKey && editable) { // Alt + Shift Arrow left
+	        if (this.expanded) {
+	          var appendDom = this.getAppend();
+	          nextDom = appendDom ? appendDom.nextSibling : undefined;
+	        }
+	        else {
+	          var dom = this.getDom();
+	          nextDom = dom.nextSibling;
+	        }
+	        if (nextDom) {
+	          nextNode = Node.getNodeFromTarget(nextDom);
+	          nextDom2 = nextDom.nextSibling;
+	          nextNode2 = Node.getNodeFromTarget(nextDom2);
+	          if (nextNode && nextNode instanceof AppendNode &&
+	              !(this.parent.childs.length == 1) &&
+	              nextNode2 && nextNode2.parent) {
+	            nextNode2.parent.moveBefore(this, nextNode2);
+	            this.focus(Node.focusElement || this._getElementName(target));
+	          }
+	        }
+	      }
+	    }
+	    else if (keynum == 38) {        // Arrow Up
+	      if (altKey && !shiftKey) {  // Alt + Arrow Up
+	        // find the previous node
+	        prevNode = this._previousNode();
+	        if (prevNode) {
+	          prevNode.focus(Node.focusElement || this._getElementName(target));
+	        }
+	        handled = true;
+	      }
+	      else if (altKey && shiftKey) { // Alt + Shift + Arrow Up
+	        // find the previous node
+	        prevNode = this._previousNode();
+	        if (prevNode && prevNode.parent) {
+	          prevNode.parent.moveBefore(this, prevNode);
+	          this.focus(Node.focusElement || this._getElementName(target));
+	        }
+	        handled = true;
+	      }
+	    }
+	    else if (keynum == 39) {        // Arrow Right
+	      if (altKey && !shiftKey) {  // Alt + Arrow Right
+	        // move to right element
+	        var nextElement = this._nextElement(target);
+	        if (nextElement) {
+	          this.focus(this._getElementName(nextElement));
+	        }
+	        handled = true;
+	      }
+	      else if (altKey && shiftKey) { // Alt + Shift Arrow Right
+	        dom = this.getDom();
+	        var prevDom = dom.previousSibling;
+	        if (prevDom) {
+	          prevNode = Node.getNodeFromTarget(prevDom);
+	          if (prevNode && prevNode.parent &&
+	              (prevNode instanceof AppendNode)
+	              && !prevNode.isVisible()) {
+	            prevNode.parent.moveBefore(this, prevNode);
+	            this.focus(Node.focusElement || this._getElementName(target));
+	          }
+	        }
+	      }
+	    }
+	    else if (keynum == 40) {        // Arrow Down
+	      if (altKey && !shiftKey) {  // Alt + Arrow Down
+	        // find the next node
+	        nextNode = this._nextNode();
+	        if (nextNode) {
+	          nextNode.focus(Node.focusElement || this._getElementName(target));
+	        }
+	        handled = true;
+	      }
+	      else if (altKey && shiftKey && editable) { // Alt + Shift + Arrow Down
+	        // find the 2nd next node and move before that one
+	        if (this.expanded) {
+	          nextNode = this.append ? this.append._nextNode() : undefined;
+	        }
+	        else {
+	          nextNode = this._nextNode();
+	        }
+	        nextDom = nextNode ? nextNode.getDom() : undefined;
+	        if (this.parent.childs.length == 1) {
+	          nextDom2 = nextDom;
+	        }
+	        else {
+	          nextDom2 = nextDom ? nextDom.nextSibling : undefined;
+	        }
+	        var nextNode2 = Node.getNodeFromTarget(nextDom2);
+	        if (nextNode2 && nextNode2.parent) {
+	          nextNode2.parent.moveBefore(this, nextNode2);
+	          this.focus(Node.focusElement || this._getElementName(target));
+	        }
+	        handled = true;
+	      }
+	    }
+
+	    if (handled) {
+	      event.preventDefault();
+	      event.stopPropagation();
+	    }
+	  };
+
+	  /**
+	   * Handle the expand event, when clicked on the expand button
+	   * @param {boolean} recurse   If true, child nodes will be expanded too
+	   * @private
+	   */
+	  Node.prototype._onExpand = function (recurse) {
+	    if (recurse) {
+	      // Take the table offline
+	      var table = this.dom.tr.parentNode; // TODO: not nice to access the main table like this
+	      var frame = table.parentNode;
+	      var scrollTop = frame.scrollTop;
+	      frame.removeChild(table);
+	    }
+
+	    if (this.expanded) {
+	      this.collapse(recurse);
+	    }
+	    else {
+	      this.expand(recurse);
+	    }
+
+	    if (recurse) {
+	      // Put the table online again
+	      frame.appendChild(table);
+	      frame.scrollTop = scrollTop;
+	    }
+	  };
+
+	  /**
+	   * Remove this node
+	   * @private
+	   */
+	  Node.prototype._onRemove = function() {
+	    this.editor.highlighter.unhighlight();
+	    var childs = this.parent.childs;
+	    var index = childs.indexOf(this);
+
+	    // adjust the focus
+	    var oldSelection = this.editor.getSelection();
+	    if (childs[index + 1]) {
+	      childs[index + 1].focus();
+	    }
+	    else if (childs[index - 1]) {
+	      childs[index - 1].focus();
+	    }
+	    else {
+	      this.parent.focus();
+	    }
+	    var newSelection = this.editor.getSelection();
+
+	    // remove the node
+	    this.parent._remove(this);
+
+	    // store history action
+	    this.editor._onAction('removeNode', {
+	      node: this,
+	      parent: this.parent,
+	      index: index,
+	      oldSelection: oldSelection,
+	      newSelection: newSelection
+	    });
+	  };
+
+	  /**
+	   * Duplicate this node
+	   * @private
+	   */
+	  Node.prototype._onDuplicate = function() {
+	    var oldSelection = this.editor.getSelection();
+	    var clone = this.parent._duplicate(this);
+	    clone.focus();
+	    var newSelection = this.editor.getSelection();
+
+	    this.editor._onAction('duplicateNode', {
+	      node: this,
+	      clone: clone,
+	      parent: this.parent,
+	      oldSelection: oldSelection,
+	      newSelection: newSelection
+	    });
+	  };
+
+	  /**
+	   * Handle insert before event
+	   * @param {String} [field]
+	   * @param {*} [value]
+	   * @param {String} [type]   Can be 'auto', 'array', 'object', or 'string'
+	   * @private
+	   */
+	  Node.prototype._onInsertBefore = function (field, value, type) {
+	    var oldSelection = this.editor.getSelection();
+
+	    var newNode = new Node(this.editor, {
+	      field: (field != undefined) ? field : '',
+	      value: (value != undefined) ? value : '',
+	      type: type
+	    });
+	    newNode.expand(true);
+	    this.parent.insertBefore(newNode, this);
+	    this.editor.highlighter.unhighlight();
+	    newNode.focus('field');
+	    var newSelection = this.editor.getSelection();
+
+	    this.editor._onAction('insertBeforeNode', {
+	      node: newNode,
+	      beforeNode: this,
+	      parent: this.parent,
+	      oldSelection: oldSelection,
+	      newSelection: newSelection
+	    });
+	  };
+
+	  /**
+	   * Handle insert after event
+	   * @param {String} [field]
+	   * @param {*} [value]
+	   * @param {String} [type]   Can be 'auto', 'array', 'object', or 'string'
+	   * @private
+	   */
+	  Node.prototype._onInsertAfter = function (field, value, type) {
+	    var oldSelection = this.editor.getSelection();
+
+	    var newNode = new Node(this.editor, {
+	      field: (field != undefined) ? field : '',
+	      value: (value != undefined) ? value : '',
+	      type: type
+	    });
+	    newNode.expand(true);
+	    this.parent.insertAfter(newNode, this);
+	    this.editor.highlighter.unhighlight();
+	    newNode.focus('field');
+	    var newSelection = this.editor.getSelection();
+
+	    this.editor._onAction('insertAfterNode', {
+	      node: newNode,
+	      afterNode: this,
+	      parent: this.parent,
+	      oldSelection: oldSelection,
+	      newSelection: newSelection
+	    });
+	  };
+
+	  /**
+	   * Handle append event
+	   * @param {String} [field]
+	   * @param {*} [value]
+	   * @param {String} [type]   Can be 'auto', 'array', 'object', or 'string'
+	   * @private
+	   */
+	  Node.prototype._onAppend = function (field, value, type) {
+	    var oldSelection = this.editor.getSelection();
+
+	    var newNode = new Node(this.editor, {
+	      field: (field != undefined) ? field : '',
+	      value: (value != undefined) ? value : '',
+	      type: type
+	    });
+	    newNode.expand(true);
+	    this.parent.appendChild(newNode);
+	    this.editor.highlighter.unhighlight();
+	    newNode.focus('field');
+	    var newSelection = this.editor.getSelection();
+
+	    this.editor._onAction('appendNode', {
+	      node: newNode,
+	      parent: this.parent,
+	      oldSelection: oldSelection,
+	      newSelection: newSelection
+	    });
+	  };
+
+	  /**
+	   * Change the type of the node's value
+	   * @param {String} newType
+	   * @private
+	   */
+	  Node.prototype._onChangeType = function (newType) {
+	    var oldType = this.type;
+	    if (newType != oldType) {
+	      var oldSelection = this.editor.getSelection();
+	      this.changeType(newType);
+	      var newSelection = this.editor.getSelection();
+
+	      this.editor._onAction('changeType', {
+	        node: this,
+	        oldType: oldType,
+	        newType: newType,
+	        oldSelection: oldSelection,
+	        newSelection: newSelection
+	      });
+	    }
+	  };
+
+	  /**
+	   * Sort the childs of the node. Only applicable when the node has type 'object'
+	   * or 'array'.
+	   * @param {String} direction   Sorting direction. Available values: "asc", "desc"
+	   * @private
+	   */
+	  Node.prototype._onSort = function (direction) {
+	    if (this._hasChilds()) {
+	      var order = (direction == 'desc') ? -1 : 1;
+	      var prop = (this.type == 'array') ? 'value': 'field';
+	      this.hideChilds();
+
+	      var oldChilds = this.childs;
+	      var oldSort = this.sort;
+
+	      // copy the array (the old one will be kept for an undo action
+	      this.childs = this.childs.concat();
+
+	      // sort the arrays
+	      this.childs.sort(function (a, b) {
+	        if (a[prop] > b[prop]) return order;
+	        if (a[prop] < b[prop]) return -order;
+	        return 0;
+	      });
+	      this.sort = (order == 1) ? 'asc' : 'desc';
+
+	      this.editor._onAction('sort', {
+	        node: this,
+	        oldChilds: oldChilds,
+	        oldSort: oldSort,
+	        newChilds: this.childs,
+	        newSort: this.sort
+	      });
+
+	      this.showChilds();
+	    }
+	  };
+
+	  /**
+	   * Create a table row with an append button.
+	   * @return {HTMLElement | undefined} buttonAppend or undefined when inapplicable
+	   */
+	  Node.prototype.getAppend = function () {
+	    if (!this.append) {
+	      this.append = new AppendNode(this.editor);
+	      this.append.setParent(this);
+	    }
+	    return this.append.getDom();
+	  };
+
+	  /**
+	   * Find the node from an event target
+	   * @param {Node} target
+	   * @return {Node | undefined} node  or undefined when not found
+	   * @static
+	   */
+	  Node.getNodeFromTarget = function (target) {
+	    while (target) {
+	      if (target.node) {
+	        return target.node;
+	      }
+	      target = target.parentNode;
+	    }
+
+	    return undefined;
+	  };
+
+	  /**
+	   * Get the previously rendered node
+	   * @return {Node | null} previousNode
+	   * @private
+	   */
+	  Node.prototype._previousNode = function () {
+	    var prevNode = null;
+	    var dom = this.getDom();
+	    if (dom && dom.parentNode) {
+	      // find the previous field
+	      var prevDom = dom;
+	      do {
+	        prevDom = prevDom.previousSibling;
+	        prevNode = Node.getNodeFromTarget(prevDom);
+	      }
+	      while (prevDom && (prevNode instanceof AppendNode && !prevNode.isVisible()));
+	    }
+	    return prevNode;
+	  };
+
+	  /**
+	   * Get the next rendered node
+	   * @return {Node | null} nextNode
+	   * @private
+	   */
+	  Node.prototype._nextNode = function () {
+	    var nextNode = null;
+	    var dom = this.getDom();
+	    if (dom && dom.parentNode) {
+	      // find the previous field
+	      var nextDom = dom;
+	      do {
+	        nextDom = nextDom.nextSibling;
+	        nextNode = Node.getNodeFromTarget(nextDom);
+	      }
+	      while (nextDom && (nextNode instanceof AppendNode && !nextNode.isVisible()));
+	    }
+
+	    return nextNode;
+	  };
+
+	  /**
+	   * Get the first rendered node
+	   * @return {Node | null} firstNode
+	   * @private
+	   */
+	  Node.prototype._firstNode = function () {
+	    var firstNode = null;
+	    var dom = this.getDom();
+	    if (dom && dom.parentNode) {
+	      var firstDom = dom.parentNode.firstChild;
+	      firstNode = Node.getNodeFromTarget(firstDom);
+	    }
+
+	    return firstNode;
+	  };
+
+	  /**
+	   * Get the last rendered node
+	   * @return {Node | null} lastNode
+	   * @private
+	   */
+	  Node.prototype._lastNode = function () {
+	    var lastNode = null;
+	    var dom = this.getDom();
+	    if (dom && dom.parentNode) {
+	      var lastDom = dom.parentNode.lastChild;
+	      lastNode =  Node.getNodeFromTarget(lastDom);
+	      while (lastDom && (lastNode instanceof AppendNode && !lastNode.isVisible())) {
+	        lastDom = lastDom.previousSibling;
+	        lastNode =  Node.getNodeFromTarget(lastDom);
+	      }
+	    }
+	    return lastNode;
+	  };
+
+	  /**
+	   * Get the next element which can have focus.
+	   * @param {Element} elem
+	   * @return {Element | null} nextElem
+	   * @private
+	   */
+	  Node.prototype._previousElement = function (elem) {
+	    var dom = this.dom;
+	    // noinspection FallthroughInSwitchStatementJS
+	    switch (elem) {
+	      case dom.value:
+	        if (this.fieldEditable) {
+	          return dom.field;
+	        }
+	      // intentional fall through
+	      case dom.field:
+	        if (this._hasChilds()) {
+	          return dom.expand;
+	        }
+	      // intentional fall through
+	      case dom.expand:
+	        return dom.menu;
+	      case dom.menu:
+	        if (dom.drag) {
+	          return dom.drag;
+	        }
+	      // intentional fall through
+	      default:
+	        return null;
+	    }
+	  };
+
+	  /**
+	   * Get the next element which can have focus.
+	   * @param {Element} elem
+	   * @return {Element | null} nextElem
+	   * @private
+	   */
+	  Node.prototype._nextElement = function (elem) {
+	    var dom = this.dom;
+	    // noinspection FallthroughInSwitchStatementJS
+	    switch (elem) {
+	      case dom.drag:
+	        return dom.menu;
+	      case dom.menu:
+	        if (this._hasChilds()) {
+	          return dom.expand;
+	        }
+	      // intentional fall through
+	      case dom.expand:
+	        if (this.fieldEditable) {
+	          return dom.field;
+	        }
+	      // intentional fall through
+	      case dom.field:
+	        if (!this._hasChilds()) {
+	          return dom.value;
+	        }
+	      default:
+	        return null;
+	    }
+	  };
+
+	  /**
+	   * Get the dom name of given element. returns null if not found.
+	   * For example when element == dom.field, "field" is returned.
+	   * @param {Element} element
+	   * @return {String | null} elementName  Available elements with name: 'drag',
+	   *                                      'menu', 'expand', 'field', 'value'
+	   * @private
+	   */
+	  Node.prototype._getElementName = function (element) {
+	    var dom = this.dom;
+	    for (var name in dom) {
+	      if (dom.hasOwnProperty(name)) {
+	        if (dom[name] == element) {
+	          return name;
+	        }
+	      }
+	    }
+	    return null;
+	  };
+
+	  /**
+	   * Test if this node has childs. This is the case when the node is an object
+	   * or array.
+	   * @return {boolean} hasChilds
+	   * @private
+	   */
+	  Node.prototype._hasChilds = function () {
+	    return this.type == 'array' || this.type == 'object';
+	  };
+
+	// titles with explanation for the different types
+	  Node.TYPE_TITLES = {
+	    'auto': 'Field type "auto". ' +
+	        'The field type is automatically determined from the value ' +
+	        'and can be a string, number, boolean, or null.',
+	    'object': 'Field type "object". ' +
+	        'An object contains an unordered set of key/value pairs.',
+	    'array': 'Field type "array". ' +
+	        'An array contains an ordered collection of values.',
+	    'string': 'Field type "string". ' +
+	        'Field type is not determined from the value, ' +
+	        'but always returned as string.'
+	  };
+
+	  /**
+	   * Show a contextmenu for this node
+	   * @param {HTMLElement} anchor   Anchor element to attache the context menu to.
+	   * @param {function} [onClose]   Callback method called when the context menu
+	   *                               is being closed.
+	   */
+	  Node.prototype.showContextMenu = function (anchor, onClose) {
+	    var node = this;
+	    var titles = Node.TYPE_TITLES;
+	    var items = [];
+
+	    if (this.editable.value) {
+	      items.push({
+	        text: 'Type',
+	        title: 'Change the type of this field',
+	        className: 'type-' + this.type,
+	        submenu: [
+	          {
+	            text: 'Auto',
+	            className: 'type-auto' +
+	                (this.type == 'auto' ? ' selected' : ''),
+	            title: titles.auto,
+	            click: function () {
+	              node._onChangeType('auto');
+	            }
+	          },
+	          {
+	            text: 'Array',
+	            className: 'type-array' +
+	                (this.type == 'array' ? ' selected' : ''),
+	            title: titles.array,
+	            click: function () {
+	              node._onChangeType('array');
+	            }
+	          },
+	          {
+	            text: 'Object',
+	            className: 'type-object' +
+	                (this.type == 'object' ? ' selected' : ''),
+	            title: titles.object,
+	            click: function () {
+	              node._onChangeType('object');
+	            }
+	          },
+	          {
+	            text: 'String',
+	            className: 'type-string' +
+	                (this.type == 'string' ? ' selected' : ''),
+	            title: titles.string,
+	            click: function () {
+	              node._onChangeType('string');
+	            }
+	          }
+	        ]
+	      });
+	    }
+
+	    if (this._hasChilds()) {
+	      var direction = ((this.sort == 'asc') ? 'desc': 'asc');
+	      items.push({
+	        text: 'Sort',
+	        title: 'Sort the childs of this ' + this.type,
+	        className: 'sort-' + direction,
+	        click: function () {
+	          node._onSort(direction);
+	        },
+	        submenu: [
+	          {
+	            text: 'Ascending',
+	            className: 'sort-asc',
+	            title: 'Sort the childs of this ' + this.type + ' in ascending order',
+	            click: function () {
+	              node._onSort('asc');
+	            }
+	          },
+	          {
+	            text: 'Descending',
+	            className: 'sort-desc',
+	            title: 'Sort the childs of this ' + this.type +' in descending order',
+	            click: function () {
+	              node._onSort('desc');
+	            }
+	          }
+	        ]
+	      });
+	    }
+
+	    if (this.parent && this.parent._hasChilds()) {
+	      if (items.length) {
+	        // create a separator
+	        items.push({
+	          'type': 'separator'
+	        });
+	      }
+
+	      // create append button (for last child node only)
+	      var childs = node.parent.childs;
+	      if (node == childs[childs.length - 1]) {
+	        items.push({
+	          text: 'Append',
+	          title: 'Append a new field with type \'auto\' after this field (Ctrl+Shift+Ins)',
+	          submenuTitle: 'Select the type of the field to be appended',
+	          className: 'append',
+	          click: function () {
+	            node._onAppend('', '', 'auto');
+	          },
+	          submenu: [
+	            {
+	              text: 'Auto',
+	              className: 'type-auto',
+	              title: titles.auto,
+	              click: function () {
+	                node._onAppend('', '', 'auto');
+	              }
+	            },
+	            {
+	              text: 'Array',
+	              className: 'type-array',
+	              title: titles.array,
+	              click: function () {
+	                node._onAppend('', []);
+	              }
+	            },
+	            {
+	              text: 'Object',
+	              className: 'type-object',
+	              title: titles.object,
+	              click: function () {
+	                node._onAppend('', {});
+	              }
+	            },
+	            {
+	              text: 'String',
+	              className: 'type-string',
+	              title: titles.string,
+	              click: function () {
+	                node._onAppend('', '', 'string');
+	              }
+	            }
+	          ]
+	        });
+	      }
+
+	      // create insert button
+	      items.push({
+	        text: 'Insert',
+	        title: 'Insert a new field with type \'auto\' before this field (Ctrl+Ins)',
+	        submenuTitle: 'Select the type of the field to be inserted',
+	        className: 'insert',
+	        click: function () {
+	          node._onInsertBefore('', '', 'auto');
+	        },
+	        submenu: [
+	          {
+	            text: 'Auto',
+	            className: 'type-auto',
+	            title: titles.auto,
+	            click: function () {
+	              node._onInsertBefore('', '', 'auto');
+	            }
+	          },
+	          {
+	            text: 'Array',
+	            className: 'type-array',
+	            title: titles.array,
+	            click: function () {
+	              node._onInsertBefore('', []);
+	            }
+	          },
+	          {
+	            text: 'Object',
+	            className: 'type-object',
+	            title: titles.object,
+	            click: function () {
+	              node._onInsertBefore('', {});
+	            }
+	          },
+	          {
+	            text: 'String',
+	            className: 'type-string',
+	            title: titles.string,
+	            click: function () {
+	              node._onInsertBefore('', '', 'string');
+	            }
+	          }
+	        ]
+	      });
+
+	      if (this.editable.field) {
+	        // create duplicate button
+	        items.push({
+	          text: 'Duplicate',
+	          title: 'Duplicate this field (Ctrl+D)',
+	          className: 'duplicate',
+	          click: function () {
+	            node._onDuplicate();
+	          }
+	        });
+
+	        // create remove button
+	        items.push({
+	          text: 'Remove',
+	          title: 'Remove this field (Ctrl+Del)',
+	          className: 'remove',
+	          click: function () {
+	            node._onRemove();
+	          }
+	        });
+	      }
+	    }
+
+	    var menu = new ContextMenu(items, {close: onClose});
+	    menu.show(anchor);
+	  };
+
+	  /**
+	   * get the type of a value
+	   * @param {*} value
+	   * @return {String} type   Can be 'object', 'array', 'string', 'auto'
+	   * @private
+	   */
+	  Node.prototype._getType = function(value) {
+	    if (value instanceof Array) {
+	      return 'array';
+	    }
+	    if (value instanceof Object) {
+	      return 'object';
+	    }
+	    if (typeof(value) == 'string' && typeof(this._stringCast(value)) != 'string') {
+	      return 'string';
+	    }
+
+	    return 'auto';
+	  };
+
+	  /**
+	   * cast contents of a string to the correct type. This can be a string,
+	   * a number, a boolean, etc
+	   * @param {String} str
+	   * @return {*} castedStr
+	   * @private
+	   */
+	  Node.prototype._stringCast = function(str) {
+	    var lower = str.toLowerCase(),
+	        num = Number(str),          // will nicely fail with '123ab'
+	        numFloat = parseFloat(str); // will nicely fail with '  '
+
+	    if (str == '') {
+	      return '';
+	    }
+	    else if (lower == 'null') {
+	      return null;
+	    }
+	    else if (lower == 'true') {
+	      return true;
+	    }
+	    else if (lower == 'false') {
+	      return false;
+	    }
+	    else if (!isNaN(num) && !isNaN(numFloat)) {
+	      return num;
+	    }
+	    else {
+	      return str;
+	    }
+	  };
+
+	  /**
+	   * escape a text, such that it can be displayed safely in an HTML element
+	   * @param {String} text
+	   * @return {String} escapedText
+	   * @private
+	   */
+	  Node.prototype._escapeHTML = function (text) {
+	    var htmlEscaped = String(text)
+	        .replace(/</g, '&lt;')
+	        .replace(/>/g, '&gt;')
+	        .replace(/  /g, ' &nbsp;') // replace double space with an nbsp and space
+	        .replace(/^ /, '&nbsp;')   // space at start
+	        .replace(/ $/, '&nbsp;');  // space at end
+
+	    var json = JSON.stringify(htmlEscaped);
+	    return json.substring(1, json.length - 1);
+	  };
+
+	  /**
+	   * unescape a string.
+	   * @param {String} escapedText
+	   * @return {String} text
+	   * @private
+	   */
+	  Node.prototype._unescapeHTML = function (escapedText) {
+	    var json = '"' + this._escapeJSON(escapedText) + '"';
+	    var htmlEscaped = util.parse(json);
+	    return htmlEscaped
+	        .replace(/&lt;/g, '<')
+	        .replace(/&gt;/g, '>')
+	        .replace(/&nbsp;|\u00A0/g, ' ');
+	  };
+
+	  /**
+	   * escape a text to make it a valid JSON string. The method will:
+	   *   - replace unescaped double quotes with '\"'
+	   *   - replace unescaped backslash with '\\'
+	   *   - replace returns with '\n'
+	   * @param {String} text
+	   * @return {String} escapedText
+	   * @private
+	   */
+	  Node.prototype._escapeJSON = function (text) {
+	    // TODO: replace with some smart regex (only when a new solution is faster!)
+	    var escaped = '';
+	    var i = 0, iMax = text.length;
+	    while (i < iMax) {
+	      var c = text.charAt(i);
+	      if (c == '\n') {
+	        escaped += '\\n';
+	      }
+	      else if (c == '\\') {
+	        escaped += c;
+	        i++;
+
+	        c = text.charAt(i);
+	        if ('"\\/bfnrtu'.indexOf(c) == -1) {
+	          escaped += '\\';  // no valid escape character
+	        }
+	        escaped += c;
+	      }
+	      else if (c == '"') {
+	        escaped += '\\"';
+	      }
+	      else {
+	        escaped += c;
+	      }
+	      i++;
+	    }
+
+	    return escaped;
+	  };
+
+	  // TODO: find a nicer solution to resolve this circular dependency between Node and AppendNode
+	  var AppendNode = appendNodeFactory(Node);
+
+	  return Node;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(9)], __WEBPACK_AMD_DEFINE_RESULT__ = function (ContextMenu) {
+
+	  /**
+	   * Create a select box to be used in the editor menu's, which allows to switch mode
+	   * @param {Object} editor
+	   * @param {String[]} modes  Available modes: 'code', 'form', 'text', 'tree', 'view'
+	   * @param {String} current  Available modes: 'code', 'form', 'text', 'tree', 'view'
+	   * @returns {HTMLElement} box
+	   */
+	  function createModeSwitcher(editor, modes, current) {
+	    // TODO: decouple mode switcher from editor
+
+	    /**
+	     * Switch the mode of the editor
+	     * @param {String} mode
+	     */
+	    function switchMode(mode) {
+	      // switch mode
+	      editor.setMode(mode);
+
+	      // restore focus on mode box
+	      var modeBox = editor.dom && editor.dom.modeBox;
+	      if (modeBox) {
+	        modeBox.focus();
+	      }
+	    }
+
+	    // available modes
+	    var availableModes = {
+	      code: {
+	        'text': 'Code',
+	        'title': 'Switch to code highlighter',
+	        'click': function () {
+	          switchMode('code')
+	        }
+	      },
+	      form: {
+	        'text': 'Form',
+	        'title': 'Switch to form editor',
+	        'click': function () {
+	          switchMode('form');
+	        }
+	      },
+	      text: {
+	        'text': 'Text',
+	        'title': 'Switch to plain text editor',
+	        'click': function () {
+	          switchMode('text');
+	        }
+	      },
+	      tree: {
+	        'text': 'Tree',
+	        'title': 'Switch to tree editor',
+	        'click': function () {
+	          switchMode('tree');
+	        }
+	      },
+	      view: {
+	        'text': 'View',
+	        'title': 'Switch to tree view',
+	        'click': function () {
+	          switchMode('view');
+	        }
+	      }
+	    };
+
+	    // list the selected modes
+	    var items = [];
+	    for (var i = 0; i < modes.length; i++) {
+	      var mode = modes[i];
+	      var item = availableModes[mode];
+	      if (!item) {
+	        throw new Error('Unknown mode "' + mode + '"');
+	      }
+
+	      item.className = 'type-modes' + ((current == mode) ? ' selected' : '');
+	      items.push(item);
+	    }
+
+	    // retrieve the title of current mode
+	    var currentMode = availableModes[current];
+	    if (!currentMode) {
+	      throw new Error('Unknown mode "' + current + '"');
+	    }
+	    var currentTitle = currentMode.text;
+
+	    // create the html element
+	    var box = document.createElement('button');
+	    box.className = 'modes separator';
+	    box.innerHTML = currentTitle + ' &#x25BE;';
+	    box.title = 'Switch editor mode';
+	    box.onclick = function () {
+	      var menu = new ContextMenu(items);
+	      menu.show(box);
+	    };
+
+	    return box;
+	  }
+
+	  return {
+	    create: createModeSwitcher
+	  }
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (util) {
+
+	  /**
+	   * A context menu
+	   * @param {Object[]} items    Array containing the menu structure
+	   *                            TODO: describe structure
+	   * @param {Object} [options]  Object with options. Available options:
+	   *                            {function} close    Callback called when the
+	   *                                                context menu is being closed.
+	   * @constructor
+	   */
+	  function ContextMenu (items, options) {
+	    this.dom = {};
+
+	    var me = this;
+	    var dom = this.dom;
+	    this.anchor = undefined;
+	    this.items = items;
+	    this.eventListeners = {};
+	    this.selection = undefined; // holds the selection before the menu was opened
+	    this.visibleSubmenu = undefined;
+	    this.onClose = options ? options.close : undefined;
+
+	    // create a container element
+	    var menu = document.createElement('div');
+	    menu.className = 'jsoneditor-contextmenu';
+	    dom.menu = menu;
+
+	    // create a list to hold the menu items
+	    var list = document.createElement('ul');
+	    list.className = 'menu';
+	    menu.appendChild(list);
+	    dom.list = list;
+	    dom.items = []; // list with all buttons
+
+	    // create a (non-visible) button to set the focus to the menu
+	    var focusButton = document.createElement('button');
+	    dom.focusButton = focusButton;
+	    var li = document.createElement('li');
+	    li.style.overflow = 'hidden';
+	    li.style.height = '0';
+	    li.appendChild(focusButton);
+	    list.appendChild(li);
+
+	    function createMenuItems (list, domItems, items) {
+	      items.forEach(function (item) {
+	        if (item.type == 'separator') {
+	          // create a separator
+	          var separator = document.createElement('div');
+	          separator.className = 'separator';
+	          li = document.createElement('li');
+	          li.appendChild(separator);
+	          list.appendChild(li);
+	        }
+	        else {
+	          var domItem = {};
+
+	          // create a menu item
+	          var li = document.createElement('li');
+	          list.appendChild(li);
+
+	          // create a button in the menu item
+	          var button = document.createElement('button');
+	          button.className = item.className;
+	          domItem.button = button;
+	          if (item.title) {
+	            button.title = item.title;
+	          }
+	          if (item.click) {
+	            button.onclick = function () {
+	              me.hide();
+	              item.click();
+	            };
+	          }
+	          li.appendChild(button);
+
+	          // create the contents of the button
+	          if (item.submenu) {
+	            // add the icon to the button
+	            var divIcon = document.createElement('div');
+	            divIcon.className = 'icon';
+	            button.appendChild(divIcon);
+	            button.appendChild(document.createTextNode(item.text));
+
+	            var buttonSubmenu;
+	            if (item.click) {
+	              // submenu and a button with a click handler
+	              button.className += ' default';
+
+	              var buttonExpand = document.createElement('button');
+	              domItem.buttonExpand = buttonExpand;
+	              buttonExpand.className = 'expand';
+	              buttonExpand.innerHTML = '<div class="expand"></div>';
+	              li.appendChild(buttonExpand);
+	              if (item.submenuTitle) {
+	                buttonExpand.title = item.submenuTitle;
+	              }
+
+	              buttonSubmenu = buttonExpand;
+	            }
+	            else {
+	              // submenu and a button without a click handler
+	              var divExpand = document.createElement('div');
+	              divExpand.className = 'expand';
+	              button.appendChild(divExpand);
+
+	              buttonSubmenu = button;
+	            }
+
+	            // attach a handler to expand/collapse the submenu
+	            buttonSubmenu.onclick = function () {
+	              me._onExpandItem(domItem);
+	              buttonSubmenu.focus();
+	            };
+
+	            // create the submenu
+	            var domSubItems = [];
+	            domItem.subItems = domSubItems;
+	            var ul = document.createElement('ul');
+	            domItem.ul = ul;
+	            ul.className = 'menu';
+	            ul.style.height = '0';
+	            li.appendChild(ul);
+	            createMenuItems(ul, domSubItems, item.submenu);
+	          }
+	          else {
+	            // no submenu, just a button with clickhandler
+	            button.innerHTML = '<div class="icon"></div>' + item.text;
+	          }
+
+	          domItems.push(domItem);
+	        }
+	      });
+	    }
+	    createMenuItems(list, this.dom.items, items);
+
+	    // TODO: when the editor is small, show the submenu on the right instead of inline?
+
+	    // calculate the max height of the menu with one submenu expanded
+	    this.maxHeight = 0; // height in pixels
+	    items.forEach(function (item) {
+	      var height = (items.length + (item.submenu ? item.submenu.length : 0)) * 24;
+	      me.maxHeight = Math.max(me.maxHeight, height);
+	    });
+	  }
+
+	  /**
+	   * Get the currently visible buttons
+	   * @return {Array.<HTMLElement>} buttons
+	   * @private
+	   */
+	  ContextMenu.prototype._getVisibleButtons = function () {
+	    var buttons = [];
+	    var me = this;
+	    this.dom.items.forEach(function (item) {
+	      buttons.push(item.button);
+	      if (item.buttonExpand) {
+	        buttons.push(item.buttonExpand);
+	      }
+	      if (item.subItems && item == me.expandedItem) {
+	        item.subItems.forEach(function (subItem) {
+	          buttons.push(subItem.button);
+	          if (subItem.buttonExpand) {
+	            buttons.push(subItem.buttonExpand);
+	          }
+	          // TODO: change to fully recursive method
+	        });
+	      }
+	    });
+
+	    return buttons;
+	  };
+
+	// currently displayed context menu, a singleton. We may only have one visible context menu
+	  ContextMenu.visibleMenu = undefined;
+
+	  /**
+	   * Attach the menu to an anchor
+	   * @param {HTMLElement} anchor
+	   */
+	  ContextMenu.prototype.show = function (anchor) {
+	    this.hide();
+
+	    // calculate whether the menu fits below the anchor
+	    var windowHeight = window.innerHeight,
+	        windowScroll = (window.pageYOffset || document.scrollTop || 0),
+	        windowBottom = windowHeight + windowScroll,
+	        anchorHeight = anchor.offsetHeight,
+	        menuHeight = this.maxHeight;
+
+	    // position the menu
+	    var left = util.getAbsoluteLeft(anchor);
+	    var top = util.getAbsoluteTop(anchor);
+	    if (top + anchorHeight + menuHeight < windowBottom) {
+	      // display the menu below the anchor
+	      this.dom.menu.style.left = left + 'px';
+	      this.dom.menu.style.top = (top + anchorHeight) + 'px';
+	      this.dom.menu.style.bottom = '';
+	    }
+	    else {
+	      // display the menu above the anchor
+	      this.dom.menu.style.left = left + 'px';
+	      this.dom.menu.style.top = '';
+	      this.dom.menu.style.bottom = (windowHeight - top) + 'px';
+	    }
+
+	    // attach the menu to the document
+	    document.body.appendChild(this.dom.menu);
+
+	    // create and attach event listeners
+	    var me = this;
+	    var list = this.dom.list;
+	    this.eventListeners.mousedown = util.addEventListener(
+	        document, 'mousedown', function (event) {
+	          // hide menu on click outside of the menu
+	          var target = event.target;
+	          if ((target != list) && !me._isChildOf(target, list)) {
+	            me.hide();
+	            event.stopPropagation();
+	            event.preventDefault();
+	          }
+	        });
+	    this.eventListeners.mousewheel = util.addEventListener(
+	        document, 'mousewheel', function (event) {
+	          // block scrolling when context menu is visible
+	          event.stopPropagation();
+	          event.preventDefault();
+	        });
+	    this.eventListeners.keydown = util.addEventListener(
+	        document, 'keydown', function (event) {
+	          me._onKeyDown(event);
+	        });
+
+	    // move focus to the first button in the context menu
+	    this.selection = util.getSelection();
+	    this.anchor = anchor;
+	    setTimeout(function () {
+	      me.dom.focusButton.focus();
+	    }, 0);
+
+	    if (ContextMenu.visibleMenu) {
+	      ContextMenu.visibleMenu.hide();
+	    }
+	    ContextMenu.visibleMenu = this;
+	  };
+
+	  /**
+	   * Hide the context menu if visible
+	   */
+	  ContextMenu.prototype.hide = function () {
+	    // remove the menu from the DOM
+	    if (this.dom.menu.parentNode) {
+	      this.dom.menu.parentNode.removeChild(this.dom.menu);
+	      if (this.onClose) {
+	        this.onClose();
+	      }
+	    }
+
+	    // remove all event listeners
+	    // all event listeners are supposed to be attached to document.
+	    for (var name in this.eventListeners) {
+	      if (this.eventListeners.hasOwnProperty(name)) {
+	        var fn = this.eventListeners[name];
+	        if (fn) {
+	          util.removeEventListener(document, name, fn);
+	        }
+	        delete this.eventListeners[name];
+	      }
+	    }
+
+	    if (ContextMenu.visibleMenu == this) {
+	      ContextMenu.visibleMenu = undefined;
+	    }
+	  };
+
+	  /**
+	   * Expand a submenu
+	   * Any currently expanded submenu will be hided.
+	   * @param {Object} domItem
+	   * @private
+	   */
+	  ContextMenu.prototype._onExpandItem = function (domItem) {
+	    var me = this;
+	    var alreadyVisible = (domItem == this.expandedItem);
+
+	    // hide the currently visible submenu
+	    var expandedItem = this.expandedItem;
+	    if (expandedItem) {
+	      //var ul = expandedItem.ul;
+	      expandedItem.ul.style.height = '0';
+	      expandedItem.ul.style.padding = '';
+	      setTimeout(function () {
+	        if (me.expandedItem != expandedItem) {
+	          expandedItem.ul.style.display = '';
+	          util.removeClassName(expandedItem.ul.parentNode, 'selected');
+	        }
+	      }, 300); // timeout duration must match the css transition duration
+	      this.expandedItem = undefined;
+	    }
+
+	    if (!alreadyVisible) {
+	      var ul = domItem.ul;
+	      ul.style.display = 'block';
+	      var height = ul.clientHeight; // force a reflow in Firefox
+	      setTimeout(function () {
+	        if (me.expandedItem == domItem) {
+	          ul.style.height = (ul.childNodes.length * 24) + 'px';
+	          ul.style.padding = '5px 10px';
+	        }
+	      }, 0);
+	      util.addClassName(ul.parentNode, 'selected');
+	      this.expandedItem = domItem;
+	    }
+	  };
+
+	  /**
+	   * Handle onkeydown event
+	   * @param {Event} event
+	   * @private
+	   */
+	  ContextMenu.prototype._onKeyDown = function (event) {
+	    var target = event.target;
+	    var keynum = event.which;
+	    var handled = false;
+	    var buttons, targetIndex, prevButton, nextButton;
+
+	    if (keynum == 27) { // ESC
+	      // hide the menu on ESC key
+
+	      // restore previous selection and focus
+	      if (this.selection) {
+	        util.setSelection(this.selection);
+	      }
+	      if (this.anchor) {
+	        this.anchor.focus();
+	      }
+
+	      this.hide();
+
+	      handled = true;
+	    }
+	    else if (keynum == 9) { // Tab
+	      if (!event.shiftKey) { // Tab
+	        buttons = this._getVisibleButtons();
+	        targetIndex = buttons.indexOf(target);
+	        if (targetIndex == buttons.length - 1) {
+	          // move to first button
+	          buttons[0].focus();
+	          handled = true;
+	        }
+	      }
+	      else { // Shift+Tab
+	        buttons = this._getVisibleButtons();
+	        targetIndex = buttons.indexOf(target);
+	        if (targetIndex == 0) {
+	          // move to last button
+	          buttons[buttons.length - 1].focus();
+	          handled = true;
+	        }
+	      }
+	    }
+	    else if (keynum == 37) { // Arrow Left
+	      if (target.className == 'expand') {
+	        buttons = this._getVisibleButtons();
+	        targetIndex = buttons.indexOf(target);
+	        prevButton = buttons[targetIndex - 1];
+	        if (prevButton) {
+	          prevButton.focus();
+	        }
+	      }
+	      handled = true;
+	    }
+	    else if (keynum == 38) { // Arrow Up
+	      buttons = this._getVisibleButtons();
+	      targetIndex = buttons.indexOf(target);
+	      prevButton = buttons[targetIndex - 1];
+	      if (prevButton && prevButton.className == 'expand') {
+	        // skip expand button
+	        prevButton = buttons[targetIndex - 2];
+	      }
+	      if (!prevButton) {
+	        // move to last button
+	        prevButton = buttons[buttons.length - 1];
+	      }
+	      if (prevButton) {
+	        prevButton.focus();
+	      }
+	      handled = true;
+	    }
+	    else if (keynum == 39) { // Arrow Right
+	      buttons = this._getVisibleButtons();
+	      targetIndex = buttons.indexOf(target);
+	      nextButton = buttons[targetIndex + 1];
+	      if (nextButton && nextButton.className == 'expand') {
+	        nextButton.focus();
+	      }
+	      handled = true;
+	    }
+	    else if (keynum == 40) { // Arrow Down
+	      buttons = this._getVisibleButtons();
+	      targetIndex = buttons.indexOf(target);
+	      nextButton = buttons[targetIndex + 1];
+	      if (nextButton && nextButton.className == 'expand') {
+	        // skip expand button
+	        nextButton = buttons[targetIndex + 2];
+	      }
+	      if (!nextButton) {
+	        // move to first button
+	        nextButton = buttons[0];
+	      }
+	      if (nextButton) {
+	        nextButton.focus();
+	        handled = true;
+	      }
+	      handled = true;
+	    }
+	    // TODO: arrow left and right
+
+	    if (handled) {
+	      event.stopPropagation();
+	      event.preventDefault();
+	    }
+	  };
+
+	  /**
+	   * Test if an element is a child of a parent element.
+	   * @param {Element} child
+	   * @param {Element} parent
+	   * @return {boolean} isChild
+	   */
+	  ContextMenu.prototype._isChildOf = function (child, parent) {
+	    var e = child.parentNode;
+	    while (e) {
+	      if (e == parent) {
+	        return true;
+	      }
+	      e = e.parentNode;
+	    }
+
+	    return false;
+	  };
+
+	  return ContextMenu;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(9), __webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = function (ContextMenu, util) {
+
+	  /**
+	   * A factory function to create an AppendNode, which depends on a Node
+	   * @param {Node} Node
+	   */
+	  function appendNodeFactory(Node) {
+	    /**
+	     * @constructor AppendNode
+	     * @extends Node
+	     * @param {TreeEditor} editor
+	     * Create a new AppendNode. This is a special node which is created at the
+	     * end of the list with childs for an object or array
+	     */
+	    function AppendNode (editor) {
+	      /** @type {TreeEditor} */
+	      this.editor = editor;
+	      this.dom = {};
+	    }
+
+	    AppendNode.prototype = new Node();
+
+	    /**
+	     * Return a table row with an append button.
+	     * @return {Element} dom   TR element
+	     */
+	    AppendNode.prototype.getDom = function () {
+	      // TODO: implement a new solution for the append node
+	      var dom = this.dom;
+
+	      if (dom.tr) {
+	        return dom.tr;
+	      }
+
+	      this._updateEditability();
+
+	      // a row for the append button
+	      var trAppend = document.createElement('tr');
+	      trAppend.node = this;
+	      dom.tr = trAppend;
+
+	      // TODO: consistent naming
+
+	      if (this.editable.field) {
+	        // a cell for the dragarea column
+	        dom.tdDrag = document.createElement('td');
+
+	        // create context menu
+	        var tdMenu = document.createElement('td');
+	        dom.tdMenu = tdMenu;
+	        var menu = document.createElement('button');
+	        menu.className = 'contextmenu';
+	        menu.title = 'Click to open the actions menu (Ctrl+M)';
+	        dom.menu = menu;
+	        tdMenu.appendChild(dom.menu);
+	      }
+
+	      // a cell for the contents (showing text 'empty')
+	      var tdAppend = document.createElement('td');
+	      var domText = document.createElement('div');
+	      domText.innerHTML = '(empty)';
+	      domText.className = 'readonly';
+	      tdAppend.appendChild(domText);
+	      dom.td = tdAppend;
+	      dom.text = domText;
+
+	      this.updateDom();
+
+	      return trAppend;
+	    };
+
+	    /**
+	     * Update the HTML dom of the Node
+	     */
+	    AppendNode.prototype.updateDom = function () {
+	      var dom = this.dom;
+	      var tdAppend = dom.td;
+	      if (tdAppend) {
+	        tdAppend.style.paddingLeft = (this.getLevel() * 24 + 26) + 'px';
+	        // TODO: not so nice hard coded offset
+	      }
+
+	      var domText = dom.text;
+	      if (domText) {
+	        domText.innerHTML = '(empty ' + this.parent.type + ')';
+	      }
+
+	      // attach or detach the contents of the append node:
+	      // hide when the parent has childs, show when the parent has no childs
+	      var trAppend = dom.tr;
+	      if (!this.isVisible()) {
+	        if (dom.tr.firstChild) {
+	          if (dom.tdDrag) {
+	            trAppend.removeChild(dom.tdDrag);
+	          }
+	          if (dom.tdMenu) {
+	            trAppend.removeChild(dom.tdMenu);
+	          }
+	          trAppend.removeChild(tdAppend);
+	        }
+	      }
+	      else {
+	        if (!dom.tr.firstChild) {
+	          if (dom.tdDrag) {
+	            trAppend.appendChild(dom.tdDrag);
+	          }
+	          if (dom.tdMenu) {
+	            trAppend.appendChild(dom.tdMenu);
+	          }
+	          trAppend.appendChild(tdAppend);
+	        }
+	      }
+	    };
+
+	    /**
+	     * Check whether the AppendNode is currently visible.
+	     * the AppendNode is visible when its parent has no childs (i.e. is empty).
+	     * @return {boolean} isVisible
+	     */
+	    AppendNode.prototype.isVisible = function () {
+	      return (this.parent.childs.length == 0);
+	    };
+
+	    /**
+	     * Show a contextmenu for this node
+	     * @param {HTMLElement} anchor   The element to attach the menu to.
+	     * @param {function} [onClose]   Callback method called when the context menu
+	     *                               is being closed.
+	     */
+	    AppendNode.prototype.showContextMenu = function (anchor, onClose) {
+	      var node = this;
+	      var titles = Node.TYPE_TITLES;
+	      var items = [
+	        // create append button
+	        {
+	          'text': 'Append',
+	          'title': 'Append a new field with type \'auto\' (Ctrl+Shift+Ins)',
+	          'submenuTitle': 'Select the type of the field to be appended',
+	          'className': 'insert',
+	          'click': function () {
+	            node._onAppend('', '', 'auto');
+	          },
+	          'submenu': [
+	            {
+	              'text': 'Auto',
+	              'className': 'type-auto',
+	              'title': titles.auto,
+	              'click': function () {
+	                node._onAppend('', '', 'auto');
+	              }
+	            },
+	            {
+	              'text': 'Array',
+	              'className': 'type-array',
+	              'title': titles.array,
+	              'click': function () {
+	                node._onAppend('', []);
+	              }
+	            },
+	            {
+	              'text': 'Object',
+	              'className': 'type-object',
+	              'title': titles.object,
+	              'click': function () {
+	                node._onAppend('', {});
+	              }
+	            },
+	            {
+	              'text': 'String',
+	              'className': 'type-string',
+	              'title': titles.string,
+	              'click': function () {
+	                node._onAppend('', '', 'string');
+	              }
+	            }
+	          ]
+	        }
+	      ];
+
+	      var menu = new ContextMenu(items, {close: onClose});
+	      menu.show(anchor);
+	    };
+
+	    /**
+	     * Handle an event. The event is catched centrally by the editor
+	     * @param {Event} event
+	     */
+	    AppendNode.prototype.onEvent = function (event) {
+	      var type = event.type;
+	      var target = event.target || event.srcElement;
+	      var dom = this.dom;
+
+	      // highlight the append nodes parent
+	      var menu = dom.menu;
+	      if (target == menu) {
+	        if (type == 'mouseover') {
+	          this.editor.highlighter.highlight(this.parent);
+	        }
+	        else if (type == 'mouseout') {
+	          this.editor.highlighter.unhighlight();
+	        }
+	      }
+
+	      // context menu events
+	      if (type == 'click' && target == dom.menu) {
+	        var highlighter = this.editor.highlighter;
+	        highlighter.highlight(this.parent);
+	        highlighter.lock();
+	        util.addClassName(dom.menu, 'selected');
+	        this.showContextMenu(dom.menu, function () {
+	          util.removeClassName(dom.menu, 'selected');
+	          highlighter.unlock();
+	          highlighter.unhighlight();
+	        });
+	      }
+
+	      if (type == 'keydown') {
+	        this.onKeyDown(event);
+	      }
+	    };
+
+	    return AppendNode;
+	  }
+
+	  // return the factory function
+	  return appendNodeFactory;
+	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ }
+/******/ ])
 });
-
-/**
- * All editors should extend from this class
- */
-JSONEditor.AbstractEditor = Class.extend({
-  fireChangeHeaderEvent: function() {
-    $triggerc(this.container,'change_header_text');
-  },
-  onChildEditorChange: function(editor) {
-    if(!this.watch_listener) return;
-    this.watch_listener();
-    this.jsoneditor.notifyWatchers(this.path);
-    if(this.parent) this.parent.onChildEditorChange(this);
-    else this.jsoneditor.onChange();
-  },
-  register: function() {
-    this.jsoneditor.registerEditor(this);
-  },
-  unregister: function() {
-    if(!this.jsoneditor) return;
-    this.jsoneditor.unregisterEditor(this);
-  },
-  getNumColumns: function() {
-    return 12;
-  },
-  init: function(options) {
-    var self = this;
-    this.container = options.container;
-    this.jsoneditor = options.jsoneditor;
-
-    this.theme = this.jsoneditor.theme;
-    this.template_engine = this.jsoneditor.template;
-    this.iconlib = this.jsoneditor.iconlib;
-
-    this.options = $extend({}, (this.options || {}), (options.schema.options || {}), options);
-    this.schema = this.options.schema;
-
-    if(!options.path && !this.schema.id) this.schema.id = 'root';
-    this.path = options.path || 'root';
-    this.formname = options.formname || this.path.replace(/\.([^.]+)/g,'[$1]');
-    if(this.jsoneditor.options.form_name_root) this.formname = this.formname.replace(/^root\[/,this.jsoneditor.options.form_name_root+'[');
-    if(this.schema.id) this.container.setAttribute('data-schemaid',this.schema.id);
-    if(this.schema.type && typeof this.schema.type === "string") this.container.setAttribute('data-schematype',this.schema.type);
-    this.container.setAttribute('data-schemapath',this.path);
-    this.jsoneditor._data(this.container,'editor',this);
-
-    this.key = this.path.split('.').pop();
-    this.parent = options.parent;
-    this.link_watchers = [];
-    
-    this.register();
-    
-    // If not required, add an add/remove property link
-    if(!this.isRequired() && !this.options.compact && false) {
-      this.title_links = this.theme.getFloatRightLinkHolder();
-      this.container.appendChild(this.title_links);
-
-      this.addremove = this.theme.getLink('remove '+this.getTitle());
-      this.title_links.appendChild(this.addremove);
-
-      this.addremove.addEventListener('click',function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Don't allow changing the properties when disabled
-        if(self.disabled) return;
-        
-        if(self.property_removed) {
-          self.addProperty();
-        }
-        else {
-          self.removeProperty();
-        }
-      
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-    }
-    
-    // Watched fields
-    this.watched = {};
-    if(this.schema.vars) this.schema.watch = this.schema.vars;
-    this.watched_values = {};
-    this.watch_listener = function() {
-      if(self.refreshWatchedFieldValues()) {
-        self.onWatchedFieldChange();
-      }
-    };
-    if(this.schema.watch) {
-      var path,path_parts,first,root,adjusted_path;
-
-      for(var name in this.schema.watch) {
-        if(!this.schema.watch.hasOwnProperty(name)) continue;
-        path = this.schema.watch[name];
-
-        if(path instanceof Array) {
-          path_parts = [path[0]].concat(path[1].split('.'));
-        }
-        else {
-          path_parts = path.split('.');
-          if(!self.theme.closest(self.container,'[data-schemaid="'+path_parts[0]+'"]')) path_parts.unshift('#');
-        }
-        first = path_parts.shift();
-
-        if(first === '#') first = self.jsoneditor.schema.id || 'root';
-
-        // Find the root node for this template variable
-        root = self.theme.closest(self.container,'[data-schemaid="'+first+'"]');
-        if(!root) throw "Could not find ancestor node with id "+first;
-
-        // Keep track of the root node and path for use when rendering the template
-        adjusted_path = root.getAttribute('data-schemapath') + '.' + path_parts.join('.');
-        
-        self.jsoneditor.watch(adjusted_path,self.watch_listener);
-        
-        self.watched[name] = adjusted_path;
-      }
-    }
-    
-    // Dynamic header
-    if(this.schema.headerTemplate) {
-      this.header_template = this.jsoneditor.compileTemplate(this.schema.headerTemplate, this.template_engine);
-    }
-
-    this.build();
-    
-    // Add links
-    if(!this.no_link_holder) {
-      this.link_holder = this.theme.getLinksHolder();
-      this.container.appendChild(this.link_holder);
-      if(this.schema.links) {
-        for(var i=0; i<this.schema.links.length; i++) {
-          this.addLink(this.getLink(this.schema.links[i]));
-        }
-      }
-    }
-    
-    this.setValue(this.getDefault(), true);
-    this.updateHeaderText();
-    this.watch_listener();
-  },
-  getButton: function(text, icon, title) {
-    var btnClass = 'json-editor-btn-'+icon;
-    if(!this.iconlib) icon = null;
-    else icon = this.iconlib.getIcon(icon);
-    
-    if(!icon && title) {
-      text = title;
-      title = null;
-    }
-    
-    var btn = this.theme.getButton(text, icon, title);
-    btn.className += ' ' + btnClass + ' ';
-    return btn;
-  },
-  setButtonText: function(button, text, icon, title) {
-    if(!this.iconlib) icon = null;
-    else icon = this.iconlib.getIcon(icon);
-    
-    if(!icon && title) {
-      text = title;
-      title = null;
-    }
-    
-    return this.theme.setButtonText(button, text, icon, title);
-  },
-  addLink: function(link) {
-    if(this.link_holder) this.link_holder.appendChild(link);
-  },
-  getLink: function(data) {
-    var holder, link;
-        
-    // Get mime type of the link
-    var mime = data.mediaType || 'application/javascript';
-    var type = mime.split('/')[0];
-    
-    // Template to generate the link href
-    var href = this.jsoneditor.compileTemplate(data.href,this.template_engine);
-    
-    // Image links
-    if(type === 'image') {
-      holder = this.theme.getBlockLinkHolder();
-      link = document.createElement('a');
-      link.setAttribute('target','_blank');
-      var image = document.createElement('img');
-      
-      this.theme.createImageLink(holder,link,image);
-    
-      // When a watched field changes, update the url  
-      this.link_watchers.push(function(vars) {
-        var url = href(vars);
-        link.setAttribute('href',url);
-        link.setAttribute('title',data.rel || url);
-        image.setAttribute('src',url);
-      });
-    }
-    // Audio/Video links
-    else if(['audio','video'].indexOf(type) >=0) {
-      holder = this.theme.getBlockLinkHolder();
-      
-      link = this.theme.getBlockLink();
-      link.setAttribute('target','_blank');
-      
-      var media = document.createElement(type);
-      media.setAttribute('controls','controls');
-      
-      this.theme.createMediaLink(holder,link,media);
-      
-      // When a watched field changes, update the url  
-      this.link_watchers.push(function(vars) {
-        var url = href(vars);
-        link.setAttribute('href',url);
-        link.textContent = data.rel || url;
-        media.setAttribute('src',url);
-      });
-    }
-    // Text links
-    else {
-      holder = this.theme.getBlockLink();
-      holder.setAttribute('target','_blank');
-      holder.textContent = data.rel;
-      
-      // When a watched field changes, update the url  
-      this.link_watchers.push(function(vars) {
-        var url = href(vars);
-        holder.setAttribute('href',url);
-        holder.textContent = data.rel || url;
-      });
-    }
-    
-    return holder;
-  },
-  refreshWatchedFieldValues: function() {
-    if(!this.watched_values) return;
-    var watched = {};
-    var changed = false;
-    var self = this;
-    
-    if(this.watched) {
-      var val,editor;
-      for(var name in this.watched) {
-        if(!this.watched.hasOwnProperty(name)) continue;
-        editor = self.jsoneditor.getEditor(this.watched[name]);
-        val = editor? editor.getValue() : null;
-        if(self.watched_values[name] !== val) changed = true;
-        watched[name] = val;
-      }
-    }
-    
-    watched.self = this.getValue();
-    if(this.watched_values.self !== watched.self) changed = true;
-    
-    this.watched_values = watched;
-    
-    return changed;
-  },
-  getWatchedFieldValues: function() {
-    return this.watched_values;
-  },
-  updateHeaderText: function() {
-    if(this.header) {
-      this.header.textContent = this.getHeaderText();
-    }
-  },
-  getHeaderText: function(title_only) {
-    if(this.header_text) return this.header_text;
-    else if(title_only) return this.schema.title;
-    else return this.getTitle();
-  },
-  onWatchedFieldChange: function() {
-    var vars;
-    if(this.header_template) {
-      vars = $extend(this.getWatchedFieldValues(),{
-        key: this.key,
-        i: this.key,
-        title: this.getTitle()
-      });
-      var header_text = this.header_template(vars);
-      
-      if(header_text !== this.header_text) {
-        this.header_text = header_text;
-        this.updateHeaderText();
-        this.fireChangeHeaderEvent();
-      }
-    }
-    if(this.link_watchers.length) {
-      vars = this.getWatchedFieldValues();
-      for(var i=0; i<this.link_watchers.length; i++) {
-        this.link_watchers[i](vars);
-      }
-    }
-  },
-  build: function() {
-
-  },
-  isValid: function(callback) {
-    callback();
-  },
-  setValue: function(value) {
-    this.value = value;
-  },
-  getValue: function() {
-    return this.value;
-  },
-  refreshValue: function() {
-
-  },
-  getChildEditors: function() {
-    return false;
-  },
-  destroy: function() {
-    var self = this;
-    this.unregister(this);
-    $each(this.watched,function(name,adjusted_path) {
-      self.jsoneditor.unwatch(adjusted_path,self.watch_listener);
-    });
-    this.watched = null;
-    this.watched_values = null;
-    this.watch_listener = null;
-    this.header_text = null;
-    this.header_template = null;
-    this.value = null;
-    if(this.container.parentNode) this.container.parentNode.removeChild(this.container);
-    this.container = null;
-    this.jsoneditor = null;
-    this.schema = null;
-    this.path = null;
-    this.key = null;
-    this.parent = null;
-  },
-  isRequired: function() {
-    if(typeof this.options.required !== "undefined") {
-      return this.options.required;
-    }
-    else if(typeof this.schema.required === "boolean") {
-      return this.schema.required;
-    }
-    else if(this.jsoneditor.options.required_by_default) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  },
-  getDefault: function() {
-    return this.schema.default || null;
-  },
-
-  getTheme: function() {
-    return this.theme;
-  },
-  getSchema: function() {
-    return this.schema;
-  },
-  getContainer: function() {
-    return this.container;
-  },
-  getTitle: function() {
-    return this.schema.title || this.key;
-  },
-  getPath: function() {
-    return this.path;
-  },
-  getParent: function() {
-    return this.parent;
-  },
-  enable: function() {
-    if(this.addremove) this.addremove.style.opacity = '';
-    
-    this.disabled = false;
-  },
-  disable: function() {
-    if(this.addremove) this.addremove.style.opacity = '.6';
-    
-    this.disabled = true;
-  },
-  isEnabled: function() {
-    return !this.disabled;
-  },
-  getOption: function(key, def) {
-    if(typeof this.options[key] !== 'undefined') return this.options[key];
-    else return def;
-  },
-  getDisplayText: function(arr) {
-    var disp = [];
-    var used = {};
-    
-    // Determine how many times each attribute name is used.
-    // This helps us pick the most distinct display text for the schemas.
-    $each(arr,function(i,el) {
-      if(el.title) {
-        used[el.title] = used[el.title] || 0;
-        used[el.title]++;
-      }
-      if(el.description) {
-        used[el.description] = used[el.description] || 0;
-        used[el.description]++;
-      }
-      if(el.format) {
-        used[el.format] = used[el.format] || 0;
-        used[el.format]++;
-      }
-      if(el.type) {
-        used[el.type] = used[el.type] || 0;
-        used[el.type]++;
-      }
-    });
-    
-    // Determine display text for each element of the array
-    $each(arr,function(i,el)  {
-      var name;
-      
-      // If it's a simple string
-      if(typeof el === "string") name = el;
-      // Object
-      else if(el.title && used[el.title]<=1) name = el.title;
-      else if(el.format && used[el.format]<=1) name = el.format;
-      else if(el.type && used[el.type]<=1) name = el.type;
-      else if(el.description && used[el.description]<=1) name = el.descripton;
-      else if(el.title) name = el.title;
-      else if(el.format) name = el.format;
-      else if(el.type) name = el.type;
-      else if(el.description) name = el.description;
-      else if(JSON.stringify(el).length < 50) name = JSON.stringify(el);
-      else name = "type";
-      
-      disp.push(name);
-    });
-    
-    // Replace identical display text with "text 1", "text 2", etc.
-    var inc = {};
-    $each(disp,function(i,name) {
-      inc[name] = inc[name] || 0;
-      inc[name]++;
-      
-      if(used[name] > 1) disp[i] = name + " " + inc[name];
-    });
-    
-    return disp;
-  },
-  showValidationErrors: function(errors) {
-
-  }
-});
-
-JSONEditor.defaults.editors.null = JSONEditor.AbstractEditor.extend({
-  getValue: function() {
-    return null;
-  },
-  setValue: function() {
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  getNumColumns: function() {
-    return 2;
-  }
-});
-
-JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {    
-    return this.schema.default || '';
-  },
-  register: function() {
-    this._super();
-    if(!this.input) return;
-    this.input.setAttribute('name',this.formname);
-  },
-  unregister: function() {
-    this._super();
-    if(!this.input) return;
-    this.input.removeAttribute('name');
-  },
-  setValue: function(value,initial,from_template) {
-    var self = this;
-    
-    if(this.template && !from_template) {
-      return;
-    }
-    
-    value = value || '';
-    if(typeof value === "object") value = JSON.stringify(value);
-    if(typeof value !== "string") value = ""+value;
-    if(value === this.serialized) return;
-
-    // Sanitize value before setting it
-    var sanitized = this.sanitize(value);
-    if(this.select_options && this.select_options.indexOf(sanitized) < 0) {
-      sanitized = this.select_options[0];
-    }
-
-    if(this.input.value === sanitized) {
-      return;
-    }
-    
-
-    this.input.value = sanitized;
-    
-    // If using SCEditor, update the WYSIWYG
-    if(this.sceditor_instance) {
-      this.sceditor_instance.val(sanitized);
-    }
-    else if(this.epiceditor) {
-      this.epiceditor.importFile(null,sanitized);
-    }
-    else if(this.ace_editor) {
-      this.ace_editor.setValue(sanitized);
-    }
-    
-    var changed = from_template || this.getValue() !== value;
-    
-    this.refreshValue();
-
-    if(changed) {
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-    }
-    
-    this.watch_listener();
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  removeProperty: function() {
-    this._super();
-    this.input.style.display = 'none';
-    if(this.description) this.description.style.display = 'none';
-    this.theme.disableLabel(this.label);
-  },
-  addProperty: function() {
-    this._super();
-    this.input.style.display = '';
-    if(this.description) this.description.style.display = '';
-    this.theme.enableLabel(this.label);
-  },
-  getNumColumns: function() {
-    var min = Math.ceil(this.getTitle().length/5);
-    var num;
-    
-    if(this.input_type === 'textarea') num = 6;
-    else if(['text','email'].indexOf(this.input_type) >= 0) num = 4;
-    else num = 2;
-    
-    return Math.min(12,Math.max(min,num));
-  },
-  build: function() {
-    var self = this, i;
-    if(!this.getOption('compact',false)) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
-
-    this.format = this.schema.format;
-    if(!this.format && this.schema.media && this.schema.media.type) {
-      this.format = this.schema.media.type.replace(/(^(application|text)\/(x-)?(script\.)?)|(-source$)/g,'');
-    }
-
-    // Select box
-    if(this.schema.enum) {
-      this.input_type = 'select';
-      this.select_options = this.schema.enum;
-      this.input = this.theme.getSelectInput(this.select_options);
-    }
-    // Dynamic Select box
-    else if(this.schema.enumSource) {
-      this.input_type = 'select';
-      this.input = this.theme.getSelectInput([]);
-      this.enumSource = [];
-      
-      // Shortcut declaration for using a single array
-      if(!(this.schema.enumSource instanceof Array)) {
-        if(this.schema.enumValue) {
-          this.enumSource = [
-            {
-              source: this.schema.enumSource,
-              value: this.schema.enumValue
-            }
-          ];
-        }
-        else {
-          this.enumSource = [
-            {
-              source: this.schema.enumSource
-            }
-          ];
-        }
-      }
-      else {
-        for(i=0; i<this.schema.enumSource.length; i++) {
-          // Shorthand for watched variable
-          if(typeof this.schema.enumSource[i] === "string") {
-            this.enumSource[i] = {
-              source: this.schema.enumSource[i]
-            };
-          }
-          // Make a copy of the schema
-          else if(!(this.schema.enumSource[i] instanceof Array)) {
-            this.enumSource[i] = $extend({},this.schema.enumSource[i]);
-          }
-          else {
-            this.enumSource[i] = this.schema.enumSource[i];
-          }
-        }
-      }
-      
-      // Now, enumSource is an array of sources
-      // Walk through this array and fix up the values
-      for(i=0; i<this.enumSource.length; i++) {
-        if(this.enumSource[i]) {
-          this.enumSource[i].value = this.jsoneditor.compileTemplate(this.enumSource[i].value, this.template_engine);
-        }
-        if(this.enumSource[i].title) {
-          this.enumSource[i].title = this.jsoneditor.compileTemplate(this.enumSource[i].title, this.template_engine);
-        }
-        if(this.enumSource[i].fillter) {
-          this.enumSource[i].filter = this.jsoneditor.compileTemplate(this.enumSource[i].filter, this.template_engine);
-        }
-      }
-    }
-    // Specific format
-    else if(this.format) {
-      // Text Area
-      if(this.format === 'textarea') {
-        this.input_type = 'textarea';
-        this.input = this.theme.getTextareaInput();
-      }
-      // Range Input
-      else if(this.format === 'range') {
-        this.input_type = 'range';
-        var min = this.schema.minimum || 0;
-        var max = this.schema.maximum || Math.max(100,min+1);
-        var step = 1;
-        if(this.schema.multipleOf) {
-          if(min%this.schema.multipleOf) min = Math.ceil(min/this.schema.multipleOf)*this.schema.multipleOf;
-          if(max%this.schema.multipleOf) max = Math.floor(max/this.schema.multipleOf)*this.schema.multipleOf;
-          step = this.schema.multipleOf;
-        }
-
-        this.input = this.theme.getRangeInput(min,max,step);
-      }
-      // Source Code
-      else if([
-          'actionscript',
-          'batchfile',
-          'bbcode',
-          'c',
-          'c++',
-          'cpp',
-          'coffee',
-          'csharp',
-          'css',
-          'dart',
-          'django',
-          'ejs',
-          'erlang',
-          'golang',
-          'handlebars',
-          'haskell',
-          'haxe',
-          'html',
-          'ini',
-          'jade',
-          'java',
-          'javascript',
-          'json',
-          'less',
-          'lisp',
-          'lua',
-          'makefile',
-          'markdown',
-          'matlab',
-          'mysql',
-          'objectivec',
-          'pascal',
-          'perl',
-          'pgsql',
-          'php',
-          'python',
-          'r',
-          'ruby',
-          'sass',
-          'scala',
-          'scss',
-          'smarty',
-          'sql',
-          'stylus',
-          'svg',
-          'twig',
-          'vbscript',
-          'xml',
-          'yaml'
-        ].indexOf(this.format) >= 0
-      ) {
-        this.input_type = this.format;
-        this.source_code = true;
-        
-        this.input = this.theme.getTextareaInput();
-      }
-      // HTML5 Input type
-      else {
-        this.input_type = this.format;
-        this.input = this.theme.getFormInputField(this.input_type);
-      }
-    }
-    // Normal text input
-    else {
-      this.input_type = 'text';
-      this.input = this.theme.getFormInputField(this.input_type);
-    }
-    
-    // minLength, maxLength, and pattern
-    if(typeof this.schema.maxLength !== "undefined") this.input.setAttribute('maxlength',this.schema.maxLength);
-    if(typeof this.schema.pattern !== "undefined") this.input.setAttribute('pattern',this.schema.pattern);
-    else if(typeof this.schema.minLength !== "undefined") this.input.setAttribute('pattern','.{'+this.schema.minLength+',}');
-
-    if(this.getOption('compact')) this.container.setAttribute('class',this.container.getAttribute('class')+' compact');
-
-    if(this.schema.readOnly || this.schema.readonly || this.schema.template) {
-      this.always_disabled = true;
-      this.input.disabled = true;
-    }
-
-    this.input
-      .addEventListener('change',function(e) {        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Don't allow changing if this field is a template
-        if(self.schema.template) {
-          this.value = self.value;
-          return;
-        }
-
-        var val = this.value;
-        
-        // sanitize value
-        var sanitized = self.sanitize(val);
-        if(val !== sanitized) {
-          this.value = sanitized;
-        }
-
-        self.refreshValue();
-        self.watch_listener();
-        self.jsoneditor.notifyWatchers(self.path);
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-
-    if(this.format) this.input.setAttribute('data-schemaformat',this.format);
-
-    this.control = this.getTheme().getFormControl(this.label, this.input, this.description);
-    this.container.appendChild(this.control);
-
-    // If the Select2 library is loaded
-    if(this.input_type === "select" && window.$ && $.fn && $.fn.select2) {
-      $(this.input).select2();
-    }
-
-    // Any special formatting that needs to happen after the input is added to the dom
-    requestAnimationFrame(function() {
-      // Skip in case the input is only a temporary editor,
-      // otherwise, in the case of an ace_editor creation,
-      // it will generate an error trying to append it to the missing parentNode
-      if(self.input.parentNode) self.afterInputReady();
-    });
-    
-    this.register();
-
-    // Compile and store the template
-    if(this.schema.template) {
-      this.template = this.jsoneditor.compileTemplate(this.schema.template, this.template_engine);
-      this.refreshValue();
-      this.jsoneditor.notifyWatchers(this.path);
-    }
-    else {
-      this.refreshValue();
-      this.jsoneditor.notifyWatchers(this.path);
-    }
-  },
-  enable: function() {
-    if(!this.always_disabled) {
-      this.input.disabled = false;
-      // TODO: WYSIWYG and Markdown editors
-    }
-    this._super();
-  },
-  disable: function() {
-    this.input.disabled = true;
-    // TODO: WYSIWYG and Markdown editors
-    this._super();
-  },
-  afterInputReady: function() {
-    var self = this, options;
-    
-    // Code editor
-    if(this.source_code) {      
-      // WYSIWYG html and bbcode editor
-      if(this.options.wysiwyg && 
-        ['html','bbcode'].indexOf(this.input_type) >= 0 && 
-        window.$ && $.fn && $.fn.sceditor
-      ) {
-        options = $extend({},{
-          plugins: self.input_type==='html'? 'xhtml' : 'bbcode',
-          emoticonsEnabled: false,
-          width: '100%',
-          height: 300
-        },JSONEditor.plugins.sceditor);
-        
-        $(self.input).sceditor(options);
-        
-        self.sceditor_instance = $(self.input).sceditor('instance');
-        
-        self.sceditor_instance.blur(function() {
-          // Get editor's value
-          var val = $("<div>"+self.sceditor_instance.val()+"</div>");
-          // Remove sceditor spans/divs
-          $('#sceditor-start-marker,#sceditor-end-marker,.sceditor-nlf',val).remove();
-          // Set the value and update
-          self.input.value = val.html();
-          self.value = self.input.value;
-          if(self.parent) self.parent.onChildEditorChange(self);
-          else self.jsoneditor.onChange();
-          self.jsoneditor.notifyWatchers(self.path);
-        });
-      }
-      // EpicEditor for markdown (if it's loaded)
-      else if (this.input_type === 'markdown' && window.EpicEditor) {
-        this.epiceditor_container = document.createElement('div');
-        this.input.parentNode.insertBefore(this.epiceditor_container,this.input);
-        this.input.style.display = 'none';
-        
-        options = $extend({},JSONEditor.plugins.epiceditor,{
-          container: this.epiceditor_container,
-          clientSideStorage: false
-        });
-        
-        this.epiceditor = new EpicEditor(options).load();
-        
-        this.epiceditor.importFile(null,this.getValue());
-      
-        this.epiceditor.on('update',function() {
-          var val = self.epiceditor.exportFile();
-          self.input.value = val;
-          self.value = val;
-          if(self.parent) self.parent.onChildEditorChange(self);
-          else self.jsoneditor.onChange();
-          self.jsoneditor.notifyWatchers(self.path);
-        });
-      }
-      // ACE editor for everything else
-      else if(window.ace) {
-        var mode = this.input_type;
-        // aliases for c/cpp
-        if(mode === 'cpp' || mode === 'c++' || mode === 'c') {
-          mode = 'c_cpp';
-        }
-        
-        this.ace_container = document.createElement('div');
-        this.ace_container.style.width = '100%';
-        this.ace_container.style.position = 'relative';
-        this.ace_container.style.height = '400px';
-        this.input.parentNode.insertBefore(this.ace_container,this.input);
-        this.input.style.display = 'none';
-        this.ace_editor = ace.edit(this.ace_container);
-        
-        this.ace_editor.setValue(this.getValue());
-        
-        // The theme
-        if(JSONEditor.plugins.ace.theme) this.ace_editor.setTheme('ace/theme/'+JSONEditor.plugins.ace.theme);
-        // The mode
-        mode = ace.require("ace/mode/"+mode);
-        if(mode) this.ace_editor.getSession().setMode(new mode.Mode());
-        
-        // Listen for changes
-        this.ace_editor.on('change',function() {
-          var val = self.ace_editor.getValue();
-          self.input.value = val;
-          self.refreshValue();
-          if(self.parent) self.parent.onChildEditorChange(self);
-          else self.jsoneditor.onChange();
-          self.jsoneditor.notifyWatchers(self.path);
-        });
-      }
-    }
-    
-    self.theme.afterInputReady(self.input);
-  },
-  refreshValue: function() {
-    this.value = this.input.value;
-    if(typeof this.value !== "string") this.value = '';
-    this.serialized = this.value;
-  },
-  destroy: function() {
-    // If using SCEditor, destroy the editor instance
-    if(this.sceditor_instance) {
-      this.sceditor_instance.destroy();
-    }
-    else if(this.epiceditor) {
-      this.epiceditor.unload();
-    }
-    else if(this.ace_editor) {
-      this.ace_editor.destroy();
-    }
-    
-    
-    this.template = null;
-    if(this.input.parentNode) this.input.parentNode.removeChild(this.input);
-    if(this.label && this.label.parentNode) this.label.parentNode.removeChild(this.label);
-    if(this.description && this.description.parentNode) this.description.parentNode.removeChild(this.description);
-
-    this._super();
-  },
-  /**
-   * This is overridden in derivative editors
-   */
-  sanitize: function(value) {
-    return value;
-  },
-  /**
-   * Re-calculates the value if needed
-   */
-  onWatchedFieldChange: function() {    
-    var self = this, vars, j;
-    
-    // If this editor needs to be rendered by a macro template
-    if(this.template) {
-      vars = this.getWatchedFieldValues();
-      this.setValue(this.template(vars),false,true);
-    }
-    // If this editor uses a dynamic select box
-    if(this.enumSource) {
-      vars = this.getWatchedFieldValues();
-      var select_options = [];
-      var select_titles = [];
-      
-      for(var i=0; i<this.enumSource.length; i++) {
-        // Constant values
-        if(this.enumSource[i] instanceof Array) {
-          select_options = select_options.concat(this.enumSource[i]);
-          select_titles = select_titles.concat(this.enumSource[i]);
-        }
-        // A watched field
-        else if(vars[this.enumSource[i].source]) {
-          var items = vars[this.enumSource[i].source];
-          
-          // Only use a predefined part of the array
-          if(this.enumSource[i].slice) {
-            items = Array.prototype.slice.apply(items,this.enumSource[i].slice);
-          }
-          // Filter the items
-          if(this.enumSource[i].filter) {
-            var new_items = [];
-            for(j=0; j<items.length; j++) {
-              if(filter({i:j,item:items[j]})) new_items.push(items[j]);
-            }
-            items = new_items;
-          }
-          
-          var item_titles = [];
-          var item_values = [];
-          for(j=0; j<items.length; j++) {
-            var item = items[j];
-            
-            // Rendered value
-            if(this.enumSource[i].value) {
-              item_values[j] = this.enumSource[i].value({
-                i: j,
-                item: item
-              });
-            }
-            // Use value directly
-            else {
-              item_values[j] = items[j];
-            }
-            
-            // Rendered title
-            if(this.enumSource[i].title) {
-              item_titles[j] = this.enumSource[i].title({
-                i: j,
-                item: item
-              });
-            }
-            // Use value as the title also
-            else {
-              item_titles[j] = item_values[j];
-            }
-          }
-          
-          // TODO: sort
-          
-          select_options = select_options.concat(item_values);
-          select_titles = select_titles.concat(item_titles);
-        }
-      }
-      
-      this.theme.setSelectOptions(this.input, select_options, select_titles);
-      this.select_options = select_options;
-      
-      // If the previous value is still in the new select options, stick with it
-      if(select_options.indexOf(this.value) !== -1) {
-        this.input.value = this.value;
-      }
-      // Otherwise, set the value to the first select option
-      else {
-        this.input.value = select_options[0];
-        this.value = select_options[0] || "";  
-        if(this.parent) this.parent.onChildEditorChange(this);
-        else this.jsoneditor.onChange();
-        this.jsoneditor.notifyWatchers(this.path);
-      }
-    }
-    
-    this._super();
-  },
-  showValidationErrors: function(errors) {
-    var self = this;
-
-    var messages = [];
-    $each(errors,function(i,error) {
-      if(error.path === self.path) {
-        messages.push(error.message);
-      }
-    });
-
-    if(messages.length) {
-      this.theme.addInputError(this.input, messages.join('. ')+'.');
-    }
-    else {
-      this.theme.removeInputError(this.input);
-    }
-  }
-});
-
-JSONEditor.defaults.editors.number = JSONEditor.defaults.editors.string.extend({
-  getDefault: function() {
-    return this.schema.default || 0;
-  },
-  sanitize: function(value) {
-    return (value+"").replace(/[^0-9\.\-]/g,'');
-  },
-  getNumColumns: function() {
-    return 2;
-  },
-  getValue: function() {
-    return this.value*1;
-  }
-});
-
-JSONEditor.defaults.editors.integer = JSONEditor.defaults.editors.number.extend({
-  sanitize: function(value) {
-    value = value + "";
-    return value.replace(/[^0-9\-]/g,'');
-  },
-  getNumColumns: function() {
-    return 2;
-  }
-});
-
-JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {
-    return $extend({},this.schema.default || {});
-  },
-  getChildEditors: function() {
-    return this.editors;
-  },
-  register: function() {
-    this._super();
-    if(this.editors) {
-      for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
-        this.editors[i].register();
-      }
-    }
-  },
-  unregister: function() {
-    this._super();
-    if(this.editors) {
-      for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
-        this.editors[i].unregister();
-      }
-    }
-  },
-  getNumColumns: function() {
-    return Math.max(Math.min(12,this.maxwidth),3);
-  },
-  enable: function() {
-    if(this.editjson_button) this.editjson_button.disabled = false;
-    if(this.addproperty_button) this.addproperty_button.disabled = false;
-    
-    this._super();
-    if(this.editors) {
-      for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
-        this.editors[i].enable();
-      }
-    }
-  },
-  disable: function() {
-    if(this.editjson_button) this.editjson_button.disabled = true;
-    if(this.addproperty_button) this.addproperty_button.disabled = true;
-    this.hideEditJSON();
-    
-    this._super();
-    if(this.editors) {
-      for(var i in this.editors) {
-        if(!this.editors.hasOwnProperty(i)) continue;
-        this.editors[i].disable();
-      }
-    }
-  },
-  layoutEditors: function() {
-    var self = this, i, j;
-    
-    if(!this.row_container) return;
-    
-    var container;
-    
-    if(this.format === 'grid') {
-      var rows = [];
-      $each(this.editors, function(key,editor) {
-        if(editor.property_removed) return;
-        var found = false;
-        var width = editor.options.hidden? 0 : editor.getNumColumns();
-        var height = editor.options.hidden? 0 : editor.container.offsetHeight;
-        // See if the editor will fit in any of the existing rows first
-        for(var i=0; i<rows.length; i++) {
-          // If the editor will fit in the row horizontally
-          if(rows[i].width + width <= 12) {
-            // If the editor is close to the other elements in height
-            // i.e. Don't put a really tall editor in an otherwise short row or vice versa
-            if(!height || (rows[i].minh*0.5 < height && rows[i].maxh*2 > height)) {
-              found = i;
-            }
-          }
-        }
-        
-        // If there isn't a spot in any of the existing rows, start a new row
-        if(found === false) {
-          rows.push({
-            width: 0,
-            minh: 999999,
-            maxh: 0,
-            editors: []
-          });
-          found = rows.length-1;
-        }
-        
-        rows[found].editors.push({
-          key: key,
-          //editor: editor,
-          width: width,
-          height: height
-        });
-        rows[found].width += width;
-        rows[found].minh = Math.min(rows[found].minh,height);
-        rows[found].maxh = Math.max(rows[found].maxh,height);
-      });
-      
-      // Make almost full rows width 12
-      // Do this by increasing all editors' sizes proprotionately
-      // Any left over space goes to the biggest editor
-      // Don't touch rows with a width of 6 or less
-      for(i=0; i<rows.length; i++) {
-        if(rows[i].width < 12) {
-          var biggest = false;
-          var new_width = 0;
-          for(j=0; j<rows[i].editors.length; j++) {
-            if(biggest === false) biggest = j;
-            else if(rows[i].editors[j].width > rows[i].editors[biggest].width) biggest = j;
-            rows[i].editors[j].width *= 12/rows[i].width;
-            rows[i].editors[j].width = Math.floor(rows[i].editors[j].width);
-            new_width += rows[i].editors[j].width;
-          }
-          if(new_width < 12) rows[i].editors[biggest].width += 12-new_width;
-          rows[i].width = 12;
-        }
-      }
-      
-      // layout hasn't changed
-      if(this.layout === JSON.stringify(rows)) return false;
-      this.layout = JSON.stringify(rows);
-      
-      // Layout the form
-      container = document.createElement('div');
-      for(i=0; i<rows.length; i++) {
-        var row = this.theme.getGridRow();
-        container.appendChild(row);
-        for(j=0; j<rows[i].editors.length; j++) {
-          var editor = this.editors[rows[i].editors[j].key];
-          
-          if(editor.options.hidden) editor.container.style.display = 'none';
-          else this.theme.setGridColumnSize(editor.container,rows[i].editors[j].width);
-          
-          row.appendChild(editor.container);
-        }
-      }
-    }
-    // Normal layout
-    else {
-      container = document.createElement('div');
-      $each(this.editors, function(key,editor) {
-        if(editor.property_removed) return;
-        var row = self.theme.getGridRow();
-        container.appendChild(row);
-        
-        if(editor.options.hidden) editor.container.style.display = 'none';
-        else self.theme.setGridColumnSize(editor.container,12);
-        
-        row.appendChild(editor.container);
-      });
-    }
-    this.row_container.innerHTML = '';
-    this.row_container.appendChild(container);
-  },
-  build: function() {
-    this.editors = {};
-    var self = this;
-    
-    this.format = this.getOption('layout') || this.getOption('object_layout') || this.schema.format || this.jsoneditor.options.object_layout || 'normal';
-
-    this.schema.properties = this.schema.properties || {};
-
-    this.minwidth = 0;
-    this.maxwidth = 0;
-
-    // If the object should be rendered as a table row
-    if(this.getOption('table_row',false)) {
-      this.editor_holder = this.container;
-      $each(this.schema.properties, function(key,schema) {
-        var editor = self.jsoneditor.getEditorClass(schema, self.jsoneditor);
-        var holder = self.editor_holder.appendChild(self.getTheme().getTableCell());
-
-        self.editors[key] = self.jsoneditor.createEditor(editor,{
-          jsoneditor: self.jsoneditor,
-          schema: schema,
-          container: holder,
-          path: self.path+'.'+key,
-          parent: self,
-          compact: true,
-          required: true
-        });
-        
-        var width = self.editors[key].options.hidden? 0 : self.editors[key].getNumColumns();
-
-        self.minwidth += width;
-        self.maxwidth += width;
-        
-        if(self.editors[key].options.hidden) {
-          holder.style.display = 'none';
-        }
-      });
-      this.no_link_holder = true;
-    }
-    // If the object should be rendered as a table
-    else if(this.getOption('table',false)) {
-      // TODO: table display format
-      throw "Not supported yet";
-    }
-    // If the object should be rendered as a div
-    else {
-      this.header = document.createElement('span');
-      this.header.textContent = this.getTitle();
-      this.title = this.getTheme().getHeader(this.header);
-      this.container.appendChild(this.title);
-      this.container.style.position = 'relative';
-      
-      // Edit JSON modal
-      this.editjson_holder = this.theme.getModal();
-      this.editjson_textarea = this.theme.getTextareaInput();
-      this.editjson_textarea.style.height = '170px';
-      this.editjson_textarea.style.width = '300px';
-      this.editjson_textarea.style.display = 'block';
-      this.editjson_save = this.getButton('Save','save','Save');
-      this.editjson_save.addEventListener('click',function() {
-        self.saveJSON();
-      });
-      this.editjson_cancel = this.getButton('Cancel','cancel','Cancel');
-      this.editjson_cancel.addEventListener('click',function() {
-        self.hideEditJSON();
-      });
-      this.editjson_holder.appendChild(this.editjson_textarea);
-      this.editjson_holder.appendChild(this.editjson_save);
-      this.editjson_holder.appendChild(this.editjson_cancel);
-      
-      // Manage Properties modal
-      this.addproperty_holder = this.theme.getModal();
-      this.addproperty_list = document.createElement('div');
-      this.addproperty_list.style.width = '295px';
-      this.addproperty_list.style.maxHeight = '160px';
-      this.addproperty_list.style.padding = '5px 0';
-      this.addproperty_list.style.overflowY = 'auto';
-      this.addproperty_list.style.overflowX = 'hidden';
-      this.addproperty_list.style.paddingLeft = '5px';
-      this.addproperty_add = this.getButton('add','add','add');
-      this.addproperty_input = this.theme.getFormInputField('text');
-      this.addproperty_input.setAttribute('placeholder','Property name...');
-      this.addproperty_input.style.width = '220px';
-      this.addproperty_input.style.marginBottom = '0';
-      this.addproperty_input.style.display = 'inline-block';
-      this.addproperty_add.addEventListener('click',function() {
-        if(self.addproperty_input.value) {
-          if(self.editors[self.addproperty_input.value]) {
-            alert('there is already a property with that name');
-            return;
-          }
-          
-          self.addObjectProperty(self.addproperty_input.value);
-          self.addPropertyCheckbox(self.addproperty_input.value);
-          if(self.editors[self.addproperty_input.value]) {
-            self.editors[self.addproperty_input.value].disable();
-          }
-        }
-      });
-      this.addproperty_holder.appendChild(this.addproperty_list);
-      this.addproperty_holder.appendChild(this.addproperty_input);
-      this.addproperty_holder.appendChild(this.addproperty_add);
-      var spacer = document.createElement('div');
-      spacer.style.clear = 'both';
-      this.addproperty_holder.appendChild(spacer);
-      
-      
-      // Description
-      if(this.schema.description) {
-        this.description = this.getTheme().getDescription(this.schema.description);
-        this.container.appendChild(this.description);
-      }
-      
-      // Validation error placeholder area
-      this.error_holder = document.createElement('div');
-      this.container.appendChild(this.error_holder);
-      
-      // Container for child editor area
-      this.editor_holder = this.getTheme().getIndentedPanel();
-      this.editor_holder.style.paddingBottom = '0';
-      this.container.appendChild(this.editor_holder);
-
-      // Container for rows of child editors
-      this.row_container = this.theme.getGridContainer();
-      this.editor_holder.appendChild(this.row_container);
-
-      $each(this.schema.properties, function(key,schema) {
-        var editor = self.jsoneditor.getEditorClass(schema, self.jsoneditor);
-        var holder = self.getTheme().getGridColumn();
-        self.row_container.appendChild(holder);
-
-        // If the property is required
-        var required;
-        if(self.schema.required && self.schema.required instanceof Array) {
-          required = self.schema.required.indexOf(key) >= 0;
-        }
-
-        self.editors[key] = self.jsoneditor.createEditor(editor,{
-          jsoneditor: self.jsoneditor,
-          schema: schema,
-          container: holder,
-          path: self.path+'.'+key,
-          parent: self,
-          required: required
-        });
-
-        self.minwidth = Math.max(self.minwidth,self.editors[key].getNumColumns());
-        self.maxwidth += self.editors[key].getNumColumns();
-      });
-
-      // Control buttons
-      this.title_controls = this.getTheme().getHeaderButtonHolder();
-      this.editjson_controls = this.getTheme().getHeaderButtonHolder();
-      this.addproperty_controls = this.getTheme().getHeaderButtonHolder();
-      this.title.appendChild(this.title_controls);
-      this.title.appendChild(this.editjson_controls);
-      this.title.appendChild(this.addproperty_controls);
-
-      // Show/Hide button
-      this.collapsed = false;
-      this.toggle_button = this.getButton('','collapse','Collapse');
-      this.title_controls.appendChild(this.toggle_button);
-      this.toggle_button.addEventListener('click',function() {
-        if(self.collapsed) {
-          self.editor_holder.style.display = '';
-          self.collapsed = false;
-          self.setButtonText(self.toggle_button,'','collapse','Collapse');
-        }
-        else {
-          self.editor_holder.style.display = 'none';
-          self.collapsed = true;
-          self.setButtonText(self.toggle_button,'','expand','Expand');
-        }
-      });
-
-      // If it should start collapsed
-      if(this.options.collapsed) {
-        $trigger(this.toggle_button,'click');
-      }
-      
-      // Collapse button disabled
-      if(this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
-        if(this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
-      }
-      else if(this.jsoneditor.options.disable_collapse) {
-        this.toggle_button.style.display = 'none';
-      }
-      
-      // Edit JSON Button
-      this.editjson_button = this.getButton('JSON','edit','Edit JSON');
-      this.editjson_button.addEventListener('click',function() {
-        self.toggleEditJSON();
-      });
-      this.editjson_controls.appendChild(this.editjson_button);
-      this.editjson_controls.appendChild(this.editjson_holder);
-      
-      // Edit JSON Buttton disabled
-      if(this.schema.options && typeof this.schema.options.disable_edit_json !== "undefined") {
-        if(this.schema.options.disable_edit_json) this.editjson_button.style.display = 'none';
-      }
-      else if(this.jsoneditor.options.disable_edit_json) {
-        this.editjson_button.style.display = 'none';
-      }
-      
-      // Object Properties Button
-      this.addproperty_button = this.getButton('Properties','edit','Object Properties');
-      this.addproperty_button.addEventListener('click',function() {
-        self.toggleAddProperty();
-      });
-      this.addproperty_controls.appendChild(this.addproperty_button);
-      this.addproperty_controls.appendChild(this.addproperty_holder);
-      this.refreshAddProperties();
-    }
-    
-    // Sort editors by propertyOrder
-    var sorted = {};
-    var keys = Object.keys(this.editors);
-    keys = keys.sort(function(a,b) {
-      var ordera = self.editors[a].schema.propertyOrder;
-      var orderb = self.editors[b].schema.propertyOrder;
-      if(typeof ordera !== "number") ordera = 1000;
-      if(typeof orderb !== "number") orderb = 1000;
-      
-      return ordera - orderb;
-    });
-    for(var i=0; i<keys.length; i++) {
-      sorted[keys[i]] = this.editors[keys[i]];
-    }
-    this.editors = sorted;
-    
-    
-    // Fix table cell ordering
-    if(this.getOption('table_row',false)) {
-      this.editor_holder = this.container;
-      $each(this.editors, function(key,editor) {
-        self.editor_holder.appendChild(editor.container);
-      });
-    }
-    // Layout object editors in grid if needed
-    else {
-      // Initial layout
-      this.layoutEditors();
-      // Do it again now that we know the approximate heights of elements
-      this.layoutEditors();
-    }
-
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  showEditJSON: function() {
-    if(!this.editjson_holder) return;
-    this.hideAddProperty();
-    
-    // Position the form directly beneath the button
-    // TODO: edge detection
-    this.editjson_holder.style.left = this.editjson_button.offsetLeft+"px";
-    this.editjson_holder.style.top = this.editjson_button.offsetTop + this.editjson_button.offsetHeight+"px";
-    
-    // Start the textarea with the current value
-    this.editjson_textarea.value = JSON.stringify(this.getValue(),null,2);
-    
-    // Disable the rest of the form while editing JSON
-    this.disable();
-    
-    this.editjson_holder.style.display = '';
-    this.editjson_button.disabled = false;
-    this.editing_json = true;
-  },
-  hideEditJSON: function() {
-    if(!this.editjson_holder) return;
-    if(!this.editing_json) return;
-    
-    this.editjson_holder.style.display = 'none';
-    this.enable();
-    this.editing_json = false;
-  },
-  saveJSON: function() {
-    if(!this.editjson_holder) return;
-    
-    try {
-      var json = JSON.parse(this.editjson_textarea.value);
-      this.setValue(json);
-      this.hideEditJSON();
-    }
-    catch(e) {
-      alert('invalid JSON');
-      throw e;
-    }
-  },
-  toggleEditJSON: function() {
-    if(this.editing_json) this.hideEditJSON();
-    else this.showEditJSON();
-  },
-  addPropertyCheckbox: function(key) {
-    var editor = this.editors[key];
-    if(!editor) return;
-    var self = this;
-    var checkbox, label, control;
-    
-    checkbox = self.theme.getCheckbox();
-    checkbox.style.width = 'auto';
-    label = self.theme.getCheckboxLabel(key);
-    control = self.theme.getFormControl(label,checkbox);
-    control.style.paddingBottom = control.style.marginBottom = control.style.paddingTop = control.style.marginTop = 0;
-    control.style.height = 'auto';
-    //control.style.overflowY = 'hidden';
-    self.addproperty_list.appendChild(control);
-    
-    checkbox.checked = !editor.property_removed;
-    if(editor.isRequired()) checkbox.disabled = true;
-    checkbox.addEventListener('change',function() {
-      if(checkbox.checked) {
-        self.addObjectProperty(key);
-      }
-      else {
-        self.removeObjectProperty(key);
-      }
-    });
-    
-    return checkbox;
-  },
-  showAddProperty: function() {
-    if(!this.addproperty_holder) return;
-    this.hideEditJSON();
-    
-    // Position the form directly beneath the button
-    // TODO: edge detection
-    this.addproperty_holder.style.left = this.addproperty_button.offsetLeft+"px";
-    this.addproperty_holder.style.top = this.addproperty_button.offsetTop + this.addproperty_button.offsetHeight+"px";
-    
-    // Build the properties list
-    this.addproperty_list.innerHTML = '';
-    var self = this;
-    this.addproperty_checkboxes = {};
-    $each(this.editors,function(i,editor) {
-      self.addproperty_checkboxes[i] = self.addPropertyCheckbox(i);
-    });
-    
-    // Disable the rest of the form while editing JSON
-    this.disable();
-    
-    this.adding_property = true;
-    this.addproperty_button.disabled = false;
-    this.addproperty_holder.style.display = '';
-    this.refreshAddProperties();
-  },
-  hideAddProperty: function() {
-    if(!this.addproperty_holder) return;
-    if(!this.adding_property) return;
-    
-    this.addproperty_holder.style.display = 'none';
-    this.enable();
-    
-    this.adding_property = false;
-  },
-  toggleAddProperty: function() {
-    if(this.adding_property) this.hideAddProperty();
-    else this.showAddProperty();
-  },
-  removeObjectProperty: function(property) {
-    if(this.editors[property]) {
-      this.editors[property].property_removed = true;
-      this.editors[property].unregister();
-      this.refreshValue();
-      this.layoutEditors();
-      this.jsoneditor.notifyWatchers(this.path);
-      if(this.parent) this.parent.onChildEditorChange(this);
-      else this.jsoneditor.onChange();
-    }
-  },
-  addObjectProperty: function(name) {
-    var self = this;
-    
-    // If property with this name already exists
-    if(this.editors[name]) {
-      // Property  was removed, add it back
-      if(this.editors[name].property_removed) {
-        this.editors[name].property_removed = false;
-        this.editors[name].register();
-        this.jsoneditor.notifyWatchers(this.editors[name].path);
-      }
-      else {
-        return; 
-      }
-    }
-    else {
-      // Determine the schema to use for this new property
-      var schema = {}, matched = false;
-      // Check if it matches any of the pattern properties
-      if(self.schema.patternProperties) {
-        $each(self.schema.patternProperties,function(i,el) {
-          var regex = new RegExp(i);
-          if(regex.test(name)) {
-            matched = true;
-            schema = $extend(schema,el);
-          }
-        });
-      }
-      // Otherwise, check if additionalProperties is a schema
-      if(!matched && typeof self.schema.additionalProperties === "object") {
-        schema = $extend(schema,self.schema.additionalProperties);
-      }
-      
-      // Add the property
-      var editor = self.jsoneditor.getEditorClass(schema, self.jsoneditor);
-      var holder = self.getTheme().getChildEditorHolder();
-      self.editor_holder.appendChild(holder);
-
-      self.editors[name] = self.jsoneditor.createEditor(editor,{
-        jsoneditor: self.jsoneditor,
-        schema: schema,
-        container: holder,
-        path: self.path+'.'+name,
-        parent: self,
-        required: false
-      });
-      self.editors[name].not_core = true;
-    }
-    
-    self.refreshValue();
-    self.jsoneditor.notifyWatchers(self.path);
-    if(self.parent) self.parent.onChildEditorChange(self);
-    else self.jsoneditor.onChange();
-    
-    self.layoutEditors();
-  },
-  onChildEditorChange: function(editor) {
-    this.refreshValue();
-    this._super(editor);
-  },
-  canHaveAdditionalProperties: function() {
-    return this.schema.additionalProperties !== false && !this.jsoneditor.options.no_additional_properties;
-  },
-  destroy: function() {
-    $each(this.editors, function(i,el) {
-      el.destroy();
-    });
-    this.editor_holder.innerHTML = '';
-    if(this.title) this.title.parentNode.removeChild(this.title);
-    if(this.error_holder) this.error_holder.parentNode.removeChild(this.error_holder);
-
-    this.editors = null;
-    this.editor_holder.parentNode.removeChild(this.editor_holder);
-    this.editor_holder = null;
-
-    this._super();
-  },
-  refreshValue: function() {
-    this.value = {};
-    this.serialized = '';
-    var self = this;
-    var props = 0;
-    
-    var removed = false;
-    var new_editors = this.editors;
-    $each(this.editors, function(i,editor) {
-      if(editor.property_removed && editor.not_core) {
-        new_editors = {};
-        removed = true;
-      }
-    });
-    
-    $each(this.editors, function(i,editor) {
-      if(editor.property_removed) {
-        if(!editor.not_core && removed) new_editors[i] = editor;
-        else if(editor.not_core) {
-          var container = editor.container;
-          editor.destroy();
-          if(container.parentNode) container.parentNode.removeChild(container);
-        }
-        return;
-      }
-      else if(removed) new_editors[i] = editor;
-      
-      props++;
-      self.value[i] = editor.getValue();
-    });
-    this.editors = new_editors;
-    
-    if(this.adding_property) this.refreshAddProperties();
-  },
-  refreshAddProperties: function() {
-    if(this.options.disable_properties || this.jsoneditor.options.disable_properties) {
-      this.addproperty_controls.style.display = 'none';
-      return;
-    }
-
-    var can_add = false, can_remove = false, num_props = 0, i, show_modal = false;
-    
-    // Get number of editors
-    for(i in this.editors) {
-      if(!this.editors.hasOwnProperty(i)) continue;
-      if(this.editors[i].property_removed) continue;
-      num_props++;
-    }
-    
-    // Determine if we can add back removed properties
-    can_add = this.canHaveAdditionalProperties() && !(typeof this.schema.maxProperties !== "undefined" && num_props >= this.schema.maxProperties);
-    
-    // Check for which editors can't be removed or added back
-    for(i in this.editors) {
-      if(!this.editors.hasOwnProperty(i)) continue;
-      if(this.editors[i].isRequired()) {
-        if(this.addproperty_checkboxes && this.addproperty_checkboxes[i]) {
-          this.addproperty_checkboxes[i].disabled = true;
-        }
-      }
-      else if(typeof this.schema.minProperties !== "undefined" && num_props <= this.schema.minProperties) {
-        if(this.addproperty_checkboxes && this.addproperty_checkboxes[i]) {
-          this.addproperty_checkboxes[i].disabled = this.addproperty_checkboxes[i].checked;
-          if(!this.addproperty_checkboxes[i].checked) show_modal = true;
-        }
-        else if(this.editors[i].property_removed && can_add) {
-          show_modal = true;
-        }
-      }
-      else if(this.editors[i].property_removed) {
-        if(this.addproperty_checkboxes && this.addproperty_checkboxes[i]) {
-          if(!can_add) {
-            this.addproperty_checkboxes[i].disabled = true;
-          }
-          else {
-            this.addproperty_checkboxes[i].disabled = false;
-            show_modal = true;
-          }
-        }
-        else if(can_add) {
-          show_modal = true;
-        }
-      }
-      else {
-        if(this.addproperty_checkboxes && this.addproperty_checkboxes[i]) {
-          this.addproperty_checkboxes[i].disabled = false;
-        }
-        show_modal = true;
-        can_remove = true;
-      }
-    }
-    
-    if(this.canHaveAdditionalProperties()) {
-      show_modal = true;
-    }
-    
-    // Additional addproperty checkboxes not tied to a current editor
-    if(this.addproperty_checkboxes) {
-      for(i in this.addproperty_checkboxes) {
-        if(!this.addproperty_checkboxes.hasOwnProperty(i)) continue;
-        if(this.editors[i]) continue;
-        show_modal = true;
-        this.addproperty_checkboxes[i].disabled = !can_add && !can_remove;
-      }
-    }
-    
-    // If no editors can be added or removed, hide the modal button
-    if(!show_modal) {
-      this.hideAddProperty();
-      this.addproperty_controls.style.display = 'none';
-    }
-    // If additional properties are disabled
-    else if(!this.canHaveAdditionalProperties()) {
-      this.addproperty_add.style.display = 'none';
-      this.addproperty_input.style.display = 'none';
-    }
-    // If no new properties can be added
-    else if(!can_add) {
-      this.addproperty_add.disabled = true;
-    }
-    // If new properties can be added
-    else {
-      this.addproperty_add.disabled = false;
-    }
-  },
-  setValue: function(value, initial) {
-    var self = this;
-    value = value || {};
-    
-    if(typeof value !== "object" || value instanceof Array) value = {};
-    
-    // First, set the values for all of the defined properties
-    $each(this.editors, function(i,editor) {      
-      if(typeof value[i] !== "undefined") {
-        // If property is removed, add property
-        if(editor.property_removed) {
-          self.addObjectProperty(i);
-        }
-        
-        editor.setValue(value[i],initial);
-      }
-      else {
-        // If property isn't required, remove property
-        if(!initial && !editor.property_removed && !editor.isRequired()) {
-          self.removeObjectProperty(i);
-          return;
-        }
-        
-        editor.setValue(editor.getDefault(),initial);
-      }
-    });
-    
-    // If additional properties are allowed, create the editors for any of those
-    if(this.canHaveAdditionalProperties()) {
-      $each(value, function(i,val) {
-        if(!self.editors[i]) {
-          self.addObjectProperty(i);
-          if(self.editors[i]) {
-            self.editors[i].setValue(val,initial);
-          }
-        }
-      });
-    }
-    
-    this.refreshValue();
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  showValidationErrors: function(errors) {
-    var self = this;
-
-    // Get all the errors that pertain to this editor
-    var my_errors = [];
-    var other_errors = [];
-    $each(errors, function(i,error) {
-      if(error.path === self.path) {
-        my_errors.push(error);
-      }
-      else {
-        other_errors.push(error);
-      }
-    });
-
-    // Show errors for this editor
-    if(this.error_holder) {
-      if(my_errors.length) {
-        var message = [];
-        this.error_holder.innerHTML = '';
-        this.error_holder.style.display = '';
-        $each(my_errors, function(i,error) {
-          self.error_holder.appendChild(self.theme.getErrorMessage(error.message));
-        });
-      }
-      // Hide error area
-      else {
-        this.error_holder.style.display = 'none';
-      }
-    }
-
-    // Show error for the table row if this is inside a table
-    if(this.getOption('table_row')) {
-      if(my_errors.length) {
-        this.theme.addTableRowError(this.container);
-      }
-      else {
-        this.theme.removeTableRowError(this.container);
-      }
-    }
-
-    // Show errors for child editors
-    $each(this.editors, function(i,editor) {
-      editor.showValidationErrors(other_errors);
-    });
-  }
-});
-
-JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {
-    return this.schema.default || [];
-  },
-  register: function() {
-    this._super();
-    if(this.rows) {
-      for(var i=0; i<this.rows.length; i++) {
-        this.rows[i].register();
-      }
-    }
-  },
-  unregister: function() {
-    this._super();
-    if(this.rows) {
-      for(var i=0; i<this.rows.length; i++) {
-        this.rows[i].unregister();
-      }
-    }
-  },
-  getNumColumns: function() {
-    var info = this.getItemInfo(0);
-    // Tabs require extra horizontal space
-    if(this.tabs_holder) {
-      return Math.max(Math.min(12,info.width+2),4);
-    }
-    else {
-      return info.width;
-    }
-  },
-  addProperty: function() {
-    this._super();
-    this.row_holder.style.display = '';
-    if(this.tabs_holder) this.tabs_holder.style.display = '';
-    this.controls.style.display = '';
-    this.title_controls.style.display = '';
-    this.theme.enableHeader(this.title);
-  },
-  removeProperty: function() {
-    this._super();
-    this.row_holder.style.display = 'none';
-    if(this.tabs_holder) this.tabs_holder.style.display = 'none';
-    this.controls.style.display = 'none';
-    this.title_controls.style.display = 'none';
-    this.theme.disableHeader(this.title);
-  },
-  enable: function() {
-    if(this.add_row_button) this.add_row_button.disabled = false;
-    if(this.remove_all_rows_button) this.remove_all_rows_button.disabled = false;
-    if(this.delete_last_row_button) this.delete_last_row_button.disabled = false;
-    
-    if(this.rows) {
-      for(var i=0; i<this.rows.length; i++) {
-        this.rows[i].enable();
-        
-        if(this.rows[i].moveup_button) this.rows[i].moveup_button.disabled = false;
-        if(this.rows[i].movedown_button) this.rows[i].movedown_button.disabled = false;
-        if(this.rows[i].delete_button) this.rows[i].delete_button.disabled = false;
-      }
-    }
-    this._super();
-  },
-  disable: function() {
-    if(this.add_row_button) this.add_row_button.disabled = true;
-    if(this.remove_all_rows_button) this.remove_all_rows_button.disabled = true;
-    if(this.delete_last_row_button) this.delete_last_row_button.disabled = true;
-
-    if(this.rows) {
-      for(var i=0; i<this.rows.length; i++) {
-        this.rows[i].disable();
-        
-        if(this.rows[i].moveup_button) this.rows[i].moveup_button.disabled = true;
-        if(this.rows[i].movedown_button) this.rows[i].movedown_button.disabled = true;
-        if(this.rows[i].delete_button) this.rows[i].delete_button.disabled = true;
-      }
-    }
-    this._super();
-  },
-  build: function() {
-    this.rows = [];
-    this.row_cache = [];
-    var self = this;
-    
-    this.hide_delete_buttons = this.options.disable_array_delete || this.jsoneditor.options.disable_array_delete;
-    this.hide_move_buttons = this.options.disable_array_reorder || this.jsoneditor.options.disable_array_reorder;
-    this.hide_add_button = this.options.disable_array_add || this.jsoneditor.options.disable_array_add;
-
-    if(!this.getOption('compact',false)) {
-      this.header = document.createElement('span');
-      this.header.textContent = this.getTitle();
-      this.title = this.theme.getHeader(this.header);
-      this.container.appendChild(this.title);
-      this.title_controls = this.theme.getHeaderButtonHolder();
-      this.title.appendChild(this.title_controls);
-      if(this.schema.description) {
-        this.description = this.theme.getDescription(this.schema.description);
-        this.container.appendChild(this.description);
-      }
-      this.error_holder = document.createElement('div');
-      this.container.appendChild(this.error_holder);
-
-      if(this.schema.format === 'tabs') {
-        this.controls = this.theme.getHeaderButtonHolder();
-        this.title.appendChild(this.controls);
-        this.tabs_holder = this.theme.getTabHolder();
-        this.container.appendChild(this.tabs_holder);
-        this.row_holder = this.theme.getTabContentHolder(this.tabs_holder);
-
-        this.active_tab = null;
-      }
-      else {
-        this.panel = this.theme.getIndentedPanel();
-        this.container.appendChild(this.panel);
-        this.row_holder = document.createElement('div');
-        this.panel.appendChild(this.row_holder);
-        this.controls = this.theme.getButtonHolder();
-        this.panel.appendChild(this.controls);
-      }
-    }
-    else {
-        this.panel = this.theme.getIndentedPanel();
-        this.container.appendChild(this.panel);
-        this.controls = this.theme.getButtonHolder();
-        this.panel.appendChild(this.controls);
-        this.row_holder = document.createElement('div');
-        this.panel.appendChild(this.row_holder);
-    }
-
-    this.row_holder.addEventListener('change_header_text',function() {
-      self.refreshTabs(true);
-    });
-    
-    // Add controls
-    this.addControls();
-    
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  onChildEditorChange: function(editor) {
-    this.refreshValue();
-    this._super(editor);
-  },
-  getItemTitle: function() {
-    return (this.schema.items && this.schema.items.title) || 'item';
-  },
-  getItemSchema: function(i) {
-    if(this.schema.items instanceof Array) {
-      if(i >= this.schema.items.length) {
-        if(this.schema.additionalItems===true) {
-          return {};
-        }
-        else if(this.schema.additionalItems) {
-          return $extend({},this.schema.additionalItems);
-        }
-      }
-      else {
-        return $extend({},this.schema.items[i]);
-      }
-    }
-    else if(this.schema.items) {
-      return $extend({},this.schema.items);
-    }
-    else {
-      return {};
-    }
-  },
-  getItemInfo: function(i) {
-    // Get the schema for this item
-    var schema = this.getItemSchema(i);
-    
-    // Check if it's cached
-    this.item_info = this.item_info || {};
-    var stringified = JSON.stringify(schema);
-    if(typeof this.item_info[stringified] !== "undefined") return this.item_info[stringified];
-    
-    // Create a temporary editor with this schema and get info
-    var tmp = document.createElement('div');
-    this.container.appendChild(tmp);
-    
-    // Ignore events on this temporary editor
-    tmp.addEventListener('change_header_text',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    });
-    
-    var editor = this.jsoneditor.getEditorClass(schema, this.jsoneditor);
-    editor = this.jsoneditor.createEditor(editor,{
-      jsoneditor: this.jsoneditor,
-      schema: schema,
-      container: tmp,
-      path: this.path+'.'+i,
-      parent: this,
-      required: true
-    });
-    this.item_info[stringified] = {
-      child_editors: editor.getChildEditors()? true : false,
-      title: schema.title || 'item',
-      width: editor.getNumColumns(),
-      default: editor.getDefault()
-    };
-    editor.destroy();
-    if(tmp.parentNode) tmp.parentNode.removeChild(tmp);
-    
-    return this.item_info[stringified];
-  },
-  getElementEditor: function(i) {
-    var item_info = this.getItemInfo(i);
-    var schema = this.getItemSchema(i);
-    schema.title = item_info.title+' '+i;
-
-    var editor = this.jsoneditor.getEditorClass(schema, this.jsoneditor);
-
-    var holder;
-    if(this.tabs_holder) {
-      holder = this.theme.getTabContent();
-    }
-    else if(item_info.child_editors) {
-      holder = this.theme.getChildEditorHolder();
-    }
-    else {
-      holder = this.theme.getIndentedPanel();
-    }
-
-    this.row_holder.appendChild(holder);
-
-    var ret = this.jsoneditor.createEditor(editor,{
-      jsoneditor: this.jsoneditor,
-      schema: schema,
-      container: holder,
-      path: this.path+'.'+i,
-      parent: this,
-      required: true
-    });
-
-    if(!ret.title_controls) {
-      ret.array_controls = this.theme.getButtonHolder();
-      holder.appendChild(ret.array_controls);
-    }
-    
-    return ret;
-  },
-  destroy: function() {
-    this.empty(true);
-    if(this.title) this.title.parentNode.removeChild(this.title);
-    if(this.description) this.description.parentNode.removeChild(this.description);
-    if(this.row_holder) this.row_holder.parentNode.removeChild(this.row_holder);
-    if(this.controls) this.controls.parentNode.removeChild(this.controls);
-    if(this.panel) this.panel.parentNode.removeChild(this.panel);
-    
-    this.rows = this.row_cache = this.title = this.description = this.row_holder = this.panel = this.controls = null;
-
-    this._super();
-  },
-  empty: function(hard) {
-    if(!this.rows) return;
-    var self = this;
-    $each(this.rows,function(i,row) {
-      if(hard) {
-        if(row.tab && row.tab.parentNode) row.tab.parentNode.removeChild(row.tab);
-        self.destroyRow(row,true);
-        self.row_cache[i] = null;
-      }
-      self.rows[i] = null;
-    });
-    self.rows = [];
-    if(hard) self.row_cache = [];
-  },
-  destroyRow: function(row,hard) {
-    var holder = row.container;
-    if(hard) {
-      row.destroy();
-      if(holder.parentNode) holder.parentNode.removeChild(holder);
-      if(row.tab && row.tab.parentNode) row.tab.parentNode.removeChild(row.tab);
-    }
-    else {
-      if(row.tab) row.tab.style.display = 'none';
-      holder.style.display = 'none';
-      row.unregister();
-    }
-  },
-  getMax: function() {
-    if((this.schema.items instanceof Array) && this.schema.additionalItems === false) {
-      return Math.min(this.schema.items.length,this.schema.maxItems || Infinity);
-    }
-    else {
-      return this.schema.maxItems || Infinity;
-    }
-  },
-  refreshTabs: function(refresh_headers) {
-    var self = this;
-    $each(this.rows, function(i,row) {
-      if(!row.tab) return;
-
-      if(refresh_headers) {
-        row.tab_text.textContent = row.getHeaderText();
-      }
-      else {
-        if(row.tab === self.active_tab) {
-          self.theme.markTabActive(row.tab);
-          row.container.style.display = '';
-        }
-        else {
-          self.theme.markTabInactive(row.tab);
-          row.container.style.display = 'none';
-        }
-      }
-    });
-  },
-  setValue: function(value, initial) {
-    // Update the array's value, adding/removing rows when necessary
-    value = value || [];
-    
-    if(!(value instanceof Array)) value = [value];
-    
-    var serialized = JSON.stringify(value);
-    if(serialized === this.serialized) return;
-
-    // Make sure value has between minItems and maxItems items in it
-    if(this.schema.minItems) {
-      while(value.length < this.schema.minItems) {
-        value.push(this.getItemInfo(value.length).default);
-      }
-    }
-    if(this.getMax() && value.length > this.getMax()) {
-      value = value.slice(0,this.getMax());
-    }
-
-    var self = this;
-    $each(value,function(i,val) {
-      if(self.rows[i]) {
-        // TODO: don't set the row's value if it hasn't changed
-        self.rows[i].setValue(val);
-      }
-      else if(self.row_cache[i]) {
-        self.rows[i] = self.row_cache[i];
-        self.rows[i].setValue(val);
-        self.rows[i].container.style.display = '';
-        if(self.rows[i].tab) self.rows[i].tab.style.display = '';
-        self.rows[i].register();
-      }
-      else {
-        self.addRow(val);
-      }
-    });
-
-    for(var j=value.length; j<self.rows.length; j++) {
-      self.destroyRow(self.rows[j]);
-      self.rows[j] = null;
-    }
-    self.rows = self.rows.slice(0,value.length);
-
-    // Set the active tab
-    var new_active_tab = null;
-    $each(self.rows, function(i,row) {
-      if(row.tab === self.active_tab) {
-        new_active_tab = row.tab;
-        return false;
-      }
-    });
-    if(!new_active_tab && self.rows.length) new_active_tab = self.rows[0].tab;
-
-    self.active_tab = new_active_tab;
-
-    self.refreshValue(initial);
-    self.refreshTabs();
-    
-    self.jsoneditor.notifyWatchers(self.path);
-    
-    // TODO: sortable
-  },
-  refreshValue: function(force) {
-    var self = this;
-    var oldi = this.value? this.value.length : 0;
-    this.value = [];
-
-    $each(this.rows,function(i,editor) {
-      // Get the value for this editor
-      self.value[i] = editor.getValue();
-    });
-    
-    if(oldi !== this.value.length || force) {
-      // If we currently have minItems items in the array
-      var minItems = this.schema.minItems && this.schema.minItems >= this.rows.length;
-      
-      $each(this.rows,function(i,editor) {
-        // Hide the move down button for the last row
-        if(editor.movedown_buttons) {
-          if(i === self.rows.length - 1) {
-            editor.movedown_button.style.display = 'none';
-          }
-          else {
-            editor.movedown_button.style.display = '';
-          }
-        }
-
-        // Hide the delete button if we have minItems items
-        if(editor.delete_button) {
-          if(minItems) {
-            editor.delete_button.style.display = 'none';
-          }
-          else {
-            editor.delete_button.style.display = '';
-          }
-        }
-
-        // Get the value for this editor
-        self.value[i] = editor.getValue();
-      });
-      
-      var controls_needed = false;
-      
-      if(!this.value.length) {
-        this.delete_last_row_button.style.display = 'none';
-        this.remove_all_rows_button.style.display = 'none';
-      }
-      else if(this.value.length === 1) {      
-        this.remove_all_rows_button.style.display = 'none';  
-
-        // If there are minItems items in the array, hide the delete button beneath the rows
-        if(minItems || this.hide_delete_buttons) {
-          this.delete_last_row_button.style.display = 'none';
-        }
-        else {
-          this.delete_last_row_button.style.display = '';
-          controls_needed = true;
-        }
-      }
-      else {
-        // If there are minItems items in the array, hide the delete button beneath the rows
-        if(minItems || this.hide_delete_buttons) {
-          this.delete_last_row_button.style.display = 'none';
-          this.remove_all_rows_button.style.display = 'none';
-        }
-        else {
-          this.delete_last_row_button.style.display = '';
-          this.remove_all_rows_button.style.display = '';
-          controls_needed = true;
-        }
-      }
-
-      // If there are maxItems in the array, hide the add button beneath the rows
-      if((this.getMax() && this.getMax() <= this.rows.length) || this.hide_add_button){
-        this.add_row_button.style.display = 'none';
-      }
-      else {
-        this.add_row_button.style.display = '';
-        controls_needed = true;
-      } 
-      
-      if(controls_needed) {
-        this.controls.style.display = '';
-      }
-      else {
-        this.controls.style.display = 'none';
-      }
-    }
-  },
-  addRow: function(value) {
-    var self = this;
-    var i = this.rows.length;
-    
-    self.rows[i] = this.getElementEditor(i);
-    self.row_cache[i] = self.rows[i];
-
-    if(self.tabs_holder) {
-      self.rows[i].tab_text = document.createElement('span');
-      self.rows[i].tab_text.textContent = self.rows[i].getHeaderText();
-      self.rows[i].tab = self.theme.getTab(self.rows[i].tab_text);
-      self.rows[i].tab.addEventListener('click', function(e) {
-        self.active_tab = self.rows[i].tab;
-        self.refreshTabs();
-        e.preventDefault();
-        e.stopPropagation();
-      });
-
-      self.theme.addTab(self.tabs_holder, self.rows[i].tab);
-    }
-    
-    var controls_holder = self.rows[i].title_controls || self.rows[i].array_controls;
-    
-    // Buttons to delete row, move row up, and move row down
-    if(!self.hide_delete_buttons) {
-      self.rows[i].delete_button = this.getButton(self.getItemTitle(),'delete','Delete '+self.getItemTitle());
-      self.rows[i].delete_button.className += ' delete';
-      self.rows[i].delete_button.setAttribute('data-i',i);
-      self.rows[i].delete_button.addEventListener('click',function() {
-        var i = this.getAttribute('data-i')*1;
-
-        var value = self.getValue();
-
-        var newval = [];
-        var new_active_tab = null;
-        $each(value,function(j,row) {
-          if(j===i) {
-            // If the one we're deleting is the active tab
-            if(self.rows[j].tab === self.active_tab) {
-              // Make the next tab active if there is one
-              if(self.rows[j+1]) new_active_tab = self.rows[j+1].tab;
-              // Otherwise, make the previous tab active if there is one
-              else if(j) new_active_tab = self.rows[j-1].tab;
-            }
-            
-            return; // If this is the one we're deleting
-          }
-          newval.push(row);
-        });
-        self.setValue(newval);
-        if(new_active_tab) {
-          self.active_tab = new_active_tab;
-          self.refreshTabs();
-        }
-        
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-      
-      if(controls_holder) {
-        self.theme.appendButtonToButtonHolder(controls_holder, self.rows[i].delete_button);
-      }
-    }
-    
-    if(i && !self.hide_move_buttons) {
-      self.rows[i].moveup_button = this.getButton('','moveup','Move up');
-      self.rows[i].moveup_button.className += ' moveup';
-      self.rows[i].moveup_button.setAttribute('data-i',i);
-      self.rows[i].moveup_button.addEventListener('click',function() {
-        var i = this.getAttribute('data-i')*1;
-
-        if(i<=0) return;
-        var rows = self.getValue();
-        var tmp = rows[i-1];
-        rows[i-1] = rows[i];
-        rows[i] = tmp;
-
-        self.setValue(rows);
-        self.active_tab = self.rows[i-1].tab;
-        self.refreshTabs();
-
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-      
-      if(controls_holder) {
-        self.theme.appendButtonToButtonHolder(controls_holder, self.rows[i].moveup_button);
-      }
-    }
-    
-    if(!self.hide_move_buttons) {
-      self.rows[i].movedown_button = this.getButton('','movedown','Move down');
-      self.rows[i].movedown_button.className += ' movedown';
-      self.rows[i].movedown_button.setAttribute('data-i',i);
-      self.rows[i].movedown_button.addEventListener('click',function() {
-        var i = this.getAttribute('data-i')*1;
-
-        var rows = self.getValue();
-        if(i>=rows.length-1) return;
-        var tmp = rows[i+1];
-        rows[i+1] = rows[i];
-        rows[i] = tmp;
-
-        self.setValue(rows);
-        self.active_tab = self.rows[i+1].tab;
-        self.refreshTabs();
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-      
-      if(controls_holder) {
-        self.theme.appendButtonToButtonHolder(controls_holder, self.rows[i].movedown_button);
-      }
-    }
-
-    if(value) self.rows[i].setValue(value);
-    self.refreshTabs();
-  },
-  addControls: function() {
-    var self = this;
-    
-    this.collapsed = false;
-    this.toggle_button = this.getButton('','collapse','Collapse');
-    this.title_controls.appendChild(this.toggle_button);
-    var row_holder_display = self.row_holder.style.display;
-    var controls_display = self.controls.style.display;
-    this.toggle_button.addEventListener('click',function() {
-      if(self.collapsed) {
-        self.collapsed = false;
-        self.row_holder.style.display = row_holder_display;
-        if(self.tabs_holder) self.tabs_holder.style.display = '';
-        self.controls.style.display = controls_display;
-        self.setButtonText(this,'','collapse','Collapse');
-      }
-      else {
-        self.collapsed = true;
-        self.row_holder.style.display = 'none';
-        if(self.tabs_holder) self.tabs_holder.style.display = 'none';
-        self.controls.style.display = 'none';
-        self.setButtonText(this,'','expand','Expand');
-      }
-    });
-
-    // If it should start collapsed
-    if(this.options.collapsed) {
-      $trigger(this.toggle_button,'click');
-    }
-    
-    // Collapse button disabled
-    if(this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
-      if(this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
-    }
-    else if(this.jsoneditor.options.disable_collapse) {
-      this.toggle_button.style.display = 'none';
-    }
-    
-    // Add "new row" and "delete last" buttons below editor
-    this.add_row_button = this.getButton(this.getItemTitle(),'add','Add '+this.getItemTitle());
-    
-    this.add_row_button.addEventListener('click',function() {
-      var i = self.rows.length;
-      if(self.row_cache[i]) {
-        self.rows[i] = self.row_cache[i];
-        self.rows[i].container.style.display = '';
-        if(self.rows[i].tab) self.rows[i].tab.style.display = '';
-        self.rows[i].register();
-      }
-      else {
-        self.addRow();
-      }
-      self.active_tab = self.rows[i].tab;
-      self.refreshTabs();
-      self.refreshValue();
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-      self.jsoneditor.notifyWatchers(self.path);
-    });
-    self.theme.appendButtonToButtonHolder(self.controls, this.add_row_button);
-
-    this.delete_last_row_button = this.getButton('Last '+this.getItemTitle(),'delete','Delete Last '+this.getItemTitle());
-    this.delete_last_row_button.addEventListener('click',function() {
-      var rows = self.getValue();
-      
-      var new_active_tab = null;
-      if(self.rows.length > 1 && self.rows[self.rows.length-1].tab === self.active_tab) new_active_tab = self.rows[self.rows.length-2].tab;
-      
-      rows.pop();
-      self.setValue(rows);
-      if(new_active_tab) {
-        self.active_tab = new_active_tab;
-        self.refreshTabs();
-      }
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-    });
-    self.theme.appendButtonToButtonHolder(self.controls, this.delete_last_row_button);
-
-    this.remove_all_rows_button = this.getButton('All','delete','Delete All');
-    this.remove_all_rows_button.addEventListener('click',function() {
-      self.setValue([]);
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-    });
-    self.theme.appendButtonToButtonHolder(self.controls, this.remove_all_rows_button);
-
-    if(self.tabs) {
-      this.add_row_button.style.width = '100%';
-      this.add_row_button.style.textAlign = 'left';
-      this.add_row_button.style.marginBottom = '3px';
-      
-      this.delete_last_row_button.style.width = '100%';
-      this.delete_last_row_button.style.textAlign = 'left';
-      this.delete_last_row_button.style.marginBottom = '3px';
-      
-      this.remove_all_rows_button.style.width = '100%';
-      this.remove_all_rows_button.style.textAlign = 'left';
-      this.remove_all_rows_button.style.marginBottom = '3px';
-    }
-  },
-  showValidationErrors: function(errors) {
-    var self = this;
-
-    // Get all the errors that pertain to this editor
-    var my_errors = [];
-    var other_errors = [];
-    $each(errors, function(i,error) {
-      if(error.path === self.path) {
-        my_errors.push(error);
-      }
-      else {
-        other_errors.push(error);
-      }
-    });
-
-    // Show errors for this editor
-    if(this.error_holder) {
-      if(my_errors.length) {
-        var message = [];
-        this.error_holder.innerHTML = '';
-        this.error_holder.style.display = '';
-        $each(my_errors, function(i,error) {
-          self.error_holder.appendChild(self.theme.getErrorMessage(error.message));
-        });
-      }
-      // Hide error area
-      else {
-        this.error_holder.style.display = 'none';
-      }
-    }
-
-    // Show errors for child editors
-    $each(this.rows, function(i,row) {
-      row.showValidationErrors(other_errors);
-    });
-  }
-});
-
-JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
-  addProperty: function() {
-    this._super();
-    if(this.value.length) this.table.style.display = '';
-  },
-  removeProperty: function() {
-    this._super();
-    this.table.style.display = 'none';
-  },
-  register: function() {
-    this._super();
-    if(this.rows) {
-      for(var i=0; i<this.rows.length; i++) {
-        this.rows[i].register();
-      }
-    }
-  },
-  unregister: function() {
-    this._super();
-    if(this.rows) {
-      for(var i=0; i<this.rows.length; i++) {
-        this.rows[i].unregister();
-      }
-    }
-  },
-  getNumColumns: function() {
-    return Math.max(Math.min(12,this.width),3);
-  },
-  build: function() {
-    this.rows = [];
-    var self = this;
-
-    this.schema.items = this.schema.items || [];
-    
-    this.hide_delete_buttons = this.options.disable_array_delete || this.jsoneditor.options.disable_array_delete;
-    this.hide_move_buttons = this.options.disable_array_reorder || this.jsoneditor.options.disable_array_reorder;
-    this.hide_add_button = this.options.disable_array_add || this.jsoneditor.options.disable_array_add;
-  
-    this.table = this.theme.getTable();
-    this.container.appendChild(this.table);
-    this.thead = this.theme.getTableHead();
-    this.table.appendChild(this.thead);
-    this.header_row = this.theme.getTableRow();
-    this.thead.appendChild(this.header_row);
-    this.row_holder = this.theme.getTableBody();
-    this.table.appendChild(this.row_holder);
-
-    // Determine the default value of array element
-    var tmp = this.getElementEditor(0,true);
-    this.item_default = tmp.getDefault();
-    this.item_title = this.schema.items.title || 'row';
-    this.width = tmp.getNumColumns();
-
-    // Build header row for table
-    if(tmp.getChildEditors()) {
-      this.item_has_child_editors = true;      
-    }
-    
-    if(!this.getOption('compact',false)) {
-      this.title = this.theme.getHeader(this.getTitle());
-      this.container.appendChild(this.title);
-      this.title_controls = this.theme.getHeaderButtonHolder();
-      this.title.appendChild(this.title_controls);
-      this.panel = this.theme.getIndentedPanel();
-      this.container.appendChild(this.panel);
-      if(this.schema.description) {
-        this.description = this.theme.getDescription(this.schema.description);
-        this.panel.appendChild(this.description);
-      }
-      this.error_holder = document.createElement('div');
-      this.panel.appendChild(this.error_holder);
-    }
-    else {
-      this.panel = document.createElement('div');
-      this.container.appendChild(this.panel);
-    }
-
-    this.panel.appendChild(this.table);
-    this.controls = this.theme.getButtonHolder();
-    this.panel.appendChild(this.controls);
-
-    if(this.item_has_child_editors) {
-      $each(tmp.getChildEditors(), function(i,editor) {
-        var th = self.theme.getTableHeaderCell(editor.getTitle());
-        if(editor.options.hidden) th.style.display = 'none';
-        self.header_row.appendChild(th);
-      });
-    }
-    else {
-      self.header_row.appendChild(self.theme.getTableHeaderCell(this.item_title));
-    }
-
-    tmp.destroy();
-    this.row_holder.innerHTML = '';
-
-    // Row Controls column
-    this.controls_header_cell = self.theme.getTableHeaderCell(" ");
-    self.header_row.appendChild(this.controls_header_cell);
-
-    // Add controls
-    this.addControls();
-    
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  onChildEditorChange: function(editor) {
-    this.refreshValue();
-    this._super();
-  },
-  getItemDefault: function() {
-    return $extend({},{default:this.item_default}).default;
-  },
-  getItemTitle: function() {
-    return this.item_title;
-  },
-  getElementEditor: function(i,ignore) {
-    var schema_copy = $extend({},this.schema.items);
-    var editor = this.jsoneditor.getEditorClass(schema_copy, this.jsoneditor);
-    var row = this.row_holder.appendChild(this.theme.getTableRow());
-    var holder = row;
-    if(!this.item_has_child_editors) {
-      holder = this.theme.getTableCell();
-      row.appendChild(holder);
-    }
-
-    if(ignore) {
-      holder.addEventListener('change_header_text',function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    }
-
-    var ret = this.jsoneditor.createEditor(editor,{
-      jsoneditor: this.jsoneditor,
-      schema: schema_copy,
-      container: holder,
-      path: this.path+'.'+i,
-      parent: this,
-      compact: true,
-      table_row: true
-    });
-
-    ret.controls_cell = row.appendChild(this.theme.getTableCell());
-    ret.row = row;
-    ret.table_controls = this.theme.getButtonHolder();
-    ret.controls_cell.appendChild(ret.table_controls);
-    ret.table_controls.style.margin = 0;
-    ret.table_controls.style.padding = 0;
-    
-    return ret;
-  },
-  destroy: function() {
-    this.innerHTML = '';
-    if(this.title) this.title.parentNode.removeChild(this.title);
-    if(this.description) this.description.parentNode.removeChild(this.description);
-    if(this.row_holder && this.row_holder.parentNode) this.row_holder.parentNode.removeChild(this.row_holder);
-    this.table.parentNode.removeChild(this.table);
-    if(this.panel) this.panel.parentNode.removeChild(this.panel);
-
-    this.rows = this.title = this.description = this.row_holder = this.table = this.panel = null;
-
-    this._super();
-  },
-  empty: function() {
-    if(!this.rows) return;
-    var self = this;
-    $each(this.rows,function(i,row) {
-      if(!self.item_has_child_editors) {
-        row.row.parentNode.removeChild(row.row);
-      }
-      row.destroy();
-      self.rows[i] = null;
-    });
-    self.rows = [];
-  },
-  setValue: function(value, initial) {
-    // Update the array's value, adding/removing rows when necessary
-    value = value || [];
-
-    // Make sure value has between minItems and maxItems items in it
-    if(this.schema.minItems) {
-      while(value.length < this.schema.minItems) {
-        value.push(this.getItemDefault());
-      }
-    }
-    if(this.schema.maxItems && value.length > this.schema.maxItems) {
-      value = value.slice(0,this.schema.maxItems);
-    }
-    
-    var serialized = JSON.stringify(value);
-    if(serialized === this.serialized) return;
-
-    var numrows_changed = false;
-
-    var self = this;
-    $each(value,function(i,val) {
-      if(self.rows[i]) {
-        // TODO: don't set the row's value if it hasn't changed
-        self.rows[i].setValue(val);
-      }
-      else {
-        self.addRow(val);
-        numrows_changed = true;
-      }
-    });
-
-    for(var j=value.length; j<self.rows.length; j++) {
-      var holder = self.rows[j].container;
-      if(!self.item_has_child_editors) {
-        self.rows[j].row.parentNode.removeChild(self.rows[j].row);
-      }
-      self.rows[j].destroy();
-      if(holder.parentNode) holder.parentNode.removeChild(holder);
-      self.rows[j] = null;
-      numrows_changed = true;
-    }
-    self.rows = self.rows.slice(0,value.length);
-
-    self.refreshValue();
-    if(numrows_changed || initial) self.refreshRowButtons();
-
-    self.jsoneditor.notifyWatchers(self.path);
-          
-    // TODO: sortable
-  },
-  refreshRowButtons: function() {
-    var self = this;
-    
-    // If we currently have minItems items in the array
-    var minItems = this.schema.minItems && this.schema.minItems >= this.rows.length;
-    
-    var need_row_buttons = false;
-    $each(this.rows,function(i,editor) {
-      // Hide the move down button for the last row
-      if(editor.movedown_button) {
-        if(i === self.rows.length - 1) {
-          editor.movedown_button.style.display = 'none';
-        }
-        else {
-          need_row_buttons = true;
-          editor.movedown_button.style.display = '';
-        }
-      }
-
-      // Hide the delete button if we have minItems items
-      if(editor.delete_button) {
-        if(minItems) {
-          editor.delete_button.style.display = 'none';
-        }
-        else {
-          need_row_buttons = true;
-          editor.delete_button.style.display = '';
-        }
-      }
-      
-      if(editor.moveup_button) {
-        need_row_buttons = true;
-      }
-    });
-    
-    // Show/hide controls column in table
-    $each(this.rows,function(i,editor) {
-      if(need_row_buttons) {
-        editor.controls_cell.style.display = '';
-      }
-      else {
-        editor.controls_cell.style.display = 'none';
-      }
-    });
-    if(need_row_buttons) {
-      this.controls_header_cell.style.display = '';
-    }
-    else {
-      this.controls_header_cell.style.display = 'none';
-    }
-    
-    var controls_needed = false;
-  
-    if(!this.value.length) {
-      this.delete_last_row_button.style.display = 'none';
-      this.remove_all_rows_button.style.display = 'none';
-      this.table.style.display = 'none';
-    }
-    else if(this.value.length === 1  || this.hide_delete_buttons) {
-      this.table.style.display = '';
-      this.remove_all_rows_button.style.display = 'none';
-
-      // If there are minItems items in the array, hide the delete button beneath the rows
-      if(minItems || this.hide_delete_buttons) {
-        this.delete_last_row_button.style.display = 'none';
-      }
-      else {
-        this.delete_last_row_button.style.display = '';
-        controls_needed = true;
-      }
-    }
-    else {
-      this.table.style.display = '';
-      // If there are minItems items in the array, hide the delete button beneath the rows
-      if(minItems || this.hide_delete_buttons) {
-        this.delete_last_row_button.style.display = 'none';
-        this.remove_all_rows_button.style.display = 'none';
-      }
-      else {
-        this.delete_last_row_button.style.display = '';
-        this.remove_all_rows_button.style.display = '';
-        controls_needed = true;
-      }
-    }
-
-    // If there are maxItems in the array, hide the add button beneath the rows
-    if((this.schema.maxItems && this.schema.maxItems <= this.rows.length) || this.hide_add_button) {
-      this.add_row_button.style.display = 'none';
-    }
-    else {
-      this.add_row_button.style.display = '';
-      controls_needed = true;
-    }
-    
-    if(!controls_needed) {
-      this.controls.style.display = 'none';
-    }
-    else {
-      this.controls.style.display = '';
-    }
-  },
-  refreshValue: function() {
-    var self = this;
-    this.value = [];
-
-    $each(this.rows,function(i,editor) {
-      // Get the value for this editor
-      self.value[i] = editor.getValue();
-    });
-    this.serialized = JSON.stringify(this.value);
-  },
-  addRow: function(value) {
-    var self = this;
-    var i = this.rows.length;
-
-    self.rows[i] = this.getElementEditor(i);
-
-    var controls_holder = self.rows[i].table_controls;
-
-    // Buttons to delete row, move row up, and move row down
-    if(!this.hide_delete_buttons) {
-      self.rows[i].delete_button = this.getButton('','delete','Delete');
-      self.rows[i].delete_button.className += ' delete';
-      self.rows[i].delete_button.setAttribute('data-i',i);
-      self.rows[i].delete_button.addEventListener('click',function() {
-        var i = this.getAttribute('data-i')*1;
-
-        var value = self.getValue();
-
-        var newval = [];
-        $each(value,function(j,row) {
-          if(j===i) return; // If this is the one we're deleting
-          newval.push(row);
-        });
-        self.setValue(newval);
-        
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-      controls_holder.appendChild(self.rows[i].delete_button);
-    }
-
-    
-    if(i && !this.hide_move_buttons) {
-      self.rows[i].moveup_button = this.getButton('','moveup','Move up');
-      self.rows[i].moveup_button.className += ' moveup';
-      self.rows[i].moveup_button.setAttribute('data-i',i);
-      self.rows[i].moveup_button.addEventListener('click',function() {
-        var i = this.getAttribute('data-i')*1;
-
-        if(i<=0) return;
-        var rows = self.getValue();
-        var tmp = rows[i-1];
-        rows[i-1] = rows[i];
-        rows[i] = tmp;
-
-        self.setValue(rows);
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-      controls_holder.appendChild(self.rows[i].moveup_button);
-    }
-    
-    if(!this.hide_move_buttons) {
-      self.rows[i].movedown_button = this.getButton('','movedown','Move down');
-      self.rows[i].movedown_button.className += ' movedown';
-      self.rows[i].movedown_button.setAttribute('data-i',i);
-      self.rows[i].movedown_button.addEventListener('click',function() {
-        var i = this.getAttribute('data-i')*1;
-        var rows = self.getValue();
-        if(i>=rows.length-1) return;
-        var tmp = rows[i+1];
-        rows[i+1] = rows[i];
-        rows[i] = tmp;
-
-        self.setValue(rows);
-        if(self.parent) self.parent.onChildEditorChange(self);
-        else self.jsoneditor.onChange();
-      });
-      controls_holder.appendChild(self.rows[i].movedown_button);
-    }
-
-    if(value) self.rows[i].setValue(value);
-    
-    self.jsoneditor.notifyWatchers(self.path);
-  },
-  addControls: function() {
-    var self = this;
-
-    this.collapsed = false;
-    this.toggle_button = this.getButton('','collapse','Collapse');
-    this.title_controls.appendChild(this.toggle_button);
-    this.toggle_button.addEventListener('click',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      if(self.collapsed) {
-        self.collapsed = false;
-        self.panel.style.display = '';
-        self.setButtonText(this,'','collapse','Collapse');
-      }
-      else {
-        self.collapsed = true;
-        self.panel.style.display = 'none';
-        self.setButtonText(this,'','expand','Expand');
-      }
-    });
-
-    // If it should start collapsed
-    if(this.options.collapsed) {
-      $trigger(this.toggle_button,'click');
-    }
-    
-    // Collapse button disabled
-    if(this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
-      if(this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
-    }
-    else if(this.jsoneditor.options.disable_collapse) {
-      this.toggle_button.style.display = 'none';
-    }
-
-    // Add "new row" and "delete last" buttons below editor
-    this.add_row_button = this.getButton(this.getItemTitle(),'add','Add '+this.getItemTitle());
-    this.add_row_button.addEventListener('click',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      self.addRow();
-      self.refreshValue();
-      self.refreshRowButtons();
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-    });
-    self.controls.appendChild(this.add_row_button);
-
-    this.delete_last_row_button = this.getButton('Last '+this.getItemTitle(),'delete','Delete Last '+this.getItemTitle());
-    this.delete_last_row_button.addEventListener('click',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      var rows = self.getValue();
-      rows.pop();
-      self.setValue(rows);
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-    });
-    self.controls.appendChild(this.delete_last_row_button);
-
-    this.remove_all_rows_button = this.getButton('All','delete','Delete All');
-    this.remove_all_rows_button.addEventListener('click',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      self.setValue([]);
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-    });
-    self.controls.appendChild(this.remove_all_rows_button);
-  }
-});
-
-// Multiple Editor (for when `type` is an array)
-JSONEditor.defaults.editors.multiple = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {
-    return this.schema.default || null;
-  },
-  register: function() {
-    if(this.editors) {
-      for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
-        this.editors[i].unregister();
-      }
-      if(this.editors[this.type]) this.editors[this.type].register();
-    }
-    this._super();
-  },
-  getNumColumns: function() {
-    return Math.max(this.editors[this.type].getNumColumns(),4);
-  },
-  enable: function() {
-    if(this.editors) {
-      for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
-        this.editors[i].enable();
-      }
-    }
-    this.switcher.disabled = false;
-    this._super();
-  },
-  disable: function() {
-    if(this.editors) {
-      for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
-        this.editors[i].disable();
-      }
-    }
-    this.switcher.disabled = true;
-    this._super();
-  },
-  unregister: function() {
-    this._super();
-    if(this.editors) {
-      for(var i=0; i<this.editors.length; i++) {
-        if(!this.editors[i]) continue;
-        this.editors[i].unregister();
-      }
-    }
-  },
-  switchEditor: function(i) {
-    var self = this;
-    
-    if(!this.editors[i]) {
-      this.buildChildEditor(i);
-    }
-    
-    self.type = i;
-
-    self.register();
-
-    var current_value = self.getValue();
-
-    $each(self.editors,function(type,editor) {
-      if(!editor) return;
-      if(self.type === type) {
-        editor.setValue(current_value,true);
-        editor.container.style.display = '';
-      }
-      else editor.container.style.display = 'none';
-    });
-    self.refreshValue();
-    
-    if(self.parent) self.parent.onChildEditorChange(self);
-    else self.jsoneditor.onChange();
-  },
-  buildChildEditor: function(i) {
-    var self = this;
-    var type = this.types[i];
-    var holder = self.theme.getChildEditorHolder();
-    self.editor_holder.appendChild(holder);
-
-    var schema;
-    
-    if(typeof type === "string") {
-      schema = $extend({},self.schema);
-      schema.type = type;
-    }
-    else {
-      schema = $extend({},self.schema,type);
-
-      // If we need to merge `required` arrays
-      if(type.required && type.required instanceof Array && self.schema.required && self.schema.required instanceof Array) {
-        schema.required = self.schema.required.concat(type.required);
-      }
-    }
-
-    var editor = self.jsoneditor.getEditorClass(schema, self.jsoneditor);
-
-    self.editors[i] = self.jsoneditor.createEditor(editor,{
-      jsoneditor: self.jsoneditor,
-      schema: schema,
-      container: holder,
-      path: self.path,
-      parent: self,
-      required: true
-    });
-    if(self.editors[i].header) self.editors[i].header.style.display = 'none';
-    
-    self.editors[i].option = self.switcher_options[i];
-    
-    holder.addEventListener('change_header_text',function() {
-      self.refreshHeaderText();
-    });
-
-    if(i !== self.type) holder.style.display = 'none';
-  },
-  build: function() {
-    var self = this;
-    var container = this.container;
-
-    this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    this.container.appendChild(this.header);
-
-    this.types = [];
-    
-    if(this.schema.oneOf) {
-      this.oneOf = true;
-      this.types = this.schema.oneOf;
-      delete this.schema.oneOf;
-    }
-    else {
-      if(!this.schema.type || this.schema.type === "any") {
-        this.types = ['string','number','integer','boolean','object','array','null'];
-        
-        // If any of these primitive types are disallowed
-        if(this.schema.disallow) {
-          var disallow = this.schema.disallow;
-          if(typeof schema.disallow !== 'object' || !(schema.disallow instanceof Array)) {
-            disallow = [this.schema.disallow];
-          }
-          var allowed_types = [];
-          $each(this.types,function(i,type) {
-            if(disallow.indexOf(type) === -1) allowed_types.push(type);
-          });
-          this.types = allowed_types;
-        }
-      }
-      else if(this.schema.type instanceof Array) {
-        this.types = this.schema.type;
-      }
-      else {
-        this.types = [this.schema.type];
-      }
-      delete this.schema.type;
-    }
-    
-    this.display_text = this.getDisplayText(this.types);
-
-    this.switcher = this.theme.getSwitcher(this.display_text);
-    container.appendChild(this.switcher);
-    this.switcher.addEventListener('change',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      self.switchEditor(self.display_text.indexOf(this.value));
-    });
-    this.switcher.style.marginBottom = 0;
-    this.switcher.style.width = 'auto';
-    this.switcher.style.display = 'inline-block';
-    this.switcher.style.marginLeft = '5px';
-
-    this.editor_holder = document.createElement('div');
-    container.appendChild(this.editor_holder);
-    this.type = 0;
-
-    this.editors = [];
-    this.validators = [];
-    this.switcher_options = this.theme.getSwitcherOptions(this.switcher);
-    $each(this.types,function(i,type) {
-      self.editors[i] = false;
-      
-      var schema;
-      
-      if(typeof type === "string") {
-        schema = $extend({},self.schema);
-        schema.type = type;
-      }
-      else {
-        schema = $extend({},self.schema,type);
-
-        // If we need to merge `required` arrays
-        if(type.required && type.required instanceof Array && self.schema.required && self.schema.required instanceof Array) {
-          schema.required = self.schema.required.concat(type.required);
-        }
-      }
-
-      self.validators[i] = new JSONEditor.Validator(schema,{
-        required_by_default: self.jsoneditor.options.required_by_default,
-        no_additional_properties: self.jsoneditor.options.no_additional_properties
-      });
-    });
-    
-    this.switchEditor(0);
-
-    this.refreshValue();
-    this.refreshHeaderText();
-
-    this.register();
-  },
-  onChildEditorChange: function(editor) {
-    if(this.editors[this.type]) {
-      this.refreshHeaderText();
-      this.refreshValue();
-    }
-    
-    this._super();
-  },
-  refreshHeaderText: function() {
-    var schemas = [];
-    $each(this.validators, function(i,validator) {
-      schemas.push(validator.schema);
-    });
-    var display_text = this.getDisplayText(schemas);
-    $each(this.switcher_options, function(i,option) {
-      option.textContent = display_text[i];
-    });
-  },
-  refreshValue: function() {
-    this.value = this.editors[this.type].getValue();
-  },
-  setValue: function(val,initial) {
-    // Determine type by getting the first one that validates
-    var self = this;
-    $each(this.validators, function(i,validator) {
-      if(!validator.validate(val).length) {
-        self.type = i;
-        self.switcher.value = self.display_text[i];
-        return false;
-      }
-    });
-    
-    this.switchEditor(this.type);
-
-    this.editors[this.type].setValue(val,initial);
-
-    this.refreshValue();
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  destroy: function() {
-    $each(this.editors, function(type,editor) {
-      if(editor) editor.destroy();
-    });
-    this.editor_holder.parentNode.removeChild(this.editor_holder);
-    this.switcher.parentNode.removeChild(this.switcher);
-    this._super();
-  },
-  showValidationErrors: function(errors) {
-    var self = this;
-    
-    // oneOf error paths need to remove the oneOf[i] part before passing to child editors
-    if(this.oneOf) {
-      $each(this.editors,function(i,editor) {
-        if(!editor) return;
-        var check = self.path+'.oneOf['+i+']';
-        var new_errors = [];
-        $each(errors, function(j,error) {
-          if(error.path.substr(0,check.length)===check) {
-            var new_error = $extend({},error);
-            new_error.path = self.path+new_error.path.substr(check.length);
-            new_errors.push(new_error);
-          }
-        });
-        
-        editor.showValidationErrors(new_errors);
-      });
-    }
-    else {
-      $each(this.editors,function(type,editor) {
-        if(!editor) return;
-        editor.showValidationErrors(errors);
-      });
-    }
-  }
-});
-
-// Enum Editor (used for objects and arrays with enumerated values)
-JSONEditor.defaults.editors.enum = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {
-    return this.schema.enum[0];
-  },
-  addProperty: function() {
-    this._super();
-    this.display_area.style.display = '';
-    this.theme.enableHeader(this.title);
-  },
-  removeProperty: function() {
-    this._super();
-    this.display_area.style.display = 'none';
-    this.theme.disableHeader(this.title);
-  },
-  getNumColumns: function() {
-    return 4;
-  },
-  build: function() {
-    var container = this.getContainer();
-    this.title = this.header = this.label = this.getTheme().getFormInputLabel(this.getTitle());
-    this.container.appendChild(this.title);
-
-    this.options.enum_titles = this.options.enum_titles || [];
-
-    this.enum = this.schema.enum;
-    this.selected = 0;
-    this.select_options = [];
-    this.html_values = [];
-
-    var self = this;
-    for(var i=0; i<this.enum.length; i++) {
-      this.select_options[i] = this.options.enum_titles[i] || "Value "+(i+1);
-      this.html_values[i] = this.getHTML(this.enum[i]);
-    }
-
-    // Switcher
-    this.switcher = this.theme.getSwitcher(this.select_options);
-    this.container.appendChild(this.switcher);
-    this.switcher.style.width = 'auto';
-    this.switcher.style.display = 'inline-block';
-    this.switcher.style.marginLeft = '5px';
-    this.switcher.style.marginBottom = 0;
-
-    // Display area
-    this.display_area = this.theme.getIndentedPanel();
-    this.display_area.style.paddingTop = 0;
-    this.display_area.style.paddingBottom = 0;
-    this.container.appendChild(this.display_area);
-
-    this.switcher.addEventListener('change',function() {
-      self.selected = self.select_options.indexOf(this.value);
-      self.value = self.enum[self.selected];
-      self.refreshValue();
-      
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-    });
-    this.value = this.enum[0];
-    this.refreshValue();
-    this.jsoneditor.notifyWatchers(this.path);
-
-    if(this.enum.length === 1) this.switcher.style.display = 'none';
-  },
-  refreshValue: function() {
-    var self = this;
-    self.selected = -1;
-    var stringified = JSON.stringify(this.value);
-    $each(this.enum, function(i, el) {
-      if(stringified === JSON.stringify(el)) {
-        self.selected = i;
-        return false;
-      }
-    });
-
-    if(self.selected<0) {
-      self.setValue(self.enum[0]);
-      return;
-    }
-
-    this.switcher.value = this.select_options[this.selected];
-    this.display_area.innerHTML = this.html_values[this.selected];
-  },
-  enable: function() {
-    if(!this.always_disabled) this.switcher.disabled = false;
-    this._super();
-  },
-  disable: function() {
-    this.switcher.disabled = true;
-    this._super();
-  },
-  getHTML: function(el) {
-    var self = this;
-
-    if(el === null) {
-      return '<em>null</em>';
-    }
-    // Array or Object
-    else if(typeof el === "object") {
-      // TODO: use theme
-      var ret = '';
-
-      $each(el,function(i,child) {
-        var html = self.getHTML(child);
-
-        // Add the keys to object children
-        if(!(el instanceof Array)) {
-          // TODO: use theme
-          html = '<div><em>'+i+'</em>: '+html+'</div>';
-        }
-
-        // TODO: use theme
-        ret += '<li>'+html+'</li>';
-      });
-      
-      if(el instanceof Array) ret = '<ol>'+ret+'</ol>';
-      else ret = "<ul style='margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;'>"+ret+'</ul>';
-
-      return ret;
-    }
-    // Boolean
-    else if(typeof el === "boolean") {
-      return el? 'true' : 'false';
-    }
-    // String
-    else if(typeof el === "string") {
-      return el.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-    // Number
-    else {
-      return el;
-    }
-  },
-  setValue: function(val) {
-    if(this.value !== val) {
-      this.value = val;
-      this.refreshValue();
-      this.jsoneditor.notifyWatchers(this.path);
-    }
-  },
-  destroy: function() {
-    this.display_area.parentNode.removeChild(this.display_area);
-    this.title.parentNode.removeChild(this.title);
-    this.switcher.parentNode.removeChild(this.switcher);
-
-    this._super();
-  }
-});
-
-JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {
-    return this.schema.default || '';
-  },
-  setValue: function(value,initial) {
-    value = this.typecast(value||'');
-
-    // Sanitize value before setting it
-    var sanitized = value;
-    if(this.enum_values.indexOf(sanitized) < 0) {
-      sanitized = this.enum_values[0];
-    }
-
-    if(this.value === sanitized) {
-      return;
-    }
-
-    this.input.value = this.enum_options[this.enum_values.indexOf(sanitized)];
-    this.value = sanitized;
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  register: function() {
-    this._super();
-    if(!this.input) return;
-    this.input.setAttribute('name',this.formname);
-  },
-  unregister: function() {
-    this._super();
-    if(!this.input) return;
-    this.input.removeAttribute('name');
-  },
-  getNumColumns: function() {
-    var longest_text = this.getTitle().length;
-    for(var i=0; i<this.enum_options.length; i++) {
-      longest_text = Math.max(longest_text,this.enum_options[i].length+4);
-    }
-    return Math.min(12,Math.max(longest_text/7,2));
-  },
-  typecast: function(value) {
-    if(this.schema.type === "boolean") {
-      return !!value;
-    }
-    else if(this.schema.type === "number") {
-      return 1*value;
-    }
-    else if(this.schema.type === "integer") {
-      return Math.floor(value*1);
-    }
-    else {
-      return ""+value;
-    }
-  },
-  getValue: function() {
-    return this.value;
-  },
-  removeProperty: function() {
-    this._super();
-    this.input.style.display = 'none';
-    if(this.description) this.description.style.display = 'none';
-    this.theme.disableLabel(this.label);
-  },
-  addProperty: function() {
-    this._super();
-    this.input.style.display = '';
-    if(this.description) this.description.style.display = '';
-    this.theme.enableLabel(this.label);
-  },
-  build: function() {
-    var self = this;
-    if(!this.getOption('compact',false)) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
-
-    this.input_type = 'select';
-    this.enum_options = [];
-    this.enum_values = [];
-    this.enum_display = [];
-
-    // Enum options enumerated
-    if(this.schema.enum) {
-      $each(this.schema.enum,function(i,option) {
-        self.enum_options[i] = ""+option;
-        self.enum_display[i] = ""+option;
-        self.enum_values[i] = self.typecast(option);
-      });
-    }
-    // Boolean
-    else if(this.schema.type === "boolean") {
-      self.enum_display = ['true','false'];
-      self.enum_options = ['1',''];
-      self.enum_values = [true,false];
-    }
-    // Other, not supported
-    else {
-      throw "'select' editor requires the enum property to be set.";
-    }
-
-    if(this.getOption('compact')) this.container.setAttribute('class',this.container.getAttribute('class')+' compact');
-
-    this.input = this.theme.getSelectInput(this.enum_options);
-    this.theme.setSelectOptions(this.input,this.enum_options,this.enum_display);
-
-    if(this.schema.readOnly || this.schema.readonly) {
-      this.always_disabled = true;
-      this.input.disabled = true;
-    }
-
-    this.input.addEventListener('change',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      var val = this.value;
-
-      var sanitized = val;
-      if(self.enum_options.indexOf(val) === -1) {
-        sanitized = self.enum_options[0];
-      }
-
-      self.value = self.enum_values[self.enum_options.indexOf(val)];
-      
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-      self.jsoneditor.notifyWatchers(self.path);
-    });
-
-    this.control = this.getTheme().getFormControl(this.label, this.input, this.description);
-    this.container.appendChild(this.control);
-
-    this.value = this.enum_values[0];
-
-    // If the Select2 library is loaded use it when we have lots of items
-    if(window.$ && $.fn && $.fn.select2 && this.enum_options.length > 2) {
-      $(this.input).select2();
-    }
-    
-    this.register();
-
-    self.theme.afterInputReady(self.input);
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  enable: function() {
-    if(!this.always_disabled) this.input.disabled = false;
-    this._super();
-  },
-  disable: function() {
-    this.input.disabled = true;
-    this._super();
-  },
-  destroy: function() {
-    if(this.label) this.label.parentNode.removeChild(this.label);
-    if(this.description) this.description.parentNode.removeChild(this.description);
-    this.input.parentNode.removeChild(this.input);
-
-    this._super();
-  }
-});
-
-JSONEditor.defaults.editors.multiselect = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {
-    return [];
-  },
-  build: function() {
-    var self = this, i;
-    if(!this.getOption('compact',false)) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
-    if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
-
-    this.select_options = {};
-    this.select_values = {};
-
-    var e = this.schema.items.enum || [];
-    var options = [];
-    for(i=0; i<e.length; i++) {
-      // If the sanitized value is different from the enum value, don't include it
-      if(this.sanitize(e[i]) !== e[i]) continue;
-
-      options.push(e[i]+"");
-      this.select_values[e[i]+""] = e[i];
-    }
-
-    if((!this.schema.format && options.length < 8) || this.schema.format === "checkbox") {
-      this.input_type = 'checkboxes';
-
-      this.inputs = {};
-      this.controls = {};
-      for(i=0; i<options.length; i++) {
-        this.inputs[options[i]] = this.theme.getCheckbox();
-        this.select_options[options[i]] = this.inputs[options[i]];
-        var label = this.theme.getCheckboxLabel(options[i]);
-        this.controls[options[i]] = this.theme.getFormControl(label, this.inputs[options[i]]);
-      }
-
-      this.control = this.theme.getMultiCheckboxHolder(this.controls,this.label,this.description);
-    }
-    else {
-      this.input_type = 'select';
-      this.input = this.theme.getSelectInput(options);
-      this.input.multiple = true;
-      this.input.size = Math.min(10,options.length);
-
-      for(i=0; i<options.length; i++) {
-        this.select_options[options[i]] = this.input.children[i];
-      }
-
-      if(this.schema.readOnly || this.schema.readonly) {
-        this.always_disabled = true;
-        this.input.disabled = true;
-      }
-
-      this.control = this.getTheme().getFormControl(this.label, this.input, this.description);
-    }
-
-    this.container.appendChild(this.control);
-    this.control.addEventListener('change',function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      var new_value = [];
-      for(i = 0; i<options.length; i++) {
-        if(self.select_options[options[i]].selected || self.select_options[options[i]].checked) new_value.push(self.select_values[options[i]]);
-      }
-
-      self.updateValue(new_value);
-
-      if(self.parent) self.parent.onChildEditorChange(self);
-      else self.jsoneditor.onChange();
-      self.jsoneditor.notifyWatchers(self.path);
-    });
-  },
-  setValue: function(value, initial) {
-    var i;
-    value = value || [];
-    if(typeof value !== "object") value = [value];
-    else if(!(value instanceof Array)) value = [];
-
-    // Make sure we are dealing with an array of strings so we can check for strict equality
-    for(i=0; i<value.length; i++) {
-      if(typeof value[i] !== "string") value[i] += "";
-    }
-
-    // Update selected status of options
-    for(i in this.select_options) {
-      if(!this.select_options.hasOwnProperty(i)) continue;
-
-      this.select_options[i][this.input_type === "select"? "selected" : "checked"] = (value.indexOf(i) !== -1);
-    }
-
-    if(this.updateValue(value)) {
-      if(this.parent) this.onChildEditorChange(this);
-      else this.jsoneditor.onChange();
-    }
-
-    this.jsoneditor.notifyWatchers(this.path);
-  },
-  register: function() {
-    this._super();
-    if(!this.input) return;
-    this.input.setAttribute('name',this.formname);
-  },
-  unregister: function() {
-    this._super();
-    if(!this.input) return;
-    this.input.removeAttribute('name');
-  },
-  getNumColumns: function() {
-    var longest_text = this.getTitle().length;
-    for(var i in this.select_values) {
-      if(!this.select_values.hasOwnProperty(i)) continue;
-      longest_text = Math.max(longest_text,(this.select_values[i]+"").length+4);
-    }
-
-    return Math.min(12,Math.max(longest_text/7,2));
-  },
-  updateValue: function(value) {
-    var changed = false;
-    var new_value = [];
-    for(var i=0; i<value.length; i++) {
-      if(!this.select_options[value[i]+""]) {
-        changed = true;
-        continue;
-      }
-      var sanitized = this.sanitize(this.select_values[value[i]]);
-      new_value.push(sanitized);
-      if(sanitized !== value[i]) changed = true;
-    }
-    this.value = new_value;
-    return changed;
-  },
-  sanitize: function(value) {
-    if(this.schema.items.type === "number") {
-      return 1*value;
-    }
-    else if(this.schema.items.type === "integer") {
-      return Math.floor(value*1);
-    }
-    else {
-      return ""+value;
-    }
-  },
-  enable: function() {
-    if(!this.always_disabled) {
-      if(this.input) {
-        this.input.disabled = false;
-      }
-      else if(this.inputs) {
-        for(var i in this.inputs) {
-          if(!this.inputs.hasOwnProperty(i)) continue;
-          this.inputs[i].disabled = false;
-        }
-      }
-    }
-    this._super();
-  },
-  disable: function() {
-    if(this.input) {
-      this.input.disabled = true;
-    }
-    else if(this.inputs) {
-      for(var i in this.inputs) {
-        if(!this.inputs.hasOwnProperty(i)) continue;
-        this.inputs[i].disabled = true;
-      }
-    }
-    this._super();
-  }
-});
-
-JSONEditor.defaults.editors.base64 = JSONEditor.AbstractEditor.extend({
-  getDefault: function() {
-    return this.schema.default || '';
-  },
-  getNumColumns: function() {
-    return 4;
-  },
-  build: function() {    
-    var self = this;
-    this.title = this.header = this.label = this.getTheme().getFormInputLabel(this.getTitle());
-
-    // Input that holds the base64 string
-    this.input = this.theme.getFormInputField('hidden');
-    this.container.appendChild(this.input);
-    
-    // Don't show uploader if this is readonly
-    if(!this.schema.readOnly && !this.schema.readonly) {
-      if(!window.FileReader) throw "FileReader required for base64 editor";
-      
-      // File uploader
-      this.uploader = this.theme.getFormInputField('file');
-      
-      this.uploader.addEventListener('change',function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        if(this.files && this.files.length) {
-          var fr = new FileReader();
-          fr.onload = function(evt) {
-            self.value = evt.target.result;
-            self.refreshPreview();
-            self.watch_listener();
-            self.jsoneditor.notifyWatchers(self.path);
-            if(self.parent) self.parent.onChildEditorChange(self);
-            else self.jsoneditor.onChange();
-            fr = null;
-          };
-          fr.readAsDataURL(this.files[0]);
-        }
-      });
-    }
-
-    this.preview = this.theme.getFormInputDescription(this.schema.description);
-    this.container.appendChild(this.preview);
-
-    this.control = this.getTheme().getFormControl(this.label, this.uploader||this.input, this.preview);
-    this.container.appendChild(this.control);
-    
-    this.register();
-  },
-  refreshPreview: function() {
-    if(this.last_preview === this.value) return;
-    this.last_preview = this.value;
-    
-    this.preview.innerHTML = '';
-    
-    if(!this.value) return;
-    
-    var mime = this.value.match(/^data:([^;,]+)[;,]/);
-    if(mime) mime = mime[1];
-    
-    if(!mime) {
-      this.preview.innerHTML = '<em>Invalid data URI</em>';
-    }
-    else {
-      this.preview.innerHTML = '<strong>Type:</strong> '+mime+', <strong>Size:</strong> '+Math.floor((this.value.length-this.value.split(',')[0].length-1)/1.33333)+' bytes';
-      if(mime.substr(0,5)==="image") {
-        this.preview.innerHTML += '<br>';
-        var img = document.createElement('img');
-        img.style.maxWidth = '100%';
-        img.style.maxHeight = '100px';
-        img.src = this.value;
-        this.preview.appendChild(img);
-      }
-    }
-  },
-  enable: function() {
-    if(this.uploader) this.uploader.disabled = false;
-    this._super();
-  },
-  disable: function() {
-    if(this.uploader) this.uploader.disabled = true;
-    this._super();
-  },
-  setValue: function(val) {
-    if(this.value !== val) {
-      this.value = val;
-      this.input.value = this.value;
-      this.refreshPreview();
-      this.watch_listener();
-      this.jsoneditor.notifyWatchers(this.path);
-    }
-  },
-  destroy: function() {
-    this.preview.parentNode.removeChild(this.preview);
-    this.title.parentNode.removeChild(this.title);
-    this.input.parentNode.removeChild(this.input);
-    if(this.uploader) this.uploader.parentNode.removeChild(this.uploader);
-
-    this._super();
-  }
-});
-
-JSONEditor.AbstractTheme = Class.extend({
-  getContainer: function() {
-    return document.createElement('div');
-  },
-  getFloatRightLinkHolder: function() {
-    var el = document.createElement('div');
-    el.style = el.style || {};
-    el.style.float = 'right';
-    el.style['margin-left'] = '10px';
-    return el;
-  },
-  getModal: function() {
-    var el = document.createElement('div');
-    el.style.backgroundColor = 'white';
-    el.style.border = '1px solid black';
-    el.style.boxShadow = '3px 3px black';
-    el.style.position = 'absolute';
-    el.style.zIndex = '10';
-    el.style.display = 'none';
-    return el;
-  },
-  getGridContainer: function() {
-    var el = document.createElement('div');
-    return el;
-  },
-  getGridRow: function() {
-    var el = document.createElement('div');
-    el.className = 'row';
-    return el;
-  },
-  getGridColumn: function() {
-    var el = document.createElement('div');
-    return el;
-  },
-  setGridColumnSize: function(el,size) {
-    
-  },
-  getLink: function(text) {
-    var el = document.createElement('a');
-    el.setAttribute('href','#');
-    el.appendChild(document.createTextNode(text));
-    return el;
-  },
-  disableHeader: function(header) {
-    header.style.color = '#ccc';
-  },
-  disableLabel: function(label) {
-    label.style.color = '#ccc';
-  },
-  enableHeader: function(header) {
-    header.style.color = '';
-  },
-  enableLabel: function(label) {
-    label.style.color = '';
-  },
-  getFormInputLabel: function(text) {
-    var el = document.createElement('label');
-    el.appendChild(document.createTextNode(text));
-    return el;
-  },
-  getCheckboxLabel: function(text) {
-    var el = this.getFormInputLabel(text);
-    el.style.fontWeight = 'normal';
-    return el;
-  },
-  getHeader: function(text) {
-    var el = document.createElement('h3');
-    if(typeof text === "string") {
-      el.textContent = text;
-    }
-    else {
-      el.appendChild(text);
-    }
-    
-    return el;
-  },
-  getCheckbox: function() {
-    var el = this.getFormInputField('checkbox');
-    el.style.display = 'inline-block';
-    el.style.width = 'auto';
-    return el;
-  },
-  getMultiCheckboxHolder: function(controls,label,description) {
-    var el = document.createElement('div');
-
-    if(label) {
-      label.style.display = 'block';
-      el.appendChild(label);
-    }
-
-    for(var i in controls) {
-      if(!controls.hasOwnProperty(i)) continue;
-      controls[i].style.display = 'inline-block';
-      controls[i].style.marginRight = '20px';
-      el.appendChild(controls[i]);
-    }
-
-    if(description) el.appendChild(description);
-
-    return el;
-  },
-  getSelectInput: function(options) {
-    var select = document.createElement('select');
-    if(options) this.setSelectOptions(select, options);
-    return select;
-  },
-  getSwitcher: function(options) {
-    var switcher = this.getSelectInput(options);
-    switcher.style.backgroundColor = 'transparent';
-    switcher.style.height = 'auto';
-    switcher.style.fontStyle = 'italic';
-    switcher.style.fontWeight = 'normal';
-    switcher.style.padding = '0 0 0 3px';
-    return switcher;
-  },
-  getSwitcherOptions: function(switcher) {
-    return switcher.getElementsByTagName('option');
-  },
-  setSwitcherOptions: function(switcher, options, titles) {
-    this.setSelectOptions(switcher, options, titles);
-  },
-  setSelectOptions: function(select, options, titles) {
-    titles = titles || [];
-    select.innerHTML = '';
-    for(var i=0; i<options.length; i++) {
-      var option = document.createElement('option');
-      option.setAttribute('value',options[i]);
-      option.textContent = titles[i] || options[i];
-      select.appendChild(option);
-    }
-  },
-  getTextareaInput: function() {
-    var el = document.createElement('textarea');
-    el.style = el.style || {};
-    el.style.width = '100%';
-    el.style.height = '300px';
-    el.style.boxSizing = 'border-box';
-    return el;
-  },
-  getRangeInput: function(min,max,step) {
-    var el = this.getFormInputField('range');
-    el.setAttribute('min',min);
-    el.setAttribute('max',max);
-    el.setAttribute('step',step);
-    return el;
-  },
-  getFormInputField: function(type) {
-    var el = document.createElement('input');
-    el.setAttribute('type',type);
-    return el;
-  },
-  afterInputReady: function(input) {
-    
-  },
-  getFormControl: function(label, input, description) {
-    var el = document.createElement('div');
-    el.className = 'form-control';
-    if(label) el.appendChild(label);
-    if(input.type === 'checkbox') {
-      label.insertBefore(input,label.firstChild);
-    }
-    else {
-      el.appendChild(input);
-    }
-    
-    if(description) el.appendChild(description);
-    return el;
-  },
-  getIndentedPanel: function() {
-    var el = document.createElement('div');
-    el.style = el.style || {};
-    el.style.paddingLeft = '10px';
-    el.style.marginLeft = '10px';
-    el.style.borderLeft = '1px solid #ccc';
-    return el;
-  },
-  getChildEditorHolder: function() {
-    return document.createElement('div');
-  },
-  getDescription: function(text) {
-    var el = document.createElement('p');
-    el.appendChild(document.createTextNode(text));
-    return el;
-  },
-  getCheckboxDescription: function(text) {
-    return this.getDescription(text);
-  },
-  getFormInputDescription: function(text) {
-    return this.getDescription(text);
-  },
-  getHeaderButtonHolder: function() {
-    return this.getButtonHolder();
-  },
-  getButtonHolder: function() {
-    return document.createElement('div');
-  },
-  appendButtonToButtonHolder: function(holder, button) {
-    holder.appendChild(button);
-  },
-  getButton: function(text, icon, title) {
-    var el = document.createElement('button');
-    this.setButtonText(el,text,icon,title);
-    return el;
-  },
-  setButtonText: function(button, text, icon, title) {
-    button.innerHTML = '';
-    if(icon) {
-      button.appendChild(icon);
-      button.innerHTML += ' ';
-    }
-    button.appendChild(document.createTextNode(text));
-    if(title) button.setAttribute('title',title);
-  },
-  getTable: function() {
-    return document.createElement('table');
-  },
-  getTableRow: function() {
-    return document.createElement('tr');
-  },
-  getTableHead: function() {
-    return document.createElement('thead');
-  },
-  getTableBody: function() {
-    return document.createElement('tbody');
-  },
-  getTableHeaderCell: function(text) {
-    var el = document.createElement('th');
-    el.textContent = text;
-    return el;
-  },
-  getTableCell: function() {
-    var el = document.createElement('td');
-    return el;
-  },
-  getErrorMessage: function(text) {
-    var el = document.createElement('p');
-    el.style = el.style || {};
-    el.style.color = 'red';
-    el.appendChild(document.createTextNode(text));
-    return el;
-  },
-  addInputError: function(input, text) {
-  },
-  removeInputError: function(input) {
-  },
-  addTableRowError: function(row) {
-  },
-  removeTableRowError: function(row) {
-  },
-  getTabHolder: function() {
-    var el = document.createElement('div');
-    el.innerHTML = "<div style='float: left; width: 130px;' class='tabs'></div><div class='content' style='margin-left: 130px;'></div><div style='clear:both;'></div>";
-    return el;
-  },
-  applyStyles: function(el,styles) {
-    el.style = el.style || {};
-    for(var i in styles) {
-      if(!styles.hasOwnProperty(i)) continue;
-      el.style[i] = styles[i];
-    }
-  },
-  closest: function(elem, selector) {
-    var matchesSelector = elem.matches || elem.webkitMatchesSelector || elem.mozMatchesSelector || elem.msMatchesSelector;
-
-    while (elem && elem !== document) {
-      try {
-        var f = matchesSelector.bind(elem);
-        if (f(selector)) {
-          return elem;
-        } else {
-          elem = elem.parentNode;
-        }
-      }
-      catch(e) {
-        return false;
-      }
-    }
-    return false;
-  },
-  getTab: function(span) {
-    var el = document.createElement('div');
-    el.appendChild(span);
-    el.style = el.style || {};
-    this.applyStyles(el,{
-      border: '1px solid #ccc',
-      borderWidth: '1px 0 1px 1px',
-      textAlign: 'center',
-      lineHeight: '30px',
-      borderRadius: '5px',
-      borderBottomRightRadius: 0,
-      borderTopRightRadius: 0,
-      fontWeight: 'bold',
-      cursor: 'pointer'
-    });
-    return el;
-  },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
-  },
-  getTabContent: function() {
-    return this.getIndentedPanel();
-  },
-  markTabActive: function(tab) {
-    this.applyStyles(tab,{
-      opacity: 1,
-      background: 'white'
-    });
-  },
-  markTabInactive: function(tab) {
-    this.applyStyles(tab,{
-      opacity:0.5,
-      background: ''
-    });
-  },
-  addTab: function(holder, tab) {
-    holder.children[0].appendChild(tab);
-  },
-  getBlockLink: function() {
-    var link = document.createElement('a');
-    link.style.display = 'block';
-    return link;
-  },
-  getBlockLinkHolder: function() {
-    var el = document.createElement('div');
-    return el;
-  },
-  getLinksHolder: function() {
-    var el = document.createElement('div');
-    return el;
-  },
-  createMediaLink: function(holder,link,media) {
-    holder.appendChild(link);
-    media.style.width='100%';
-    holder.appendChild(media);
-  },
-  createImageLink: function(holder,link,image) {
-    holder.appendChild(link);
-    link.appendChild(image);
-  }
-});
-
-JSONEditor.defaults.themes.bootstrap2 = JSONEditor.AbstractTheme.extend({
-  getRangeInput: function(min, max, step) {
-    // TODO: use bootstrap slider
-    return this._super(min, max, step);
-  },
-  getGridContainer: function() {
-    var el = document.createElement('div');
-    el.className = 'container-fluid';
-    return el;
-  },
-  getGridRow: function() {
-    var el = document.createElement('div');
-    el.className = 'row-fluid';
-    return el;
-  },
-  getFormInputLabel: function(text) {
-    var el = this._super(text);
-    el.style.display = 'inline-block';
-    el.style.fontWeight = 'bold';
-    return el;
-  },
-  setGridColumnSize: function(el,size) {
-    el.className = 'span'+size;
-  },
-  getSelectInput: function(options) {
-    var input = this._super(options);
-    input.style.width = 'auto';
-    input.style.maxWidth = '98%';
-    return input;
-  },
-  getFormInputField: function(type) {
-    var el = this._super(type);
-    el.style.width = '98%';
-    return el;
-  },
-  afterInputReady: function(input) {
-    if(input.controlgroup) return;
-    input.controlgroup = this.closest(input,'.control-group');
-    input.controls = this.closest(input,'.controls');
-    if(this.closest(input,'.compact')) {
-      input.controlgroup.className = input.controlgroup.className.replace(/control-group/g,'').replace(/[ ]{2,}/g,' ');
-      input.controls.className = input.controlgroup.className.replace(/controls/g,'').replace(/[ ]{2,}/g,' ');
-      input.style.marginBottom = 0;
-    }
-
-    // TODO: use bootstrap slider
-  },
-  getIndentedPanel: function() {
-    var el = document.createElement('div');
-    el.className = 'well well-small';
-    return el;
-  },
-  getFormInputDescription: function(text) {
-    var el = document.createElement('p');
-    el.className = 'help-inline';
-    el.textContent = text;
-    return el;
-  },
-  getFormControl: function(label, input, description) {
-    var ret = document.createElement('div');
-    ret.className = 'control-group';
-
-    var controls = document.createElement('div');
-    controls.className = 'controls';
-
-    if(label && input.getAttribute('type') === 'checkbox') {
-      ret.appendChild(controls);
-      label.className += ' checkbox';
-      label.appendChild(input);
-      controls.appendChild(label);
-      controls.style.height = '30px';
-    }
-    else {
-      if(label) {
-        label.className += ' control-label';
-        ret.appendChild(label);
-      }
-      controls.appendChild(input);
-      ret.appendChild(controls);
-    }
-
-    if(description) controls.appendChild(description);
-
-    return ret;
-  },
-  getHeaderButtonHolder: function() {
-    var el = this.getButtonHolder();
-    el.style.marginLeft = '10px';
-    return el;
-  },
-  getButtonHolder: function() {
-    var el = document.createElement('div');
-    el.className = 'btn-group';
-    return el;
-  },
-  getButton: function(text, icon, title) {
-    var el =  this._super(text, icon, title);
-    el.className += ' btn btn-default';
-    return el;
-  },
-  getTable: function() {
-    var el = document.createElement('table');
-    el.className = 'table table-bordered';
-    el.style.width = 'auto';
-    el.style.maxWidth = 'none';
-    return el;
-  },
-  addInputError: function(input,text) {
-    if(!input.controlgroup || !input.controls) return;
-    input.controlgroup.className += ' error';
-    if(!input.errmsg) {
-      input.errmsg = document.createElement('p');
-      input.errmsg.className = 'help-block errormsg';
-      input.controls.appendChild(input.errmsg);
-    }
-    else {
-      input.errmsg.style.display = '';
-    }
-
-    input.errmsg.textContent = text;
-  },
-  removeInputError: function(input) {
-    if(!input.errmsg) return;
-    input.errmsg.style.display = 'none';
-    input.controlgroup.className = input.controlgroup.className.replace(/\s?error/g,'');
-  },
-  getTabHolder: function() {
-    var el = document.createElement('div');
-    el.className = 'tabbable tabs-left';
-    el.innerHTML = "<ul class='nav nav-tabs span2' style='margin-right: 0;'></ul><div class='tab-content span10' style='overflow:visible;'></div>";
-    return el;
-  },
-  getTab: function(text) {
-    var el = document.createElement('li');
-    var a = document.createElement('a');
-    a.setAttribute('href','#');
-    a.appendChild(text);
-    el.appendChild(a);
-    return el;
-  },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
-  },
-  getTabContent: function() {
-    var el = document.createElement('div');
-    el.className = 'tab-pane active';
-    return el;
-  },
-  markTabActive: function(tab) {
-    tab.className += ' active';
-  },
-  markTabInactive: function(tab) {
-    tab.className = tab.className.replace(/\s?active/g,'');
-  },
-  addTab: function(holder, tab) {
-    holder.children[0].appendChild(tab);
-  }
-});
-
-JSONEditor.defaults.themes.bootstrap3 = JSONEditor.AbstractTheme.extend({
-  getSelectInput: function(options) {
-    var el = this._super(options);
-    el.className += 'form-control';
-    //el.style.width = 'auto';
-    return el;
-  },
-  setGridColumnSize: function(el,size) {
-    el.className = 'col-md-'+size;
-  },
-  afterInputReady: function(input) {
-    if(input.controlgroup) return;
-    input.controlgroup = this.closest(input,'.form-group');
-    if(this.closest(input,'.compact')) {
-      input.controlgroup.style.marginBottom = 0;
-    }
-
-    // TODO: use bootstrap slider
-  },
-  getTextareaInput: function() {
-    var el = document.createElement('textarea');
-    el.className = 'form-control';
-    return el;
-  },
-  getRangeInput: function(min, max, step) {
-    // TODO: use better slider
-    return this._super(min, max, step);
-  },
-  getFormInputField: function(type) {
-    var el = this._super(type);
-    if(type !== 'checkbox') {
-      el.className += 'form-control';
-    }
-    return el;
-  },
-  getFormControl: function(label, input, description) {
-    var group = document.createElement('div');
-
-    if(label && input.type === 'checkbox') {
-      group.className += ' checkbox';
-      label.appendChild(input);
-      label.style.fontSize = '14px';
-      group.style.marginTop = '0';
-      group.appendChild(label);
-    } 
-    else {
-      group.className += ' form-group';
-      if(label) {
-        label.className += ' control-label';
-        group.appendChild(label);
-      }
-      group.appendChild(input);
-    }
-
-    if(description) group.appendChild(description);
-
-    return group;
-  },
-  getIndentedPanel: function() {
-    var el = document.createElement('div');
-    el.className = 'well well-sm';
-    return el;
-  },
-  getFormInputDescription: function(text) {
-    var el = document.createElement('p');
-    el.className = 'help-block';
-    el.textContent = text;
-    return el;
-  },
-  getHeaderButtonHolder: function() {
-    var el = this.getButtonHolder();
-    el.style.marginLeft = '10px';
-    return el;
-  },
-  getButtonHolder: function() {
-    var el = document.createElement('div');
-    el.className = 'btn-group';
-    return el;
-  },
-  getButton: function(text, icon, title) {
-    var el = this._super(text, icon, title);
-    el.className += 'btn btn-default';
-    return el;
-  },
-  getTable: function() {
-    var el = document.createElement('table');
-    el.className = 'table table-bordered';
-    el.style.width = 'auto';
-    el.style.maxWidth = 'none';
-    return el;
-  },
-
-  addInputError: function(input,text) {
-    if(!input.controlgroup) return;
-    input.controlgroup.className += ' has-error';
-    if(!input.errmsg) {
-      input.errmsg = document.createElement('p');
-      input.errmsg.className = 'help-block errormsg';
-      input.controlgroup.appendChild(input.errmsg);
-    }
-    else {
-      input.errmsg.style.display = '';
-    }
-
-    input.errmsg.textContent = text;
-  },
-  removeInputError: function(input) {
-    if(!input.errmsg) return;
-    input.errmsg.style.display = 'none';
-    input.controlgroup.className = input.controlgroup.className.replace(/\s?has-error/g,'');
-  },
-  getTabHolder: function() {
-    var el = document.createElement('div');
-    el.innerHTML = "<div class='tabs list-group col-md-2'></div><div class='col-md-10'></div>";
-    el.className = 'rows';
-    return el;
-  },
-  getTab: function(text) {
-    var el = document.createElement('a');
-    el.className = 'list-group-item';
-    el.setAttribute('href','#');
-    el.appendChild(text);
-    return el;
-  },
-  markTabActive: function(tab) {
-    tab.className += ' active';
-  },
-  markTabInactive: function(tab) {
-    tab.className = tab.className.replace(/\s?active/g,'');
-  }
-});
-
-// Base Foundation theme
-JSONEditor.defaults.themes.foundation = JSONEditor.AbstractTheme.extend({
-  getChildEditorHolder: function() {
-    var el = document.createElement('div');
-    el.style.marginBottom = '15px';
-    return el;
-  },
-  getSelectInput: function(options) {
-    var el = this._super(options);
-    el.style.minWidth = 'none';
-    el.style.padding = '5px';
-    el.style.marginTop = '3px';
-    return el;
-  },
-  getSwitcher: function(options) {
-    var el = this._super(options);
-    el.style.paddingRight = '8px';
-    return el;
-  },
-  afterInputReady: function(input) {
-    if(this.closest(input,'.compact')) {
-      input.style.marginBottom = 0;
-    }
-    input.group = this.closest(input,'.form-control');
-  },
-  getFormInputLabel: function(text) {
-    var el = this._super(text);
-    el.style.display = 'inline-block';
-    return el;
-  },
-  getFormInputField: function(type) {
-    var el = this._super(type);
-    el.style.width = '100%';
-    el.style.marginBottom = type==='checkbox'? '0' : '12px';
-    return el;
-  },
-  getFormInputDescription: function(text) {
-    var el = document.createElement('p');
-    el.textContent = text;
-    el.style.marginTop = '-10px';
-    el.style.fontStyle = 'italic';
-    return el;
-  },
-  getIndentedPanel: function() {
-    var el = document.createElement('div');
-    el.className = 'panel';
-    return el;
-  },
-  getHeaderButtonHolder: function() {
-    var el = this.getButtonHolder();
-    el.style.display = 'inline-block';
-    el.style.marginLeft = '10px';
-    el.style.verticalAlign = 'middle';
-    return el;
-  },
-  getButtonHolder: function() {
-    var el = document.createElement('div');
-    el.className = 'button-group';
-    return el;
-  },
-  getButton: function(text, icon, title) {
-    var el = this._super(text, icon, title);
-    el.className += ' small button';
-    return el;
-  },
-  addInputError: function(input,text) {
-    if(!input.group) return;
-    input.group.className += ' error';
-    
-    if(!input.errmsg) {
-      input.insertAdjacentHTML('afterend','<small class="errormsg"></small>');
-      input.errmsg = input.parentNode.getElementsByClassName('errormsg')[0];
-    }
-    else {
-      input.errmsg.style.display = '';
-    }
-    
-    input.errmsg.textContent = text;
-  },
-  removeInputError: function(input) {
-    if(!input.errmsg) return;
-    input.group.className = input.group.className.replace(/ error/g,'');
-    input.errmsg.style.display = 'none';
-  }
-});
-
-// Foundation 3 Specific Theme
-JSONEditor.defaults.themes.foundation3 = JSONEditor.defaults.themes.foundation.extend({
-  getHeaderButtonHolder: function() {
-    var el = this._super();
-    el.style.fontSize = '.6em';
-    return el;
-  },
-  getFormInputLabel: function(text) {
-    var el = this._super(text);
-    el.style.fontWeight = 'bold';
-    return el;
-  },
-  getTabHolder: function() {
-    var el = document.createElement('div');
-    el.className = 'row';
-    el.innerHTML = "<dl class='tabs vertical two columns'></dl><div class='tabs-content ten columns'></div>";
-    return el;
-  },
-  setGridColumnSize: function(el,size) {
-    var sizes = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
-    el.className = 'columns '+sizes[size];
-  },
-  getTab: function(text) {
-    var el = document.createElement('dd');
-    var a = document.createElement('a');
-    a.setAttribute('href','#');
-    a.appendChild(text);
-    el.appendChild(a);
-    return el;
-  },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
-  },
-  getTabContent: function() {
-    var el = document.createElement('div');
-    el.className = 'content active';
-    el.style.paddingLeft = '5px';
-    return el;
-  },
-  markTabActive: function(tab) {
-    tab.className += ' active';
-  },
-  markTabInactive: function(tab) {
-    tab.className = tab.className.replace(/\s*active/g,'');
-  },
-  addTab: function(holder, tab) {
-    holder.children[0].appendChild(tab);
-  }
-});
-
-// Foundation 4 Specific Theme
-JSONEditor.defaults.themes.foundation4 = JSONEditor.defaults.themes.foundation.extend({
-  getHeaderButtonHolder: function() {
-    var el = this._super();
-    el.style.fontSize = '.6em';
-    return el;
-  },
-  setGridColumnSize: function(el,size) {
-    el.className = 'columns large-'+size;
-  },
-  getFormInputDescription: function(text) {
-    var el = this._super(text);
-    el.style.fontSize = '.8rem';
-    return el;
-  },
-  getFormInputLabel: function(text) {
-    var el = this._super(text);
-    el.style.fontWeight = 'bold';
-    return el;
-  }
-});
-
-// Foundation 5 Specific Theme
-JSONEditor.defaults.themes.foundation5 = JSONEditor.defaults.themes.foundation.extend({
-  getFormInputDescription: function(text) {
-    var el = this._super(text);
-    el.style.fontSize = '.8rem';
-    return el;
-  },
-  setGridColumnSize: function(el,size) {
-    el.className = 'columns medium-'+size;
-  },
-  getButton: function(text, icon, title) {
-    var el = this._super(text,icon,title);
-    el.className = el.className.replace(/\s*small/g,'') + ' tiny';
-    return el;
-  },
-  getTabHolder: function() {
-    var el = document.createElement('div');
-    el.innerHTML = "<dl class='tabs vertical'></dl><div class='tabs-content'></div>";
-    return el;
-  },
-  getTab: function(text) {
-    var el = document.createElement('dd');
-    var a = document.createElement('a');
-    a.setAttribute('href','#');
-    a.appendChild(text);
-    el.appendChild(a);
-    return el;
-  },
-  getTabContentHolder: function(tab_holder) {
-    return tab_holder.children[1];
-  },
-  getTabContent: function() {
-    var el = document.createElement('div');
-    el.className = 'content active';
-    el.style.paddingLeft = '5px';
-    return el;
-  },
-  markTabActive: function(tab) {
-    tab.className += ' active';
-  },
-  markTabInactive: function(tab) {
-    tab.className = tab.className.replace(/\s*active/g,'');
-  },
-  addTab: function(holder, tab) {
-    holder.children[0].appendChild(tab);
-  }
-});
-
-JSONEditor.defaults.themes.html = JSONEditor.AbstractTheme.extend({
-  getFormInputLabel: function(text) {
-    var el = this._super(text);
-    el.style.display = 'block';
-    el.style.marginBottom = '3px';
-    el.style.fontWeight = 'bold';
-    return el;
-  },
-  getFormInputDescription: function(text) {
-    var el = this._super(text);
-    el.style.fontSize = '.8em';
-    el.style.margin = 0;
-    el.style.display = 'inline-block';
-    el.style.fontStyle = 'italic';
-    return el;
-  },
-  getIndentedPanel: function() {
-    var el = this._super();
-    el.style.border = '1px solid #ddd';
-    el.style.padding = '5px';
-    el.style.margin = '5px';
-    el.style.borderRadius = '3px';
-    return el;
-  },
-  getChildEditorHolder: function() {
-    var el = this._super();
-    el.style.marginBottom = '8px';
-    return el;
-  },
-  getHeaderButtonHolder: function() {
-    var el = this.getButtonHolder();
-    el.style.display = 'inline-block';
-    el.style.marginLeft = '10px';
-    el.style.fontSize = '.8em';
-    el.style.verticalAlign = 'middle';
-    return el;
-  },
-  getTable: function() {
-    var el = this._super();
-    el.style.borderBottom = '1px solid #ccc';
-    el.style.marginBottom = '5px';
-    return el;
-  },
-  addInputError: function(input, text) {
-    input.style.borderColor = 'red';
-    
-    if(!input.errmsg) {
-      var group = this.closest(input,'.form-control');
-      input.errmsg = document.createElement('div');
-      input.errmsg.setAttribute('class','errmsg');
-      input.errmsg.style = input.errmsg.style || {};
-      input.errmsg.style.color = 'red';
-      group.appendChild(input.errmsg);
-    }
-    else {
-      input.errmsg.style.display = 'block';
-    }
-    
-    input.errmsg.innerHTML = '';
-    input.errmsg.appendChild(document.createTextNode(text));
-  },
-  removeInputError: function(input) {
-    input.style.borderColor = '';
-    if(input.errmsg) input.errmsg.style.display = 'none';
-  }
-});
-
-JSONEditor.defaults.themes.jquerymobile = JSONEditor.AbstractTheme.extend({
-  getTable: function() {
-    var el = this._super();
-    el.setAttribute('cellpadding',5);
-    el.setAttribute('cellspacing',0);
-    return el;
-  },
-  getTableHeaderCell: function(text) {
-    var el = this._super(text);
-    el.className = 'ui-state-active';
-    el.style.fontWeight = 'bold';
-    return el;
-  },
-  getTableCell: function() {
-    var el = this._super();
-    el.className = 'ui-widget-content';
-    return el;
-  },
-  getHeaderButtonHolder: function() {
-    var el = this.getButtonHolder();
-    el.style.marginLeft = '10px';
-    el.style.fontSize = '.6em';
-    el.style.display = 'inline-block';
-    return el;
-  },
-  getFormControl: function(label, input, description) {
-    var el = document.createElement('div');
-    el.className = 'ui-field-contain';
-    if(label) el.appendChild(label);
-    if(input.type === 'checkbox') {
-      label.insertBefore(input,label.firstChild);
-    }
-    else {
-      el.appendChild(input);
-    }
-    
-    if(description) el.appendChild(description);
-    return el;
-  },
-  getDescription: function(text) {
-    var el = document.createElement('legend');
-    el.style.fontSize = '.8em';
-    el.style.fontStyle = 'italic';
-    el.style.paddingTop = '10px';
-    el.textContent = text;
-    return el;
-  },
-  getButtonHolder: function() {
-    var el = document.createElement('div');
-    el.className = 'ui-controlgroup ui-controlgroup-horizontal ui-mini ui-corner-all';
-    var inner = document.createElement('div');
-    inner.className = 'ui-controlgroup-controls';
-    el.appendChild(inner);
-    return el;
-  },
-  appendButtonToButtonHolder: function(holder, button) {
-    holder.firstChild.appendChild(button);
-    //jQuery(holder).controlgroup({ mini: true });
-  },
-  getFormInputLabel: function(text) {
-    var el = document.createElement('label');
-    el.textContent = text;
-    return el;
-  },
-  getButton: function(text, icon, title) {
-    var button = document.createElement("button");
-    button.className = 'ui-btn ui-btn-inline ';
-
-    // Icon only
-    if(icon && !text) {
-      button.className += ' ui-btn-icon-notext ui-corner-all';
-      //icon.className += ' ui-button-icon-primary ui-icon-primary';
-      //button.appendChild(icon);
-    }
-    // Icon and Text
-    else if(icon) {
-      button.className += ' ui-btn-icon-left';
-      //icon.className += ' ui-button-icon-primary ui-icon-primary';
-      //button.appendChild(icon);
-    }
-    // Text only
-    else {
-      /*nop*/
-    }
-
-    button.textContent = text||title||".";
-    button.setAttribute('title',title);
-    
-    return button;
-  },
-  setButtonText: function(button,text, icon, title) {
-    button.innerHTML = '';
-    button.className = 'ui-btn ui-btn-inline ';
-
-    // Icon only
-    if(icon && !text) {
-      button.className += ' ui-btn-icon-notext ui-corner-all';
-      //icon.className += ' ui-button-icon-primary ui-icon-primary';
-      //button.appendChild(icon);
-    }
-    // Icon and Text
-    else if(icon) {
-      button.className += ' ui-btn-icon-left';
-      //icon.className += ' ui-button-icon-primary ui-icon-primary';
-      //button.appendChild(icon);
-    }
-    // Text only
-    else {
-      /*nop*/
-    }
-
-    button.textContent = text||title||".";
-    button.setAttribute('title',title);
-  },
-  getHeader: function(text) {
-    var el = document.createElement('h3');
-    el.className = 'ui-bar ui-bar-a ui-corner-all';
-    if(typeof text === "string") {
-      el.textContent = text;
-    }
-    else {
-      el.appendChild(text);
-    }
-    
-    return el;
-  },
-  getIndentedPanel: function() {
-    var el = document.createElement('div');
-    el.className = 'ui-body ui-body-a ui-corner-all';
-    //el.style.padding = '1em 1.4em';
-    return el;
-  },
-  afterInputReady: function(input) {
-    controlgroup = this.closest(input,'.ui-controlgroup-controls');
-    switch(input.type) {
-      case 'select-one':
-        try {
-          jQuery(input).selectmenu({ inline: true });
-        } catch(e) {
-            //ignore silently
-        }
-        break;
-      case 'text':
-        try {
-          jQuery(input).textinput();
-        } catch(e) {
-          //ignore silently
-        }
-        break;
-    }
-  },
-  addInputError: function(input,text) {
-    if(!input.controls) return;
-    if(!input.errmsg) {
-      input.errmsg = document.createElement('div');
-      input.errmsg.className = 'ui-state-error';
-      input.controls.appendChild(input.errmsg);
-    }
-    else {
-      input.errmsg.style.display = '';
-    }
-
-    input.errmsg.textContent = text;
-  },
-  removeInputError: function(input) {
-    if(!input.errmsg) return;
-    input.errmsg.style.display = 'none';
-  },
-  markTabActive: function(tab) {
-    tab.className = tab.className.replace(/\s*ui-widget-header/g,'')+' ui-state-active';
-  },
-  markTabInactive: function(tab) {
-    tab.className = tab.className.replace(/\s*ui-state-active/g,'')+' ui-widget-header';
-  }
-});
-
-JSONEditor.defaults.themes.jqueryui = JSONEditor.AbstractTheme.extend({
-  getTable: function() {
-    var el = this._super();
-    el.setAttribute('cellpadding',5);
-    el.setAttribute('cellspacing',0);
-    return el;
-  },
-  getTableHeaderCell: function(text) {
-    var el = this._super(text);
-    el.className = 'ui-state-active';
-    el.style.fontWeight = 'bold';
-    return el;
-  },
-  getTableCell: function() {
-    var el = this._super();
-    el.className = 'ui-widget-content';
-    return el;
-  },
-  getHeaderButtonHolder: function() {
-    var el = this.getButtonHolder();
-    el.style.marginLeft = '10px';
-    el.style.fontSize = '.6em';
-    el.style.display = 'inline-block';
-    return el;
-  },
-  getFormInputDescription: function(text) {
-    var el = this.getDescription(text);
-    el.style.marginLeft = '10px';
-    el.style.display = 'inline-block';
-    return el;
-  },
-  getFormControl: function(label, input, description) {
-    var el = this._super(label,input,description);
-    if(input.type === 'checkbox') {
-      el.style.lineHeight = '25px';
-      
-      el.style.padding = '3px 0';
-    }
-    else {
-      el.style.padding = '4px 0 8px 0';
-    }
-    return el;
-  },
-  getDescription: function(text) {
-    var el = document.createElement('span');
-    el.style.fontSize = '.8em';
-    el.style.fontStyle = 'italic';
-    el.textContent = text;
-    return el;
-  },
-  getButtonHolder: function() {
-    var el = document.createElement('div');
-    el.className = 'ui-buttonset';
-    el.style.fontSize = '.7em';
-    return el;
-  },
-  getFormInputLabel: function(text) {
-    var el = document.createElement('label');
-    el.style.fontWeight = 'bold';
-    el.style.display = 'block';
-    el.textContent = text;
-    return el;
-  },
-  getButton: function(text, icon, title) {
-    var button = document.createElement("button");
-    button.className = 'ui-button ui-widget ui-state-default ui-corner-all';
-
-    // Icon only
-    if(icon && !text) {
-      button.className += ' ui-button-icon-only';
-      icon.className += ' ui-button-icon-primary ui-icon-primary';
-      button.appendChild(icon);
-    }
-    // Icon and Text
-    else if(icon) {
-      button.className += ' ui-button-text-icon-primary';
-      icon.className += ' ui-button-icon-primary ui-icon-primary';
-      button.appendChild(icon);
-    }
-    // Text only
-    else {
-      button.className += ' ui-button-text-only';
-    }
-
-    var el = document.createElement('span');
-    el.className = 'ui-button-text';
-    el.textContent = text||title||".";
-    button.appendChild(el);
-
-    button.setAttribute('title',title);
-    
-    return button;
-  },
-  setButtonText: function(button,text, icon, title) {
-    button.innerHTML = '';
-    button.className = 'ui-button ui-widget ui-state-default ui-corner-all';
-
-    // Icon only
-    if(icon && !text) {
-      button.className += ' ui-button-icon-only';
-      icon.className += ' ui-button-icon-primary ui-icon-primary';
-      button.appendChild(icon);
-    }
-    // Icon and Text
-    else if(icon) {
-      button.className += ' ui-button-text-icon-primary';
-      icon.className += ' ui-button-icon-primary ui-icon-primary';
-      button.appendChild(icon);
-    }
-    // Text only
-    else {
-      button.className += ' ui-button-text-only';
-    }
-
-    var el = document.createElement('span');
-    el.className = 'ui-button-text';
-    el.textContent = text||title||".";
-    button.appendChild(el);
-
-    button.setAttribute('title',title);
-  },
-  getIndentedPanel: function() {
-    var el = document.createElement('div');
-    el.className = 'ui-widget-content ui-corner-all';
-    el.style.padding = '1em 1.4em';
-    el.style.marginBottom = '20px';
-    return el;
-  },
-  afterInputReady: function(input) {
-    if(input.controls) return;
-    input.controls = this.closest(input,'.form-control');
-  },
-  addInputError: function(input,text) {
-    if(!input.controls) return;
-    if(!input.errmsg) {
-      input.errmsg = document.createElement('div');
-      input.errmsg.className = 'ui-state-error';
-      input.controls.appendChild(input.errmsg);
-    }
-    else {
-      input.errmsg.style.display = '';
-    }
-
-    input.errmsg.textContent = text;
-  },
-  removeInputError: function(input) {
-    if(!input.errmsg) return;
-    input.errmsg.style.display = 'none';
-  },
-  markTabActive: function(tab) {
-    tab.className = tab.className.replace(/\s*ui-widget-header/g,'')+' ui-state-active';
-  },
-  markTabInactive: function(tab) {
-    tab.className = tab.className.replace(/\s*ui-state-active/g,'')+' ui-widget-header';
-  }
-});
-
-JSONEditor.AbstractIconLib = Class.extend({
-  mapping: {
-    collapse: '',
-    expand: '',
-    delete: '',
-    edit: '',
-    add: '',
-    cancel: '',
-    save: '',
-    moveup: '',
-    movedown: ''
-  },
-  icon_prefix: '',
-  getIconClass: function(key) {
-    if(this.mapping[key]) return this.icon_prefix+this.mapping[key];
-    else return null;
-  },
-  getIcon: function(key) {
-    var iconclass = this.getIconClass(key);
-    
-    if(!iconclass) return null;
-    
-    var i = document.createElement('i');
-    i.className = iconclass;
-    return i;
-  }
-});
-
-JSONEditor.defaults.iconlibs.bootstrap2 = JSONEditor.AbstractIconLib.extend({
-  mapping: {
-    collapse: 'chevron-down',
-    expand: 'chevron-up',
-    delete: 'trash',
-    edit: 'pencil',
-    add: 'plus',
-    cancel: 'ban-circle',
-    save: 'ok',
-    moveup: 'arrow-up',
-    movedown: 'arrow-down'
-  },
-  icon_prefix: 'icon-'
-});
-
-JSONEditor.defaults.iconlibs.bootstrap3 = JSONEditor.AbstractIconLib.extend({
-  mapping: {
-    collapse: 'chevron-down',
-    expand: 'chevron-right',
-    delete: 'remove',
-    edit: 'pencil',
-    add: 'plus',
-    cancel: 'floppy-remove',
-    save: 'floppy-saved',
-    moveup: 'arrow-up',
-    movedown: 'arrow-down'
-  },
-  icon_prefix: 'glyphicon glyphicon-'
-});
-
-JSONEditor.defaults.iconlibs.fontawesome3 = JSONEditor.AbstractIconLib.extend({
-  mapping: {
-    collapse: 'chevron-down',
-    expand: 'chevron-right',
-    delete: 'remove',
-    edit: 'pencil',
-    add: 'plus',
-    cancel: 'ban-circle',
-    save: 'save',
-    moveup: 'arrow-up',
-    movedown: 'arrow-down'
-  },
-  icon_prefix: 'icon-'
-});
-
-JSONEditor.defaults.iconlibs.fontawesome4 = JSONEditor.AbstractIconLib.extend({
-  mapping: {
-    collapse: 'caret-square-o-down',
-    expand: 'caret-square-o-right',
-    delete: 'times',
-    edit: 'pencil',
-    add: 'plus',
-    cancel: 'ban',
-    save: 'save',
-    moveup: 'arrow-up',
-    movedown: 'arrow-down'
-  },
-  icon_prefix: 'fa fa-'
-});
-
-JSONEditor.defaults.iconlibs.foundation2 = JSONEditor.AbstractIconLib.extend({
-  mapping: {
-    collapse: 'minus',
-    expand: 'plus',
-    delete: 'remove',
-    edit: 'edit',
-    add: 'add-doc',
-    cancel: 'error',
-    save: 'checkmark',
-    moveup: 'up-arrow',
-    movedown: 'down-arrow'
-  },
-  icon_prefix: 'foundicon-'
-});
-
-JSONEditor.defaults.iconlibs.foundation3 = JSONEditor.AbstractIconLib.extend({
-  mapping: {
-    collapse: 'minus',
-    expand: 'plus',
-    delete: 'x',
-    edit: 'pencil',
-    add: 'page-add',
-    cancel: 'x-circle',
-    save: 'save',
-    moveup: 'arrow-up',
-    movedown: 'arrow-down'
-  },
-  icon_prefix: 'fi-'
-});
-
-JSONEditor.defaults.iconlibs.jqueryui = JSONEditor.AbstractIconLib.extend({
-  mapping: {
-    collapse: 'triangle-1-s',
-    expand: 'triangle-1-e',
-    delete: 'trash',
-    edit: 'pencil',
-    add: 'plusthick',
-    cancel: 'closethick',
-    save: 'disk',
-    moveup: 'arrowthick-1-n',
-    movedown: 'arrowthick-1-s'
-  },
-  icon_prefix: 'ui-icon ui-icon-'
-});
-
-JSONEditor.defaults.templates.default = function() {
-  var expandVars = function(vars) {
-    var expanded = {};
-    $each(vars, function(i,el) {
-      if(typeof el === "object" && el !== null) {
-        var tmp = {};
-        $each(el, function(j,item) {
-          tmp[i+'.'+j] = item;
-        });
-        $extend(expanded,expandVars(tmp));
-      }
-      else {
-        expanded[i] = el;
-      }
-    });
-    return expanded;
-  };
-  
-  return {
-    compile: function(template) {
-      return function (vars) {
-        var expanded = expandVars(vars);
-        
-        var ret = template+"";
-        // Only supports basic {{var}} macro replacement
-        $each(expanded,function(key,value) {
-          ret = ret.replace(new RegExp('{{\\s*'+key+'\\s*}}','g'),value);
-        });
-        return ret;
-      };
-    }
-  };
-};
-
-JSONEditor.defaults.templates.ejs = function() {
-  if(!window.EJS) return false;
-
-  return {
-    compile: function(template) {
-      var compiled = new EJS({
-        text: template
-      });
-
-      return function(context) {
-        return compiled.render(context);
-      };
-    }
-  };
-};
-
-JSONEditor.defaults.templates.handlebars = function() {
-  return window.Handlebars;
-};
-
-JSONEditor.defaults.templates.hogan = function() {
-  if(!window.Hogan) return false;
-
-  return {
-    compile: function(template) {
-      var compiled = Hogan.compile(template);
-      return function(context) {
-        return compiled.render(context);
-      };
-    }
-  };
-};
-
-JSONEditor.defaults.templates.markup = function() {
-  if(!window.Mark || !window.Mark.up) return false;
-
-  return {
-    compile: function(template) {
-      return function(context) {
-        return Mark.up(template,context);
-      };
-    }
-  };
-};
-
-JSONEditor.defaults.templates.mustache = function() {
-  if(!window.Mustache) return false;
-
-  return {
-    compile: function(template) {
-      return function(view) {
-        return Mustache.render(template, view);
-      };
-    }
-  };
-};
-
-JSONEditor.defaults.templates.swig = function() {
-  return window.swig;
-};
-
-JSONEditor.defaults.templates.underscore = function() {
-  if(!window._) return false;
-
-  return {
-    compile: function(template) {
-      return function(context) {
-        return _.template(template, context);
-      };
-    }
-  };
-};
-
-// Set the default theme
-JSONEditor.defaults.theme = 'html';
-
-// Set the default template engine
-JSONEditor.defaults.template = 'default';
-
-// Default options when initializing JSON Editor
-JSONEditor.defaults.options = {};
-
-// Miscellaneous Plugin Settings
-JSONEditor.plugins = {
-  ace: {
-    theme: ''
-  },
-  epiceditor: {
-    
-  },
-  sceditor: {
-    
-  }
-};
-
-// Default per-editor options
-for(var i in JSONEditor.defaults.editors) {
-  if(!JSONEditor.defaults.editors.hasOwnProperty(i)) continue;
-  JSONEditor.defaults.editors[i].options = JSONEditor.defaults.editors.options || {};
-}
-
-// Set the default resolvers
-// Use "multiple" as a fall back for everything
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(typeof schema.type !== "string") return "multiple";
-});
-// If the type is set and it's a basic type, use the primitive editor
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  // If the schema is a simple type
-  if(typeof schema.type === "string") return schema.type;
-});
-// Use the select editor for all boolean values
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.type === 'boolean') {
-    return "select";
-  }
-});
-// Use the multiple editor for schemas where the `type` is set to "any"
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  // If the schema can be of any type
-  if(schema.type === "any") return "multiple";
-});
-// Editor for base64 encoded files
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  // If the schema can be of any type
-  if(schema.type === "string" && schema.media && schema.media.binaryEncoding==="base64") {
-    return "base64";
-  }
-});
-// Use the table editor for arrays with the format set to `table`
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  // Type `array` with format set to `table`
-  if(schema.type == "array" && schema.format == "table") {
-    return "table";
-  }
-});
-// Use the `enum` or `select` editors for schemas with enumerated properties
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.enum) {
-    if(schema.type === "array" || schema.type === "object") {
-      return "enum";
-    }
-    else if(schema.type === "number" || schema.type === "integer" || schema.type === "string") {
-      return "select";
-    }
-  }
-});
-// Use the 'multiselect' editor for arrays of enumerated strings/numbers/integers
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.type === "array" && schema.items && !(schema.items instanceof Array) && schema.uniqueItems && schema.items.enum && ['string','number','integer'].indexOf(schema.items.type) >= 0) {
-    return 'multiselect';
-  }
-});
-// Use the multiple editor for schemas with `oneOf` set
-JSONEditor.defaults.resolvers.unshift(function(schema) {
-  // If this schema uses `oneOf`
-  if(schema.oneOf) return "multiple";
-});
-
-/**
- * This is a small wrapper for using JSON Editor like a typical jQuery plugin.
- */
-if(window.jQuery || window.Zepto) {
-  window.$ = window.$ || {};
-  $.jsoneditor = JSONEditor.defaults;
-  
-  (window.jQuery || window.Zepto).fn.jsoneditor = function(options) {
-    var self = this;
-    var editor = this.data('jsoneditor');
-    if(options === 'value') {
-      if(!editor) throw "Must initialize jsoneditor before getting/setting the value";
-      
-      // Set value
-      if(arguments.length > 1) {
-        editor.setValue(arguments[1]);
-      }
-      // Get value
-      else {
-        return editor.getValue();
-      }
-    }
-    else if(options === 'validate') {
-      if(!editor) throw "Must initialize jsoneditor before validating";
-      
-      // Validate a specific value
-      if(arguments.length > 1) {
-        return editor.validate(arguments[1]);
-      }
-      // Validate current value
-      else {
-        return editor.validate();
-      }
-    }
-    else if(options === 'destroy') {
-      if(editor) {
-        editor.destroy();
-        this.data('jsoneditor',null);
-      }
-    }
-    else {
-      // Destroy first
-      if(editor) {
-        editor.destroy();
-      }
-      
-      // Create editor
-      editor = new JSONEditor(this.get(0),options);
-      this.data('jsoneditor',editor);
-      
-      // Setup event listeners
-      editor.on('change',function() {
-        self.trigger('change');
-      });
-      editor.on('ready',function() {
-        self.trigger('ready');
-      });
-    }
-    
-    return this;
-  };
-}
-
-  window.JSONEditor = JSONEditor;
-})();

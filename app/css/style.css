@@ -1316,3 +1316,16 @@ border-bottom-left-radius: inherit;
   left: auto;
   margin: 0;
 }
+
+
+#config-editor {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  display: block;
+}
+
+#config .ui-content {
+  padding: 0;
+}

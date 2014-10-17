@@ -152,6 +152,10 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
       li(data-theme=theme.menuSwatch)
         a(href='#plugins', data-transition="slidefade")=__('Plugins') 
       <!-- /ko --> 
+      <!-- ko if: $root.hasPermission('config', 'read') -->
+      li(data-theme=theme.menuSwatch)
+        a(href='#config', data-transition="slidefade")=__('Config')
+      <!-- /ko --> 
       <!-- ko if: $root.hasPermission('updates', 'read') -->
       li(data-theme=theme.menuSwatch)
         a(href='#updates', data-transition="slidefade")=__('Updates')
