@@ -185,7 +185,8 @@ html body .ui-panel-dismiss {
   overflow: visible;
 }
 
-.ui-mobile .ui-li-divider + li {
+.ui-mobile .ui-li-divider + li,
+.ui-mobile .ui-li-divider + li a {
   border-top-width: 0px;
 }
 
@@ -200,6 +201,10 @@ html body .ui-panel-dismiss {
   color: #005994;
   font-weight: bold !important;
   text-shadow: none;
+}
+
+.ui-mobile .ui-page-theme-a .ui-li-divider label{
+  margin-bottom: 0;
 }
 
 .ui-mobile .ui-page-theme-a #item-lists .ui-first-child{
