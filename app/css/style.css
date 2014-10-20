@@ -293,10 +293,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 /* align the slider for switches to the right */
 #index div.ui-flipswitch {
-    margin: 5px 10px 5px 0 !important;
-    position: absolute;
-    right: 6px;
-    top: 0;
+    margin: 0px 0px 0px 10px;
+    float: right;
 }
 
 #index div.ui-flipswitch .ui-flipswitch-on {
