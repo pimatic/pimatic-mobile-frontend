@@ -6,6 +6,10 @@ script#switch-template(type='text/template')
       data-bind="attr: { id: switchId }, value: switchState")
       option(value="off")=__('Off')
       option(value="on")=__('On')
+    | 
+    span.error(data-bind="text: ($data.error() ? $data.error() : '') ")
+    | 
+    span.attributes(data-bind="template: { name: 'switch-attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")
 script#shutter-template(type='text/template')
   li.sortable.shutter-device.no-header
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
@@ -55,6 +59,15 @@ script#attribute-template(type='text/template')
     <!-- ko if: $data.showSparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
+script#switch-attribute-template(type='text/template')
+  <!-- ko if: $data.type !== 'boolean' -->
+  span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
+    span.val(data-bind="text: $data.valueText")
+    span.unit(data-bind="text: $data.unitText")
+    <!-- ko if: $data.showSparkline()  -->
+    span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
+    <!-- /ko -->
+  <!-- /ko -->
 script#sortable-handle-template(type='text/template')
   div.handle.no-carousel-slide
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
