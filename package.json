@@ -27,7 +27,7 @@
   ],
   "dependencies": {
     "jade": "1.1.4",
-    "nap": "0.7.15",
+    "nap": "0.8.0",
     "render-appcache-manifest": "0.3.0"
   },
   "peerDependencies": {

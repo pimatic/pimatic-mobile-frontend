@@ -11,7 +11,6 @@ module.exports = (env) ->
   Promise.promisifyAll(fs)
   assert = env.require 'cassert'
   express = env.require "express" 
-  coffee = env.require 'coffee-script'
   S = env.require 'string'
   M = env.matcher
 
