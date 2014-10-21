@@ -48,7 +48,7 @@ class DeviceAttribute
     if @type is "number"
       @sparklineHistory = ko.computed( => ([t, v] for {t,v} in @history()) )
 
-  showSparkline: -> 
+  displaySparkline: -> 
     return (
       @type is "number" and 
       @history().length > 1 and 
