@@ -48,22 +48,18 @@ script#musicplayer-template(type='text/template')
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-step-backward(data-bind="click: function(){$data.sendPlayerAction('previous');}")=__('Previous')
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon(data-bind="jqmbutton: {icon: $data.playButtonIcon}, click: $data.togglePlay")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-step-forward(data-bind="click: function(){$data.sendPlayerAction('next');}")=__('Next')
-script#variable-item-template(type='text/template')
-  li.sortable.variable.no-header
-    label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
-    span.var-value(data-bind="text: value")
 script#attribute-template(type='text/template')
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
-    span.val(data-bind="text: $data.valueText")
-    span.unit(data-bind="text: $data.unitText")
+    span.val(data-bind="text: $data.displayValueText()")
+    span.unit(data-bind="text: $data.displayUnitText()")
     <!-- ko if: $data.displaySparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
 script#switch-attribute-template(type='text/template')
   <!-- ko if: $data.type !== 'boolean' -->
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
-    span.val(data-bind="text: $data.valueText")
-    span.unit(data-bind="text: $data.unitText")
+    span.val(data-bind="text: $data.displayValueText()")
+    span.unit(data-bind="text: $data.displayUnitText()")
     <!-- ko if: $data.displaySparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->

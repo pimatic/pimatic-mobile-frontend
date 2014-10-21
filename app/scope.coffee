@@ -24,26 +24,18 @@ class DeviceAttribute
     history: 'observe'
     lastUpdate: 'observe'
     showSparkline: 'observable'
+    displayUnit: 'copy'
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
     # Allways create an observable for value:
     unless data.value? then data.value = null
+
     @history = ko.observableArray([])
     @lastUpdate = ko.observable(0)
     
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @valueText = ko.computed( =>
-      value = @value()
-      unless value?
-        return __("unknown")
-      if @type is 'boolean'
-        unless @labels? then return value.toString()
-        else if value is true then @labels[0] 
-        else if value is false then @labels[1]
-        else value.toString()
-      else return value.toString()
-    )
+
     @unitText = if @unit? then @unit else ''
     if @type is "number"
       @sparklineHistory = ko.computed( => ([t, v] for {t,v} in @history()) )
@@ -89,13 +81,53 @@ class DeviceAttribute
       @history.shift()
     @history.push({t:timestamp, v:value})
 
-  formatValue: (value) ->
-    if @type is 'boolean'
-      if @labels then (if value is true then @labels[0] else @labels[1])
-      else value.toString()
+  displayValueText: ->
+    value = @value()
+    unless value?
+      return __("unknown")
+    if @type is 'number'
+      format = @_getNumberFormat(value)
+      return format.num
     else
-      if @unit? and @unit.length > 0 then "#{value} #{@unit}"
-      else value
+      return @formatValue(value)
+
+  displayUnitText: ->
+    if @type is 'number'
+      value = @value()
+      format = @_getNumberFormat(value)
+      return format.unit
+    else
+      return ''
+
+  formatValue: (value) ->
+    switch @type
+      when 'boolean'
+        if @labels then (if value is true then @labels[0] else @labels[1])
+        else value.toString()
+      when 'string' then value
+      when "number"
+        format = @_getNumberFormat(value)
+        "#{format.num} #{format.unit}"
+      else
+        value.toString()
+
+  _getNumberFormat: (value) ->
+    immutable = ['°C', 'K', 'F', '%']
+    if (not @unit?) or @unit in immutable
+      return {
+        num: Math.round(value * 1e2) / 1e2 
+        unit: @unit or ''
+      }
+    if @displayUnit? and @unit?
+      prefix = @displayUnit.substring(0, @displayUnit.length - @unit.length)
+
+    else
+      prefix = null
+    info = humanFormat.humanFormatInfo(value, {unit: @unit, prefix})
+    return {
+      num: info.num
+      unit: info.prefix + info.unit
+    }
 
   formatTime: (time) -> 
     day = Highcharts.dateFormat('%Y-%m-%d', time)

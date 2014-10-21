@@ -183,6 +183,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/jquery.ui.datepicker.js"
               "pimatic-mobile-frontend/app/js/jquery.mobile.datepicker.mod.js"
               "pimatic-mobile-frontend/app/js/jquery.sparkline.js"
+              'pimatic-mobile-frontend/app/js/human-format.js'
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
