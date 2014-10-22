@@ -17,7 +17,7 @@
   "homepage": "http://github.com/pimatic/pimatic",
   "repository": {
     "type": "git",
-    "url": "git://github.com/pimatic/pimatic-log-mobile-frontend.git"
+    "url": "git://github.com/pimatic/pimatic-mobile-frontend.git"
   },
   "configSchema": "mobile-frontend-config-schema.coffee",
   "bundledDependencies": [
