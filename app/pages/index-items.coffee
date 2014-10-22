@@ -78,7 +78,10 @@ $(document).on( "pagebeforecreate", (event) ->
       super(templData, @device)
       @switchId = "switch-#{templData.deviceId}"
       @switchState = ko.observable(if @getAttribute('state').value() then 'on' else 'off')
-      @getAttribute('state').value.subscribe( (newState) =>
+      stateAttribute = @getAttribute('state')
+      unless stateAttribute?
+        throw new Error("A switch device needs an state attribute!")
+      stateAttribute.value.subscribe( (newState) =>
         @switchState(if newState then 'on' else 'off')
         pimatic.try => @sliderEle.flipswitch('refresh') 
       )
