@@ -57,7 +57,7 @@ $(document).on( "pagebeforecreate", (event) ->
 
     error: ->
       return (
-        if @deive is pimatic.nullDevice
+        if @device is pimatic.nullDevice
           "Could not find a device with id: #{@templData.deviceId}"
         else null
       )
