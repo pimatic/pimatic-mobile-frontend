@@ -23,7 +23,7 @@ class DeviceAttribute
     unit: 'copy'
     history: 'observe'
     lastUpdate: 'observe'
-    showSparkline: 'observable'
+    displaySparkline: 'observable'
     displayUnit: 'copy'
   }
   constructor: (data, @device) ->
@@ -40,11 +40,11 @@ class DeviceAttribute
     if @type is "number"
       @sparklineHistory = ko.computed( => ([t, v] for {t,v} in @history()) )
 
-  displaySparkline: -> 
+  shouldDisplaySparkline: -> 
     return (
       @type is "number" and 
       @history().length > 1 and 
-      (if @showSparkline? and @showSparkine()? then @showSparkline() else true)
+      (if @displaySparkline? and @displaySparkline()? then @displaySparkline() else true)
     )
 
   tooltipHtml: => 

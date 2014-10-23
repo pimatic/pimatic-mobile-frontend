@@ -52,7 +52,7 @@ script#attribute-template(type='text/template')
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
     span.val(data-bind="text: $data.displayValueText()")
     span.unit(data-bind="text: $data.displayUnitText()")
-    <!-- ko if: $data.displaySparkline()  -->
+    <!-- ko if: $data.shouldDisplaySparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
 script#switch-attribute-template(type='text/template')
@@ -60,7 +60,7 @@ script#switch-attribute-template(type='text/template')
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
     span.val(data-bind="text: $data.displayValueText()")
     span.unit(data-bind="text: $data.displayUnitText()")
-    <!-- ko if: $data.displaySparkline()  -->
+    <!-- ko if: $data.shouldDisplaySparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
   <!-- /ko -->
