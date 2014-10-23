@@ -23,7 +23,7 @@ class DeviceAttribute
     unit: 'copy'
     history: 'observe'
     lastUpdate: 'observe'
-    displaySparkline: 'observable'
+    displaySparkline: 'observe'
     displayUnit: 'copy'
   }
   constructor: (data, @device) ->
