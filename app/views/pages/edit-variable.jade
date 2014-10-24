@@ -15,6 +15,10 @@ div#edit-variable(data-role='page')
         label(data-bind="text: valueLabelText() + ': '")
         input#edit-varibale-value(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", 
           data-bind="value: variableValue, attr: {placeholder: (variableType() == 'value' ? 'Number or string in quotes' : 'Numeric expr or string in quotes')}")
+      .ui-field-contain
+        label(for='select-variable-type')=__('Unit') + ': '
+        input#edit-varibale-unit(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", 
+          data-bind="value: variableUnit, attr: {placeholder: 'Optional'}")
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-variable-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"

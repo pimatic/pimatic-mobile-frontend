@@ -13,6 +13,7 @@ $(document).on("pagebeforecreate", (event) ->
     variableName: ko.observable('')
     variableValue: ko.observable('')
     variableType: ko.observable('value')
+    variableUnit: ko.observable('')
 
     constructor: ->
       @pageTitle = ko.computed( => 
@@ -27,6 +28,7 @@ $(document).on("pagebeforecreate", (event) ->
       @variableName('')
       @variableValue('')
       @variableType('value')
+      @variableUnit('')
 
 
     onSubmit: ->
@@ -38,6 +40,7 @@ $(document).on("pagebeforecreate", (event) ->
         name: @variableName()
         type: @variableType()
         valueOrExpression: @variableValue()
+        unit: @variableUnit()
       }
 
       (

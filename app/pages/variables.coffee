@@ -170,6 +170,7 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
           if variable.type() is 'value' then variable.value() else variable.exprInputStr()
         )
         editVariablePage.variableType(variable.type())
+        editVariablePage.variableUnit(variable.unit())
         editVariablePage.action('update')
         return true
       else return false

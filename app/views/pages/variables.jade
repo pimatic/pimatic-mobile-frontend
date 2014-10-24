@@ -4,7 +4,9 @@ script#variable-template(type="text/template")
       label.var-name(data-bind="text: displayName()")
       span.var-expression(data-bind="text: type() == 'expression' ? ' = ' + exprInputStr() : ''")
       span.var-type(data-bind="text: ' (' + type() + ')'")
-      span.var-value(data-bind="text: displayValue()")
+      span.var-fullvalue
+        span.var-value(data-bind="text: displayValue()")
+        span.var-unit(data-bind="text: unit")
 script#variable-groups-template(type="text/template")
   <!-- ko if: $root.enabledEditing() || $data.getVariables().length > 0  -->
   li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)

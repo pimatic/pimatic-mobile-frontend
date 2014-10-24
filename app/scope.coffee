@@ -234,6 +234,7 @@ class Variable
     readonly: 'observe'
     type: 'observe'
     value: 'observe'
+    unit: 'observe'
   }
   constructor: (data) ->
     unless data.value? then data.value = null
