@@ -89,6 +89,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         @averageDuration(@timeDurationToText(groupByTime))
 
         units = []
+        unitsAttributes = []
         for item in displayed
           item.added = no
           if (item.range isnt range or item.chosenDate isnt chosenDate)
@@ -96,24 +97,36 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             item.data = null
           unless item.attribute.unit in units
             units.push item.attribute.unit
-        yAxis = (
-          for unit in units
-            {
+            unitsAttributes[item.attribute.unit]=item.attribute
+
+        yAxis = []
+        for u in units
+          do (u) ->
+            unitAttribute = unitsAttributes[u]
+            yAxis.push(
               labels:
-                format: "{value} #{unit}"
-              unit: unit
-              tooltip:
-                valueDecimals: 2
-                valueSuffix: " " + unit
+                formatter: -> unitAttribute.formatValue(this.value)
+              unit: u
               opposite: no
-            }
-        )
+            )
+
 
         {to, from} = @getDateRange()
 
         chartOptions = {
           tooltip:
-            valueDecimals: 2
+            formatter: -> 
+              time = Highcharts.dateFormat('%A, %b %e, %H:%M:%S', this.points[0].key)
+              html = """<span style="font-size: 10px">#{time}</span><br/>"""
+              for p in this.points
+                unit = units[p.series.options.yAxis]
+                attribute = unitsAttributes[unit]
+                html += 
+                """
+                <span style="color:#{p.series.color}">\u25CF</span> 
+                #{p.series.name}: <b>#{attribute.formatValue(p.y)}</b><br/>
+                """
+              return html
           yAxis: yAxis
           xAxis:
             type: 'datetime'
@@ -155,9 +168,6 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             name: "#{item.device.name()}: #{item.attribute.label}"
             data: data
             yAxis: y
-            tooltip:
-              valueDecimals: 2
-              valueSuffix: " " + item.attribute.unit     
           }
         )
 

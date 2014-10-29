@@ -159,14 +159,12 @@
 			var factor = opts.factor;
 			// if no factor is given then look it up
 			if(factor === undefined) {
-				console.log(opts.prefixes.map);
 				factor = opts.prefixes.map[opts.prefix];
 			}
 			// if we found a factor use it
 			if(factor !== undefined) {
 				prefix = [opts.prefix, factor];
 			}
-			console.log(opts, prefix);
 		}
 
 		// if no prefix was provided search for the best prefix
