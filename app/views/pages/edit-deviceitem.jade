@@ -5,10 +5,10 @@ div#edit-devicepage(data-role='page')
     form#edit-devicepage-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       .ui-field-contain.has-page-name-input
         label(for='edit-devicepage-name')=__('Name') + ': '
-        input#edit-devicepage-name(placeholder="page-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: pageName, valueUpdate: 'afterkeydown'")
+        input#edit-devicepage-name(placeholder="page-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: pageName")
       .ui-field-contain.has-page-id-input
         label(for='edit-devicepage-id')=__('ID') + ': '
-        input#edit-devicepage-id(placeholder="page-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: pageId, jqmenabled: action() == 'add'")
+        input#edit-devicepage-id(placeholder="page-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: pageId, jqmenabled: action() == 'add'")
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-devicepage-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"

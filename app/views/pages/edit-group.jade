@@ -5,10 +5,10 @@ div#edit-group(data-role='page')
     form#edit-group-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       .ui-field-contain.has-group-name-input
         label(for='edit-group-name')=__('Name') + ': '
-        input#edit-group-name(placeholder="group-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: groupName, valueUpdate: 'afterkeydown'")
+        input#edit-group-name(placeholder="group-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: groupName")
       .ui-field-contain.has-group-id-input
         label(for='edit-group-id')=__('ID') + ': '
-        input#edit-group-id(placeholder="group-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: groupId, jqmenabled: action() == 'add'")
+        input#edit-group-id(placeholder="group-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: groupId, jqmenabled: action() == 'add'")
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-group-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"

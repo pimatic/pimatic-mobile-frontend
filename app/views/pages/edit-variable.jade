@@ -5,7 +5,7 @@ div#edit-variable(data-role='page')
     form#edit-variable-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       .ui-field-contain.has-variable-name-input
         label(for='edit-variable-name')=__('Name') + ': '
-        input#edit-variable-name(placeholder="variable-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: variableName, jqmenabled: action() == 'add'")
+        input#edit-variable-name(placeholder="variable-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: variableName, jqmenabled: action() == 'add'")
       .ui-field-contain
         label(for='select-variable-type')=__('Type') + ': '
         select#select-variable-type(name='select-variable-type', data-bind="jqmselectvalue: variableType")
@@ -14,11 +14,11 @@ div#edit-variable(data-role='page')
       .ui-field-contain
         label(data-bind="text: valueLabelText() + ': '")
         input#edit-varibale-value(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", 
-          data-bind="value: variableValue, attr: {placeholder: (variableType() == 'value' ? 'Number or string in quotes' : 'Numeric expr or string in quotes')}")
+          data-bind="textInput: variableValue, attr: {placeholder: (variableType() == 'value' ? 'Number or string in quotes' : 'Numeric expr or string in quotes')}")
       .ui-field-contain
         label(for='select-variable-type')=__('Unit') + ': '
         input#edit-varibale-unit(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", 
-          data-bind="value: variableUnit, attr: {placeholder: 'Optional'}")
+          data-bind="textInput: variableUnit, attr: {placeholder: 'Optional'}")
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-variable-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"

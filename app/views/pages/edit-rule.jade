@@ -5,16 +5,16 @@ div#edit-rule(data-role='page')
     form#edit-rule-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
       .ui-field-contain
         label.short-label(for='edit-rule-name')=__('Name') + ': '
-        input#edit-rule-name(type="text", placeholder=__('Short description') data-bind="value: ruleName, valueUpdate: 'afterkeydown'")
+        input#edit-rule-name(type="text", placeholder=__('Short description') data-bind="textInput: ruleName")
       .ui-field-contain
         label.short-label(for='edit-rule-name')=__('ID') + ': '
-        input#edit-rule-id(type="text", placeholder="Internal ID" data-bind="value: ruleId, jqmenabled: action() == 'add'")  
+        input#edit-rule-id(type="text", placeholder="Internal ID" data-bind="textInput: ruleId, jqmenabled: action() == 'add'")  
       .ui-field-contain
         label(for='edit-rule-condition')='if'
-        textarea#edit-rule-condition(placeholder="Condition", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleCondition, valueUpdate: 'afterkeydown'")
+        textarea#edit-rule-condition(placeholder="Condition", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleCondition")
       .ui-field-contain
         label(for='edit-rule-actions')='then'
-        textarea#edit-rule-actions(placeholder="Actions", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: ruleActions, valueUpdate: 'afterkeydown'")
+        textarea#edit-rule-actions(placeholder="Actions", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleActions")
       input#edit-rule-active(type='checkbox', name='edit-rule-active', data-bind="jqmchecked: ruleEnabled")
       label(for='edit-rule-active')=__('Enabled')
       input#edit-rule-logging(type='checkbox', name='edit-rule-logging', data-bind="jqmchecked: ruleLogging")

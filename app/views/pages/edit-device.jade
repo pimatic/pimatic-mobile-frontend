@@ -5,10 +5,10 @@ div#edit-device(data-role='page')
     div#edit-device-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false" action="#")
       .ui-field-contain.has-device-name-input
         label(for='edit-device-name')=__('Name') + ': '
-        input#edit-device-name(placeholder="device-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceName, valueUpdate: 'afterkeydown'")
+        input#edit-device-name(placeholder="device-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: deviceName")
       .ui-field-contain.has-device-id-input
         label(for='edit-device-id')=__('ID') + ': '
-        input#edit-device-id(placeholder="device-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="value: deviceId, jqmenabled: action() == 'add'")
+        input#edit-device-id(placeholder="device-id", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: deviceId, jqmenabled: action() == 'add'")
       .ui-field-contain.has-device-id-input
         label(for='edit-device-class')=__('Class') + ': '
         select#select-device-class(name='select-device-class', data-bind="jqmoptions: deviceClasses, value: deviceClass, jqmenabled: action() == 'add'")
