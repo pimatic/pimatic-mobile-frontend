@@ -16,13 +16,13 @@ $(document).on("pagecreate", '#config', (event) ->
       soruce = $(scripts[1]).attr('src')
       $.getScript(soruce, ( data, textStatus, jqxhr ) =>
         container= $('#config-editor')[0]
-        editor = new JSONEditor(container, {
+        @editor = new JSONEditor(container, {
           mode: 'tree',
           modes: ['tree', 'code'] 
         })
         @getConfig()
         @config.subscribe( (value) =>
-          editor.set(value);
+          @editor.set(value);
         )
       )
       
@@ -31,6 +31,13 @@ $(document).on("pagecreate", '#config', (event) ->
         @config(data.config)
         return 
       ).fail(ajaxAlertFail)
+
+    updateConfigClicked: =>
+      try
+        config = @editor.get()
+        pimatic.client.rest.updateConfig(config: config).fail(ajaxAlertFail)
+      catch e
+        alert e
 
   try
     pimatic.pages.config = configPage = new ConfigViewModel()
