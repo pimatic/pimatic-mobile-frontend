@@ -18,7 +18,7 @@ $(document).on("pagecreate", '#config', (event) ->
       scripts.appendTo('head')
       soruce = $(scripts[1]).attr('src')
       $.getScript(soruce, ( data, textStatus, jqxhr ) =>
-        container= $('#config-editor')[0]
+        container = $('#config-editor')[0]
         # capture mode changes
         orgSetMode = JSONEditor.prototype.setMode
         JSONEditor.prototype.setMode = (mode) ->
@@ -30,6 +30,10 @@ $(document).on("pagecreate", '#config', (event) ->
           mode = @mode()
           if mode is 'code'
             @editor?.editor.setReadOnly(@locked())
+            if @locked()
+              $('#config-editor .ace_content').addClass('readonly')
+            else
+              $('#config-editor .ace_content').removeClass('readonly')
           if mode is 'view'
             @editor?.modes = ['tree', 'code']
             unless @locked()
@@ -88,20 +92,23 @@ $(document).on("pagecreate", '#config', (event) ->
       ).fail(ajaxAlertFail)
 
     updateConfigClicked: =>
-      try
-        swal({
-          title: "Are you sure?",
-          text: "pimatic will be restarted after the config was changed!",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Yes",
-        }, =>
+      swal({
+        title: "Are you sure?",
+        text: "pimatic will be restarted after the config was changed!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        closeOnConfirm: false
+      }, =>
+        try
           config = @editor.get()
-          pimatic.client.rest.updateConfig(config: config).fail(ajaxAlertFail)
-          @locked(yes)
-        )
-      catch e
-        alert e
+          pimatic.client.rest.updateConfig(config: config).done( =>
+            swal("Restarting", "Config seems to be valid, restarting...", "success")
+            @locked(yes)
+          ).fail(ajaxAlertFail).fail()
+        catch err
+          swal("Oops...", err, "error")
+      )
 
   try
     pimatic.pages.config = configPage = new ConfigViewModel()
