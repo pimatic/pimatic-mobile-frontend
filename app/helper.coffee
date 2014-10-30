@@ -151,9 +151,7 @@ window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
       message = textStatus
 
   # Give other events time to process
-  setTimeout( ->
-    alert __(message)
-  , 1)
+  swal("Oops...", __(message), "error")
   return true
 
 

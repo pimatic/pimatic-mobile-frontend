@@ -183,7 +183,8 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/jquery.ui.datepicker.js"
               "pimatic-mobile-frontend/app/js/jquery.mobile.datepicker.mod.js"
               "pimatic-mobile-frontend/app/js/jquery.sparkline.js"
-              'pimatic-mobile-frontend/app/js/human-format.js'
+              "pimatic-mobile-frontend/app/js/human-format.js"
+              "pimatic-mobile-frontend/app/js/sweet-alert.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -224,6 +225,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
               "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
               "pimatic-mobile-frontend/app/css/owl.carousel.css"
+              "pimatic-mobile-frontend/app/css/sweet-alert.css"
             ] 
             style: [
               "pimatic-mobile-frontend/app/css/style.css"

@@ -2,8 +2,12 @@ div#config(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
       data-inline='true', data-transition="slidefade", data-direction="reverse")=__('Back')
-    a(data-role='button', data-icon='check', data-iconpos='left', data-bind="click: updateConfigClicked, visible: pimatic.hasPermission('config', 'write')"
-      data-inline='true', data-transition="slidefade", data-direction="reverse")=__('Save')
+    div(data-role="controlgroup", data-type="horizontal", class="ui-mini ui-btn-right")
+      a.ui-btn.ui-btn-inline.ui-btn-icon-left.ui-icon-bars(
+        data-bind="jqmbutton: lockButton(), click: toggleLock, visible: pimatic.hasPermission('config', 'write')" href="")
+      a.ui-btn.ui-btn-inline.ui-btn-icon-left.ui-icon-check(
+        data-bind="click: updateConfigClicked, visible: pimatic.hasPermission('config', 'write') && !$data.locked()"
+        data-transition="slidefade", data-direction="reverse")=__('Save')
     h3=__('Config')
   div.ui-content.overthrow
     div#config-editor()
