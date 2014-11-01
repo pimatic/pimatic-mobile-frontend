@@ -207,7 +207,7 @@ html body .ui-panel-dismiss {
   margin-bottom: 0;
 }
 
-.ui-mobile .ui-page-theme-a #item-lists .ui-first-child{
+.ui-mobile .ui-page-theme-a #item-lists .items > li.ui-first-child{
   padding-top: 8px;
 }
 
