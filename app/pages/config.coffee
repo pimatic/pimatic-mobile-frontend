@@ -62,6 +62,23 @@ $(document).on("pagecreate", '#config', (event) ->
         }
       )
 
+      $.mobile.document.on "pagebeforechange",  (event, data) => 
+        if data.options.fromPage?.is('#config') and (not @locked())
+          swal({
+            title: "Discard all changes?",
+            text: "If you leave the page all unsaved changes will be lost, continue?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Continue",
+            closeOnConfirm: true
+          }, =>
+            @locked(true)
+            $.mobile.pageContainer.pagecontainer("change", data.toPage, {options: data.options})
+          )
+          event.preventDefault()
+          return false
+        return true
+        
     toggleLock: ->
       if @locked()
         swal({
