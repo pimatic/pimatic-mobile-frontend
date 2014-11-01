@@ -112,7 +112,7 @@ class DeviceAttribute
         value.toString()
 
   _getNumberFormat: (value) ->
-    immutable = ['°C', 'K', 'F', '%']
+    immutable = ['°C', 'K', 'F', '%', 'km/h', 'MB', 'GB', 'mbar']
     if (not @unit?) or @unit in immutable
       return {
         num: Math.round(value * 1e2) / 1e2 
