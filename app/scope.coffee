@@ -112,22 +112,22 @@ class DeviceAttribute
         value.toString()
 
   _getNumberFormat: (value) ->
-    immutable = ['°C', 'K', 'F', '%', 'km/h', 'MB', 'GB', 'mbar', 'm³']
-    if (not @unit?) or @unit in immutable
+    supportedUnits = ['B']
+    if @unit in supportedUnits
+      if @displayUnit? and @unit?
+        prefix = @displayUnit.substring(0, @displayUnit.length - @unit.length)
+      else
+        prefix = null
+      info = humanFormat.humanFormatInfo(value, {unit: @unit, prefix})
       return {
-        num: Math.round(value * 1e2) / 1e2 
+        num: info.num
+        unit: info.prefix + info.unit
+      }
+    else
+      return {
+        num: Number(value).toFixed(2)
         unit: @unit or ''
       }
-    if @displayUnit? and @unit?
-      prefix = @displayUnit.substring(0, @displayUnit.length - @unit.length)
-
-    else
-      prefix = null
-    info = humanFormat.humanFormatInfo(value, {unit: @unit, prefix})
-    return {
-      num: info.num
-      unit: info.prefix + info.unit
-    }
 
   formatTime: (time) -> 
     day = Highcharts.dateFormat('%Y-%m-%d', time)
