@@ -219,12 +219,14 @@
       },
 
       onSelect: function (value) {
-        var pre, post, newSubStr;
+        var pre, post, newSubStr, fullText;
         pre = this.getTextFromHeadToCaret();
         post = this.el.value.substring(this.el.selectionEnd);
         pre = this.strategy.replace(pre, value);
-        this.$el.val(pre + post);
+        fullText = pre + post;
+        this.el.value = fullText;
         this.el.focus();
+        this.strategy.change(fullText);
         this.el.selectionStart = this.el.selectionEnd = pre.length;
         this.onKeyup(null, true);
       },

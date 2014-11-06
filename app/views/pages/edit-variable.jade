@@ -14,7 +14,7 @@ div#edit-variable(data-role='page')
       .ui-field-contain
         label(data-bind="text: valueLabelText() + ': '")
         input#edit-varibale-value(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", 
-          data-bind="textInput: variableValue, attr: {placeholder: (variableType() == 'value' ? 'Number or string in quotes' : 'Numeric expr or string in quotes')}")
+          data-bind="textInput: variableValue, attr: {placeholder: (variableType() == 'value' ? 'Number or string' : 'Numeric expr or string in quotes')}")
       .ui-field-contain
         label(for='select-variable-type')=__('Unit') + ': '
         input#edit-varibale-unit(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", 

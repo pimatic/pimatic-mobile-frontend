@@ -130,6 +130,7 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
         textValue = customReplace.call(this, pre, value)
         editRulePage.ruleCondition(textValue)
         return textValue
+      change: (text) -> editRulePage.ruleCondition(text)
       template: customTemplate
     ])
 
@@ -157,6 +158,7 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
         textValue = customReplace.call(this, pre, value)
         editRulePage.ruleActions(textValue)
         return textValue
+      change: (text) -> editRulePage.ruleActions(text)
       template: customTemplate
     ])
   catch e
