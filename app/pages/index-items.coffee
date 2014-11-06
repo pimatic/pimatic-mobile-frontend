@@ -270,7 +270,7 @@ $(document).on( "pagebeforecreate", (event) ->
 
     constructor: (templData, @device) ->
       super(templData, @device)
-      @currentTitle = @device.getAttribute('currentTitle').value;
+      @currentTitle = @device.getAttribute('currentTitle').value
 
       @playButtonIcon = ko.computed( =>
         state = @device.getAttribute('state').value

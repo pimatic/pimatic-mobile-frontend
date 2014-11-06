@@ -125,7 +125,7 @@ class DeviceAttribute
       }
     else
       return {
-        num: Number(value).toFixed(2)
+        num: Math.round(value * 1e2) / 1e2
         unit: @unit or ''
       }
 
