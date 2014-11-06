@@ -11,6 +11,34 @@ ko.mapper.handlers.callback = {
 ko.mapper.handlers.observe = ko.mapper.handlers.value
 
 
+setupUnitPrefixes = ( ->
+
+  siPrefixes = humanFormat.makePrefixes(
+    'y,z,a,f,p,n,µ,m,,k,M,G,T,P,E,Z,Y'.split(','),
+    1e3, # Base.
+    -8   # Exponent for the first value.
+  )
+
+  wPrefixes = humanFormat.makePrefixes(
+    ',k'.split(','),
+    1e3, # Base.
+    0   # Exponent for the first value.
+  )
+
+  mPrefixes = humanFormat.makePrefixes(
+    'm,c,d,'.split(','),
+    10, # Base.
+    -3   # Exponent for the first value.
+  )
+
+  humanFormat.unitPrefixes = {
+    'B': siPrefixes,
+    'W': wPrefixes,
+    'Wh': wPrefixes,
+    'm': mPrefixes
+  }
+)()
+
 class DeviceAttribute 
   @mapping = {
     $default: 'ignore'
@@ -112,13 +140,16 @@ class DeviceAttribute
         value.toString()
 
   _getNumberFormat: (value) ->
-    supportedUnits = ['B']
-    if @unit in supportedUnits
+    if @unit in Object.keys(humanFormat.unitPrefixes)
       if @displayUnit? and @unit?
         prefix = @displayUnit.substring(0, @displayUnit.length - @unit.length)
       else
         prefix = null
-      info = humanFormat.humanFormatInfo(value, {unit: @unit, prefix})
+      info = humanFormat.humanFormatInfo(value, {
+        unit: @unit
+        prefixes: humanFormat.unitPrefixes[@unit]
+        prefix
+      })
       return {
         num: info.num
         unit: info.prefix + info.unit
