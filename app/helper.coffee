@@ -113,8 +113,18 @@ $(document).ready =>
     window.applicationCache.addEventListener 'updateready', (e) =>
       if window.applicationCache.status is window.applicationCache.UPDATEREADY 
         window.applicationCache.swapCache()
-        if confirm('A new version of this site is available. Load it?')
+        swal({
+          title: 'Reload?'
+          text: 'A new version of the frontend is available. Load it?'
+          type: "info"
+          showCancelButton: true
+          cancelButtonText:  "Not right now..."
+          confirmButtonText: "Reload!"
+          closeOnConfirm: false 
+        }, -> 
+          swal("Reloading!", "Reloading app, please wait.", "success")
           window.location.reload()
+        )
     , false
 , false
 
