@@ -17,6 +17,7 @@ module.exports = (env) ->
   global.i18n = env.require('i18n')
   global.__ = i18n.__
   _ = env.require 'lodash'
+  crypto = require 'crypto'
 
   # * own
   # socketIo = require 'socket.io'
@@ -57,10 +58,10 @@ module.exports = (env) ->
         res.sendfile(certFile)
 
       @framework.on 'after init', (context)=>
-        # and then setup the assets and manifest
         finished = Promise.resolve().then( =>
+          # and then setup the assets and manifest
           try
-            @setupAssetsAndManifest()
+            assets = @setupAssets()
           catch e
             env.logger.error "Error setting up assets in mobile-frontend: #{e.message}"
             env.logger.debug e.stack
@@ -82,8 +83,11 @@ module.exports = (env) ->
             return @renderIndex().then( (html) =>
               indexFile = __dirname + '/public/index.html'
               fs.writeFileAsync(indexFile, html)
+              @setupManifest(assets, html)
             )
-          )
+          
+        )
+
         context.waitForIt finished
         return
 
@@ -122,11 +126,11 @@ module.exports = (env) ->
               env.logger.error "Could not add page: #{page} unknown extension."
               Promise.resolve ""
 
-      Promise.all(awaitingRenders).then( (htmlPages) =>
+      return Promise.all(awaitingRenders).then( (htmlPages) =>
         renderOptions.additionalPages = _.reduce htmlPages, (html, page) => html + page
         layout = path.resolve __dirname, 'app/views/layout.jade' 
         env.logger.debug("rendering: #{layout}") if @config.debug
-        jade.renderFileAsync(layout, renderOptions).then( (html) =>
+        return jade.renderFileAsync(layout, renderOptions).then( (html) =>
           env.logger.info "rendering html finished"
           return html
         )
@@ -139,8 +143,7 @@ module.exports = (env) ->
         "the pimatic 'after init' event."
       @additionalAssetFiles[type].push file
 
-    setupAssetsAndManifest: () ->
-
+    setupAssets: () ->
       parentDir = path.resolve __dirname, '..'
 
       themeCss = (
@@ -267,7 +270,6 @@ module.exports = (env) ->
         '/',
         '/socket.io/socket.io.js'
         '/api/decl-api-client.js'
-        "/worker-json.js"
       ]
       for f in fs.readdirSync  __dirname + '/public/assets'
         assets.push "/assets/#{f}"
@@ -289,6 +291,17 @@ module.exports = (env) ->
           return req.url.match(/^\/assets\/.*$/)?
         )
 
+      if @config.mode is "development"
+        # then serve the files directly
+        @app.use nap.middleware
+
+      # * Static assets
+      @app.use express.static(__dirname + "/public")
+
+      return assets
+
+    setupManifest: (assets, indexHtml)->
+      parentDir = path.resolve __dirname, '..'
       # When the config mode 
       manifest = (switch @config.mode 
         # is production
@@ -306,6 +319,10 @@ module.exports = (env) ->
             else mobilefrontentLastupdate
           ) 
 
+          md5 = crypto.createHash('md5')
+          md5.update indexHtml
+          indexMD5 = md5.digest('hex')
+
           renderManifest = require "render-appcache-manifest"
           # function to create the app manifest
           createAppManifest = =>
@@ -315,14 +332,13 @@ module.exports = (env) ->
               network: ['*']
               fallback: []
               lastModified: lastModified
+              comment: indexMD5
             )
           # Save the manifest. We don't need to generate it each request, because
           # files shouldn't change in production mode
           manifest = createAppManifest()
         # if we are in development mode
         when "development"
-          # then serve the files directly
-          @app.use nap.middleware
           # and cache nothing
           manifest = """
             CACHE MANIFEST
@@ -332,10 +348,7 @@ module.exports = (env) ->
         else 
           env.logger.error "Unknown mode: #{@config.mode}!"
           ""
-      )
-
-      # * Static assets
-      @app.use express.static(__dirname + "/public")
+        )
 
       # If the app manifest is requested
       @app.get "/application.manifest", (req, res) =>
