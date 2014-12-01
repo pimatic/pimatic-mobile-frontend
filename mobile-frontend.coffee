@@ -293,6 +293,19 @@ module.exports = (env) ->
       manifest = (switch @config.mode 
         # is production
         when "production"
+          pimaticLastUpdate = fs.statSync(
+            "#{parentDir}/pimatic/package.json"
+          ).mtime
+          mobilefrontentLastupdate = fs.statSync(
+            "#{parentDir}/pimatic-mobile-frontend/package.json"
+          ).mtime
+
+          lastModified = (
+            if pimaticLastUpdate > mobilefrontentLastupdate
+            then pimaticLastUpdate
+            else mobilefrontentLastupdate
+          ) 
+
           renderManifest = require "render-appcache-manifest"
           # function to create the app manifest
           createAppManifest = =>
@@ -301,7 +314,7 @@ module.exports = (env) ->
               cache: assets
               network: ['*']
               fallback: []
-              lastModified: new Date()
+              lastModified: lastModified
             )
           # Save the manifest. We don't need to generate it each request, because
           # files shouldn't change in production mode
