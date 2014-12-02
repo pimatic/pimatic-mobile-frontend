@@ -256,6 +256,8 @@ $(document).on("pagecreate", '#graph-page', (event) ->
                     if last? then data.push [time, last]
                     last = value
                     data.push [time, value]
+                  if (not hasMore) and last?
+                    data.push [to.getTime(), last]
               else
                 data = ([time, value] for {time, value} in events)
 
