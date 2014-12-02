@@ -169,7 +169,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             name: "#{item.device.name()}: #{item.attribute.label}"
             data: data
             yAxis: y
-            type: (if item.attribute.discrete then "line" else "spline")
+            step: item.attribute.discrete
           }
         )
 
@@ -245,22 +245,8 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               text: __("Loading data for #{item.device.name()}: #{item.attribute.label}")
               blocking: no
             })
-            loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>
-              if item.attribute.discrete
-                # data is discrete, because highstockjs does not support discrete data
-                # we have to add aditional points to the data set
-                data = []
-                if events.length > 0
-                  last = (if allData.length > 0 then allData[allData.length-1] else null)
-                  for {time, value} in events
-                    if last? then data.push [time, last]
-                    last = value
-                    data.push [time, value]
-                  if (not hasMore) and last?
-                    data.push [to.getTime(), last]
-              else
-                data = ([time, value] for {time, value} in events)
-
+            loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>          
+              data = ([time, value] for {time, value} in events)
               unless item.added
                 addSeriesToChart(item, data)
               else
@@ -428,10 +414,6 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
             {from, to} = page.getDateRange()
             if firstPoint[0] < from.getTime()
               shift = yes
-
-          if item.attribute.discrete and item.data.length > 0
-            last = item.data[item.data.length-1]
-            serie.addPoint([point[0], last[1]], redraw=no, shift, animate=false)
           serie.addPoint(point, redraw=yes, shift, animate=yes)
           pimatic.showToast __('%s: %s value: %s',
             item.device.name(),
