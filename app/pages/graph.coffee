@@ -141,6 +141,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               year: '%Y'
             tickPixelInterval: 40
             labels : { y : 20, rotation: -30, align: 'right' }
+            ordinal: false
           rangeSelector:
             enabled: no
           credits:
@@ -168,6 +169,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             name: "#{item.device.name()}: #{item.attribute.label}"
             data: data
             yAxis: y
+            type: (if item.attribute.discrete then "line" else "spline")
           }
         )
 
@@ -244,7 +246,19 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               blocking: no
             })
             loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>
-              data = ([time, value] for {time, value} in events)
+              if item.attribute.discrete
+                # data is discrete, because highstockjs does not support discrete data
+                # we have to add aditional points to the data set
+                data = []
+                if events.length > 0
+                  last = (if allData.length > 0 then allData[allData.length-1] else null)
+                  for {time, value} in events
+                    if last? then data.push [time, last]
+                    last = value
+                    data.push [time, value]
+              else
+                data = ([time, value] for {time, value} in events)
+
               unless item.added
                 addSeriesToChart(item, data)
               else
@@ -412,7 +426,10 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
             {from, to} = page.getDateRange()
             if firstPoint[0] < from.getTime()
               shift = yes
-          #console.log serie.options.id, "addPoint", point, yes, shift, yes
+
+          if item.attribute.discrete and item.data.length > 0
+            last = item.data[item.data.length-1]
+            serie.addPoint([point[0], last[1]], redraw=no, shift, animate=false)
           serie.addPoint(point, redraw=yes, shift, animate=yes)
           pimatic.showToast __('%s: %s value: %s',
             item.device.name(),

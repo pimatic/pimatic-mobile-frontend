@@ -53,6 +53,7 @@ class DeviceAttribute
     lastUpdate: 'observe'
     displaySparkline: 'observe'
     displayUnit: 'copy'
+    discrete: 'copy'
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
