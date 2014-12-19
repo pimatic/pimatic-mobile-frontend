@@ -1338,3 +1338,24 @@ border-bottom-left-radius: inherit;
 #config-editor .readonly{
   opacity: 0.7;
 }
+
+#item-lists, .owl-wrapper-outer, .owl-wrapper,  .owl-item {
+  height: 100%;
+  margin: 0;
+  border: none;
+  display: block;  
+}
+
+.owl-item { 
+  overflow: auto;
+}
+
+#item-lists {
+  margin-top: -36px;
+}
+
+.owl-item {
+  padding-top: 38px;
+}
+
+
