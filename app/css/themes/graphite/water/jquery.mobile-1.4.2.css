@@ -927,31 +927,34 @@ html .ui-alt-icon .ui-radio-off:after {
 /* Swatches */
 /* A
 -----------------------------------------------------------------------------------------------------------*/
+/*Flipswitch off Background*/
 /* Bar: Toolbars, dividers, slider track */
 .ui-bar-a,
 .ui-page-theme-a .ui-bar-inherit,
 html .ui-bar-a .ui-bar-inherit,
 html .ui-body-a .ui-bar-inherit,
 html body .ui-group-theme-a .ui-bar-inherit {
-	background-color: 			#007dcd /*{a-bar-background-color}*/;
-	border-color:	 		#005994 /*{a-bar-border}*/;
-	color: 					#fff /*{a-bar-color}*/;
-	text-shadow: 0 /*{a-bar-shadow-x}*/ 0px /*{a-bar-shadow-y}*/ 0 /*{a-bar-shadow-radius}*/ 	#eee /*{a-bar-shadow-color}*/;
+	background-color: #171717 /*{a-bar-background-color}*/;
+	border-color: #005994 /*{a-bar-border}*/;
+	color: #c4c4c4 /*{a-bar-color}*/;
+	text-shadow: 0 /*{a-bar-shadow-x}*/ 0px /*{a-bar-shadow-y}*/ 0 /*{a-bar-shadow-radius}*/ 0 /*{a-bar-shadow-color}*/;
 	font-weight: bold;
 }
 .ui-bar-a {
 	border-width: 1px;
 	border-style: solid;
 }
+/*Main Background*/
 /* Page and overlay */
 .ui-overlay-a,
 .ui-page-theme-a,
 .ui-page-theme-a .ui-panel-wrapper {
-	background-color: 			#eee /*{a-page-background-color}*/;
-	border-color:	 		#bbb /*{a-page-border}*/;
-	color: 					#333 /*{a-page-color}*/;
-	text-shadow: 0px /*{a-page-shadow-x}*/ 0px /*{a-page-shadow-y}*/ 0px /*{a-page-shadow-radius}*/ 	#f3f3f3 /*{a-page-shadow-color}*/;
+	background-color: #171717 /*{a-page-background-color}*/;
+	border-color: #262626 /*{a-page-border}*/;
+	color: #C4C4C4 /*{a-page-color}*/;
+	text-shadow: 0 /*{a-page-shadow-x}*/ 0px /*{a-page-shadow-y}*/ 0 /*{a-page-shadow-radius}*/ 0 /*{a-page-shadow-color}*/;
 }
+/*Device List Background*/
 /* Body: Read-only lists, text inputs, collapsible content */
 .ui-body-a,
 .ui-page-theme-a .ui-body-inherit,
@@ -959,10 +962,10 @@ html .ui-bar-a .ui-body-inherit,
 html .ui-body-a .ui-body-inherit,
 html body .ui-group-theme-a .ui-body-inherit,
 html .ui-panel-page-container-a {
-	background-color: 			#fff /*{a-body-background-color}*/;
-	border-color:	 		#ddd /*{a-body-border}*/;
-	color: 					#333 /*{a-body-color}*/;
-	text-shadow: 0 /*{a-body-shadow-x}*/ 0px /*{a-body-shadow-y}*/ 0 /*{a-body-shadow-radius}*/ 	#f3f3f3 /*{a-body-shadow-color}*/;
+	background-color: #212121 /*{a-body-background-color}*/;
+	border-color: #151515 /*{a-body-border}*/;
+	color: #c4c4c4 /*{a-body-color}*/;
+	text-shadow: 0 /*{a-body-shadow-x}*/ 0px /*{a-body-shadow-y}*/ 0 /*{a-body-shadow-radius}*/ 0 /*{a-body-shadow-color}*/;
 }
 .ui-body-a {
 	border-width: 1px;
@@ -1004,12 +1007,12 @@ html head + body .ui-btn.ui-btn-a,
 .ui-page-theme-a .ui-btn:visited,
 html .ui-bar-a .ui-btn:visited,
 html .ui-body-a .ui-btn:visited,
-html body .ui-group-theme-a .ui-btn:visited,
+html body .ui-group-theme-a .ui-btn:visited, 
 html head + body .ui-btn.ui-btn-a:visited {
-	background-color: 			#fff /*{a-bup-background-color}*/;
-	border-color:	 		#ccc /*{a-bup-border}*/;
-	color: 					#000 /*{a-bup-color}*/;
-	text-shadow: 0 /*{a-bup-shadow-x}*/ 0px /*{a-bup-shadow-y}*/ 0 /*{a-bup-shadow-radius}*/ #f3f3f3 /*{a-bup-shadow-color}*/;
+	background-color: 			#202020 /*{a-bup-background-color}*/;
+	border-color:	 		#151515 /*{a-bup-border}*/;
+	color: 					#ffffff /*{a-bup-color}*/;
+	text-shadow: 0 /*{a-bup-shadow-x}*/ 0px /*{a-bup-shadow-y}*/ 0 /*{a-bup-shadow-radius}*/ #151515 /*{a-bup-shadow-color}*/;
 }
 /* Button hover */
 .ui-page-theme-a .ui-btn:hover,
@@ -1019,8 +1022,8 @@ html body .ui-group-theme-a .ui-btn:hover,
 html head + body .ui-btn.ui-btn-a:hover {
 	background-color: 			#0093EA /*{a-bhover-background-color}*/;
 	border-color:	 		#007dcd /*{a-bhover-border}*/;
-	color: 					#fff /*{a-bhover-color}*/;
-	text-shadow: 0 /*{a-bhover-shadow-x}*/ 0px /*{a-bhover-shadow-y}*/ 0 /*{a-bhover-shadow-radius}*/ #f3f3f3 /*{a-bhover-shadow-color}*/;
+	color: 					#ffffff /*{a-bhover-color}*/;
+	text-shadow: 0 /*{a-bhover-shadow-x}*/ 0px /*{a-bhover-shadow-y}*/ 0 /*{a-bhover-shadow-radius}*/ #151515 /*{a-bhover-shadow-color}*/;
 }
 /* Button down */
 .ui-page-theme-a .ui-btn:active,
@@ -1029,8 +1032,8 @@ html .ui-body-a .ui-btn:active,
 html body .ui-group-theme-a .ui-btn:active,
 html head + body .ui-btn.ui-btn-a:active {
 	background-color: 			#007dcd /*{a-bdown-background-color}*/;
-	border-color:	 		#ddd /*{a-bdown-border}*/;
-	color: 					#333 /*{a-bdown-color}*/;
+	border-color:	 		#151515 /*{a-bdown-border}*/;
+	color: 					#ffffff /*{a-bdown-color}*/;
 	text-shadow: 0 /*{a-bdown-shadow-x}*/ 0px /*{a-bdown-shadow-y}*/ 0 /*{a-bdown-shadow-radius}*/ #000 /*{a-bdown-shadow-color}*/;
 }
 /* Active button */
@@ -1059,7 +1062,7 @@ html body .ui-group-theme-a .ui-slider-track .ui-btn-active,
 html body div.ui-slider-track.ui-body-a .ui-btn-active {
 	background-color: 		#007dcd /*{a-active-background-color}*/;
 	border-color:	 		#007dcd /*{a-active-border}*/;
-	color: 					#fff /*{a-active-color}*/;
+	color: 					#ffffff /*{a-active-color}*/;
 	text-shadow: 0 /*{a-active-shadow-x}*/ 0px /*{a-active-shadow-y}*/ 0 /*{a-active-shadow-radius}*/ #005599 /*{a-active-shadow-color}*/;
 }
 /* Active radio button icon */

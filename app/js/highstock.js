@@ -1242,7 +1242,7 @@ defaultLabelOptions = {
 		return this.value;
 	},*/
 	style: {
-		color: '#606060',
+		color: '#C0C0C0',
 		cursor: 'default',
 		fontSize: '11px'
 	}
@@ -1297,9 +1297,9 @@ defaultOptions = {
 		//	fontFamily: '"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif', // default font
 		//	fontSize: '12px'
 		//},
-		backgroundColor: '#FFFFFF',
+		backgroundColor: '#212121',
 		//plotBackgroundColor: null,
-		plotBorderColor: '#C0C0C0',
+		plotBorderColor: '#828282',
 		//plotBorderWidth: 0,
 		//plotShadow: false,
 		//zoomType: ''
@@ -1325,7 +1325,7 @@ defaultOptions = {
 		// verticalAlign: 'top',
 		// y: null,
 		style: {
-			color: '#333333',
+			color: '#151515',
 			fontSize: '18px'
 		}
 
@@ -1450,7 +1450,7 @@ defaultOptions = {
 			return this.name;
 		},
 		//borderWidth: 0,
-		borderColor: '#909090',
+		borderColor: '#151515',
 		borderRadius: 0,
 		navigation: {
 			// animation: true,
@@ -1467,7 +1467,7 @@ defaultOptions = {
 			padding: '5px'
 		},*/
 		itemStyle: {			
-			color: '#333333',
+			color: '#C5C5C5',
 			fontSize: '12px',
 			fontWeight: 'bold'
 		},
@@ -1540,7 +1540,7 @@ defaultOptions = {
 		//shared: false,
 		snap: isTouchDevice ? 25 : 10,
 		style: {
-			color: '#333333',
+			color: '#151515',
 			cursor: 'default',
 			fontSize: '12px',
 			padding: '8px',
@@ -6251,7 +6251,7 @@ Axis.prototype = {
 			year: '%Y'
 		},
 		endOnTick: false,
-		gridLineColor: '#C0C0C0',
+		gridLineColor: '#171717',
 		// gridLineDashStyle: 'solid',
 		// gridLineWidth: 0,
 		// reversed: false,
@@ -19533,7 +19533,7 @@ extend(defaultOptions, {
 				zIndex: 2 // #1839
 			},
 			id: PREFIX + 'navigator-series',
-			lineColor: '#4572A7',
+			lineColor: '#7CB5EC',
 			lineWidth: 1,
 			marker: {
 				enabled: false

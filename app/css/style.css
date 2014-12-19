@@ -191,13 +191,13 @@ html body .ui-panel-dismiss {
 }
 
 .ui-mobile .ui-page-theme-a #item-lists .ui-li-divider {
-  border-color: #ddd;
+  border-color: #151515;
   border-bottom: 2px solid #005994;
 }
 
 .ui-mobile .ui-page-theme-a .ui-li-divider,
 .ui-mobile .ui-page-theme-a .ui-li-divider label{
-  background: #fff;
+  background: #171717;
   color: #005994;
   font-weight: bold !important;
   text-shadow: none;
@@ -303,12 +303,12 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 #index div.ui-flipswitch .ui-flipswitch-on {
-  color: #FFF;
+  color: #c4c4c4;
   font-weight: bold;
 }
 
 #index div.ui-flipswitch .ui-flipswitch-off {
-  color: #000;
+  color: #808080;
   font-weight: bold;
 }
 
@@ -365,7 +365,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 #rules li a{
   font-weight: normal;
-  color: #333;
+  color: #C4C4C4;
 }
 
 #rules li a p{
@@ -402,7 +402,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #variables #add-a-variable a
 #devicepages #add-a-devicepage a{
   font-weight: normal;
-  color: #000;
+  color: #C4C4C4;
 }
 
 /*#index .ui-content .ui-listview {
@@ -474,13 +474,13 @@ html.ui-mobile body .delete-link:visited,
 html.ui-mobile body .delete-link.ui-btn.ui-btn-active{
   background-color: #cc2929;
   border-color: #AA0000;
-  color: #fff;
+  color: #c4c4c4;
 }
 
 html.ui-mobile body .delete-link:hover {
   background-color: #CC0000;
   border-color: #AA0000;
-  color: #fff;
+  color: #C4C4C4;
 }
 
 .dark-background {
@@ -498,7 +498,6 @@ html.ui-mobile body .delete-link:hover {
   border-style: dashed;
   border-width: 1px;
   background-color: rgb(51, 51, 51);
-  border-color: rgb(204, 204, 204);
 }
 
 #rules li.sortable-placeholder{
@@ -594,7 +593,7 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
 
 
 table#events-table {
-  background: #fff;
+  background: #212121;
   width: 100%;
 }
 
@@ -610,7 +609,7 @@ table#events-table {
    
   #events-table tbody tr,
   #events-table thead tr {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #151515;
   }
   
   #events-table thead tr {
@@ -711,7 +710,7 @@ table#events-table {
 }
 
 #log-messages .tags {
-  color: #0e1b52;
+  color: #0073BD;
 }
 
 .level.info {
@@ -792,7 +791,7 @@ table#events-table {
 }
 
 #rules li.rule.deactivated a{
-  color: #A0A0A0;
+  color: #171717;
 }
 
 #rules li.rule a .name {
@@ -878,14 +877,14 @@ li.with-button a.ui-btn {
 #variables .variable .var-name,
 #variables .variable .var-value {
   font-weight: bold;
-  color: #333;
+  color: #C4C4C4;
 }
 
 
 #variables .variable .var-type,
 #variables .variable .var-expression {
   font-weight: normal;
-  color: #333;
+  color: #C4C4C4;
 }
 
 #variables .variable .var-type {
@@ -908,7 +907,7 @@ li.with-button a.ui-btn {
 }
 
 #nav-panel {
-  background-color: #FFF;
+  background-color: #171717;
 }
 
 #nav-panel a,
@@ -961,7 +960,7 @@ li.with-button a.ui-btn {
 @media (min-width: 60em) {
 
   .locked #item-lists {
-    background: #fff;
+    background: #171717;
     padding-top: 5px;
     padding-bottom: 5px;
   }
@@ -984,7 +983,7 @@ li.with-button a.ui-btn {
     padding-bottom: 2px;
     margin-bottom: 4px;
   }
-  
+  /*Desktop Device List*/
   .locked .items .no-header {
     overflow: visible;
     border-radius: 2px;
@@ -994,11 +993,12 @@ li.with-button a.ui-btn {
     width: 46.4%;
     margin-left: 0;
     margin-right: 0;
-    border: 1px solid #ccc !important;
+    border: 1px solid #171717 !important;
+    border-radius: 5px;
     margin-left: 1%;
+
     margin-top: 0.4%;
     margin-bottom: 0.4%;
-    box-shadow: 0 0 2px 2px rgb(247, 247, 247);
   }
   
   .locked .items .ui-first-child {
@@ -1049,7 +1049,7 @@ li.with-button a.ui-btn {
 
 .graph-device-attribute  div.controls .ui-btn-inline{
   margin: 2px;
-  color: black;
+  color: #c4c4c4;
   font-weight: bold;
 }
 
@@ -1087,13 +1087,14 @@ li.item .attributes .outOfDate {
   display: inline-block;
   vertical-align: middle;
   width: 88px;
-  border-color:     #ccc /*{a-bup-border}*/;
+
+  border-color:     #151515 /*{a-bup-border}*/;
 }
 
 #graph-page #chart-container .ui-input-text input{
   padding-top: 0.50em;
   padding-bottom: 0.50em;
-  background: white;
+  background-color: #202020;
 }
 
 @media (max-width:28em) {
@@ -1183,9 +1184,9 @@ html body.flat .ui-group-theme-a .ui-bar-inherit {
     -webkit-border-radius:        3em;
   border-radius:            3em;
     border: none; /*{a-bar-background-color}*/;
-  -webkit-box-shadow: 0px 0px 0px 2px rgba(0,125,205,1);
-  -moz-box-shadow: 0px 0px 0px 2px rgba(0,125,205,1);
-  box-shadow: 0px 0px 0px 2px rgba(0,125,205,1);
+  -webkit-box-shadow: 0px 0px 0px 2px rgba(33,33,33,1);
+  -moz-box-shadow: 0px 0px 0px 2px rgba(33,33,33,1);
+  box-shadow: 0px 0px 0px 2px rgba(33,33,33,1);
 }
 
 .flat .ui-slider-handle {
