@@ -28,7 +28,8 @@
   "dependencies": {
     "jade": "1.1.4",
     "nap": "0.8.0",
-    "render-appcache-manifest": "0.3.0"
+    "render-appcache-manifest": "0.3.0",
+    "jqmthemer": "pimatic/jqmthemer"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"

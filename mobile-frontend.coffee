@@ -22,6 +22,7 @@ module.exports = (env) ->
   # * own
   # socketIo = require 'socket.io'
   global.nap = require 'nap'
+  jqmthemer = require 'jqmthemer'
 
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
@@ -56,6 +57,8 @@ module.exports = (env) ->
       app.get '/root-ca-cert.crt', (req, res) =>
         res.setHeader('content-type', 'application/x-x509-ca-cert')
         res.sendfile(certFile)
+
+      @setupThemes()
 
       @framework.on 'after init', (context)=>
         finished = Promise.resolve().then( =>
@@ -221,9 +224,9 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/jsonlint.js"
             ]
           css:
-            theme: [
+            base: [
               "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
-            ] .concat themeCss .concat [
+            # ] .concat themeCss .concat [
               "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
               "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
@@ -299,6 +302,30 @@ module.exports = (env) ->
       @app.use express.static(__dirname + "/public")
 
       return assets
+
+    createThemeCss: (themeName) ->
+      theme = require "./themes/#{themeName}"
+      # concate all css
+      cssFiles = theme.css
+      return Promise.map(cssFiles, (cssFile) =>
+        return fs.readFileAsync(__dirname + "/#{cssFile}")
+      ).reduce( (fullCss, css) =>
+        fullCss += css;
+      ).then( (css) ->
+        return jqmthemer.themeCss theme, css 
+      )
+
+    setupThemes: () ->
+      @app.get "/theme/:themeBase/:themeSub.css", (req, res) =>
+        @createThemeCss(req.params.themeBase + "/" + req.params.themeSub).then( (css) =>
+          # then deliver it
+          res.statusCode = 200
+          res.setHeader "content-type", "text/css"
+          res.setHeader "content-length", Buffer.byteLength(css)
+          res.end css
+        ).done()
+
+
 
     setupManifest: (assets, indexHtml)->
       parentDir = path.resolve __dirname, '..'
