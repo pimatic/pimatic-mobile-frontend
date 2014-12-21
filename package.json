@@ -26,10 +26,11 @@
     "render-appcache-manifest"
   ],
   "dependencies": {
+    "colour.js": "^1.5.2",
     "jade": "1.1.4",
+    "jqmthemer": "pimatic/jqmthemer",
     "nap": "0.8.0",
-    "render-appcache-manifest": "0.3.0",
-    "jqmthemer": "pimatic/jqmthemer"
+    "render-appcache-manifest": "0.3.0"
   },
   "peerDependencies": {
     "pimatic": "0.8.*"

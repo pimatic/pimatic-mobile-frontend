@@ -35,6 +35,11 @@ module.exports = (env) ->
     # ###init the frontend:
     init: (@app, @framework, @config) ->
 
+      if @config.theme in ["aloe", "candy", "melon", "mint", "royal", "sand", "slate", "water"]
+        @config.theme = "graphite/#{@config.theme}"
+      if @config.theme is "classic"
+        @config.theme = "jqm/#{@config.theme}" 
+      
       app.post('/client-error', (req, res) =>
         error = req.body.error
         env.logger.error("Client error:", error.message)
@@ -104,6 +109,7 @@ module.exports = (env) ->
         headerSwatch: 'a'
         dividerSwatch: 'a'
         menuSwatch: 'f'
+        fullName: @config.theme
       }
 
       renderOptions = {
@@ -234,7 +240,6 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/css/sweet-alert.css"
             ] 
             style: [
-              "pimatic-mobile-frontend/app/css/style.css"
               "pimatic-mobile-frontend/app/css/jqm-icon-pack-fa.css"
             ] .concat @additionalAssetFiles['css']
             editor: [
@@ -285,7 +290,8 @@ module.exports = (env) ->
         return (
           req.url.match(/^\/socket\.io\/.*$/)? or 
           (req.url in assets) or 
-          (req.url is '/application.manifest')
+          (req.url is '/application.manifest') or
+          req.url.match(/^\/theme\/.*\.css$/)? 
         )
       )
 
@@ -306,7 +312,9 @@ module.exports = (env) ->
     createThemeCss: (themeName) ->
       theme = require "./themes/#{themeName}"
       # concate all css
-      cssFiles = theme.css
+      cssFiles = _.clone(theme.css)
+      cssFiles.push "app/css/style.css"
+      cssFiles = cssFiles.concat theme.extraCss
       return Promise.map(cssFiles, (cssFile) =>
         return fs.readFileAsync(__dirname + "/#{cssFile}")
       ).reduce( (fullCss, css) =>
@@ -317,15 +325,34 @@ module.exports = (env) ->
 
     setupThemes: () ->
       @app.get "/theme/:themeBase/:themeSub.css", (req, res) =>
-        @createThemeCss(req.params.themeBase + "/" + req.params.themeSub).then( (css) =>
-          # then deliver it
+        themeBase = req.params.themeBase
+        themeSub = req.params.themeSub
+        themeFullName = "#{themeBase}/#{themeSub}"
+        cachePath = __dirname + "/public/theme-#{themeBase}-#{themeSub}.css"
+        
+        serveTheme = (css) ->
           res.statusCode = 200
           res.setHeader "content-type", "text/css"
           res.setHeader "content-length", Buffer.byteLength(css)
           res.end css
-        ).done()
 
-
+        if @mode is "production"
+          fs.readFileAsync(cachePath)
+            .then( (css) -> serveTheme(css.toString()) )
+            .catch( (error) =>
+              if error.code is 'ENOENT' 
+                return @createThemeCss(themeFullName).then( (css) ->
+                  fs.writeFileAsync(cachePath).then( ->
+                    serveTheme(css)
+                  )
+                )
+              else
+                throw error
+            )
+            .done()
+        else
+          # always rerender theme in production mode
+          @createThemeCss(themeFullName).then( (css) -> serveTheme(css) ).done()
 
     setupManifest: (assets, indexHtml)->
       parentDir = path.resolve __dirname, '..'

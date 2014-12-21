@@ -1,0 +1,93 @@
+.locked .items .no-header {
+  box-shadow: none;
+}
+
+/*Flipswitch off Background*/
+ /* Bar: Toolbars, dividers, slider track */
+.ui-bar-a,
+.ui-page-theme-a .ui-bar-inherit,
+html .ui-bar-a .ui-bar-inherit,
+html .ui-body-a .ui-bar-inherit,
+html body .ui-group-theme-a .ui-bar-inherit {
+  text-shadow: none;
+}
+
+/*Main Background*/
+/* Page and overlay */
+.ui-overlay-a,
+.ui-page-theme-a,
+.ui-page-theme-a .ui-panel-wrapper {
+  text-shadow: none;
+}
+
+/*Device List Background*/
+/* Body: Read-only lists, text inputs, collapsible content */
+.ui-body-a,
+.ui-page-theme-a .ui-body-inherit,
+html .ui-bar-a .ui-body-inherit,
+html .ui-body-a .ui-body-inherit,
+html body .ui-group-theme-a .ui-body-inherit,
+html .ui-panel-page-container-a {
+  text-shadow: none;
+}
+
+ /* Button up */
+ .ui-page-theme-a .ui-btn,
+ html .ui-bar-a .ui-btn,
+ html .ui-body-a .ui-btn,
+ html body .ui-group-theme-a .ui-btn,
+ html head + body .ui-btn.ui-btn-a,
+ /* Button visited */
+ .ui-page-theme-a .ui-btn:visited,
+ html .ui-bar-a .ui-btn:visited,
+ html .ui-body-a .ui-btn:visited,
+ html body .ui-group-theme-a .ui-btn:visited, 
+ html head + body .ui-btn.ui-btn-a:visited {
+  text-shadow: none;
+ }
+
+ /* Slider track */
+.flat .ui-slider-track.ui-corner-all,
+/* Flipswitch */
+.flat .ui-flipswitch.ui-corner-all { 
+  background-color: #151515;
+  box-shadow: none;
+}
+
+#index div.ui-flipswitch .ui-flipswitch-on,
+#index div.ui-slider .ui-slider-handle {
+  background: #323232;
+  border-color: #151515;
+}
+
+/* Active button */
+.ui-page-theme-a .ui-btn.ui-btn-active,
+html .ui-bar-a .ui-btn.ui-btn-active,
+html .ui-body-a .ui-btn.ui-btn-active,
+html body .ui-group-theme-a .ui-btn.ui-btn-active,
+html head + body .ui-btn.ui-btn-a.ui-btn-active,
+/* Active checkbox icon */
+.ui-page-theme-a .ui-checkbox-on:after,
+html .ui-bar-a .ui-checkbox-on:after,
+html .ui-body-a .ui-checkbox-on:after,
+html body .ui-group-theme-a .ui-checkbox-on:after,
+.ui-btn.ui-checkbox-on.ui-btn-a:after,
+/* Active flipswitch background */
+.ui-page-theme-a .ui-flipswitch.ui-flipswitch-active,
+html .ui-bar-a .ui-flipswitch.ui-flipswitch-active,
+html .ui-body-a .ui-flipswitch.ui-flipswitch-active,
+html body .ui-group-theme-a .ui-flipswitch.ui-flipswitch-active,
+html body .ui-flipswitch.ui-bar-a.ui-flipswitch-active,
+/* Active slider track */
+.ui-page-theme-a .ui-slider-track .ui-btn-active,
+html .ui-bar-a .ui-slider-track .ui-btn-active,
+html .ui-body-a .ui-slider-track .ui-btn-active,
+html body .ui-group-theme-a .ui-slider-track .ui-btn-active,
+html body div.ui-slider-track.ui-body-a .ui-btn-active {
+  background-color: #007dcd /*{a-active-background-color}*/;
+}
+
+li.sortable .handle .ui-icon:after,
+li .edit-handle .ui-icon:after{
+  background-color: white;
+}

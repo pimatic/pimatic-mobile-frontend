@@ -256,3 +256,23 @@ TraceKit.report.subscribe( (errorReport) =>
   )
 )
 
+# theme stuff
+pimatic.changeTheme = (fullName) ->
+  $('#theme-link').attr('href', '/theme/' + fullName + '.css') 
+  pimatic.storage.set('pimatic.theme', fullName)
+
+( ->
+
+  theme = pimatic.storage.get('pimatic.theme')
+  pimatic.changeTheme(theme) if theme? 
+
+  # update meta theme-color if theme changed
+  setInterval( ( ->
+    color = $('#index .ui-header').css('background-color')
+    metaThemeColor = $('#theme-color')
+    if color? and color != metaThemeColor.attr('content')
+      metaThemeColor.attr('content', color)
+
+  ), 5000)
+
+)()
