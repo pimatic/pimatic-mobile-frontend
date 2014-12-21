@@ -1,10 +1,10 @@
 # #mobile-frontend configuration options
 themes = [
   # legacy:
-  "classic", "aloe", "candy", "melon", "mint", "royal", "sand", "slate", "water"
+  "classic", "aloe", "candy", "melon", "mint", "royal", "sand", "water"
   # new names:
   "jqm/classic", "graphite/aloe", "graphite/candy", "graphite/melon", "graphite/mint", 
-  "graphite/royal", "graphite/sand", "graphite/slate", "graphite/water", "graphite/dark"
+  "graphite/royal", "graphite/sand", "graphite/water", "graphite/dark"
 ]
 module.exports = {
   title: "pimatic-mobile-frontend config"

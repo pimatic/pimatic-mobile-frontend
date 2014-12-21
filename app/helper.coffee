@@ -258,11 +258,10 @@ TraceKit.report.subscribe( (errorReport) =>
 
 # theme stuff
 pimatic.changeTheme = (fullName) ->
-  $('#theme-link').attr('href', '/theme/' + fullName + '.css') 
+  $('#theme-link').attr('href', '/theme/' + fullName + '.css')
   pimatic.storage.set('pimatic.theme', fullName)
 
 ( ->
-
   theme = pimatic.storage.get('pimatic.theme')
   pimatic.changeTheme(theme) if theme? 
 

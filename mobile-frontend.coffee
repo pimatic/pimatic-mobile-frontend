@@ -155,19 +155,6 @@ module.exports = (env) ->
     setupAssets: () ->
       parentDir = path.resolve __dirname, '..'
 
-      themeCss = (
-        if @config.theme is 'classic'
-          [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.inline-svg-1.4.2.css",
-            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]
-        else if @config.theme is 'pimatic'
-          [ "pimatic-mobile-frontend/app/css/themes/pimatic/jquery.mobile.icons.min.css",
-            "pimatic-mobile-frontend/app/css/themes/pimatic/pimatic.css",
-            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]
-        else
-          [ "pimatic-mobile-frontend/app/css/themes/graphite/#{@config.theme}/" +
-            "jquery.mobile-1.4.2.css" ]
-      )
-
       # Configure static assets with nap
       napAssets = nap(
         appDir: parentDir
@@ -377,12 +364,19 @@ module.exports = (env) ->
           md5.update indexHtml
           indexMD5 = md5.digest('hex')
 
+          themes = require('./mobile-frontend-config-schema').properties.theme.enum
+          themesCss = []
+          for theme in themes
+            if theme.indexOf('/') is -1 then continue
+            themesCss.push ["/theme/#{theme}.css"]
+
+
           renderManifest = require "render-appcache-manifest"
           # function to create the app manifest
           createAppManifest = =>
             # render the app manifest
             return renderManifest(
-              cache: assets
+              cache: assets.concat themesCss
               network: ['*']
               fallback: []
               lastModified: lastModified
