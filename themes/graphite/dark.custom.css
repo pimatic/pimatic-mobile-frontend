@@ -91,3 +91,23 @@ li.sortable .handle .ui-icon:after,
 li .edit-handle .ui-icon:after{
   background-color: white;
 }
+
+.graph-device-attribute  div.controls .ui-btn-inline{
+  color: #c4c4c4 /*{a-body-color}*/;
+}
+
+#log-messages .tags {
+  color: #0073BD;
+}
+
+#rules li.rule.deactivated a{
+ color: #595959;
+}
+
+#config-editor .jsoneditor .field,
+#config-editor .jsoneditor .value,
+#config-editor .jsoneditor td,
+#config-editor .jsoneditor th,
+#config-editor .jsoneditor textarea {
+  color: #C4C4C4;
+}

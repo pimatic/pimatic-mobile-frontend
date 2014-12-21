@@ -1103,7 +1103,6 @@ li.item .attributes .outOfDate {
 #graph-page #chart-container .ui-input-text input{
   padding-top: 0.50em;
   padding-bottom: 0.50em;
-  background: white;
 }
 
 @media (max-width:28em) {
