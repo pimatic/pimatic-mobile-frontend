@@ -16,7 +16,7 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     title=customTitle
     != nap.css('base')
     != nap.css('style')
-    link#theme-link(rel='stylesheet', href='/theme/' + theme.fullName + '.css', type='text/css', media='all')
+    link#theme-link(rel='stylesheet', data-default-theme=theme.fullName, href='/theme/' + theme.fullName + '.css', type='text/css', media='all')
     != nap.js('jquery')
     script(src='socket.io/socket.io.js')
     script(src='api/decl-api-client.js')

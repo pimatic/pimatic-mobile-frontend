@@ -48,6 +48,7 @@ module.exports = (BASE_COLOR, SECONDARY_COLOR, HIGHLIGHT_COLOR) ->
     'a-bar-color': '#fff'
     'a-bar-shadow-y': '0px'
     'a-bar-shadow-color': baseColorDarker
+    'a-active-shadow-color': baseColorDarker
 
     # Typography
     'a-link-color': BASE_COLOR
@@ -101,6 +102,8 @@ module.exports = (BASE_COLOR, SECONDARY_COLOR, HIGHLIGHT_COLOR) ->
     'b-active-shadow-y': '0px'
     'b-bdown-shadow-color': '#000'
     'b-active-border': BASE_COLOR
+    'b-bup-shadow-color': baseColorDarker
+
     'base_color': BASE_COLOR 
     'secondary_color': SECONDARY_COLOR
     'highlight_border_color': HIGHLIGHT_COLOR

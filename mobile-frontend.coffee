@@ -39,6 +39,12 @@ module.exports = (env) ->
         @config.theme = "graphite/#{@config.theme}"
       if @config.theme is "classic"
         @config.theme = "jqm/#{@config.theme}" 
+
+      themesWithLegazy = require('./mobile-frontend-config-schema').properties.theme.enum
+      @themes = []
+      for theme in themesWithLegazy
+        if theme.indexOf('/') is -1 then continue
+        @themes.push theme
       
       app.post('/client-error', (req, res) =>
         error = req.body.error
@@ -278,7 +284,7 @@ module.exports = (env) ->
           req.url.match(/^\/socket\.io\/.*$/)? or 
           (req.url in assets) or 
           (req.url is '/application.manifest') or
-          req.url.match(/^\/theme\/.*\.css$/)? 
+          req.url.match(/^\/theme\/.*\.css(\?.*)?$/)? 
         )
       )
 
@@ -315,8 +321,17 @@ module.exports = (env) ->
         themeBase = req.params.themeBase
         themeSub = req.params.themeSub
         themeFullName = "#{themeBase}/#{themeSub}"
+        unless themeFullName in @themes
+          res.statusCode = 404
+          res.end()
+          return
+
         cachePath = __dirname + "/public/theme-#{themeBase}-#{themeSub}.css"
         
+        if req.query.save
+          # Save theme to session so that we can deliver the correct theme in the app manifest
+          req.session.theme = themeFullName
+
         serveTheme = (css) ->
           res.statusCode = 200
           res.setHeader "content-type", "text/css"
@@ -364,19 +379,15 @@ module.exports = (env) ->
           md5.update indexHtml
           indexMD5 = md5.digest('hex')
 
-          themes = require('./mobile-frontend-config-schema').properties.theme.enum
-          themesCss = []
-          for theme in themes
-            if theme.indexOf('/') is -1 then continue
-            themesCss.push ["/theme/#{theme}.css"]
-
-
           renderManifest = require "render-appcache-manifest"
           # function to create the app manifest
           createAppManifest = =>
             # render the app manifest
             return renderManifest(
-              cache: assets.concat themesCss
+              cache: assets.concat [
+                "/theme/#{@config.theme}.css"
+                "/theme/THEMENAME.css?save=1"
+              ]
               network: ['*']
               fallback: []
               lastModified: lastModified
@@ -400,11 +411,15 @@ module.exports = (env) ->
 
       # If the app manifest is requested
       @app.get "/application.manifest", (req, res) =>
+        themeName = @config.theme
+        if req.session.theme? and req.session.theme in @themes
+          themeName = req.session.theme
+        customManifest = manifest.replace('THEMENAME', themeName)
         # then deliver it
         res.statusCode = 200
         res.setHeader "content-type", "text/cache-manifest"
-        res.setHeader "content-length", Buffer.byteLength(manifest)
-        res.end manifest
+        res.setHeader "content-length", Buffer.byteLength(customManifest)
+        res.end customManifest
 
   plugin = new MobileFrontend
   return plugin

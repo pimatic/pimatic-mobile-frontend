@@ -13,6 +13,7 @@
     dateFormat: 'yy-mm-dd'
   })
 
+  jQuery.mobile.loader.prototype.fakeFixLoader = (->)
   pendingLoadings = {}
 
   # build a string containing all loading messages
@@ -111,7 +112,8 @@ $(document).ajaxError -> #nop
 $(document).ready => 
   if window.applicationCache 
     window.applicationCache.addEventListener 'updateready', (e) =>
-      if window.applicationCache.status is window.applicationCache.UPDATEREADY 
+      if window.applicationCache.status is window.applicationCache.UPDATEREADY and 
+          (not pimatic.themeChanged)
         window.applicationCache.swapCache()
         swal({
           title: 'Reload?'
@@ -125,6 +127,7 @@ $(document).ready =>
           swal("Reloading!", "Reloading app, please wait.", "success")
           window.location.reload()
         )
+      pimatic.themeChanged = false
     , false
 , false
 
@@ -258,25 +261,32 @@ TraceKit.report.subscribe( (errorReport) =>
 
 # theme stuff
 pimatic.changeTheme = (fullName) ->
-  $('#theme-link').attr('href', '/theme/' + fullName + '.css')
+  $('#theme-link').attr('href', '/theme/' + fullName + '.css?save=1')
   $('#select-theme').val(fullName)
+  pimatic.themeChanged = true
   pimatic.storage.set('pimatic.theme', fullName)
 
 ( ->
   theme = pimatic.storage.get('pimatic.theme')
-  pimatic.changeTheme(theme) if theme? 
-  console.log $('#select-theme').length
+  if theme? 
+    pimatic.changeTheme(theme)
+  else
+    defaultTheme = $('#theme-link').attr('data-default-theme')
+    $('#theme-link').attr('href', '/theme/' + defaultTheme + '.css?save=1')
+    pimatic.themeChanged = true
+
   $(document).on('change', '#select-theme', () ->
     pimatic.changeTheme($(this).val())
   ) 
 
   # update meta theme-color if theme changed
-  setInterval( ( ->
+  updateMetaThemeColor = ( ->
     color = $('#index .ui-header').css('background-color')
     metaThemeColor = $('#theme-color')
     if color? and color != metaThemeColor.attr('content')
       metaThemeColor.attr('content', color)
-
-  ), 5000)
+  )
+  updateMetaThemeColor()
+  setInterval(updateMetaThemeColor, 5000)
 
 )()
