@@ -1358,3 +1358,8 @@ border-bottom-left-radius: inherit;
 #config-editor .readonly{
   opacity: 0.7;
 }
+
+#login-page .ui-header .ui-select {
+  float: left;
+  top: 5px;
+}

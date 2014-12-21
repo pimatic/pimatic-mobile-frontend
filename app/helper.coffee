@@ -259,11 +259,16 @@ TraceKit.report.subscribe( (errorReport) =>
 # theme stuff
 pimatic.changeTheme = (fullName) ->
   $('#theme-link').attr('href', '/theme/' + fullName + '.css')
+  $('#select-theme').val(fullName)
   pimatic.storage.set('pimatic.theme', fullName)
 
 ( ->
   theme = pimatic.storage.get('pimatic.theme')
   pimatic.changeTheme(theme) if theme? 
+  console.log $('#select-theme').length
+  $(document).on('change', '#select-theme', () ->
+    pimatic.changeTheme($(this).val())
+  ) 
 
   # update meta theme-color if theme changed
   setInterval( ( ->

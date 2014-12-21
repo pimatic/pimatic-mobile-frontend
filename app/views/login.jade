@@ -1,5 +1,15 @@
 div#login-page(data-role='page', data-dialog='true', data-close-btn="none")
   div(data-theme=theme.headerSwatch, data-role='header')
+    select#select-theme.ui-btn-left(name='select-theme', data-mini='true', data-inline='true')
+      option(value='graphite/water') graphite: water
+      option(value='graphite/aloe') graphite: aloe
+      option(value='graphite/candy') graphite: candy
+      option(value='graphite/melon') graphite: melon
+      option(value='graphite/mint') graphite: mint 
+      option(value='graphite/royal') graphite: royal
+      option(value='graphite/sand') graphite: sand
+      option(value='graphite/dark') graphite: dark
+      option(value='jqm/classic') jqm: calssic
     h3=__("Login")
   div.ui-content
     form#loginForm
