@@ -5,10 +5,10 @@ theme = {
     "app/css/themes/default/jquery.mobile.structure-1.4.2.css" 
   ],
   'extraCss': [
-    'theme/jqm/classic.css'
+    'themes/jqm/classic.css'
   ]
 }
 theme.variables = {
-  'a-bar-background-color': e9e9e9
+  'a-bar-background-color': '#e9e9e9'
 }
 module.exports = theme
