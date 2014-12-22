@@ -111,3 +111,47 @@ li .edit-handle .ui-icon:after{
 #config-editor .jsoneditor textarea {
   color: #C4C4C4;
 }
+
+.highcharts-background {
+  fill: #212121 !important;
+}
+
+#chart text {
+  fill: #C0C0C0 !important;
+  color: #C0C0C0 !important;
+}
+
+#chart .highcharts-tooltip path{
+  stroke: fill !important;
+}
+
+/*.highcharts-legend {
+  stroke: #151515 !important;
+}*/
+
+.highcharts-scrollbar rect{
+  fill: #202020;
+  stroke: #151515;
+}
+
+.highcharts-scrollbar path {
+  fill: #C0C0C0;  
+}
+
+.highcharts-navigator-handle-right rect, .highcharts-navigator-handle-left rect{
+  stroke: #151515;  
+  fill: #202020;
+}
+
+
+.highcharts-navigator-handle-right path, .highcharts-navigator-handle-left path{
+  fill: #C0C0C0;  
+}
+
+.highcharts-navigator path {
+    stroke: #151515;  
+}
+
+.highcharts-navigator rect {
+    fill: rgba(255, 255, 255, 0.2);
+}
