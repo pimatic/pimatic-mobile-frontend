@@ -11,6 +11,7 @@
     "mobile-frontend-config-schema.coffee",
     "coffee",
     "views",
+    "themes",
     "README.md"
   ],
   "version": "0.8.28",
