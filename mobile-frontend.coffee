@@ -3,7 +3,7 @@ module.exports = (env) ->
   # ##Dependencies
   # * from node.js
   util = require 'util'
-  fs = require 'fs'
+  fs = env.require 'fs.extra'
   path = require 'path'
 
   # * pimatic imports.
@@ -69,10 +69,8 @@ module.exports = (env) ->
         res.setHeader('content-type', 'application/x-x509-ca-cert')
         res.sendfile(certFile)
 
-      @setupThemes()
-
       @framework.on 'after init', (context)=>
-        finished = Promise.resolve().then( =>
+        finished = @setupThemes().then( =>
           # and then setup the assets and manifest
           try
             assets = @setupAssets()
@@ -99,9 +97,7 @@ module.exports = (env) ->
               fs.writeFileAsync(indexFile, html)
               @setupManifest(assets, html)
             )
-          
         )
-
         context.waitForIt finished
         return
 
@@ -303,6 +299,7 @@ module.exports = (env) ->
       return assets
 
     createThemeCss: (themeName) ->
+      env.logger.info "rendering theme: #{themeName}"
       theme = require "./themes/#{themeName}"
       # concate all css
       cssFiles = _.clone(theme.css)
@@ -313,11 +310,15 @@ module.exports = (env) ->
       ).reduce( (fullCss, css) =>
         fullCss += css;
       ).then( (css) ->
-        return jqmthemer.themeCss theme, css 
+        themedCss = jqmthemer.themeCss theme, css 
+        env.logger.info "rendering theme finished"
+        return themedCss
       )
 
     setupThemes: () ->
-      @app.get "/theme/:themeBase/:themeSub.css", (req, res) =>
+      # Setup get theme handler
+      @_themesRenderings = {}
+      @app.get("/theme/:themeBase/:themeSub.css", (req, res) =>
         themeBase = req.params.themeBase
         themeSub = req.params.themeSub
         themeFullName = "#{themeBase}/#{themeSub}"
@@ -326,35 +327,42 @@ module.exports = (env) ->
           res.end()
           return
 
-        cachePath = __dirname + "/public/theme-#{themeBase}-#{themeSub}.css"
+        cachePath = __dirname + "/public/theme/#{themeBase}-#{themeSub}.css"
         
         if req.query.save
           # Save theme to session so that we can deliver the correct theme in the app manifest
           req.session.theme = themeFullName
 
-        serveTheme = (css) ->
+        serveTheme = (css) =>
           res.statusCode = 200
           res.setHeader "content-type", "text/css"
           res.setHeader "content-length", Buffer.byteLength(css)
           res.end css
+          @_themesRenderings[themeFullName] = undefined
+          return css
 
-        if @mode is "production"
-          fs.readFileAsync(cachePath)
-            .then( (css) -> serveTheme(css.toString()) )
+        if @config.mode  is "production"
+          if @_themesRenderings[themeFullName]?
+            return @_themesRenderings[themeFullName].then( (css) -> serveTheme(css) )
+
+          @_themesRenderings[themeFullName] = fs.readFileAsync(cachePath)
+            .then( (css) -> serveTheme(css.toString()))
             .catch( (error) =>
-              if error.code is 'ENOENT' 
+              if error.cause.code is 'ENOENT' 
                 return @createThemeCss(themeFullName).then( (css) ->
-                  fs.writeFileAsync(cachePath).then( ->
-                    serveTheme(css)
-                  )
+                  fs.writeFileAsync(cachePath, css).then( -> serveTheme(css) )
                 )
               else
                 throw error
             )
             .done()
         else
-          # always rerender theme in production mode
+          # always rerender theme in development mode
           @createThemeCss(themeFullName).then( (css) -> serveTheme(css) ).done()
+      )
+       # delete all old generated themes:
+      themeBase = __dirname + "/public/theme"
+      return fs.removeAsync(themeBase).then( -> fs.mkdirsAsync(themeBase) )
 
     setupManifest: (assets, indexHtml)->
       parentDir = path.resolve __dirname, '..'
