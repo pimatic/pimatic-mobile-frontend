@@ -287,6 +287,6 @@ pimatic.changeTheme = (fullName) ->
       metaThemeColor.attr('content', color)
   )
   updateMetaThemeColor()
-  setInterval(updateMetaThemeColor, 5000)
+  setInterval(updateMetaThemeColor, 500)
 
 )()
