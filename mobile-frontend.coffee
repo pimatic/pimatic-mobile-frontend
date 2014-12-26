@@ -122,6 +122,7 @@ module.exports = (env) ->
         api: env.api.all
         customTitle: @config.customTitle
         theme
+        themes: @themes
       }
 
       awaitingRenders = 
