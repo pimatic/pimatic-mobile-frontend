@@ -27,7 +27,6 @@
     "render-appcache-manifest"
   ],
   "dependencies": {
-    "clean-css": "^3.0.1",
     "colour.js": "^1.5.2",
     "jade": "1.1.4",
     "jqmthemer": "pimatic/jqmthemer",

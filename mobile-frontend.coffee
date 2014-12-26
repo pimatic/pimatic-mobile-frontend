@@ -23,7 +23,6 @@ module.exports = (env) ->
   # socketIo = require 'socket.io'
   global.nap = require 'nap'
   jqmthemer = require 'jqmthemer'
-  CleanCSS = require 'clean-css'
 
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
@@ -313,8 +312,7 @@ module.exports = (env) ->
       ).reduce( (fullCss, css) =>
         fullCss += css;
       ).then( (css) ->
-        themedCss = jqmthemer.themeCss theme, css
-        themedCss = new CleanCSS().minify(themedCss).styles if @config.mode is "production"
+        themedCss = jqmthemer.themeCss theme, css 
         env.logger.info "rendering theme finished"
         return themedCss
       )
