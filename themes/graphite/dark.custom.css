@@ -87,6 +87,13 @@ html body div.ui-slider-track.ui-body-a .ui-btn-active {
   background-color: #007dcd /*{a-active-background-color}*/;
 }
 
+@media (min-width: 60em) {
+
+  .locked #item-lists {
+    background: transparent;
+  }
+}
+
 li.sortable .handle .ui-icon:after,
 li .edit-handle .ui-icon:after{
   background-color: white;
