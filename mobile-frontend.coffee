@@ -314,7 +314,7 @@ module.exports = (env) ->
         fullCss += css;
       ).then( (css) ->
         themedCss = jqmthemer.themeCss theme, css
-        themedCss = new CleanCSS().minify(css).styles if @config.mode is "production"
+        themedCss = new CleanCSS().minify(themedCss).styles if @config.mode is "production"
         env.logger.info "rendering theme finished"
         return themedCss
       )
