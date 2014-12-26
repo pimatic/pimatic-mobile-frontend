@@ -315,7 +315,7 @@ $(document).on( "pagebeforecreate", (event) ->
       # input changes -> call changeTemperature
       ko.computed( =>
         textValue = @inputValue()
-        if parseFloat(attrValue) isnt parseFloat(textValue)
+        if textValue? and attrValue? and parseFloat(attrValue) isnt parseFloat(textValue)
           @changeTemperatureTo(parseFloat(textValue))
       ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } })
 
