@@ -1362,3 +1362,43 @@ border-bottom-left-radius: inherit;
   float: left;
   top: 5px;
 }
+
+#index li.thermostat div.controls {
+  float: right;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  margin-top: -4px;
+  margin-bottom: -4px;
+  text-align: right;
+  white-space: normal;
+}
+
+#index li.thermostat div.controls .ui-controlgroup{
+  display: inline-block;
+  margin: 0;
+  margin-left: 4px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  border-radius: 0.8em;
+}
+
+#index li.thermostat div.controls .ui-group-theme-a{
+  border-radius: 2em
+}
+
+#index li.thermostat div.controls .ui-controlgroup .ui-btn{
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+#index li.thermostat div.controls .spinbox input{
+  border: none;
+  background: none;
+  height: 29.75px;
+  font-weight: bold;
+}
+
+#index li.thermostat.unsynced{
+  color: gray !important;
+}
