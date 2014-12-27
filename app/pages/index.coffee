@@ -56,6 +56,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
       }
 
       lastNavbarWidth = null
+      lastNavbarHeight = null
       updateNavbarLayoutTimeput = null
       updateNavbarLayout = (recheck = true) =>
         if itemTabs? and itemLists?
@@ -65,11 +66,10 @@ $(document).on("pagecreate", '#index', tc (event) ->
             itemTabs.css(
               width: width
             )
+          height = itemTabs.height()
+          if height isnt lastNavbarHeight
             itemLists.find('.items').each( () ->
-              height = itemTabs.height()
-              $(this).css(
-                'padding-top': height
-              )
+              $(this).css('padding-top', height)
             )
           clearTimeout(updateNavbarLayoutTimeput)
           if recheck
@@ -77,6 +77,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
               updateNavbarLayout(false)
             ), 350)
           lastNavbarWidth = width
+          lastNavbarHeight = height
 
 
       @devicepagesTabsRefresh = ko.computed( tc =>
@@ -109,6 +110,15 @@ $(document).on("pagecreate", '#index', tc (event) ->
           itemTabs.find('ul').append($('#edit-devicepage-link-template').text())
         if (dPages.length > 0 or @enabledEditing()) and @hasPermission('pages', 'read')
           itemTabs.navbar()
+          itemTabs.find('ul').removeClass('ui-grid-a ui-grid-duo')
+          lis = itemTabs.find('li')
+          liWidth = (100/lis.length) + "%"
+          lis.each( () ->
+            $(this)
+              .css({'width': liWidth, 'clear': 'none'})
+              .removeClass('ui-block-a ui-block-b ui-block-c ui-block-d ui-block-e')
+              .addClass('ui-block-a')
+          )
           headroom = new Headroom(itemTabs[0], headroomOptions)
           headroom.init()
         updateNavbarLayout()
