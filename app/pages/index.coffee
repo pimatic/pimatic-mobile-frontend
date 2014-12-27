@@ -112,12 +112,20 @@ $(document).on("pagecreate", '#index', tc (event) ->
           itemTabs.navbar()
           itemTabs.find('ul').removeClass('ui-grid-a ui-grid-duo')
           lis = itemTabs.find('li')
-          liWidth = (100/lis.length) + "%"
-          lis.each( () ->
+          if lis.length <= 6
+            liWidth = (100/lis.length) + "%"
+            fullRow = lis.length
+          else
+            fullRow = Math.ceil(lis.length/2)
+            liWidth = (100/fullRow) + "%"
+          lis.each( (i) ->
             $(this)
               .css({'width': liWidth, 'clear': 'none'})
               .removeClass('ui-block-a ui-block-b ui-block-c ui-block-d ui-block-e')
               .addClass('ui-block-a')
+            liA = $(this).find('a')
+            liA.css('border-top-width', 0) if i+1 > fullRow
+            #liA.css('border-right-width', liA.css('border-left-width')) if (i+1)%fullRow is 0
           )
           headroom = new Headroom(itemTabs[0], headroomOptions)
           headroom.init()
