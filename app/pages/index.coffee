@@ -42,11 +42,38 @@ $(document).on("pagecreate", '#index', tc (event) ->
           return __('Logout')
       )
 
+      itemTabs = null
+      itemLists = null
+      headroom = null
+      headroomOptions = {
+        offset: 40,
+        tolerance: 10,
+        classes: {
+          initial: "animated",
+          pinned: "slideDown",
+          unpinned: "slideUp"
+        }
+      }
+
+      updateNavbarLayout = () =>
+        if itemTabs? and itemLists?
+          index = if @activeDevicepage()? then @devicepages.indexOf(@activeDevicepage()) else 0
+          itemTabs.css(
+            width: $(itemLists.find('.items')[index]).width()
+          )
+          itemLists.find('.items').each( () ->
+            height = itemTabs.height()
+            $(this).css(
+              'padding-top': height
+            )
+          )
+
       @devicepagesTabsRefresh = ko.computed( tc =>
         unless @bindingsApplied() then return
         dPages =  @devicepages()
         enabledEditing = @enabledEditing()
         itemTabs = $("#item-tabs")
+        headroom?.destroy()
         pimatic.try => itemTabs.navbar "destroy"
         ko.cleanNode(itemTabs[0])
         if dPages.length > 0 and @hasPermission('pages', 'read')
@@ -71,7 +98,19 @@ $(document).on("pagecreate", '#index', tc (event) ->
           itemTabs.find('ul').append($('#edit-devicepage-link-template').text())
         if (dPages.length > 0 or @enabledEditing()) and @hasPermission('pages', 'read')
           itemTabs.navbar()
+          headroom = new Headroom(itemTabs[0], headroomOptions)
+          headroom.init()
+        updateNavbarLayout()
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
+
+      updateHeadroom = () =>
+        if headroom? and @activeDevicepage()?
+          headroom.destroy()
+          # find scroller
+          index = @devicepages.indexOf(@activeDevicepage())
+          headroomOptions.scroller = itemLists.find('.owl-wrapper .owl-item')[index]
+          headroom = new Headroom(itemTabs[0], headroomOptions)
+          headroom.init()
 
       _devicePages = []
 
@@ -110,13 +149,16 @@ $(document).on("pagecreate", '#index', tc (event) ->
             afterMove: (ele) =>
               current = ele.data('owlCarousel').currentItem
               @activeDevicepage(@devicepages()[current])
+            afterUpdate: =>
+              updateNavbarLayout()
           })
           lastCarouselWidth = itemLists.width()
+          updateHeadroom()
         else
           itemLists.html('')
+        updateNavbarLayout()
         return
        ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
-
 
       @activeDevicepage.subscribe( (ap) =>
         unless ap? then return
@@ -125,6 +167,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
         index = @devicepages.indexOf(ap)
         if index is -1 then return
         owl.goTo(index)
+        updateHeadroom()
+        updateNavbarLayout()
       )
 
       ko.computed( =>
