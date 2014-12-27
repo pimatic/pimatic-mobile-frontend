@@ -55,18 +55,29 @@ $(document).on("pagecreate", '#index', tc (event) ->
         }
       }
 
-      updateNavbarLayout = () =>
+      lastNavbarWidth = null
+      updateNavbarLayoutTimeput = null
+      updateNavbarLayout = (recheck = true) =>
         if itemTabs? and itemLists?
           index = if @activeDevicepage()? then @devicepages.indexOf(@activeDevicepage()) else 0
-          itemTabs.css(
-            width: $(itemLists.find('.items')[index]).width()
-          )
-          itemLists.find('.items').each( () ->
-            height = itemTabs.height()
-            $(this).css(
-              'padding-top': height
+          width = $(itemLists.find('.items')[index]).width()
+          if width isnt lastNavbarWidth
+            itemTabs.css(
+              width: width
             )
-          )
+            itemLists.find('.items').each( () ->
+              height = itemTabs.height()
+              $(this).css(
+                'padding-top': height
+              )
+            )
+          clearTimeout(updateNavbarLayoutTimeput)
+          if recheck
+            updateNavbarLayoutTimeput = setTimeout((->
+              updateNavbarLayout(false)
+            ), 350)
+          lastNavbarWidth = width
+
 
       @devicepagesTabsRefresh = ko.computed( tc =>
         unless @bindingsApplied() then return
@@ -394,7 +405,6 @@ updateCarousel = ->
     width = itemList.width()
     if width isnt lastCarouselWidth
       itemList.data('owlCarousel').updateVars()
-      itemList.data('owlCarousel').ju
     lastCarouselWidth = width
 
 
