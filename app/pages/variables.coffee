@@ -64,6 +64,7 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
       @getDeviceAttributeVariables = ko.computed( tc =>
         return ( v for v in @variables() when v.isDeviceAttribute() )
       )
+      pimatic.fixedAddElement(@enabledEditing, @isSortingVariables, $('#add-a-variable'), $('#variables'))
 
     afterRenderVariable: (elements) ->
       handleHTML = $('#sortable-handle-template').text()

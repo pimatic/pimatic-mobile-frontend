@@ -50,6 +50,7 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
           css += " hideRuleText"
         return css
       )
+      pimatic.fixedAddElement(@enabledEditing, @isSortingRules, $('#add-rule'), $('#rules'))
 
     afterRenderRule: (elements, rule) ->
       handleHTML = $('#sortable-handle-template').text()

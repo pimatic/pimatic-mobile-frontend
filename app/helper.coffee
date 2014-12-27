@@ -290,3 +290,45 @@ pimatic.changeTheme = (fullName) ->
   setInterval(updateMetaThemeColor, 500)
 
 )()
+
+pimatic.fixedAddElement = (toggleObservable, sortingObservable, addEle, parentList) ->
+  resizeListener = () ->
+    if toggleObservable()
+      addEle.css(width: parentList.width())
+  $(window).resize(resizeListener)
+  sorting = sortingObservable()
+  sortingObservable.subscribe( (value) ->
+    sorting = value
+    if sorting
+      parentList.css(
+        'height': parentList.height() + addEle.outerHeight()
+        'padding-bottom': 0
+      )
+    else
+      parentList.css('padding-bottom': addEle.outerHeight() )
+  )
+
+  ko.computed( ->
+    editing = toggleObservable()
+    if editing and (not sorting)
+      addEle.css(
+        position: 'fixed'
+        left: 0
+        bottom: 0
+        height: addEle.height()
+        width: parentList.width()
+        'z-index': 3
+      )
+      parentList.css(
+        'padding-bottom': addEle.outerHeight()
+      )
+      addEle.addClass('fixed-add-element')
+    else
+      addEle.css(
+        position: 'relative'
+        height: 'auto'
+        width: 'auto'
+      )
+      parentList.css('padding-bottom': 0)
+      addEle.removeClass('fixed-add-element')
+  ).extend(rateLimit: {timeout: 200, method: "notifyWhenChangesStop"})

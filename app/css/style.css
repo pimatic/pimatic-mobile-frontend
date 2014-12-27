@@ -411,9 +411,17 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #rules #add-rule a, 
 #variables #add-a-variable a
 #devicepages #add-a-devicepage a{
-  font-weight: normal;
+  font-weight: bold;
   color: #000 /*{a-bup-color}*/;
 }
+
+.fixed-add-element, .fixed-add-element a {
+  border-color: #007dcd  /*{a-bar-background-color}*/ !important;
+  background:       #007dcd /*{a-bar-background-color}*/ !important;
+  color:          #FFF /*{a-bar-color}*/ !important;
+  text-shadow: none !important;
+}
+
 
 /*#index .ui-content .ui-listview {
   margin-top: 20px;
