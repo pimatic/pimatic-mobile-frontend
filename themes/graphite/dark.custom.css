@@ -1,0 +1,164 @@
+.locked .items .no-header {
+  box-shadow: none;
+}
+
+/*Flipswitch off Background*/
+ /* Bar: Toolbars, dividers, slider track */
+.ui-bar-a,
+.ui-page-theme-a .ui-bar-inherit,
+html .ui-bar-a .ui-bar-inherit,
+html .ui-body-a .ui-bar-inherit,
+html body .ui-group-theme-a .ui-bar-inherit {
+  text-shadow: none;
+}
+
+/*Main Background*/
+/* Page and overlay */
+.ui-overlay-a,
+.ui-page-theme-a,
+.ui-page-theme-a .ui-panel-wrapper {
+  text-shadow: none;
+}
+
+/*Device List Background*/
+/* Body: Read-only lists, text inputs, collapsible content */
+.ui-body-a,
+.ui-page-theme-a .ui-body-inherit,
+html .ui-bar-a .ui-body-inherit,
+html .ui-body-a .ui-body-inherit,
+html body .ui-group-theme-a .ui-body-inherit,
+html .ui-panel-page-container-a {
+  text-shadow: none;
+}
+
+ /* Button up */
+ .ui-page-theme-a .ui-btn,
+ html .ui-bar-a .ui-btn,
+ html .ui-body-a .ui-btn,
+ html body .ui-group-theme-a .ui-btn,
+ html head + body .ui-btn.ui-btn-a,
+ /* Button visited */
+ .ui-page-theme-a .ui-btn:visited,
+ html .ui-bar-a .ui-btn:visited,
+ html .ui-body-a .ui-btn:visited,
+ html body .ui-group-theme-a .ui-btn:visited, 
+ html head + body .ui-btn.ui-btn-a:visited {
+  text-shadow: none;
+ }
+
+ /* Slider track */
+.flat .ui-slider-track.ui-corner-all,
+/* Flipswitch */
+.flat .ui-flipswitch.ui-corner-all { 
+  background-color: #151515;
+  box-shadow: none;
+}
+
+#index div.ui-flipswitch .ui-flipswitch-on,
+#index div.ui-slider .ui-slider-handle {
+  background: #323232;
+  border-color: #151515;
+}
+
+/* Active button */
+.ui-page-theme-a .ui-btn.ui-btn-active,
+html .ui-bar-a .ui-btn.ui-btn-active,
+html .ui-body-a .ui-btn.ui-btn-active,
+html body .ui-group-theme-a .ui-btn.ui-btn-active,
+html head + body .ui-btn.ui-btn-a.ui-btn-active,
+/* Active checkbox icon */
+.ui-page-theme-a .ui-checkbox-on:after,
+html .ui-bar-a .ui-checkbox-on:after,
+html .ui-body-a .ui-checkbox-on:after,
+html body .ui-group-theme-a .ui-checkbox-on:after,
+.ui-btn.ui-checkbox-on.ui-btn-a:after,
+/* Active flipswitch background */
+.ui-page-theme-a .ui-flipswitch.ui-flipswitch-active,
+html .ui-bar-a .ui-flipswitch.ui-flipswitch-active,
+html .ui-body-a .ui-flipswitch.ui-flipswitch-active,
+html body .ui-group-theme-a .ui-flipswitch.ui-flipswitch-active,
+html body .ui-flipswitch.ui-bar-a.ui-flipswitch-active,
+/* Active slider track */
+.ui-page-theme-a .ui-slider-track .ui-btn-active,
+html .ui-bar-a .ui-slider-track .ui-btn-active,
+html .ui-body-a .ui-slider-track .ui-btn-active,
+html body .ui-group-theme-a .ui-slider-track .ui-btn-active,
+html body div.ui-slider-track.ui-body-a .ui-btn-active {
+  background-color: #007dcd /*{a-active-background-color}*/;
+}
+
+@media (min-width: 60em) {
+
+  .locked #item-lists {
+    background: transparent;
+  }
+}
+
+li.sortable .handle .ui-icon:after,
+li .edit-handle .ui-icon:after{
+  background-color: white;
+}
+
+.graph-device-attribute  div.controls .ui-btn-inline{
+  color: #c4c4c4 /*{a-body-color}*/;
+}
+
+#log-messages .tags {
+  color: #0073BD;
+}
+
+#rules li.rule.deactivated a{
+ color: #595959;
+}
+
+#config-editor .jsoneditor .field,
+#config-editor .jsoneditor .value,
+#config-editor .jsoneditor td,
+#config-editor .jsoneditor th,
+#config-editor .jsoneditor textarea {
+  color: #C4C4C4;
+}
+
+.highcharts-background {
+  fill: #212121 !important;
+}
+
+#chart text {
+  fill: #C0C0C0 !important;
+  color: #C0C0C0 !important;
+}
+
+#chart .highcharts-tooltip path{
+  stroke: fill !important;
+}
+
+/*.highcharts-legend {
+  stroke: #151515 !important;
+}*/
+
+.highcharts-scrollbar rect{
+  fill: #202020;
+  stroke: #151515;
+}
+
+.highcharts-scrollbar path {
+  fill: #C0C0C0;  
+}
+
+.highcharts-navigator-handle-right rect, .highcharts-navigator-handle-left rect{
+  stroke: #151515;  
+  fill: #202020;
+}
+
+
+.highcharts-navigator-handle-right path, .highcharts-navigator-handle-left path{
+  fill: #C0C0C0;  
+}
+
+.highcharts-navigator path {
+    stroke: #151515;  
+}
+
+.highcharts-navigator rect {
+    fill: rgba(255, 255, 255, 0.2);
+}

@@ -151,6 +151,10 @@ class DeviceAttribute
         prefixes: humanFormat.unitPrefixes[@unit]
         prefix
       })
+      # show 3 decimals for kW and kWh
+      if info.unit in ['W', 'Wh'] and info.prefix is 'k'
+        info.num = Math.round(value) / 1e3
+
       return {
         num: info.num
         unit: info.prefix + info.unit

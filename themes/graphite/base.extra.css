@@ -1,0 +1,111 @@
+/* Button up */
+.ui-page-theme-a .ui-btn,
+html .ui-bar-a .ui-btn,
+html .ui-body-a .ui-btn,
+html body .ui-group-theme-a .ui-btn,
+html head + body .ui-btn.ui-btn-a {
+  -moz-box-shadow:0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.3) inset;
+  -webkit-box-shadow:0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.3) inset;
+  box-shadow: 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.3) inset;
+}
+
+/* Bar: Toolbars, dividers*/
+.ui-bar-a,
+.ui-page-theme-a .ui-header,
+html .ui-bar-a .ui-header,
+html .ui-body-a .ui-header,
+html body .ui-group-theme-a .ui-header,
+.ui-page-theme-a .ui-li-divider,
+html .ui-bar-a .ui-li-divider,
+html .ui-body-a .ui-li-divider,
+html body .ui-group-theme-a .ui-li-divider  {
+  border: 1px solid     #333 /*{a-bar-border}*/;
+  background:       #111 /*{a-bar-background-color}*/;
+  color:          #fff /*{a-bar-color}*/;
+  font-weight: bold;
+  text-shadow: 0 /*{a-bar-shadow-x}*/ -1px /*{a-bar-shadow-y}*/ 0 /*{a-bar-shadow-radius}*/ #000 /*{a-bar-shadow-color}*/;
+  background-image: -webkit-gradient(linear, left top, left bottom, from( #3c3c3c /*{a-bar-background-start}*/), to( #111 /*{a-bar-background-end}*/)); /* Saf4+, Chrome */
+  background-image: -webkit-linear-gradient( #3c3c3c /*{a-bar-background-start}*/, #111 /*{a-bar-background-end}*/); /* Chrome 10+, Saf5.1+ */
+  background-image:    -moz-linear-gradient( #3c3c3c /*{a-bar-background-start}*/, #111 /*{a-bar-background-end}*/); /* FF3.6 */
+  background-image:     -ms-linear-gradient( #3c3c3c /*{a-bar-background-start}*/, #111 /*{a-bar-background-end}*/); /* IE10 */
+  background-image:      -o-linear-gradient( #3c3c3c /*{a-bar-background-start}*/, #111 /*{a-bar-background-end}*/); /* Opera 11.10+ */
+  background-image:         linear-gradient( #3c3c3c /*{a-bar-background-start}*/, #111 /*{a-bar-background-end}*/);
+}
+
+/* Button in Toolbars, dividers*/
+.ui-bar-a .ui-btn,
+.ui-page-theme-a .ui-header .ui-btn,
+html .ui-bar-a.ui-header .ui-btn,
+html .ui-body-a .ui-header .ui-btn,
+html body .ui-group-theme-a .ui-header .ui-btn,
+.ui-page-theme-a .ui-li-divider .ui-btn,
+html .ui-bar-a .ui-li-divider .ui-btn,
+html .ui-body-a .ui-li-divider .ui-btn,
+html body .ui-group-theme-a .ui-li-divider 
+/* Button in Toolbars, dividers visited*/
+.ui-page-theme-a .ui-header .ui-btn:visited,
+html .ui-bar-a.ui-header .ui-btn:visited,
+html .ui-body-a .ui-header .ui-btn:visited,
+html body .ui-group-theme-a .ui-header .ui-btn:visited,
+html head + body .ui-header .ui-btn.ui-btn-a:visited {
+  background-color:       #333 /*{b-bup-background-color}*/;
+  border-color:     #1f1f1f /*{b-bup-border}*/;
+  color:          #fff /*{b-bup-color}*/;
+  text-shadow: 0 /*{b-bup-shadow-x}*/ 1px /*{b-bup-shadow-y}*/ 0 /*{b-bup-shadow-radius}*/ #111 /*{b-bup-shadow-color}*/;
+  -moz-box-shadow:0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.3) inset;
+  -webkit-box-shadow:0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.3) inset;
+  box-shadow: 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.3) inset;
+}
+
+/* Button in Toolbars, dividers  hover */
+.ui-bar-a .ui-btn:hover,
+.ui-page-theme-a .ui-header .ui-btn:hover,
+html .ui-bar-a.ui-header .ui-btn:hover,
+html .ui-body-a .ui-header .ui-btn:hover,
+html body .ui-group-theme-a .ui-header .ui-btn:hover,
+.ui-page-theme-a .ui-li-divider .ui-btn:hover,
+html .ui-bar-a .ui-li-divider .ui-btn:hover,
+html .ui-body-a .ui-li-divider .ui-btn:hover {
+  background-color:       #373737 /*{b-bhover-background-color}*/;
+  border-color:     #1f1f1f /*{b-bhover-border}*/;
+  color:          #fff /*{b-bhover-color}*/;
+  text-shadow: 0 /*{b-bhover-shadow-x}*/ 1px /*{b-bhover-shadow-y}*/ 0 /*{b-bhover-shadow-radius}*/ #111 /*{b-bhover-shadow-color}*/;
+}
+/* Button in Toolbars, dividers  down */
+.ui-bar-a .ui-btn:active,
+.ui-page-theme-a .ui-header .ui-btn:active,
+html .ui-bar-a.ui-header .ui-btn:active,
+html .ui-body-a .ui-header .ui-btn:active,
+html body .ui-group-theme-a .ui-header .ui-btn:active,
+.ui-page-theme-a .ui-li-divider .ui-btn:active,
+html .ui-bar-a .ui-li-divider .ui-btn:active,
+html .ui-body-a .ui-li-divider .ui-btn:active {
+  background-color:       #404040 /*{b-bdown-background-color}*/;
+  border-color:     #1f1f1f /*{b-bdown-border}*/;
+  color:          #fff /*{b-bdown-color}*/;
+  text-shadow: 0 /*{b-bdown-shadow-x}*/ 1px /*{b-bdown-shadow-y}*/ 0 /*{b-bdown-shadow-radius}*/ #111 /*{b-bdown-shadow-color}*/;
+}
+
+.ui-page-theme-a .ui-li-divider,
+html .ui-bar-a .ui-li-divider,
+html .ui-body-a .ui-li-divider,
+html body .ui-group-theme-a .ui-li-divider {
+  border-bottom-width: 0;
+}
+
+/* Button in header */
+.ui-header .ui-btn {
+  font-size: 12.5px;
+  border-radius: 3.2px;
+  padding-top: 0.70em;
+  padding-bottom: 0.60em;
+}
+
+/* Icon-only buttons in header */
+.ui-header .ui-btn-icon-notext.ui-btn-corner-all,
+.ui-header .ui-btn-icon-notext.ui-corner-all {
+  -webkit-border-radius: 1em;
+  border-radius: 1em;
+  padding: 0;
+  font-size: 16px
+}

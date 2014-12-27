@@ -11,9 +11,10 @@
     "mobile-frontend-config-schema.coffee",
     "coffee",
     "views",
+    "themes",
     "README.md"
   ],
-  "version": "0.8.27",
+  "version": "0.8.30",
   "homepage": "http://github.com/pimatic/pimatic",
   "repository": {
     "type": "git",
@@ -26,12 +27,14 @@
     "render-appcache-manifest"
   ],
   "dependencies": {
+    "colour.js": "^1.5.2",
     "jade": "1.1.4",
+    "jqmthemer": "pimatic/jqmthemer",
     "nap": "0.8.0",
     "render-appcache-manifest": "0.3.0"
   },
   "peerDependencies": {
-    "pimatic": "0.8.*"
+    "pimatic": "0.8.* && >=0.8.31"
   },
   "engines": {
     "node": ">0.8.x",

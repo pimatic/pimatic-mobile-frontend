@@ -35,4 +35,4 @@ div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEdit
       <!-- /ko -->
       li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
       li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")
-        a(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'
+        a.ui-btn.ui-btn-icon-left.ui-icon-plus(data-transition='slidefade', href='#edit-variable', data-bind="click: onAddVariableClicked")=__('Add a variable')+'...'

@@ -13,6 +13,7 @@
     dateFormat: 'yy-mm-dd'
   })
 
+  jQuery.mobile.loader.prototype.fakeFixLoader = (->)
   pendingLoadings = {}
 
   # build a string containing all loading messages
@@ -111,7 +112,8 @@ $(document).ajaxError -> #nop
 $(document).ready => 
   if window.applicationCache 
     window.applicationCache.addEventListener 'updateready', (e) =>
-      if window.applicationCache.status is window.applicationCache.UPDATEREADY 
+      if window.applicationCache.status is window.applicationCache.UPDATEREADY and 
+          (not pimatic.themeChanged)
         window.applicationCache.swapCache()
         swal({
           title: 'Reload?'
@@ -125,6 +127,7 @@ $(document).ready =>
           swal("Reloading!", "Reloading app, please wait.", "success")
           window.location.reload()
         )
+      pimatic.themeChanged = false
     , false
 , false
 
@@ -256,3 +259,76 @@ TraceKit.report.subscribe( (errorReport) =>
   )
 )
 
+# theme stuff
+pimatic.changeTheme = (fullName) ->
+  $('#theme-link').attr('href', '/theme/' + fullName + '.css?save=1')
+  $('#select-theme').val(fullName)
+  pimatic.themeChanged = true
+  pimatic.storage.set('pimatic.theme', fullName)
+
+( ->
+  theme = pimatic.storage.get('pimatic.theme')
+  if theme? 
+    pimatic.changeTheme(theme)
+  else
+    defaultTheme = $('#theme-link').attr('data-default-theme')
+    $('#theme-link').attr('href', '/theme/' + defaultTheme + '.css?save=1')
+    pimatic.themeChanged = true
+
+  $(document).on('change', '#select-theme', () ->
+    pimatic.changeTheme($(this).val())
+  ) 
+
+  # update meta theme-color if theme changed
+  updateMetaThemeColor = ( ->
+    color = $('#index .ui-header').css('background-color')
+    metaThemeColor = $('#theme-color')
+    if color? and color != metaThemeColor.attr('content')
+      metaThemeColor.attr('content', color)
+  )
+  updateMetaThemeColor()
+  setInterval(updateMetaThemeColor, 500)
+
+)()
+
+pimatic.fixedAddElement = (toggleObservable, sortingObservable, addEle, parentList) ->
+  resizeListener = () ->
+    if toggleObservable()
+      addEle.css(width: parentList.width())
+  $(window).resize(resizeListener)
+  sorting = sortingObservable()
+  sortingObservable.subscribe( (value) ->
+    sorting = value
+    if sorting
+      parentList.css(
+        'height': parentList.height() + addEle.outerHeight()
+        'padding-bottom': 0
+      )
+    else
+      parentList.css('padding-bottom': addEle.outerHeight() )
+  )
+
+  ko.computed( ->
+    editing = toggleObservable()
+    if editing and (not sorting)
+      addEle.css(
+        position: 'fixed'
+        left: 0
+        bottom: 0
+        height: addEle.height()
+        width: parentList.width()
+        'z-index': 3
+      )
+      parentList.css(
+        'padding-bottom': addEle.outerHeight()
+      )
+      addEle.addClass('fixed-add-element')
+    else
+      addEle.css(
+        position: 'relative'
+        height: 'auto'
+        width: 'auto'
+      )
+      parentList.css('padding-bottom': 0)
+      addEle.removeClass('fixed-add-element')
+  ).extend(rateLimit: {timeout: 200, method: "notifyWhenChangesStop"})

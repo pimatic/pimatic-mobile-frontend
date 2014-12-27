@@ -35,7 +35,7 @@ div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(
       <!-- /ko -->
       li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingRules()")=__('Drop here to remove rule')
       li#add-rule(data-bind="visible: $root.enabledEditing() && !$root.isSortingRules() ")
-        a(data-transition='slidefade', href='#edit-rule', data-bind="click: $root.onAddRuleClicked")=__('Add a new rule')+'...'
+        a.ui-btn.ui-btn-icon-left.ui-icon-plus(data-transition='slidefade', href='#edit-rule', data-bind="click: $root.onAddRuleClicked")=__('Add a new rule')+'...'
        div.drag-message
     <!-- ko if: !$root.hasPermission('rules', 'read') -->
     div.denied=__('Permission denied')

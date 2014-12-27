@@ -1,5 +1,8 @@
 div#login-page(data-role='page', data-dialog='true', data-close-btn="none")
   div(data-theme=theme.headerSwatch, data-role='header')
+    select#select-theme.ui-btn-left(name='select-theme', data-mini='true', data-inline='true')
+      each theme in themes
+        option(value=theme)=theme.replace('/', ': ')
     h3=__("Login")
   div.ui-content
     form#loginForm

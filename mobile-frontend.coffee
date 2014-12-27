@@ -3,7 +3,7 @@ module.exports = (env) ->
   # ##Dependencies
   # * from node.js
   util = require 'util'
-  fs = require 'fs'
+  fs = env.require 'fs.extra'
   path = require 'path'
 
   # * pimatic imports.
@@ -22,6 +22,7 @@ module.exports = (env) ->
   # * own
   # socketIo = require 'socket.io'
   global.nap = require 'nap'
+  jqmthemer = require 'jqmthemer'
 
   # ##The MobileFrontend
   class MobileFrontend extends env.plugins.Plugin
@@ -34,6 +35,17 @@ module.exports = (env) ->
     # ###init the frontend:
     init: (@app, @framework, @config) ->
 
+      if @config.theme in ["aloe", "candy", "melon", "mint", "royal", "sand", "slate", "water"]
+        @config.theme = "graphite/#{@config.theme}"
+      if @config.theme is "classic"
+        @config.theme = "jqm/#{@config.theme}" 
+
+      themesWithLegazy = require('./mobile-frontend-config-schema').properties.theme.enum
+      @themes = []
+      for theme in themesWithLegazy
+        if theme.indexOf('/') is -1 then continue
+        @themes.push theme
+      
       app.post('/client-error', (req, res) =>
         error = req.body.error
         env.logger.error("Client error:", error.message)
@@ -58,7 +70,7 @@ module.exports = (env) ->
         res.sendfile(certFile)
 
       @framework.on 'after init', (context)=>
-        finished = Promise.resolve().then( =>
+        finished = @setupThemes().then( =>
           # and then setup the assets and manifest
           try
             assets = @setupAssets()
@@ -85,9 +97,7 @@ module.exports = (env) ->
               fs.writeFileAsync(indexFile, html)
               @setupManifest(assets, html)
             )
-          
         )
-
         context.waitForIt finished
         return
 
@@ -101,6 +111,7 @@ module.exports = (env) ->
         headerSwatch: 'a'
         dividerSwatch: 'a'
         menuSwatch: 'f'
+        fullName: @config.theme
       }
 
       renderOptions = {
@@ -111,6 +122,7 @@ module.exports = (env) ->
         api: env.api.all
         customTitle: @config.customTitle
         theme
+        themes: @themes
       }
 
       awaitingRenders = 
@@ -146,19 +158,6 @@ module.exports = (env) ->
     setupAssets: () ->
       parentDir = path.resolve __dirname, '..'
 
-      themeCss = (
-        if @config.theme is 'classic'
-          [ "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.inline-svg-1.4.2.css",
-            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]
-        else if @config.theme is 'pimatic'
-          [ "pimatic-mobile-frontend/app/css/themes/pimatic/jquery.mobile.icons.min.css",
-            "pimatic-mobile-frontend/app/css/themes/pimatic/pimatic.css",
-            "pimatic-mobile-frontend/app/css/themes/default/jquery.mobile.structure-1.4.2.css" ]
-        else
-          [ "pimatic-mobile-frontend/app/css/themes/graphite/#{@config.theme}/" +
-            "jquery.mobile-1.4.2.css" ]
-      )
-
       # Configure static assets with nap
       napAssets = nap(
         appDir: parentDir
@@ -186,6 +185,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/jquery.ui.datepicker.js"
               "pimatic-mobile-frontend/app/js/jquery.mobile.datepicker.mod.js"
               "pimatic-mobile-frontend/app/js/jquery.sparkline.js"
+              "pimatic-mobile-frontend/app/js/jqm-spinbox.js"
               "pimatic-mobile-frontend/app/js/human-format.js"
               "pimatic-mobile-frontend/app/js/sweet-alert.js"
             ]
@@ -221,9 +221,9 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/jsonlint.js"
             ]
           css:
-            theme: [
+            base: [
               "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
-            ] .concat themeCss .concat [
+            # ] .concat themeCss .concat [
               "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
               "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
@@ -231,7 +231,6 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/css/sweet-alert.css"
             ] 
             style: [
-              "pimatic-mobile-frontend/app/css/style.css"
               "pimatic-mobile-frontend/app/css/jqm-icon-pack-fa.css"
             ] .concat @additionalAssetFiles['css']
             editor: [
@@ -282,7 +281,8 @@ module.exports = (env) ->
         return (
           req.url.match(/^\/socket\.io\/.*$/)? or 
           (req.url in assets) or 
-          (req.url is '/application.manifest')
+          (req.url is '/application.manifest') or
+          req.url.match(/^\/theme\/.*\.css(\?.*)?$/)? 
         )
       )
 
@@ -299,6 +299,72 @@ module.exports = (env) ->
       @app.use express.static(__dirname + "/public")
 
       return assets
+
+    createThemeCss: (themeName) ->
+      env.logger.info "rendering theme: #{themeName}"
+      theme = require "./themes/#{themeName}"
+      # concate all css
+      cssFiles = _.clone(theme.css)
+      cssFiles.push "app/css/style.css"
+      cssFiles = cssFiles.concat theme.extraCss
+      return Promise.map(cssFiles, (cssFile) =>
+        return fs.readFileAsync(__dirname + "/#{cssFile}")
+      ).reduce( (fullCss, css) =>
+        fullCss += css;
+      ).then( (css) ->
+        themedCss = jqmthemer.themeCss theme, css 
+        env.logger.info "rendering theme finished"
+        return themedCss
+      )
+
+    setupThemes: () ->
+      # Setup get theme handler
+      @_themesRenderings = {}
+      @app.get("/theme/:themeBase/:themeSub.css", (req, res) =>
+        themeBase = req.params.themeBase
+        themeSub = req.params.themeSub
+        themeFullName = "#{themeBase}/#{themeSub}"
+        unless themeFullName in @themes
+          res.statusCode = 404
+          res.end()
+          return
+
+        cachePath = __dirname + "/public/theme/#{themeBase}-#{themeSub}.css"
+        
+        if req.query.save
+          # Save theme to session so that we can deliver the correct theme in the app manifest
+          req.session.theme = themeFullName
+
+        serveTheme = (css) =>
+          res.statusCode = 200
+          res.setHeader "content-type", "text/css"
+          res.setHeader "content-length", Buffer.byteLength(css)
+          res.end css
+          @_themesRenderings[themeFullName] = undefined
+          return css
+
+        if @config.mode  is "production"
+          if @_themesRenderings[themeFullName]?
+            return @_themesRenderings[themeFullName].then( (css) -> serveTheme(css) )
+
+          @_themesRenderings[themeFullName] = fs.readFileAsync(cachePath)
+            .then( (css) -> serveTheme(css.toString()))
+            .catch( (error) =>
+              if error.cause.code is 'ENOENT' 
+                return @createThemeCss(themeFullName).then( (css) ->
+                  fs.writeFileAsync(cachePath, css).then( -> serveTheme(css) )
+                )
+              else
+                throw error
+            )
+            .done()
+        else
+          # always rerender theme in development mode
+          @createThemeCss(themeFullName).then( (css) -> serveTheme(css) ).done()
+      )
+       # delete all old generated themes:
+      themeBase = __dirname + "/public/theme"
+      return fs.removeAsync(themeBase).then( -> fs.mkdirsAsync(themeBase) )
 
     setupManifest: (assets, indexHtml)->
       parentDir = path.resolve __dirname, '..'
@@ -328,7 +394,10 @@ module.exports = (env) ->
           createAppManifest = =>
             # render the app manifest
             return renderManifest(
-              cache: assets
+              cache: assets.concat [
+                "/theme/#{@config.theme}.css"
+                "/theme/THEMENAME.css?save=1"
+              ]
               network: ['*']
               fallback: []
               lastModified: lastModified
@@ -352,11 +421,15 @@ module.exports = (env) ->
 
       # If the app manifest is requested
       @app.get "/application.manifest", (req, res) =>
+        themeName = @config.theme
+        if req.session.theme? and req.session.theme in @themes
+          themeName = req.session.theme
+        customManifest = manifest.replace('THEMENAME', themeName)
         # then deliver it
         res.statusCode = 200
         res.setHeader "content-type", "text/cache-manifest"
-        res.setHeader "content-length", Buffer.byteLength(manifest)
-        res.end manifest
+        res.setHeader "content-length", Buffer.byteLength(customManifest)
+        res.end customManifest
 
   plugin = new MobileFrontend
   return plugin

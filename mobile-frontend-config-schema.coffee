@@ -1,30 +1,38 @@
 # #mobile-frontend configuration options
+themes = [
+  # legacy:
+  "classic", "aloe", "candy", "melon", "mint", "royal", "sand", "water"
+  # new names:
+  "graphite/aloe", "graphite/candy", "graphite/melon", "graphite/mint", 
+  "graphite/royal", "graphite/sand", "graphite/water", "graphite/dark",
+  "jqm/classic"
+]
 module.exports = {
   title: "pimatic-mobile-frontend config"
   type: "object"
   properties:
     mode:
-      doc: "production or development mode"
+      description: "production or development mode"
       type: "string"
       enum: ["production", "development"]
       default: "production"
     theme:
-      doc: """jQuery Mobile theme to use. If classic then jQuery Mobiles default theme is used, 
-        else the graphite theme with the corresponding color theme is used.
+      description: """jQuery Mobile theme to use. If classic then jQuery Mobiles default theme is 
+        used, else the graphite theme with the corresponding color theme is used.
         """
       # http://driftyco.github.io/graphite/
-      enum: ["classic", "aloe", "candy", "melon", "mint", "royal", "sand", "slate", "water"]
-      default: 'water'
+      enum: themes
+      default: 'graphite/water'
     flat:
-      doc: "Use a flat style if the theme supports it."
+      description: "Use a flat style if the theme supports it."
       type: "boolean"
       default: true
     customTitle:
-      doc: "Custimg title to use for the pimatic installation"
+      description: "Custimg title to use for the pimatic installation"
       type: "string"
       default: "pimatic"
     debug:
-      doc: "that to true to get additional debug outputs"
+      description: "that to true to get additional debug outputs"
       type: "boolean"
       default: false
 }
