@@ -320,10 +320,10 @@ $(document).on("pagecreate", '#index', tc (event) ->
     return false
   )
 
-  $('#index').on("vclick", '#item-tabs .edit-handle', tc (event) -> 
-    indexPage.onEditPageClicked(ko.dataFor(this))
-    return false
-  )
+  # $('#index').on("vclick", '#item-tabs .edit-handle', tc (event) -> 
+  #   indexPage.onEditPageClicked(ko.dataFor(this))
+  #   return false
+  # )
 
   $('#index').on("vclick", '#item-tabs #add-devicepage-link', tc (event) -> 
     indexPage.onAddPageClicked()
