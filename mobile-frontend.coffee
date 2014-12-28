@@ -311,7 +311,7 @@ module.exports = (env) ->
       return Promise.map(cssFiles, (cssFile) =>
         return fs.readFileAsync(__dirname + "/#{cssFile}")
       ).reduce( (fullCss, css) =>
-        fullCss += css;
+        fullCss += css
       ).then( (css) ->
         themedCss = jqmthemer.themeCss theme, css 
         env.logger.info "rendering theme finished"
