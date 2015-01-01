@@ -434,7 +434,7 @@ $(document).on("pageshow", '#index', tc (event) ->
   updateCarousel()
   setTimeout(( ->
     updateCarousel()
-  ), 300)
+  ), 1)
 )
 
 $(document).on("pagebeforeshow", '#index', tc (event) ->
