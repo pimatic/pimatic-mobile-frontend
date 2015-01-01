@@ -102,7 +102,7 @@ script#devicepages-template(type='text/template')
 script#devicepage-template(type='text/template')
   div(data-bind="id: 'device-page-'+$data.id()")
     ul(data-role="listview", class="items", 
-      data-bind="sortable: {isSorting: $root.isSortingItems, sorted: $root.onItemsSorted, drop: $root.onDropItemOnTrash, droppable: '.droppable-' + $data.id}")
+      data-bind="sortable: {isSorting: $root.isSortingItems, sorted: $root.onItemsSorted, drop: $root.onDropItemOnTrash, droppable: '.droppable-' + $data.id, scroller: '.owl-item'}")
       <!-- ko if: ! $root.enabledEditing() && $data.devices().length === 0  -->
       li.empty-list()=__("I'm an empty page, add some items!")
       <!-- /ko -->      

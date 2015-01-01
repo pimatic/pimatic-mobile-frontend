@@ -401,8 +401,8 @@
             value.isSorting(yes) if value.isSorting?
             $(element).addClass("noAnimation")
             parent.css('margin-bottom', -parent.innerHeight())
-            parents = $(element).parents('.ui-content.overthrow')
-            scrollArea = new ScrollArea(parents[0]);
+            parents = $(element).parents(value.scroller or '.ui-content.overthrow')
+            scrollArea = new ScrollArea(parents[0])
             
             lastX = null
             lastY = null
@@ -419,7 +419,7 @@
             )
             unless onDropRegion then updateOrder()
             pepObj = parent.data('plugin_pep')
-            $.pep.unbind( parent );
+            $.pep.unbind( parent )
             $(element).find('.sortable').attr('style', '')
             $(element).css('height', '')
             value.isSorting(no) if value.isSorting?

@@ -69,7 +69,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
           height = itemTabs.height()
           if height isnt lastNavbarHeight
             itemLists.find('.items').each( () ->
-              $(this).css('padding-top', height)
+              $(this).parent().css('padding-top', height)
             )
           clearTimeout(updateNavbarLayoutTimeput)
           if recheck

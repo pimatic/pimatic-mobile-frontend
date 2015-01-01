@@ -16,14 +16,15 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     title=customTitle
     != nap.css('base')
     != nap.css('style')
-    link#theme-link(rel='stylesheet', data-default-theme=theme.fullName, href='/theme/' + theme.fullName + '.css', type='text/css', media='all')
     != nap.js('jquery')
     script(src='socket.io/socket.io.js')
     script(src='api/decl-api-client.js')
     script(type='text/javascript')!="locale = " + JSON.stringify(i18n.getCatalog()) + ";"
     script(type='text/javascript')!="api = " + JSON.stringify(api) + ";"
+    link#theme-link(rel='stylesheet', data-default-theme=theme.fullName, media='all')
     != nap.js('main')
     script#editor-scripts-template(type='text/template')!= nap.css('editor') + nap.js('editor')  
+    link#test(rel='stylesheet', data-default-theme=theme.fullName, media='all')
   body(class=(theme.flat ? 'flat' : ''))
     include pages/index
     include pages/rules

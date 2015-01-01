@@ -135,7 +135,7 @@ pimatic.try = (func) ->
   try
     return func.apply(this, arguments)
   catch e
-    console.log "ignoring error: ", e 
+    #console.log "ignoring error: ", e 
 
 pimatic.tryCatch = (func) ->
   return -> 
@@ -232,7 +232,7 @@ pimatic.autoFillId = (nameObservable, idObservable, actionObservable) =>
 window.__ = (text, args...) -> 
   translated = text
   if locale[text]? then translated = locale[text]
-  else console.log 'no translation yet:', text
+  #else console.log 'no translation yet:', text
     
   for a in args
     translated = translated.replace /%s/, a
@@ -267,13 +267,19 @@ pimatic.changeTheme = (fullName) ->
   pimatic.storage.set('pimatic.theme', fullName)
 
 ( ->
+
+  themeLink = $('#theme-link')
+  themeLink.remove()
   theme = pimatic.storage.get('pimatic.theme')
   if theme? 
-    pimatic.changeTheme(theme)
+    themeLink.attr('href', '/theme/' + theme + '.css?save=1')
   else
-    defaultTheme = $('#theme-link').attr('data-default-theme')
-    $('#theme-link').attr('href', '/theme/' + defaultTheme + '.css?save=1')
-    pimatic.themeChanged = true
+    defaultTheme = themeLink.attr('data-default-theme')
+    themeLink.attr('href', '/theme/' + defaultTheme + '.css?save=1')
+  pimatic.themeChanged = true
+  html = themeLink.prop('outerHTML')
+  # This prevents the browser from rendering the page untill the css is loaded
+  document.write(html)
 
   $(document).on('change', '#select-theme', () ->
     pimatic.changeTheme($(this).val())
