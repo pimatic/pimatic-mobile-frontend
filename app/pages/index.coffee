@@ -432,6 +432,9 @@ $(document).on('click', '.content-overlay', tc (event) ->
 
 $(document).on("pageshow", '#index', tc (event) ->
   updateCarousel()
+  setTimeout(( ->
+    updateCarousel()
+  ), 300)
 )
 
 $(document).on("pagebeforeshow", '#index', tc (event) ->
