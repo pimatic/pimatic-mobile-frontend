@@ -1385,6 +1385,7 @@ border-bottom-left-radius: inherit;
   margin-bottom: -4px;
   text-align: right;
   white-space: normal;
+  height: 38px;
 }
 
 #index li.thermostat div.controls .ui-controlgroup{
