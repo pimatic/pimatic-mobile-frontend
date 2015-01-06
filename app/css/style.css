@@ -1408,7 +1408,9 @@ border-bottom-left-radius: inherit;
 #index li.thermostat div.controls .spinbox input{
   border: none;
   background: none;
-  width: 20px;
+  width: 36px;
+  margin-left: -8px;
+  margin-right: -8px;
   padding: 0;
   font-weight: bold;
   color: #000 /*{a-bup-color}*/;
