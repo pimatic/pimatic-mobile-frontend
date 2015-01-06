@@ -124,12 +124,12 @@
 			w.d.input.css( { textAlign: "center" } );
 			
 			if ( o.type !== "vertical" ) {
-				w.d.inputWrap.css( { 
+/*				w.d.inputWrap.css( { 
 					padding: o.mini ? "1px 0" : "4px 0 3px" 
 				} );
 				w.d.input.css( { 
 					width: o.mini ? "40px" : "50px" 
-				} );
+				} );*/
 			} else {
 				w.d.wrap.css( { 
 					width: "auto"

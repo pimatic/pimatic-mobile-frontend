@@ -1381,11 +1381,10 @@ border-bottom-left-radius: inherit;
   max-width: 100%;
   margin: 0;
   overflow: hidden;
-  margin-top: -4px;
-  margin-bottom: -4px;
+  margin-top: -4.5px;
+  margin-bottom: -4.5px;
   text-align: right;
   white-space: normal;
-  height: 38px;
 }
 
 #index li.thermostat div.controls .ui-controlgroup{
@@ -1409,7 +1408,8 @@ border-bottom-left-radius: inherit;
 #index li.thermostat div.controls .spinbox input{
   border: none;
   background: none;
-  height: 29.75px;
+  width: 20px;
+  padding: 0;
   font-weight: bold;
   color: #000 /*{a-bup-color}*/;
 }
