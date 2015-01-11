@@ -189,6 +189,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/human-format.js"
               "pimatic-mobile-frontend/app/js/sweet-alert.js"
               "pimatic-mobile-frontend/app/js/headroom.js"
+              "pimatic-mobile-frontend/app/js/inobounce.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
