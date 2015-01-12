@@ -216,6 +216,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/pages/updates.coffee"
               "pimatic-mobile-frontend/app/pages/edit-devicepage.coffee"
               "pimatic-mobile-frontend/app/pages/graph.coffee"
+              "pimatic-mobile-frontend/app/pages/database.coffee"
             ] .concat @additionalAssetFiles['js']
             editor: [
               "pimatic-mobile-frontend/app/js/jsoneditor.js"

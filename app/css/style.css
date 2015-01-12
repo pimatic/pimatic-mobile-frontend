@@ -1542,3 +1542,26 @@ border-bottom-left-radius: inherit;
   -o-animation-name: slideUp;
   animation-name: slideUp;
 }
+
+#database-problems li {
+  white-space: normal;
+}
+
+#database-problems .info {
+  float: left;
+}
+
+#database-problems .attribute {
+  font-weight: bold;
+}
+
+#database-problems .action {
+  display: block;
+  float: right;
+  padding-left: 10px;
+
+}
+
+#database-problems .action a {
+  margin: -2px 0;
+}
