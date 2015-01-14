@@ -1565,3 +1565,58 @@ border-bottom-left-radius: inherit;
 #database-problems .action a {
   margin: -2px 0;
 }
+
+.node {
+  background-color: #fff /*{a-body-background-color}*/;
+  border: 1px solid #ddd /*{a-body-border}*/;
+  color: #333 /*{a-body-color}*/;
+  padding: 6px 10px;
+}
+
+.binary-operator {
+  display: inline-block;
+  font-weight: bold;
+  padding: 8px 0;
+}
+
+.node-and > .node-and, node-or > node-or {
+  border: none;
+  padding: 0;
+}
+
+.node-predicate {
+  padding: 0px 0;
+  border: none;
+  /*display: inline-block*/
+}
+
+.node-predicate .buttons{
+  display: inline-block
+}
+
+.node-predicate .ui-btn {
+  font-weight: bold;
+}
+
+
+.node a.ui-btn {
+  opacity: 0.5;
+  border: none;
+  margin: 2px 0;
+  font-size: 15px;
+  padding-left: 34px;
+  padding-right: 8px;
+}
+
+.node-predicate > .ui-btn {
+  margin-top: -3px;
+  margin-bottom: -3px;
+}
+
+.node-predicate > .ui-btn:first {
+  margin-left: 10px;
+}
+
+.node .ui-btn:hover {
+  opacity: 1;
+}

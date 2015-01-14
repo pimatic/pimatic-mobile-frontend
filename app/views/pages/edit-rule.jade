@@ -1,9 +1,36 @@
+script#rule-condition-template(type='text/template')
+  div
+    a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="visible: !$data.tree(), click: addCondition")=__('Condition')
+    <!-- ko template: { name: "rule-predicate-template", data: tree, if: tree} --><!-- /ko -->
+  div#rule-condition-selector(data-bind="visible: conditionInput.visible")
+    input#rule-condition-input(autocomplete="off", autocapitalize="none", autocorrect="off", type="text", data-bind="textInput: conditionInput.value, event: {keypress: conditionInput.keypress}")
+    div(data-bind="foreach: conditionInput.defaults")
+      a.ui-btn.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.conditionInput.selectPredicate, text: name")
+    div(data-bind="foreach: conditionInput.elements")
+      select(data-bind="options: options, value: match")
+script#rule-predicate-template(type='text/template')
+  div.node(data-bind="css: { 'node-predicate': type == 'predicate', 'node-and': type == 'and', 'node-or': type == 'or' }")
+    <!-- ko template: { name: "rule-predicate-template", data: $data.left, if: $data.left} --><!-- /ko -->
+    <!-- ko if: type != 'predicate' -->
+    span.binary-operator(data-bind="text: type")
+    <!-- /ko -->
+    <!-- ko if: type == 'predicate' -->
+    span.predicate.ui-btn.ui-btn-inline.ui-mini.ui-corner-all(data-bind="text: predicate.token")
+    <!-- /ko -->
+    <!-- ko template: { name: "rule-predicate-template", data: $data.right, if: $data.right} --><!-- /ko -->
+    div.buttons
+      <!-- ko if: type != 'predicate' || $parent.type != 'and'-->
+      a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addAnd")=__('and')
+      <!-- /ko -->
+      <!-- ko if: type != 'predicate' || $parent.type != 'or'-->
+      a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addOr")=__('or')
+      <!-- /ko -->
 div#edit-rule(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     h3(data-bind="text: pageTitle()")
   div.ui-content.overthrow
     form#edit-rule-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
-      .ui-field-contain
+      .ui-field-contain 
         label.short-label(for='edit-rule-name')=__('Name') + ': '
         input#edit-rule-name(type="text", placeholder=__('Short description') data-bind="textInput: ruleName")
       .ui-field-contain
@@ -12,6 +39,7 @@ div#edit-rule(data-role='page')
       .ui-field-contain
         label(for='edit-rule-condition')='if'
         textarea#edit-rule-condition(placeholder="Condition", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleCondition")
+        <!-- ko template: { name: "rule-condition-template", data: $data} --><!-- /ko -->
       .ui-field-contain
         label(for='edit-rule-actions')='then'
         textarea#edit-rule-actions(placeholder="Actions", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleActions")

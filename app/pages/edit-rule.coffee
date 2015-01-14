@@ -4,6 +4,64 @@
 $(document).on("pagebeforecreate", (event) ->
   if pimatic.pages.editRule? then return
 
+
+  class ConditionInput
+
+    visible: ko.observable(false)
+    value: ko.observable("")
+    defaults: ko.observable([])
+    elements: ko.observable([])
+    parentOp: null
+
+    constructor: (@ruleView) ->
+
+    keypress: (model, event) =>
+      if event.keyCode is 13 #enter
+        @parse()
+        return false
+      return true
+
+    parse: ->
+      pimatic.client.rest.getRuleConditionHints(
+        {conditionInput: @value()}
+      ).done( (data) =>
+        console.log data
+        if data.success and data.hints.tree?
+          data.hints.tree.parent = @parentOp
+          @updateTree(data.hints.tree)
+          @visible(false)
+        else
+          console.log "not valid"
+      )
+
+    refreshDefaults: ->
+      pimatic.client.rest.getPredicateDefaults(
+        {}
+      ).done( (data) =>
+        console.log data
+        if data.success and data.defaults?
+          @defaults(data.defaults)
+      )
+
+
+    updateTree: (ele) ->
+      unless @parentOp?
+        @ruleView.tree(ele)
+      else
+        @parentOp.right = ele
+        @ruleView.tree(@ruleView.tree())
+
+    selectPredicate: (pred) =>
+      @value(pred.input)
+      pimatic.client.rest.getPredicateInfo(
+        {input: pred.input, predicateProviderClass: pred.predicateProviderClass}
+      ).done( (data) =>
+        console.log data
+        if data.success and data.elements?
+          @elements(data.elements)
+      )
+      console.log pred
+
   class EditRuleViewModel
 
     autocompleteAjax: null
@@ -16,6 +74,36 @@ $(document).on("pagebeforecreate", (event) ->
     ruleActions: ko.observable('')
     ruleEnabled: ko.observable(yes)
     ruleLogging: ko.observable(yes)
+    tree: ko.observable(null)
+
+    addCondition: =>
+      @conditionInput.parentOp = null
+      @conditionInput.visible(true)
+      @conditionInput.value("")
+      @conditionInput.refreshDefaults()
+      $('#rule-condition-input').focus()
+
+    addAnd: (ele) => @addBinaryOp('and', ele)
+
+    addOr: (ele) =>  @addBinaryOp('or', ele)
+
+    addBinaryOp: (type, ele) ->
+      newBinOp =  {type, left: ele, right: null}
+      if ele.parent?
+        if ele.parent.left is ele
+          ele.parent.left = newBinOp
+        else
+          ele.parent.right = newBinOp
+        ele.parent = newBinOp
+        @tree(@tree())
+      else
+        ele.parent = newBinOp
+        @tree(newBinOp)
+
+      @conditionInput.parentOp = newBinOp
+      @conditionInput.visible(true)
+      @conditionInput.value("")
+      $('#rule-condition-input').focus()
 
     constructor: ->
       @ruleAsText = ko.computed( => "if #{@ruleCondition()} then #{@ruleActions()}")
@@ -24,7 +112,7 @@ $(document).on("pagebeforecreate", (event) ->
       )
 
       pimatic.autoFillId(@ruleName, @ruleId, @action)
-
+      @conditionInput = new ConditionInput(this)
     resetFields: () ->
       @ruleId('')
       @ruleName('')
@@ -118,6 +206,8 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
             {conditionInput: term},
             {global: false}
           ).done( (data) =>
+            if data.hints.tree?
+              editRulePage.tree(data.hints.tree)
             result.autocomplete = data.hints?.autocomplete or []
             result.format = data.hints?.format or []
             if data.error then console.log data.error
