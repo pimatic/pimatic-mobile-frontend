@@ -140,23 +140,14 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
 
     onAddRuleClicked: ->
       editRulePage = pimatic.pages.editRule
-      editRulePage.resetFields()
-      editRulePage.action('add')
-      editRulePage.ruleEnabled(yes)
+      jQuery.mobile.pageParams = {action: 'add'}
       return true
 
     onEditRuleClicked: (rule) =>
       unless @hasPermission('rules', 'write') or pimatic.isDemo()
         pimatic.showToast(__("Sorry, you have no permissions to edit this rule."))
         return false
-      editRulePage = pimatic.pages.editRule
-      editRulePage.action('update')
-      editRulePage.ruleId(rule.id)
-      editRulePage.ruleName(rule.name())
-      editRulePage.ruleCondition(rule.conditionToken())
-      editRulePage.ruleActions(rule.actionsToken())
-      editRulePage.ruleEnabled(rule.active())
-      editRulePage.ruleLogging(rule.logging())
+      jQuery.mobile.pageParams = {action: 'update', rule}
       return true
 
   pimatic.pages.rules = rulesPage = new RulesViewModel()
