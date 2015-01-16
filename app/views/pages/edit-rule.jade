@@ -1,9 +1,79 @@
+script#rule-condition-template(type='text/template')
+  div#rule-condition-gui.ui-corner-all
+    a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="visible: !$data.tree(), click: addCondition")=__('Condition')
+    <!-- ko template: { name: "rule-predicate-template", data: tree, if: tree} --><!-- /ko -->
+  a.input-mode-switch(href="#", data-bind="click: $root.setTextMode")=__('switch to text mode')
+script#rule-condition-selector-element(type='text/template')
+  span
+    <!-- ko if: type == "select" -->
+    select(data-mini="true", data-inline="true", data-bind="jqmoptions: options, value: match, optionsText: $root.conditionInput.elementOptionsText, disabled: $parent.disableElementsInput")
+    <!-- /ko -->
+    <!-- ko if: type == "static" -->
+    span(data-bind="text: match, disabled: $parent.disableElementsInput")
+    <!-- /ko -->
+    <!-- ko if: type == "text" -->
+    input(type="text", data-bind="textInput: match, disabled: $parent.disableElementsInput")
+    <!-- /ko -->
+    <!-- ko if: type == "time" -->
+    input(type="text", data-bind="textInput: match, disabled: $parent.disableElementsInput")
+    <!-- /ko -->
+script#rule-condition-selector-template(type='text/template')
+  div#rule-condition-selector(data-bind="visible: conditionInput.visible, event: {keypress: conditionInput.keypress}")
+    div.outer.overthrow
+      div.inner
+        .ui-field-contain 
+          label.short-label(for='edit-rule-name')=__('Predicate') + ': '
+          div.ui-input-text
+            input#rule-condition-input(autocomplete="off", autocapitalize="none", autocorrect="off", type="text", data-bind="textInput: conditionInput.inputValue, disabled: conditionInput.disablePredicateInput")
+          div(data-bind="foreach: conditionInput.errors")
+            div(data-bind="text: $data")
+        div#rule-condition-presets.ui-field-contain(data-bind="visible: conditionInput.presetsVisible")
+          label()=__('Available Events') + ': '
+          div(data-bind="foreach: conditionInput.presets")
+            a.ui-btn.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.conditionInput.selectPredicate, text: name")
+        div#rule-condition-elements.ui-field-contain(data-bind="visible: conditionInput.elementsVisible")
+          label()=__('Event') + ': '
+          div.ui-body-inherit.ui-corner-all.ui-shadow-inset
+            a#rule-condition-back-presets.ui-btn.ui-btn-inline.ui-mini.ui-corner-all.ui-icon-back.ui-btn-icon-left(data-bind="click: conditionInput.showDefaultSelection")=__('Back')
+            div.elements(data-bind="")
+              <!-- ko template: { name: "rule-condition-selector-element", foreach: conditionInput.elements} --><!-- /ko -->
+        div#rule-condition-for-elements.ui-field-contain(data-bind="visible: conditionInput.forElementsVisible")
+          .ui-checkbox.ui-mini
+            label.ui-btn.ui-corner-all.ui-btn-inherit.ui-btn-icon-left.ui-checkbox-off(for='checkbox-enhanced')=__('Duration') + ': '
+              input#checkbox-enhanced(type='checkbox', data-enhanced='true', data-bind="jqmchecked: conditionInput.forEnabled")
+          div.ui-body-inherit.ui-corner-all.ui-shadow-inset
+            div.elements(data-bind="")
+            <!-- ko template: { name: "rule-condition-selector-element", foreach: conditionInput.forElements} --><!-- /ko -->
+        .ui-grid-a.controls
+          .ui-block-a
+            a#rule-condition-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-bind="click: conditionInput.cancel")=__('Cancel')
+          .ui-block-b
+            a#rule-condition-ok.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: conditionInput.ok")=__('OK')
+script#rule-predicate-template(type='text/template')
+  div.node(data-bind="css: { 'node-predicate': type == 'predicate', 'node-and': type == 'and', 'node-or': type == 'or' }")
+    <!-- ko template: { name: "rule-predicate-template", data: $data.left, if: $data.left} --><!-- /ko -->
+    <!-- ko if: type != 'predicate' -->
+    span.binary-operator(data-bind="text: type")
+    <!-- /ko -->
+    <!-- ko if: type == 'predicate' -->
+    span.predicate.ui-btn.ui-btn-inline.ui-mini.ui-corner-all(
+      data-bind="text: predicate.token + (predicate.for ? '  for ' + predicate.for.token : ''), click: $root.editPredicate")
+    <!-- /ko -->
+    <!-- ko template: { name: "rule-predicate-template", data: $data.right, if: $data.right} --><!-- /ko -->
+    div.buttons
+      <!-- ko if: type != 'predicate' || $parent.type != 'and'-->
+      a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addAnd")=__('and')
+      <!-- /ko -->
+      <!-- ko if: type != 'predicate' || $parent.type != 'or'-->
+      a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addOr")=__('or')
+      <!-- /ko -->
 div#edit-rule(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     h3(data-bind="text: pageTitle()")
   div.ui-content.overthrow
+    <!-- ko template: { name: "rule-condition-selector-template", data: $data} --><!-- /ko -->
     form#edit-rule-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false")
-      .ui-field-contain
+      .ui-field-contain 
         label.short-label(for='edit-rule-name')=__('Name') + ': '
         input#edit-rule-name(type="text", placeholder=__('Short description') data-bind="textInput: ruleName")
       .ui-field-contain
@@ -11,7 +81,13 @@ div#edit-rule(data-role='page')
         input#edit-rule-id(type="text", placeholder="Internal ID" data-bind="textInput: ruleId, jqmenabled: action() == 'add'")  
       .ui-field-contain
         label(for='edit-rule-condition')='if'
-        textarea#edit-rule-condition(placeholder="Condition", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleCondition")
+        textarea#edit-rule-condition(placeholder="Condition", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleCondition, visible: editMode() == 'text'")
+        <!-- ko if: editMode() == "text" -->
+        a.input-mode-switch(href="#", data-bind="click: $root.setGuiMode")=__('switch to gui mode')
+        <!-- /ko -->
+        <!-- ko if: editMode() == "gui" -->
+        <!-- ko template: { name: "rule-condition-template", data: $data} --><!-- /ko -->
+        <!-- /ko -->
       .ui-field-contain
         label(for='edit-rule-actions')='then'
         textarea#edit-rule-actions(placeholder="Actions", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleActions")

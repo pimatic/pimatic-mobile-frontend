@@ -190,6 +190,13 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/sweet-alert.js"
               "pimatic-mobile-frontend/app/js/headroom.js"
               "pimatic-mobile-frontend/app/js/inobounce.js"
+              "pimatic-mobile-frontend/app/js/mobiscroll.core.js"
+              "pimatic-mobile-frontend/app/js/mobiscroll.widget.js"
+              "pimatic-mobile-frontend/app/js/mobiscroll.scroller.js"
+              "pimatic-mobile-frontend/app/js/mobiscroll.util.datetime.js"
+              "pimatic-mobile-frontend/app/js/mobiscroll.datetimebase.js"
+              "pimatic-mobile-frontend/app/js/mobiscroll.datetime.js"
+              "pimatic-mobile-frontend/app/js/mobiscroll.select.js"
             ]
             main: [
               "pimatic-mobile-frontend/app/scope.coffee"
@@ -232,7 +239,10 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
               "pimatic-mobile-frontend/app/css/owl.carousel.css"
               "pimatic-mobile-frontend/app/css/sweet-alert.css"
-            ] 
+              "pimatic-mobile-frontend/app/css/mobiscroll.animation.css"
+              "pimatic-mobile-frontend/app/css/mobiscroll.widget.css"
+              "pimatic-mobile-frontend/app/css/mobiscroll.scroller.css"
+            ]
             style: [
               "pimatic-mobile-frontend/app/css/jqm-icon-pack-fa.css"
             ] .concat @additionalAssetFiles['css']
