@@ -154,14 +154,20 @@ class DeviceAttribute
       # show 3 decimals for kW and kWh
       if info.unit in ['W', 'Wh'] and info.prefix is 'k'
         info.num = Math.round(value) / 1e3
+        info.num = info.num.toFixed(3)
 
       return {
         num: info.num
         unit: info.prefix + info.unit
       }
     else
+      if @unit in ['kW', 'kWh']
+        num = Math.round(value * 1e3) / 1e3
+        num = num.toFixed(3)
+      else
+        num = Math.round(value * 1e2) / 1e2
       return {
-        num: Math.round(value * 1e2) / 1e2
+        num
         unit: @unit or ''
       }
 
