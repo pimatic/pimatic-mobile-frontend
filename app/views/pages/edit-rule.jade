@@ -17,6 +17,9 @@ script#rule-condition-selector-element(type='text/template')
     <!-- ko if: type == "time" -->
     input(type="text", data-bind="textInput: match, disabled: $parent.disableElementsInput")
     <!-- /ko -->
+    <!-- ko if: type == "number" -->
+    input(type="text", data-bind="textInput: match, disabled: $parent.disableElementsInput")
+    <!-- /ko -->
 script#rule-condition-selector-template(type='text/template')
   div#rule-condition-selector(data-bind="visible: conditionInput.visible, event: {keypress: conditionInput.keypress}")
     div.outer.overthrow
