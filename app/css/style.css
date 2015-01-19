@@ -1636,6 +1636,8 @@ border-bottom-left-radius: inherit;
 
 #rule-condition-back-presets {
   float: right;
+  margin-right: 0;
+  margin-left: 12px;
 }
 
 #rule-condition-selector {
