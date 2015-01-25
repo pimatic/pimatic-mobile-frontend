@@ -11,11 +11,15 @@ $(document).on("pagecreate", '#database', tc (event) ->
         $key: 'id'
         $itemOptions:
           $handler: 'copy'
+      deviceAttributes:
+        $key: 'id'
+        $itemOptions:
+          $handler: 'copy'
     }
 
     constructor: ->
       @hasPermission = pimatic.hasPermission
-      @updateFromJs([])
+      @updateFromJs(problems: [], deviceAttributes: [])
 
       @updateListView = ko.computed( =>
         @problems()
@@ -23,7 +27,7 @@ $(document).on("pagecreate", '#database', tc (event) ->
       )
 
     updateFromJs: (data) ->
-      ko.mapper.fromJS({problems: data}, DatabaseViewModel.mapping, this)
+      ko.mapper.fromJS(data, DatabaseViewModel.mapping, this)
 
     deleteDeviceAttribute: (item) =>
       pimatic.client.rest.deleteDeviceAttribute(
@@ -35,7 +39,6 @@ $(document).on("pagecreate", '#database', tc (event) ->
       ).fail(ajaxAlertFail)
 
     checkDatabase: ->
-
       ajaxCall = =>
         if @loadProblemsAjax? then return
         pimatic.loading "databasecheck", "show", text: __('Checking Database')
@@ -47,12 +50,31 @@ $(document).on("pagecreate", '#database', tc (event) ->
         ).done( tc (data) =>
           @loadProblemsAjax = null
           if data.success
-            @updateFromJs(data.problems)
+            @updateFromJs(problems: data.problems)
           return
         ).fail(ajaxAlertFail)
 
       unless @loadProblemsAjax? then ajaxCall()
       else @loadProblemsAjax.done( => ajaxCall() )
+
+    querydeviceAttributeInfo: ->
+      ajaxCall = =>
+        if @loadDAInfoAjax? then return
+        pimatic.loading "deviceattributeinfo", "show", text: __('Querying attribute info')
+        pimatic.client.rest.queryDeviceAttributeEventsInfo(
+          {},
+          {timeout: 60000, global: no}
+        ).always( =>
+          pimatic.loading "deviceattributeinfo", "hide"
+        ).done( tc (data) =>
+          @loadDAInfoAjax = null
+          if data.success
+            @updateFromJs(deviceAttributes: data.deviceAttributes)
+          return
+        ).fail(ajaxAlertFail)
+
+      unless @loadDAInfoAjax? then ajaxCall()
+      else @loadDAInfoAjax.done( => ajaxCall() )
 
   try
     pimatic.pages.database = databasePage = new DatabaseViewModel()
@@ -65,7 +87,8 @@ $(document).on("pagecreate", '#database', tc (event) ->
 $(document).on("pagebeforeshow", '#database', tc (event) ->
   try
     databasePage = pimatic.pages.database
-    databasePage.checkDatabase();
+    databasePage.checkDatabase()
+    databasePage.querydeviceAttributeInfo()
   catch e
     TraceKit.report(e)
 )
