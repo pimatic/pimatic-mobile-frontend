@@ -621,7 +621,8 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
 }
 
 
-table#events-table {
+table#events-table,
+table#database-attribute-info {
   background: #fff /*{a-body-background-color}*/;
   width: 100%;
 }
