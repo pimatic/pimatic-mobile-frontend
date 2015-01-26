@@ -14,7 +14,10 @@ $(document).on("pagecreate", '#database', tc (event) ->
       deviceAttributes:
         $key: 'id'
         $itemOptions:
-          $handler: 'copy'
+          $default: "copy"
+          count: "observe"
+          interval: "observe"
+          expire: "observe"
     }
 
     constructor: ->
@@ -69,12 +72,39 @@ $(document).on("pagecreate", '#database', tc (event) ->
         ).done( tc (data) =>
           @loadDAInfoAjax = null
           if data.success
+            for da in data.deviceAttributes
+              da.count = '?'
             @updateFromJs(deviceAttributes: data.deviceAttributes)
+            @querydeviceAttributeCounts()
           return
         ).fail(ajaxAlertFail)
 
       unless @loadDAInfoAjax? then ajaxCall()
       else @loadDAInfoAjax.done( => ajaxCall() )
+
+    querydeviceAttributeCounts: ->
+      ajaxCall = =>
+        if @loadCountsAjax? then return
+        pimatic.loading "deviceattributeCounts", "show", text: __('Querying counts')
+        pimatic.client.rest.queryDeviceAttributeEventsCounts(
+          {},
+          {timeout: 60000, global: no}
+        ).always( =>
+          pimatic.loading "deviceattributeCounts", "hide"
+        ).done( tc (data) =>
+          @loadCountsAjax = null
+          if data.success
+            for c in data.counts
+              for da in @deviceAttributes()
+                if da.id is c.deviceAttributeId
+                  da.count(c.count)
+            for da in @deviceAttributes()
+              da.count(0) if da.count() is '?'
+          return
+        ).fail(ajaxAlertFail)
+
+      unless @loadCountsAjax? then ajaxCall()
+      else @loadCountsAjax.done( => ajaxCall() )
 
   try
     pimatic.pages.database = databasePage = new DatabaseViewModel()
