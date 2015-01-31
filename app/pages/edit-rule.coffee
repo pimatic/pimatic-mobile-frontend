@@ -21,11 +21,14 @@ $(document).on("pagebeforecreate", (event) ->
     inputValue: ko.observable(true)
     disablePredicateInput: ko.observable(false)
     disableElementsInput: ko.observable(false)
+    justTrigger: ko.observable(false)
 
     constructor: (@ruleView) ->
 
       @computedPredicateToken = ko.computed( =>
         tokens = ""
+        if @justTrigger()
+          tokens +="trigger: "
         for e in @elements()
           tokens += e.match()
         return tokens
@@ -103,6 +106,7 @@ $(document).on("pagebeforecreate", (event) ->
           {input, predicateProviderClass}
         ).done( (data) =>
           if data.success and data.result.predicate?
+            @justTrigger(data.result.predicate.justTrigger)
             elements = data.result.elements
             # If we are showing a new predicate and we were not able to parse it
             # then add just a single text element, so that the user can correct the predicate
@@ -185,6 +189,7 @@ $(document).on("pagebeforecreate", (event) ->
       @setInputValue("")
       @refreshPresets()
       @showDefaultSelection()
+      @justTrigger(false)
       supportsTouch = 'ontouchstart' of window or navigator.msMaxTouchPoints
       unless supportsTouch
         $('#rule-condition-input').focus()
@@ -196,10 +201,15 @@ $(document).on("pagebeforecreate", (event) ->
       )
       @parentOp = node.parent
       @visible(true)
-      @setInputValue(
-        if node.predicate.for? then "#{node.predicate.token} for #{node.predicate.for.token}"
-        else node.predicate.token
-      )
+
+      if node.predicate.justTrigger
+        inputValue = "trigger: "
+      else
+        inputValue = ""
+      inputValue += node.predicate.token
+      if node.predicate.for?
+        inputValue += " for #{node.predicate.for.token}"
+      @setInputValue(inputValue)
       @getElements(@inputValue())
 
     ok: =>

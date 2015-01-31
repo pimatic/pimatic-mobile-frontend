@@ -60,7 +60,7 @@ script#rule-predicate-template(type='text/template')
     <!-- /ko -->
     <!-- ko if: type == 'predicate' -->
     span.predicate.ui-btn.ui-btn-inline.ui-mini.ui-corner-all(
-      data-bind="text: predicate.token + (predicate.for ? '  for ' + predicate.for.token : ''), click: $root.editPredicate")
+      data-bind="text: (predicate.justTrigger ? 'trigger: ' : '' ) + predicate.token + (predicate.for ? '  for ' + predicate.for.token : ''), click: $root.editPredicate")
     <!-- /ko -->
     <!-- ko template: { name: "rule-predicate-template", data: $data.right, if: $data.right} --><!-- /ko -->
     div.buttons
