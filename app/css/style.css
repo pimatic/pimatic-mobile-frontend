@@ -685,6 +685,53 @@ table#database-attribute-info {
     font-weight: bold;
   }
 
+  #database-attribute-info tbody td, #database-attribute-info thead th{
+    border: none;
+  }
+   
+  #database-attribute-info tbody tr,
+  #database-attribute-info thead tr {
+    border-bottom: 1px solid #ddd /*{a-body-border}*/;
+  }
+  
+  #events-table thead tr {
+    display: block;
+  }
+
+  #database-attribute-info .device-column {
+    display: block;
+    float: left;
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-bottom: 0px;
+  }
+
+  #database-attribute-info .type-column span:first-child {
+    display: block;
+  }
+
+  #database-attribute-info .attribute-column {
+    float: left;
+    display: block;
+  }
+
+  #database-attribute-info .interval-column {
+    display: block;
+    width: 100%;
+    float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-bottom: 0px;
+  }
+
+
+  #database-attribute-info .expire-column {
+    float: left;
+    display: block;
+  }
+
 
 }
 
