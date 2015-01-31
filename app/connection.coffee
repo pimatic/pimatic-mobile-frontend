@@ -13,7 +13,6 @@ $(document).on( "pagebeforecreate", (event) ->
   })
 
   pimatic.socket.io.on 'open', () ->
-    #console.log "m: open"
     pimatic.loading "socket", "hide"
 
     if window.applicationCache?
@@ -25,6 +24,7 @@ $(document).on( "pagebeforecreate", (event) ->
 
   connectionLostErrroCount = 0
   pimatic.socket.on('connect', ->
+    pimatic.loading "socket", "hide"
     pimatic.pages.login?.hideLoginDialog()
     connectionLostErrroCount = 0
     pimatic.socket.emit('call', {
