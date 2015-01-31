@@ -41,6 +41,20 @@ $(document).on("pagecreate", '#database', tc (event) ->
         return
       ).fail(ajaxAlertFail)
 
+    updateDeviceAttribute: (item) =>
+      pimatic.client.rest.updateDeviceAttribute(
+        {id: item.id}
+      ).done( tc (data) =>
+        if data.success
+          @problems.remove( (p) -> p.id is item.id )
+        return
+      ).fail(ajaxAlertFail)
+
+    fixProblem: (problem) =>
+      switch problem.action
+        when 'delete' then @deleteDeviceAttribute(problem)
+        when 'update' then @updateDeviceAttribute(problem)
+
     checkDatabase: ->
       ajaxCall = =>
         if @loadProblemsAjax? then return

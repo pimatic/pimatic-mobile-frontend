@@ -33,7 +33,7 @@ div#database(data-role='page')
           |: 
           span.description(data-bind='text: $data.description')
         div.action
-          a.ui-btn.ui-corner-all.ui-mini.delete-link(data-bind="text: $data.action, click: $parent.deleteDeviceAttribute")
+          a.ui-btn.ui-corner-all.ui-mini.delete-link(data-bind="text: $data.action, click: $parent.fixProblem")
     <!-- ko if: problems && problems.length == 0 -->
     div=__("No problems found.")
     <!-- /ko --> 
