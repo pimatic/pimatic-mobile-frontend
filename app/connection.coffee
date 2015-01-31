@@ -230,7 +230,6 @@ $(document).on( "pagebeforecreate", (event) ->
 
   pimatic.socket.on('error', (error) ->
     connectionLostErrroCount++
-    #console.log "m: ",error
     pimatic.socket.io.disconnect()
     if error is "Authentication error" and pimatic.pages?.login?
       pimatic.socket.io.reconnection(no)
