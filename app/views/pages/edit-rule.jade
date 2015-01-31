@@ -52,6 +52,7 @@ script#rule-condition-selector-template(type='text/template')
             a#rule-condition-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-bind="click: conditionInput.cancel")=__('Cancel')
           .ui-block-b
             a#rule-condition-ok.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: conditionInput.ok")=__('OK')
+        a#rule-confition-remove.delete-link.ui-btn.ui-icon-delete.ui-btn-icon-left(data-bind="visible: conditionInput.canRemove, click: conditionInput.remove")=__('Remove')
 script#rule-predicate-template(type='text/template')
   div.node(data-bind="css: { 'node-predicate': type == 'predicate', 'node-and': type == 'and', 'node-or': type == 'or' }")
     <!-- ko template: { name: "rule-predicate-template", data: $data.left, if: $data.left} --><!-- /ko -->
@@ -60,7 +61,7 @@ script#rule-predicate-template(type='text/template')
     <!-- /ko -->
     <!-- ko if: type == 'predicate' -->
     span.predicate.ui-btn.ui-btn-inline.ui-mini.ui-corner-all(
-      data-bind="text: (predicate.justTrigger ? 'trigger: ' : '' ) + predicate.token + (predicate.for ? '  for ' + predicate.for.token : ''), click: $root.editPredicate")
+      data-bind="text: $root.predicateToString(predicate), click: $root.editPredicate")
     <!-- /ko -->
     <!-- ko template: { name: "rule-predicate-template", data: $data.right, if: $data.right} --><!-- /ko -->
     div.buttons

@@ -22,6 +22,7 @@ $(document).on("pagebeforecreate", (event) ->
     disablePredicateInput: ko.observable(false)
     disableElementsInput: ko.observable(false)
     justTrigger: ko.observable(false)
+    canRemove: ko.observable(false)
 
     constructor: (@ruleView) ->
 
@@ -90,7 +91,7 @@ $(document).on("pagebeforecreate", (event) ->
       else
         unless @side then throw new Error("illegal side: ", @side)
         @parentOp[@side] = ele
-        @ruleView.tree(@ruleView.tree())
+        @ruleView.tree.valueHasMutated()
 
     selectPredicate: (pred) =>
       @setInputValue(pred.input)
@@ -190,6 +191,7 @@ $(document).on("pagebeforecreate", (event) ->
       @refreshPresets()
       @showDefaultSelection()
       @justTrigger(false)
+      @canRemove(false)
       supportsTouch = 'ontouchstart' of window or navigator.msMaxTouchPoints
       unless supportsTouch
         $('#rule-condition-input').focus()
@@ -201,39 +203,73 @@ $(document).on("pagebeforecreate", (event) ->
       )
       @parentOp = node.parent
       @visible(true)
+      @canRemove(true)
 
-      if node.predicate.justTrigger
-        inputValue = "trigger: "
-      else
-        inputValue = ""
-      inputValue += node.predicate.token
-      if node.predicate.for?
-        inputValue += " for #{node.predicate.for.token}"
-      @setInputValue(inputValue)
+      @setInputValue(@ruleView.predicateToString(node.predicate))
       @getElements(@inputValue())
 
     ok: =>
       @parse(@inputValue(), true)
 
     cancel: =>
-      if @parentOp?
+      if @parentOp? 
         if @parentOp[@side] is null
           if @parentOp.parent?
             if @side is "left"
-              if @parentOp.parent.left is @parentOp.parent
+              if @parentOp.parent.left is @parentOp
                 @parentOp.parent.left = @parentOp.right
-              else if @parentOp.parent.right is @parentOp.parent
+                @parentOp.parent.left.parent = @parentOp.parent
+              else if @parentOp.parent.right is @parentOp
                 @parentOp.parent.right = @parentOp.right
+                @parentOp.parent.right.parent = @parentOp.parent
             else
-              if @parentOp.parent.left is @parentOp.parent
+              if @parentOp.parent.left is @parentOp
                 @parentOp.parent.left = @parentOp.left
-              else if @parentOp.parent.right is @parentOp.parent
+                @parentOp.parent.left.parent = @parentOp.parent
+              else if @parentOp.parent.right is @parentOp
                 @parentOp.parent.right = @parentOp.left
+                @parentOp.parent.right.parent = @parentOp.parent
+            @ruleView.tree.valueHasMutated()
           else
             if @side is "left"
+              @parentOp.right.parent = undefined
               @ruleView.tree(@parentOp.right)
             else
+              @parentOp.left.parent = undefined
               @ruleView.tree(@parentOp.left)
+
+      
+      @visible(false)
+
+    remove: =>
+      console.log @parentOp
+      if @parentOp?
+        if @parentOp.parent?
+          if @side is "left"
+            if @parentOp.parent.left is @parentOp
+              @parentOp.parent.left = @parentOp.right
+              @parentOp.parent.left.parent = @parentOp.parent
+            else if @parentOp.parent.right is @parentOp
+              @parentOp.parent.right = @parentOp.right
+              @parentOp.parent.right.parent = @parentOp.parent
+          else
+            if @parentOp.parent.left is @parentOp
+              @parentOp.parent.left = @parentOp.left
+              @parentOp.parent.left.parent = @parentOp.parent
+            else if @parentOp.parent.right is @parentOp
+              @parentOp.parent.right = @parentOp.left
+              @parentOp.parent.right.parent = @parentOp.parent
+        else
+          if @side is "left"
+            @parentOp.right.parent = undefined
+            @ruleView.tree(@parentOp.right)
+          else
+            @parentOp.left.parent = undefined
+            @ruleView.tree(@parentOp.left)
+        @ruleView.tree.valueHasMutated()
+      else
+        @ruleView.tree(null)
+
       @visible(false)
 
     elementOptionsText: (option) => option.replace(/^\{(.*)\}$/, 'Choose $1...')
@@ -284,14 +320,16 @@ $(document).on("pagebeforecreate", (event) ->
     addOr: (ele) =>  @addBinaryOp('or', ele)
 
     addBinaryOp: (type, ele) ->
+      console.log ele
       newBinOp =  {type, left: ele, right: null}
       if ele.parent?
         if ele.parent.left is ele
           ele.parent.left = newBinOp
         else
           ele.parent.right = newBinOp
+        newBinOp.parent = ele.parent
         ele.parent = newBinOp
-        @tree(@tree())
+        @tree.valueHasMutated()
       else
         ele.parent = newBinOp
         @tree(newBinOp)
@@ -350,15 +388,24 @@ $(document).on("pagebeforecreate", (event) ->
       else
         @ruleId(ruleId + "-2")
 
+    predicateToString: (predicate) ->
+      if predicate.justTrigger
+        inputValue = "trigger: "
+      else
+        inputValue = ""
+      inputValue += predicate.token
+      if predicate.for?
+        inputValue += " for #{predicate.for.token}"
+      return inputValue
+
     getTreeAsString: ->
       tree = @tree()
       unless tree? then return ""
-      nodeToString = (node, parent) ->
+      nodeToString = (node, parent) =>
         unless node? then return ""
         switch node.type
           when 'predicate'
-            if node.predicate.for? then "#{node.predicate.token} for #{node.predicate.for.token}"
-            else node.predicate.token 
+            @predicateToString(node.predicate)
           else 
             sub = "#{nodeToString node.left, node} #{node.type} #{nodeToString node.right, node}"
             wrap = parent? and (parent.type isnt node.type)
