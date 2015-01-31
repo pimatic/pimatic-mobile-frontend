@@ -36,7 +36,6 @@ $(document).on("pagebeforecreate", (event) ->
         if @forEnabled()
           for e in @forElements()
             tokens += e.match()
-        console.log tokens 
         return tokens
       )
 
@@ -98,7 +97,6 @@ $(document).on("pagebeforecreate", (event) ->
       if @inputValue().length is 0
         @showDefaultSelection()
       else
-        console.log "getting elements", source
         @disableElementsInput(true)
         @disablePredicateInput(true)
         pimatic.client.rest.getPredicateInfo(
@@ -159,7 +157,6 @@ $(document).on("pagebeforecreate", (event) ->
             if isUpdating then return
             isUpdating = true
             elements = @elements()
-            console.log value
             j = i+1
             while j < elements.length
               element = elements[j]
@@ -167,7 +164,6 @@ $(document).on("pagebeforecreate", (event) ->
                 if element.options?
                   unless element.wildcard in element.options
                     element.options.unshift element.wildcard
-                console.log "setting", element, "to wildcard:", element.wildcard
                 element.match(element.wildcard)
               j++
             isUpdating = false
