@@ -109,3 +109,6 @@ html body .ui-group-theme-a .ui-li-divider {
   padding: 0;
   font-size: 16px
 }
+.ui-icon-stop:after {
+    background-position: 4px 3px;
+}
