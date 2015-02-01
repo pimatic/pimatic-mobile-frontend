@@ -302,6 +302,9 @@ $(document).on( "pagebeforecreate", (event) ->
       else
         action = 'play'
       @sendPlayerAction(action)
+      
+    stop: () =>
+      @sendPlayerAction("stop")
 
   class ThermostatItem extends DeviceItem
     
