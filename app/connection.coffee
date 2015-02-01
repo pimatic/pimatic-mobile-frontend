@@ -4,7 +4,7 @@ $(document).on( "pagebeforecreate", (event) ->
   # Just execte this function one time:
   if pimatic.socket? then return
 
-  pimatic.socket = io('/',{
+  pimatic.socket = io("#{document.location.host}/",{
     reconnection: yes
     reconnectionDelay: 1000
     reconnectionDelayMax: 3000
@@ -13,7 +13,6 @@ $(document).on( "pagebeforecreate", (event) ->
   })
 
   pimatic.socket.io.on 'open', () ->
-    #console.log "m: open"
     pimatic.loading "socket", "hide"
 
     if window.applicationCache?
@@ -25,6 +24,7 @@ $(document).on( "pagebeforecreate", (event) ->
 
   connectionLostErrroCount = 0
   pimatic.socket.on('connect', ->
+    pimatic.loading "socket", "hide"
     pimatic.pages.login?.hideLoginDialog()
     connectionLostErrroCount = 0
     pimatic.socket.emit('call', {
@@ -230,7 +230,6 @@ $(document).on( "pagebeforecreate", (event) ->
 
   pimatic.socket.on('error', (error) ->
     connectionLostErrroCount++
-    #console.log "m: ",error
     pimatic.socket.io.disconnect()
     if error is "Authentication error" and pimatic.pages?.login?
       pimatic.socket.io.reconnection(no)

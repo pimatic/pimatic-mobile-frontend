@@ -984,7 +984,9 @@ if (typeof Object.create !== "function") {
                     base.options.startDragging.apply(base, [base.$elem]);
                 }
 
-                if ((base.newRelativeX > 8 || base.newRelativeX < -8) && (base.browser.isTouch === true)) {
+                var minTrackingOffset = 60;
+
+                if (Math.abs(base.newRelativeX) > minTrackingOffset && (base.browser.isTouch === true)) {
                     if (ev.preventDefault !== undefined) {
                         ev.preventDefault();
                     } else {
@@ -998,7 +1000,7 @@ if (typeof Object.create !== "function") {
                     return;
                 }
 
-                if((base.newRelativeX < 16 && base.newRelativeX > -16) && locals.sliding === false) {
+                if(Math.abs(base.newRelativeX) < minTrackingOffset && locals.sliding === false) {
                     return;
                 }
 

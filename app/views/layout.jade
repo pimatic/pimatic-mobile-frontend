@@ -44,6 +44,7 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     include pages/config
     include pages/updates
     include pages/devicepages
+    include pages/database
     include login
     | !{additionalPages}
     #toasts(data-bind="foreach: toastMessages")

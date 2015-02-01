@@ -1,8 +1,16 @@
+html {
+  position: fixed; 
+  top: 0; 
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
 /* 
   Overthrow CSS:
   Enable overflow: auto on elements with overthrow class when html element has overthrow class too 
 */
-.overthrow-enabled .overthrow {
+.overthrow-enabled .overthrow, #item-lists .owl-item {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -613,7 +621,8 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
 }
 
 
-table#events-table {
+table#events-table,
+table#database-attribute-info {
   background: #fff /*{a-body-background-color}*/;
   width: 100%;
 }
@@ -674,6 +683,53 @@ table#events-table {
 
   #events-table .value-column {
     font-weight: bold;
+  }
+
+  #database-attribute-info tbody td, #database-attribute-info thead th{
+    border: none;
+  }
+   
+  #database-attribute-info tbody tr,
+  #database-attribute-info thead tr {
+    border-bottom: 1px solid #ddd /*{a-body-border}*/;
+  }
+  
+  #events-table thead tr {
+    display: block;
+  }
+
+  #database-attribute-info .device-column {
+    display: block;
+    float: left;
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-bottom: 0px;
+  }
+
+  #database-attribute-info .type-column span:first-child {
+    display: block;
+  }
+
+  #database-attribute-info .attribute-column {
+    float: left;
+    display: block;
+  }
+
+  #database-attribute-info .interval-column {
+    display: block;
+    width: 100%;
+    float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-bottom: 0px;
+  }
+
+
+  #database-attribute-info .expire-column {
+    float: left;
+    display: block;
   }
 
 
@@ -1381,11 +1437,10 @@ border-bottom-left-radius: inherit;
   max-width: 100%;
   margin: 0;
   overflow: hidden;
-  margin-top: -4px;
-  margin-bottom: -4px;
+  margin-top: -4.5px;
+  margin-bottom: -4.5px;
   text-align: right;
   white-space: normal;
-  height: 38px;
 }
 
 #index li.thermostat div.controls .ui-controlgroup{
@@ -1409,7 +1464,11 @@ border-bottom-left-radius: inherit;
 #index li.thermostat div.controls .spinbox input{
   border: none;
   background: none;
-  height: 29.75px;
+  width: 36px;
+  margin: 0;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding: 0;
   font-weight: bold;
   color: #000 /*{a-bup-color}*/;
 }
@@ -1423,10 +1482,6 @@ border-bottom-left-radius: inherit;
   margin: 0;
   border: none;
   display: block;  
-}
-
-#item-lists .owl-item { 
-  overflow: auto;
 }
 
 /*.owl-item {
@@ -1534,4 +1589,164 @@ border-bottom-left-radius: inherit;
   -moz-animation-name: slideUp;
   -o-animation-name: slideUp;
   animation-name: slideUp;
+}
+
+#database-problems li {
+  white-space: normal;
+}
+
+#database-problems .info {
+  float: left;
+}
+
+#database-problems .attribute {
+  font-weight: bold;
+}
+
+#database-problems .action {
+  display: block;
+  float: right;
+  padding-left: 10px;
+
+}
+
+#database-problems .action a {
+  margin: -2px 0;
+}
+
+#rule-condition-selector .errors {
+  border: 1px solid #AA0000;
+  padding: 10px;
+  color: #AA0000;
+}
+
+#rule-condition-gui, .node {
+  background-color: #fff /*{a-body-background-color}*/;
+  border: 1px solid #ddd /*{a-body-border}*/;
+  color: #333 /*{a-body-color}*/;
+  padding: 6px 10px;
+}
+
+#rule-condition-gui {
+  margin: .5em 0;
+}
+
+.binary-operator {
+  display: inline-block;
+  font-weight: bold;
+  padding: 8px 0;
+}
+
+.node-and > .node-and, .node-or > .node-or, 
+#rule-condition-gui > .node-and, #rule-condition-gui > .node-or{
+  padding: 0;
+  border: none;
+}
+
+@media (min-width: 28em) {
+  #rule-condition-gui {
+    width: 100%;
+  }
+}
+
+.node-predicate {
+  padding: 0px 0;
+  border: none;
+  /*display: inline-block*/
+}
+
+.node-predicate .buttons{
+  display: inline-block
+}
+
+.node-predicate .ui-btn {
+  font-weight: bold;
+}
+
+.node-predicate .predicate {
+  margin-right: 0em;
+}
+
+
+.node a.ui-btn {
+  opacity: 0.5;
+  margin: 2px 0;
+  padding-left: 34px;
+  padding-right: 8px;
+}
+
+.node-predicate > .ui-btn {
+  margin-top: -3px;
+  margin-bottom: -3px;
+}
+
+.node-predicate > .ui-btn:first {
+  margin-left: 10px;
+}
+
+.node .ui-btn:hover {
+  opacity: 1;
+}
+
+#rule-condition-back-presets {
+  float: right;
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+#rule-condition-selector {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  padding: 30px;
+  padding-top: 80px;
+}
+
+#rule-condition-selector .outer{
+  background-color: white;
+  max-height: 100%;
+  border: 1px solid gray;
+}
+
+#rule-condition-selector .inner{
+  background-color: white;
+  padding: 20px;
+}
+
+/*#rule-condition-elements .elements {
+    margin-bottom: 20px
+}*/
+
+#rule-condition-elements .elements .ui-select {
+  margin-right: 0;
+}
+
+#rule-condition-selector .controls {
+  margin-top: 20px
+}
+
+@media (min-width: 28em) {
+  #rule-condition-for-elements > .ui-checkbox {
+    float: left;
+    width: 20%;
+    margin: .5em 2% 0 0;
+
+  }
+}
+
+#rule-condition-for-elements > .ui-checkbox{
+  display: block;
+  margin: 0 0 .4em;
+}
+
+#rule-condition-for-elements .ui-checkbox > label {
+  border: none;
+}
+
+.input-mode-switch{
+  font-size: 14px;
 }

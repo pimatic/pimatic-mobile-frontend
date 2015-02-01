@@ -1,0 +1,39 @@
+div#database(data-role='page')
+  div(data-theme=theme.headerSwatch, data-role='header')
+    a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
+    h3=__('Database')
+  div.ui-content.overthrow
+    h2=__('Attribute logging info')
+    .outdent
+      table#database-attribute-info.table-stroke.ui-table()
+        thead
+          tr
+            th.device-column=__('Device')
+            th.attribute-column=__('Attribute')
+            th.type-column=__('Type')
+            th.interval-column=__('Interval')
+            th.expire-column=__('Expire')
+            th.count-column=__('Count')
+        tbody(data-bind="foreach: deviceAttributes")
+          tr
+            td.device-column(data-bind="text: deviceId")
+            td.attribute-column(data-bind="text: attributeName")
+            td.type-column
+              span.type(data-bind="text: $data.type")
+              | 
+              span.discrete(data-bind="text: '(' + ($data.discrete? 'discrete' : 'continuous') + ')'")
+            td.interval-column(data-bind="text: interval")
+            td.expire-column(data-bind="text: expire")
+            td.count-column(data-bind="text: count")
+    h2=__('Problems') + ": "
+    ul#database-problems(data-role='listview', data-bind="foreach: problems")
+      li
+        div.info
+          span.attribute(data-bind='text: $data.deviceId + "." + $data.attribute')
+          |: 
+          span.description(data-bind='text: $data.description')
+        div.action
+          a.ui-btn.ui-corner-all.ui-mini.delete-link(data-bind="text: $data.action, click: $parent.fixProblem")
+    <!-- ko if: problems && problems.length == 0 -->
+    div=__("No problems found.")
+    <!-- /ko --> 

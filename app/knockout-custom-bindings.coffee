@@ -69,7 +69,11 @@
   }
 
   ko.bindingHandlers.jqmchecked = {
-    init: ko.bindingHandlers.checked.init
+    init: (element, valueAccessor, allBindings) ->
+      init: ko.bindingHandlers.checked.init(element, valueAccessor, allBindings)
+      $(element).checkboxradio()
+      return
+    
     update: (element, valueAccessor) ->
       value = valueAccessor()
       valueUnwrapped = ko.unwrap(value)
@@ -96,10 +100,15 @@
     }
 
   ko.bindingHandlers.jqmoptions = {
-    init: ko.bindingHandlers.options.init
+    init: (element, valueAccessor, allBindings) ->
+      ko.bindingHandlers.options.init(element, valueAccessor, allBindings)
+      $(element).selectmenu()
+      return
+
     update: (element, valueAccessor, allBindings) ->
       ko.bindingHandlers.options.update(element, valueAccessor, allBindings)
-      value = valueAccessor()
+      value = allBindings()?.value()
+      $(element).val(value) if value?
       $(element).selectmenu("refresh")
       return
     }
