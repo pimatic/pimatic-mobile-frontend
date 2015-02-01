@@ -1614,6 +1614,12 @@ border-bottom-left-radius: inherit;
   margin: -2px 0;
 }
 
+#rule-condition-selector .errors {
+  border: 1px solid #AA0000;
+  padding: 10px;
+  color: #AA0000;
+}
+
 #rule-condition-gui, .node {
   background-color: #fff /*{a-body-background-color}*/;
   border: 1px solid #ddd /*{a-body-border}*/;

@@ -106,20 +106,21 @@ $(document).on("pagebeforecreate", (event) ->
         pimatic.client.rest.getPredicateInfo(
           {input, predicateProviderClass}
         ).done( (data) =>
-          if data.success and data.result.predicate?
-            @justTrigger(data.result.predicate.justTrigger)
-            elements = data.result.elements
-            # If we are showing a new predicate and we were not able to parse it
-            # then add just a single text element, so that the user can correct the predicate
-            if @elements().length is 0 and not (elements?)
-              elements = [{match: data.result.predicate.token, type: "text"}]
-            # if there are no errors update the elements
-            if data.result.errors.length is 0 and elements?
-              @showElementSelection(
-                elements, 
-                data.result.forElements, 
-                data.result.predicate?.for?
-              )
+          if data.success
+            if data.result.predicate?
+              @justTrigger(data.result.predicate.justTrigger)
+              elements = data.result.elements
+              # If we are showing a new predicate and we were not able to parse it
+              # then add just a single text element, so that the user can correct the predicate
+              if @elements().length is 0 and not (elements?)
+                elements = [{match: data.result.predicate.token, type: "text"}]
+              # if there are no errors update the elements
+              if data.result.errors.length is 0 and elements?
+                @showElementSelection(
+                  elements, 
+                  data.result.forElements, 
+                  data.result.predicate?.for?
+                )
             @errors(data.result.errors or [])
         ).always( =>
           @disableElementsInput(false)
@@ -319,7 +320,6 @@ $(document).on("pagebeforecreate", (event) ->
     addOr: (ele) =>  @addBinaryOp('or', ele)
 
     addBinaryOp: (type, ele) ->
-      console.log ele
       newBinOp =  {type, left: ele, right: null}
       if ele.parent?
         if ele.parent.left is ele
@@ -415,6 +415,7 @@ $(document).on("pagebeforecreate", (event) ->
     setTextMode: =>
       @ruleCondition(@getTreeAsString())
       @editMode('text')
+      @saveEditMode('text')
 
     setGuiMode: =>
 
@@ -435,9 +436,15 @@ $(document).on("pagebeforecreate", (event) ->
             else
               @tree(null)
             @editMode('gui')
+            @saveEditMode('gui')
           else
             swal("Oops...", __(data.hints.errors[0]), "error")
       ).fail(ajaxAlertFail)
+
+    saveEditMode: (mode) =>
+      data = pimatic.storage.get('pimatic.editRule') or {}
+      data.editMode = mode
+      pimatic.storage.set('pimatic.editRule', data)
 
   try
     pimatic.pages.editRule = new EditRuleViewModel()
@@ -527,9 +534,24 @@ $(document).on("pagebeforehide", '#edit-rule', (event) ->
 )
 
 $(document).on("pagebeforeshow", '#edit-rule', (event) ->
+  data = pimatic.storage.get('pimatic.editRule') or {}
   editRule = pimatic.pages.editRule
   params = jQuery.mobile.pageParams
   jQuery.mobile.pageParams = {}
+  if params?
+    data.params = {
+      action: params.action
+      ruleId: params.rule?.id
+    }
+    pimatic.storage.set('pimatic.editRule', data)
+  else
+    if data.params?
+      params = {
+        action: data.params.action
+        rule: pimatic.getRuleById(data.params.ruleId)
+      }
+      unless params.rule?
+        params.action = 'add'
   if params?.action is "update"
     rule = params.rule
     editRule.action('update')
@@ -543,6 +565,12 @@ $(document).on("pagebeforeshow", '#edit-rule', (event) ->
     editRule.resetFields()
     editRule.action('add')
     editRule.ruleEnabled(yes)
-  editRule.setGuiMode()
+
+  
+  mode = data.editMode or 'gui'
+  switch mode
+    when 'gui' then editRule.setGuiMode()
+    when 'text'
+      editRule.editMode('text')
   return
 )

@@ -28,7 +28,8 @@ script#rule-condition-selector-template(type='text/template')
           label.short-label(for='edit-rule-name')=__('Predicate') + ': '
           div.ui-input-text
             input#rule-condition-input(autocomplete="off", autocapitalize="none", autocorrect="off", type="text", data-bind="textInput: conditionInput.inputValue, disabled: conditionInput.disablePredicateInput")
-          div(data-bind="foreach: conditionInput.errors")
+        .ui-field-contain(data-bind="visible: conditionInput.errors().length > 0")
+          div.errors(data-bind="foreach: conditionInput.errors")
             div(data-bind="text: $data")
         div#rule-condition-presets.ui-field-contain(data-bind="visible: conditionInput.presetsVisible")
           label()=__('Available Events') + ': '
