@@ -242,7 +242,6 @@ $(document).on("pagebeforecreate", (event) ->
       @visible(false)
 
     remove: =>
-      console.log @parentOp
       if @parentOp?
         if @parentOp.parent?
           if @side is "left"
