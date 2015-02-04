@@ -1315,6 +1315,10 @@ border-bottom-left-radius: inherit;
   background-position: 4px 3px;
 }
 
+.ui-icon-stop:after {
+    background-position: 4px 3px;
+}
+
 .empty-list {
   font-style: italic;
 }
