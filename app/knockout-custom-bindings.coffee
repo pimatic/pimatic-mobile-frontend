@@ -204,9 +204,13 @@
       return tooltip
 
     remove_tooltip: (target, tooltip) ->
+      ko.bindingHandlers.tooltip.doRemove = yes
       tooltip.animate(
         opacity: 0
-      , 100, ( => tooltip.removeClass('animated-tooltip').remove() ) )
+      , 100, ( => 
+        if ko.bindingHandlers.tooltip.doRemove
+          tooltip.removeClass('animated-tooltip').remove() 
+      ) )
 
     init: (element, valueAccessor) ->
       target = $(element)
@@ -218,6 +222,7 @@
         if tooltip.length is 0
           tooltip = $("<div id=\"tooltip\" class=\"ui-corner-all\"></div>")
           tooltip.css("opacity", 0).html(tip).appendTo('body')
+        ko.bindingHandlers.tooltip.doRemove = no
         ko.bindingHandlers.tooltip.subscribtion?.dispose()
         clearInterval(ko.bindingHandlers.tooltip.interval)
         clearTimeout(ko.bindingHandlers.tooltip.timeout)
@@ -239,9 +244,12 @@
           clearTimeout(ko.bindingHandlers.tooltip.timeout)
           ko.bindingHandlers.tooltip.subscribtion.dispose()
           ko.bindingHandlers.tooltip.remove_tooltip(target, tooltip)
+          $(window).off('touchstart', ko.bindingHandlers.tooltip.touchdispose)
           container.off("scroll", removeTooltip)
           tooltip.off("vclick", removeTooltip)
           target.off("mouseleave", mouseleave) if mouseleave?
+          if event? and $(event.target).parents('#tooltip').length isnt 0
+            $(event.target).click()
           return true
         )
         isTouchSupported = 'ontouchstart' in window
@@ -254,12 +262,12 @@
             , 1000)
           )
         clearTimeout(ko.bindingHandlers.tooltip.timeout)
+        ko.bindingHandlers.tooltip.touchdispose = removeTooltip
         ko.bindingHandlers.tooltip.timeout = setTimeout( ->
           tooltip.one("vclick", removeTooltip)
-        , 300)
+          $(window).one('touchstart', ko.bindingHandlers.tooltip.touchdispose)
+        , 310)
         container.one("scroll", removeTooltip)
-        ko.bindingHandlers.tooltip.touchdispose = removeTooltip
-        $(window).one('touchstart', ko.bindingHandlers.tooltip.touchdispose)
         return
       )
 }

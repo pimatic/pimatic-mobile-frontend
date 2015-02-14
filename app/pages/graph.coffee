@@ -7,7 +7,7 @@ tc = pimatic.tryCatch
 
 $(document).on "pagecreate", '#index', (event) ->
 
-  $(document).on "click", '#to-graph-page', ->
+  $(document).on "vclick", '#to-graph-page', ->
     deviceId = $('#to-graph-page').attr('data-deviceId')
     device = pimatic.getDeviceById(deviceId)
     jQuery.mobile.pageParams = {
