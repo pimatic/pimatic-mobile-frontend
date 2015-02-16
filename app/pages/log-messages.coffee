@@ -65,12 +65,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
     updateFromJs: (data) ->
       ko.mapper.fromJS({messages: data}, LogMessageViewModel.mapping, this)
 
-    timestampToDateTime: (time) ->
-      pad = (n) => if n < 10 then "0#{n}" else "#{n}"
-      d = new Date(time)
-      date = pad(d.getDate()) + '.' + pad((d.getMonth()+1)) + '.' + d.getFullYear()
-      time = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
-      return {date, time}
+
 
     timeToShow: (index) ->
       index = index()
@@ -78,11 +73,14 @@ $(document).on("pagecreate", '#log', tc (event) ->
       if index is 0 
         msg = dMessages[index]
         unless msg? then return ''
-        dt = @timestampToDateTime(msg?.time)
+        dt = pimatic.timestampToDateTime(msg?.time)
         return "#{dt.date} #{dt.time}"
       else 
         [msgBefore, msgCurrent] = [ dMessages[index-1], dMessages[index] ]
-        [before, current] = [ @timestampToDateTime(msgBefore.time), @timestampToDateTime(msgCurrent.time) ]
+        [before, current] = [ 
+          pimatic.timestampToDateTime(msgBefore.time), 
+          pimatic.timestampToDateTime(msgCurrent.time) 
+        ]
         if current.date is before.date then return current.time
         else return "#{current.date} #{current.time}"
 

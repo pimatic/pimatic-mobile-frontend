@@ -1162,6 +1162,10 @@ li.item .attributes .outOfDate {
   font-size: 15px;
 }
 
+#chart-info #average-info {
+  padding: 13px 10px;
+}
+
 #graph-page #chart-container .ui-input-text{
   display: inline-block;
   vertical-align: middle;
@@ -1179,6 +1183,49 @@ li.item .attributes .outOfDate {
     display: none;
   }
  
+}
+
+#chart-container {
+  background-color: white;
+  padding: 0.7em 0;
+  margin: -1em;
+}
+
+#chart-legend-wrapper {
+  text-align: center;
+}
+
+#chart-legend {
+  text-align: center;
+  border: 1px solid gray;
+  padding: 2px 6px;
+  border-radius: 5px;
+  margin: 0px 10px;
+  font-size: 13px;
+  display: inline-block;
+}
+
+.dygraph-tooltip {
+  border: 1px solid #C8C8C8FF !important;
+  padding: 2px 6px;
+  border-radius: 5px;
+  margin: 0px 10px;
+  font-size: 13px !important;
+  background: rgba(249, 249, 249, 0.77) !important;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.15);
+}
+#chart-legend .label {
+  color: black;
+}
+
+#chart-container .controls{
+  padding-left: 10px;
+  padding-bottom: 10px;
+}
+
+#chart .dygraph-axis-label{
+  font-size: 12px;
+  color: #606060;
 }
 
 .edit-pages-handle-label {

@@ -4,11 +4,6 @@
 # scope this function
 ( ->
 
-  Highcharts.setOptions(
-    global:
-      useUTC: false
-  )
-
   $.datepicker.setDefaults({
     dateFormat: 'yy-mm-dd'
   })
@@ -167,6 +162,12 @@ window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   swal("Oops...", __(message), "error")
   return true
 
+pimatic.timestampToDateTime = (time) ->
+  pad = (n) => if n < 10 then "0#{n}" else "#{n}"
+  d = new Date(time)
+  date = d.getFullYear() + '-' + pad((d.getMonth()+1)) + '-' + pad(d.getDate())
+  time = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+  return {date, time}
 
 
 $(document).ready( => 

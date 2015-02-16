@@ -42,16 +42,19 @@ div#graph-page(data-role='page')
           option(value="year")=__('365 days')
         span=__('up to ')
         input#chart-select-date(type="text", data-role="date", data-mini="true", data-bind="value: chosenDate", data-date-format="yy-mm-dd")
-      div#chart
+      div#chart-wrapper
+        div#chart
       div#chart-info
-        span(data-bind="if: averageDuration && displayedAttributes().length > 0")
+        div#chart-legend-wrapper
+          div#chart-legend
+        div#average-info(data-bind="if: averageDuration && displayedAttributes().length > 0")
           span(data-bind="text: averageDurationText()")
     //-     span=__('Last Update: ')
     //-     span.last-update-time
     //-     span=' ('
     //-     span.last-update-value
     //-     soan=')'
-    ul#graph-device-list.device-attribute-list(data-role='listview', data-inset='true')
+    ul#graph-device-list.device-attribute-list(data-role='listview')
       <!-- ko template: { name: 'graph-group-template', foreach: groups} --><!-- /ko -->
       <!-- ko if: $root.getUngroupedDevicesWithNumericAttribute().length > 0  -->
       li(data-role='list-divider', data-theme=theme.dividerSwatch)

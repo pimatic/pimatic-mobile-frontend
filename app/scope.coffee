@@ -172,17 +172,13 @@ class DeviceAttribute
       }
 
   formatTime: (time) -> 
-    day = Highcharts.dateFormat('%Y-%m-%d', time)
-    today = Highcharts.dateFormat('%Y-%m-%d', (new Date()).getTime())
+    dt = pimatic.timestampToDateTime(time)
+    today = pimatic.timestampToDateTime(new Date())
     return(
-      if day isnt today
-        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', time)
-      else
-        Highcharts.dateFormat('%H:%M:%S', time)
+      if dt.date isnt today.date then "#{dt.date} #{dt.time}" else dt.date
     )
 
   toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
-
 
 
 class Device
