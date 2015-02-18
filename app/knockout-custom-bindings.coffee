@@ -207,7 +207,7 @@
       ko.bindingHandlers.tooltip.doRemove = yes
       tooltip.animate(
         opacity: 0
-      , 100, ( => 
+      , 200, ( => 
         if ko.bindingHandlers.tooltip.doRemove
           tooltip.removeClass('animated-tooltip').remove() 
       ) )
@@ -243,13 +243,15 @@
           clearInterval(ko.bindingHandlers.tooltip.interval)
           clearTimeout(ko.bindingHandlers.tooltip.timeout)
           ko.bindingHandlers.tooltip.subscribtion.dispose()
-          ko.bindingHandlers.tooltip.remove_tooltip(target, tooltip)
           $(window).off('touchstart', ko.bindingHandlers.tooltip.touchdispose)
           container.off("scroll", removeTooltip)
           tooltip.off("vclick", removeTooltip)
           target.off("mouseleave", mouseleave) if mouseleave?
           if event? and $(event.target).parents('#tooltip').length isnt 0
+            event.preventDefault()
+            event.stopImmediatePropagation()
             $(event.target).click()
+          ko.bindingHandlers.tooltip.remove_tooltip(target, tooltip)
           return true
         )
         isTouchSupported = 'ontouchstart' in window
