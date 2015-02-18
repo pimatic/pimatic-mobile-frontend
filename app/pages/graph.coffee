@@ -115,7 +115,6 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               valueFormatter: (value)-> unitAttribute.formatValue(value)
             )
 
-
         {to, from} = @getDateRange()
 
         axisName = (i) -> if i is 0 then 'y' else "y#{i+1}"
@@ -134,12 +133,18 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           connectSeparatedPoints: true
           rangeSelectorPlotStrokeColor: @colors[0]
           rangeSelectorPlotFillColor: '#e0e6ec'
+          xAxisHeight: 35
+          highlightSeriesBackgroundAlpha: 0.9
+          highlightSeriesOpts: {}
+          gridLineColor: '#BDBDBD'
           series: {}
           axes: {
             x: {
               valueFormatter: (date) => 
                 dateTime = pimatic.timestampToDateTime(date)
                 return "#{dateTime.date} #{dateTime.time}"
+              pixelsPerLabel: 25
+              axisTickSize: 10
             }
           }
         }
@@ -222,7 +227,6 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           #console.log allChartData
           if xRange? and isEnd
             xRange[1] = allChartData[allChartData.length-1][0].getTime()
-            console.log xRange
             chartOptions.axes.x.dateWindow = xRange
           updateChart()
           

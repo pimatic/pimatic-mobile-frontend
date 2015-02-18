@@ -1206,14 +1206,21 @@ li.item .attributes .outOfDate {
 }
 
 .dygraph-tooltip {
-  border: 1px solid #C8C8C8FF !important;
-  padding: 2px 6px;
-  border-radius: 5px;
-  margin: 0px 10px;
+  color: rgb(97, 97, 97) !important;
+  border: 1px solid #DADADA !important;
   font-size: 13px !important;
   background: rgba(249, 249, 249, 0.77) !important;
-  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.15);
+  -webkit-transition: left 150ms linear, top 150ms linear;
+  -moz-transition: left 150ms linear, top 150ms linear;
+  -o-transition: left 150ms linear, top 150ms linear;
+  -ms-transition: left 150ms linear, top 150ms linear;
+  transition: left 150ms linear, top 150ms linear;
 }
+
+.dygraph-axis-label-x {
+  transform: rotate(-35deg);
+}
+
 #chart-legend .label {
   color: black;
 }
@@ -1404,7 +1411,7 @@ border-bottom-left-radius: inherit;
   padding-bottom: 3px;
 }
 
-#tooltip
+#tooltip, .dygraph-tooltip
 {
   font-weight: bold;
   font-size: 0.8em;
@@ -1427,7 +1434,8 @@ border-bottom-left-radius: inherit;
   background: black;
 }
  
-#tooltip:after /* triangle decoration */
+#tooltip:after, /* triangle decoration */
+.dygraph-tooltip:after
 {
   width: 0;
   height: 0;
@@ -1441,7 +1449,8 @@ border-bottom-left-radius: inherit;
   margin-left: -5px;
 }
 
-#tooltip.top:after
+#tooltip.top:after,
+.dygraph-tooltip.top:after
 {
   border-top-color: transparent;
   border-bottom: 5px solid rgba(0, 0, 0, 0.8);
@@ -1449,13 +1458,15 @@ border-bottom-left-radius: inherit;
   bottom: auto;
 }
 
-#tooltip.left:after
+#tooltip.left:after,
+.dygraph-tooltip.left:after
 {
   left: 15px;
   margin: 0;
 }
 
-#tooltip.right:after
+#tooltip.right:after,
+.dygraph-tooltip.right:after
 {
   right: 15px;
   left: auto;
