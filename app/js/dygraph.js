@@ -1169,6 +1169,10 @@ DygraphCanvasRenderer._drawSeries = function(e,
       if (i == limit) break;
       point = arr[i];
     }
+    if(first && stepPlot) {
+      prevCanvasX = 0;
+      prevCanvasY = point.canvasyy;
+    }
 
     // FIXME: The 'canvasy != canvasy' test here catches NaN values but the test
     // doesn't catch Infinity values. Could change this to
@@ -1220,6 +1224,10 @@ DygraphCanvasRenderer._drawSeries = function(e,
     }
     first = false;
   }
+  if(stepPlot && point && point.canvasy !== null && point.canvasy == point.canvasy) {
+    ctx.lineTo(point.canvasx+10000, prevCanvasY);
+  }
+
   ctx.stroke();
   return pointsOnLine;
 };
