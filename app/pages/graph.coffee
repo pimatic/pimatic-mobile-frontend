@@ -223,6 +223,10 @@ $(document).on("pagecreate", '#graph-page', (event) ->
                 seriesDataIndex++
                 if seriesDataIndex < data.length
                   time = data[seriesDataIndex][0]
+            while allDataIndex < allData.length
+              #console.log "keeping", allData[allDataIndex][0].getTime()
+              newChartData.push allData[allDataIndex]
+              allDataIndex++
           allChartData = newChartData
           #console.log allChartData
           if xRange? and isEnd
