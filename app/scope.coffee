@@ -175,7 +175,7 @@ class DeviceAttribute
     dt = pimatic.timestampToDateTime(time)
     today = pimatic.timestampToDateTime(new Date())
     return(
-      if dt.date isnt today.date then "#{dt.date} #{dt.time}" else dt.date
+      if dt.date isnt today.date then "#{dt.date} #{dt.time}" else dt.time
     )
 
   toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
