@@ -3636,6 +3636,9 @@ Dygraph.prototype.doAnimatedZoom = function(oldXRange, newXRange, oldYRanges, ne
 
   var that = this;
   Dygraph.repeatAndCleanup(function(step) {
+    if(!that.canvas_) {
+      return;
+    }
     if (valueRanges.length) {
       for (var i = 0; i < that.axes_.length; i++) {
         var w = valueRanges[step][i];
@@ -3875,6 +3878,9 @@ Dygraph.prototype.animateSelection_ = function(direction) {
   var that = this;
   Dygraph.repeatAndCleanup(
     function(n) {
+      if(!that.canvas_) {
+        return;
+      }
       // ignore simultaneous animations
       if (that.animateId != thisId) return;
 
