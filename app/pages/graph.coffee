@@ -76,6 +76,13 @@ $(document).on("pagecreate", '#graph-page', (event) ->
 
       @chosenDate($.datepicker.formatDate(@dateFormat, new Date()))
 
+      attributeToUnit = (attribute) ->
+        return (
+          if attribute.type is "boolean" then "#{attribute.labels[0]}-#{attribute.labels[1]}"
+          else attribute.unit
+        )
+
+
       ko.computed( tc =>
         displayed = @displayedAttributes()
         if displayed.length is 0
@@ -102,17 +109,33 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           if (item.range isnt range or item.chosenDate isnt chosenDate)
             item.range = null
             item.data = null
-          unless item.attribute.unit in units
-            units.push item.attribute.unit
-            unitsAttributes[item.attribute.unit]=item.attribute
+          unit = attributeToUnit item.attribute
+          unless unit in units
+            units.push unit
+            unitsAttributes[unit]=item.attribute
 
         yAxis = []
         for u in units
           do (u) ->
             unitAttribute = unitsAttributes[u]
+            formater = (value) ->
+              if unitAttribute.type is "boolean"
+                unless value in [0, 1]
+                  return ""
+                value = (value is 1) 
+              unitAttribute.formatValue(value)
+            if unitAttribute.type is "boolean"
+              ticker = ->
+                return [
+                  {v: 0, label: unitAttribute.labels[1]},
+                  {v: 1, label: unitAttribute.labels[0]}
+                ]
+            else
+              ticker = Dygraph.numericTicks
             yAxis.push(
-              axisLabelFormatter: (value)-> unitAttribute.formatValue(value)
-              valueFormatter: (value)-> unitAttribute.formatValue(value)
+              axisLabelFormatter: formater
+              valueFormatter: formater
+              ticker: ticker 
             )
 
         {to, from} = @getDateRange()
@@ -186,6 +209,9 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           if data.length is 0
             newChartData = allChartData
           else
+            if typeof data[0][1] is "boolean"
+              for d in data
+                d[1] = if d[1] then 1 else 0
             time = data[0][0]
             #console.log "startTime", time
             allDataIndex = 0
@@ -251,7 +277,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
                 after: fromTime
                 before: tillTime
                 limit: limit
-                groupByTime: groupByTime
+                groupByTime: groupByTime if item.attribute.type is "number"
               }
             }, {global: no}).done( (result) =>
               if task.status is "aborted" then return
@@ -283,7 +309,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         )
 
         addSeries = ( (index, item) =>
-          y = ko.utils.arrayIndexOf(units, item.attribute.unit)
+          y = ko.utils.arrayIndexOf(units, attributeToUnit item.attribute)
           name = "#{item.device.name()}: #{item.attribute.label}"
           orgName = name
           num = 2
@@ -327,10 +353,12 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         addSeries(index, item) for item, index in displayed
 
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
-
-    getUngroupedDevicesWithNumericAttribute: () ->
+    
+    getUngroupedDevicesWithGraphableAttribute: () ->
       ungrouped = pimatic.getUngroupedDevices()
-      return (d for d in ungrouped when d.hasAttibuteWith( (attr) => attr.type is "number" ))
+      return (d for d in ungrouped when d.hasAttibuteWith( 
+        (attr) => attr.type in ["boolean", "number"] 
+      ))
 
     afterRenderAttribute: (elements) =>
       sliderEle = $(elements).find('select')

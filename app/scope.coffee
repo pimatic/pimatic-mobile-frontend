@@ -375,8 +375,8 @@ class Group
   getDevicesWithAttibute: (predicate) ->
     return ( d for d in @getDevices() when d.hasAttibuteWith(predicate) )
 
-  getDevicesWithNumericAttribute: ->
-    return @getDevicesWithAttibute( (attr) => attr.type is "number" )
+  getDevicesWithGraphableAttribute: ->
+    return @getDevicesWithAttibute( (attr) => attr.type in ["number", "boolean"] )
 
   containsDevice: (deviceId) ->
     index = ko.utils.arrayIndexOf(@devices(), deviceId)

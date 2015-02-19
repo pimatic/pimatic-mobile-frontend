@@ -1,15 +1,15 @@
 script#graph-group-template(type='text/template')
-  <!-- ko if: $data.getDevicesWithNumericAttribute().length > 0  -->
+  <!-- ko if: $data.getDevicesWithGraphableAttribute().length > 0  -->
   li(data-role='list-divider', data-theme=theme.dividerSwatch)
     label(data-bind="text: name")
-  <!-- ko template: { name: 'graph-device-template', foreach: $data.getDevicesWithNumericAttribute() } --><!-- /ko -->
+  <!-- ko template: { name: 'graph-device-template', foreach: $data.getDevicesWithGraphableAttribute() } --><!-- /ko -->
   <!-- /ko -->
 script#graph-device-template(type='text/template')
   li.graph-device
     label(data-bind='text: name')
     <!-- ko template: { name: 'graph-attribute-template', foreach: $data.attributes(), afterRender: $root.afterRenderAttribute } --><!-- /ko -->
 script#graph-attribute-template(type='text/template')
-  <!-- ko if: $data.type == "number" -->
+  <!-- ko if: $data.type == "number" || $data.type == "boolean" -->
   div.graph-device-attribute(data-role="fieldcontain")
     <!-- ko with: $root.getDisplayedAttribute($parent, $data) -->
     <!-- ko if: $data.serie -->
@@ -56,9 +56,9 @@ div#graph-page(data-role='page')
     //-     soan=')'
     ul#graph-device-list.device-attribute-list(data-role='listview')
       <!-- ko template: { name: 'graph-group-template', foreach: groups} --><!-- /ko -->
-      <!-- ko if: $root.getUngroupedDevicesWithNumericAttribute().length > 0  -->
+      <!-- ko if: $root.getUngroupedDevicesWithGraphableAttribute().length > 0  -->
       li(data-role='list-divider', data-theme=theme.dividerSwatch)
         label()=__('Ungrouped')
-      <!-- ko template: { name: 'graph-device-template', foreach: $root.getUngroupedDevicesWithNumericAttribute() } --><!-- /ko -->
+      <!-- ko template: { name: 'graph-device-template', foreach: $root.getUngroupedDevicesWithGraphableAttribute() } --><!-- /ko -->
       <!-- /ko -->
 
