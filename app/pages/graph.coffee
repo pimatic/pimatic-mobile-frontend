@@ -76,12 +76,13 @@ $(document).on("pagecreate", '#graph-page', (event) ->
 
       @chosenDate($.datepicker.formatDate(@dateFormat, new Date()))
 
+      nexStateGraphOffset = 0
+      stateGraphOffsets = []
       attributeToUnit = (attribute) ->
         return (
-          if attribute.type is "boolean" then "#{attribute.labels[0]}-#{attribute.labels[1]}"
+          if attribute.type is "boolean" then "__state"
           else attribute.unit
         )
-
 
       ko.computed( tc =>
         displayed = @displayedAttributes()
@@ -110,32 +111,42 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             item.range = null
             item.data = null
           unit = attributeToUnit item.attribute
+          if item.attribute.type is "boolean"
+            stateGraphOffsets[nexStateGraphOffset] = item.attribute
+            item.stateOffset = nexStateGraphOffset
+            nexStateGraphOffset++
           unless unit in units
             units.push unit
             unitsAttributes[unit]=item.attribute
 
         yAxis = []
+
+        stateFormater = (value) ->
+          # round down
+          base = Math.floor(value)
+          attribute = stateGraphOffsets[base]
+          # 0 => false, 0.5 => 1
+          value = (value isnt base) 
+          attribute.formatValue(value)
+        
+        stateTicks = []
+        for attribute, base in stateGraphOffsets
+          stateTicks.push {v: base, label: attribute.labels[1]}
+          stateTicks.push {v: base + 0.5, label: attribute.labels[0]}
+        stateTicker = -> stateTicks
         for u in units
           do (u) ->
             unitAttribute = unitsAttributes[u]
-            formater = (value) ->
-              if unitAttribute.type is "boolean"
-                unless value in [0, 1]
-                  return ""
-                value = (value is 1) 
-              unitAttribute.formatValue(value)
-            if unitAttribute.type is "boolean"
-              ticker = ->
-                return [
-                  {v: 0, label: unitAttribute.labels[1]},
-                  {v: 1, label: unitAttribute.labels[0]}
-                ]
+            if u is '__state'
+              formater = stateFormater
+              ticker = stateTicker
             else
+              formater = (value) -> unitAttribute.formatValue(value)
               ticker = Dygraph.numericTicks
             yAxis.push(
               axisLabelFormatter: formater
               valueFormatter: formater
-              ticker: ticker 
+              ticker: ticker
             )
 
         {to, from} = @getDateRange()
@@ -198,20 +209,20 @@ $(document).on("pagecreate", '#graph-page', (event) ->
 
 
         tDelta = 500
-        @addChartData = (index, data) =>
+        @addChartData = (index, item, data) =>
           #console.log "addChartData", index, data
           allData = allChartData
           newChartData = []
           xRange = @chart?.xAxisRange()
           if xRange? and allChartData.length > 0
             isEnd = xRange[1] is allChartData[allChartData.length-1][0].getTime()
+          if item.attribute.type is "boolean" 
+            for d in data
+              d[1] = if d[1] then item.stateOffset + 0.5 else item.stateOffset
           # merge "sort", alldata with series data
           if data.length is 0
             newChartData = allChartData
           else
-            if typeof data[0][1] is "boolean"
-              for d in data
-                d[1] = if d[1] then 1 else 0
             time = data[0][0]
             #console.log "startTime", time
             allDataIndex = 0
@@ -322,6 +333,9 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             color: @colors[index % @colors.length]
             showInRangeSelector: (index is 0)
           }
+          if item.attribute.type is "boolean"
+            serie.strokePattern = Dygraph.DASHED_LINE
+            #serie.strokeWidth = 1
           # unless item.attribute.discrete
           #   serie.plotter = smoothPlotter
           item.added = yes
@@ -340,7 +354,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           })
           loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>          
             data = ([time, value] for {time, value} in events)
-            @addChartData index, data
+            @addChartData index, item, data
             allData = allData.concat data
             unless hasMore
               item.data = allData
@@ -486,7 +500,7 @@ $(document).on "pagebeforeshow", '#graph-page', () ->
     for item in page.displayedAttributes()
       if item.device.id is attrEvent.deviceId and item.attribute.name is attrEvent.attributeName
         if item.serie? and item.data? and item.added and item.index? and page.addChartData?
-          page.addChartData(item.index, [[new Date(attrEvent.time).getTime(), attrEvent.value]])
+          page.addChartData(item.index, item, [[new Date(attrEvent.time).getTime(), attrEvent.value]])
           pimatic.showToast __('%s: %s value: %s',
             item.device.name(),
             item.attribute.label,
