@@ -68,8 +68,16 @@ $(document).on( "pagebeforecreate", (event) ->
         <div>ID: #{@deviceId}</div>
         <div>Class: #{@device.config.class}</div>
       """
+      buttons = []
       if @device.config.xLink
-        html += """<div><a href="#{@device.config.xLink}" target="_blank">Link</a></div>"""
+        buttons.push """<a href="#{@device.config.xLink}" target="_blank">Link</a>"""
+      if @device.hasAttibuteWith( (attr) => attr.type in ["number", "boolean"])
+        buttons.push """  
+          <a href="#" id="to-graph-page"
+          data-deviceId="#{@device.id}">Graph</a>
+        """
+      if buttons.length > 0
+        html += "<div>#{buttons.join('')}</div>"
       return html
 
   class SwitchItem extends DeviceItem

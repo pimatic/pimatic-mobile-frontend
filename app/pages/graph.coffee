@@ -76,8 +76,6 @@ $(document).on("pagecreate", '#graph-page', (event) ->
 
       @chosenDate($.datepicker.formatDate(@dateFormat, new Date()))
 
-      nexStateGraphOffset = 0
-      stateGraphOffsets = []
       attributeToUnit = (attribute) ->
         return (
           if attribute.type is "boolean" then "__state"
@@ -93,6 +91,18 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           $("#chart").hide()
           $("#chart-info").hide()
           return
+
+        nexStateGraphOffset = 0
+        stateGraphOffsets = []
+
+        # sort boolean attributes in displayed to end
+        newDisplayed = displayed.filter( 
+          (item) -> item.attribute.type is "number"
+        )
+        newDisplayed = newDisplayed.concat displayed.filter(
+          (item) -> item.attribute.type is "boolean"
+        )
+        displayed = newDisplayed
 
         @dataLoadingQuery.clear()
 
@@ -134,6 +144,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           stateTicks.push {v: base, label: attribute.labels[1]}
           stateTicks.push {v: base + 0.5, label: attribute.labels[0]}
         stateTicker = -> stateTicks
+        console.log stateTicks
         for u in units
           do (u) ->
             unitAttribute = unitsAttributes[u]
@@ -480,7 +491,7 @@ $(document).on("pagebeforeshow", '#graph-page', (event) ->
   if device?
     toDisplay = []
     for attr in device.attributes()
-      if attr.type is "number"
+      if attr.type in ["number", "boolean"]
         toDisplay.push {device, attribute: attr, serie: ko.observable()}
     page.displayedAttributes(toDisplay)
   return

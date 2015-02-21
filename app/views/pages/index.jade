@@ -53,7 +53,7 @@ script#musicplayer-template(type='text/template')
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-step-forward(data-bind="click: function(){$data.sendPlayerAction('next');}")=__('Next')
 script#thermostat-template(type='text/template')
   li.sortable.device.no-header.thermostat(data-bind='css: {unsynced: !$data.synced()}')
-    label.device-label(data-bind='text: name')
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     .valve-position
       .valve-position-bar!='&nbsp'
     .controls
