@@ -10192,6 +10192,10 @@ tooltip.prototype.select = function(e) {
     return;
   }
 
+  if(points.length === 0) {
+    return;
+  }
+
   if (tooltipMode === 'follow') {
     //hide outside of chart
     if(points[0].x < 0 || points[0].x > 1) {

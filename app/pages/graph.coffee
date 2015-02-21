@@ -279,6 +279,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             attributeName: item.attribute.name
             abort: onError
           }
+          groupByTime  = (item.attribute.type is "number" and not item.attribute.discrete)
           task.start = ( =>
             startTime = new Date().getTime()
             pimatic.client.rest.querySingleDeviceAttributeEvents({
@@ -288,7 +289,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
                 after: fromTime
                 before: tillTime
                 limit: limit
-                groupByTime: groupByTime if item.attribute.type is "number"
+                groupByTime: groupByTime
               }
             }, {global: no}).done( (result) =>
               if task.status is "aborted" then return

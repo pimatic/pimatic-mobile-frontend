@@ -80,7 +80,7 @@ class DeviceAttribute
     @label + ': ' +
     @formatValue(@value()) + 
     ' ' + @lastUpdateTimeText() + 
-    (if @type is "number" then """
+    (if @type in ["number", "boolean"] then """
       <a href="#" id="to-graph-page"
         data-attributeName="#{@name}"
         data-deviceId="#{@device.id}">Graph</a>
