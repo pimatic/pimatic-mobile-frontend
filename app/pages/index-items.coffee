@@ -344,16 +344,11 @@ $(document).on( "pagebeforecreate", (event) ->
 
       @updateButtons()
       @updatePreTemperature()
+      @updateValvePosition()
 
       @getAttribute('mode').value.subscribe( => @updateButtons() )
       @stAttr.value.subscribe( => @updatePreTemperature() )
-      @getAttribute('valve')?.value.subscribe( (value) =>
-        if value?
-          @valvePosition.css('height', "#{value}%")
-          @valvePosition.css('width', '100%')
-        else
-          @valvePosition.css('width', 0)
-      )
+      @getAttribute('valve')?.value.subscribe( => @updateValvePosition() )
       return
 
     # define the available actions for the template
@@ -397,6 +392,14 @@ $(document).on( "pagebeforecreate", (event) ->
         @ecoButton.removeClass('ui-btn-active')
         @comfyButton.removeClass('ui-btn-active')
       return
+
+    updateValvePosition: ->
+      valveVal = @getAttribute('valve')?.value()
+      if valveVal?
+        @valvePosition.css('height', "#{valveVal}%")
+        @valvePosition.css('width', '100%')
+      else
+        @valvePosition.css('width', 0)
 
     changeModeTo: (mode) ->
       @device.rest.changeModeTo({mode}, global: no)
