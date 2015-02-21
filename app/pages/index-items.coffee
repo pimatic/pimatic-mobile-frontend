@@ -397,9 +397,9 @@ $(document).on( "pagebeforecreate", (event) ->
       valveVal = @getAttribute('valve')?.value()
       if valveVal?
         @valvePosition.css('height', "#{valveVal}%")
-        @valvePosition.css('width', '100%')
+        @valvePosition.parent().css('display', '')
       else
-        @valvePosition.css('width', 0)
+        @valvePosition.parent().css('display', 'none')
 
     changeModeTo: (mode) ->
       @device.rest.changeModeTo({mode}, global: no)

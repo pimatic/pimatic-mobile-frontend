@@ -1101,6 +1101,21 @@ li.with-button a.ui-btn {
     clear: both;
   }
 
+  #index.locked li.thermostat {
+    line-height: 1.3;
+  }
+
+
+  #index.locked li.thermostat .valve-position{
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  #index.locked li.thermostat div.controls {
+    margin-top: -4.5px;
+    margin-bottom: -4.5px;
+  }
+
 }
 
 .graph-device label {
@@ -1502,13 +1517,16 @@ border-bottom-left-radius: inherit;
   top: 5px;
 }
 
+#index li.thermostat {
+  text-align: right;
+  line-height: 30px;
+}
+
 #index li.thermostat div.controls {
   float: right;
   max-width: 100%;
   margin: 0;
   overflow: hidden;
-  margin-top: -4.5px;
-  margin-bottom: -4.5px;
   text-align: right;
   white-space: normal;
 }
@@ -1543,22 +1561,23 @@ border-bottom-left-radius: inherit;
   color: #000 /*{a-bup-color}*/;
 }
 
-#index li.thermostat div.controls .valve-position{
+#index li.thermostat .valve-position{
   display: inline-block;
   margin: 0;
   padding: 0;
   width: 6px;
-  line-height: 32px;
-  height: 32px;
-  position: relative;
-  top: 1px;
+  line-height: 30px;
+  height: 30px;
+  background: #C7C7C7;
+  margin: 5px 0px;
+  border-radius: 2px;
 }
 
-#index li.thermostat div.controls .valve-position-bar{
+#index li.thermostat .valve-position-bar{
  display: inline-block;
  height: 0%;
  width: 100%;
- background: gray;
+ background: #007dcd /*{a-bar-background-color}*/;
  vertical-align: bottom;
  border-radius: 2px;
 }
