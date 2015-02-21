@@ -339,6 +339,7 @@ $(document).on( "pagebeforecreate", (event) ->
       @comfyButton = $(elements).find('[name=comfyButton]')
       # @vacButton = $(elements).find('[name=vacButton]')
       @input = $(elements).find('.spinbox input')
+      @valvePosition = $(elements).find('.valve-position-bar')
       @input.spinbox()
 
       @updateButtons()
@@ -346,6 +347,13 @@ $(document).on( "pagebeforecreate", (event) ->
 
       @getAttribute('mode').value.subscribe( => @updateButtons() )
       @stAttr.value.subscribe( => @updatePreTemperature() )
+      @getAttribute('valve')?.value.subscribe( (value) =>
+        if value?
+          @valvePosition.css('height', "#{value}%")
+          @valvePosition.css('width', '100%')
+        else
+          @valvePosition.css('width', 0)
+      )
       return
 
     # define the available actions for the template

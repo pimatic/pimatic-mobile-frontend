@@ -346,6 +346,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   white-space: normal;
 }
 
+
 #index li.shutter-device .ui-controlgroup-controls{
   padding-top: 1px;
 }
@@ -357,6 +358,13 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index li.musicplayer div.controls {
   margin-top: -1px;
 }
+
+#index li.musicplayer span.controls-inner {
+  white-space: nowrap;
+  margin-top: 0;
+}
+
+
 
 #index li.button div.buttons a {
   margin: 0;
@@ -1533,6 +1541,26 @@ border-bottom-left-radius: inherit;
   padding: 0;
   font-weight: bold;
   color: #000 /*{a-bup-color}*/;
+}
+
+#index li.thermostat div.controls .valve-position{
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  width: 6px;
+  line-height: 32px;
+  height: 32px;
+  position: relative;
+  top: 1px;
+}
+
+#index li.thermostat div.controls .valve-position-bar{
+ display: inline-block;
+ height: 0%;
+ width: 100%;
+ background: gray;
+ vertical-align: bottom;
+ border-radius: 2px;
 }
 
 #index li.thermostat.unsynced{
