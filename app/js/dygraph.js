@@ -9493,6 +9493,8 @@ rangeSelector.prototype.createZoomHandles_ = function() {
   img.style.visibility = 'hidden'; // Initially hidden so they don't show up in the wrong place.
   img.style.cursor = 'col-resize';
 
+  var svg = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?><svg version="1.1" width="9" height="16" xmlns="http://www.w3.org/2000/svg"><rect style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1" width="8" height="15" x="0.5" y="0.5" /><path style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 3.5,3 0,10" /> <path style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 5.5,3 0,10" /></svg>';
+
   if (/MSIE 7/.test(navigator.userAgent)) { // IE7 doesn't support embedded src data.
     img.width = 7;
     img.height = 14;
@@ -9507,13 +9509,13 @@ rangeSelector.prototype.createZoomHandles_ = function() {
 // 'bW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAaElEQVQoz+3SsRFAQBCF4Z9WJM8KCDVwownl' +
 // '6YXsTmCUsyKGkZzcl7zkz3YLkypgAnreFmDEpHkIwVOMfpdi9CEEN2nGpFdwD03yEqDtOgCaun7s' +
 // 'qSTDH32I1pQA2Pb9sZecAxc5r3IAb21d6878xsAAAAAASUVORK5CYII=';
-    img.src = 'data:image/svg+xml,' + '<?xml version="1.0" encoding="UTF-8" standalone="no" ?><svg version="1.1" width="9" height="16" xmlns="http://www.w3.org/2000/svg"><rect style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1" width="8" height="15" x="0.5" y="0.5" /><path style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 3.5,3 0,10" /> <path style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 5.5,3 0,10" /></svg>';
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
 
   if (this.isMobileDevice_) {
     img.width *= 2;
     img.height *= 2;
-    img.src = img.src.replace(/stroke-width:1/g, 'stroke-width:0.5');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace(/stroke-width:1/g, 'stroke-width:0.5'));
   }
 
   this.leftZoomHandle_ = img;
