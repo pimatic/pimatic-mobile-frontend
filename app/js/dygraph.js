@@ -3155,9 +3155,9 @@ Dygraph.prototype.setColors_ = function() {
   var colors = this.getOption('colors');
   var visibility = this.visibility();
   for (var i = 0; i < num; i++) {
-    if (!visibility[i]) {
-      continue;
-    }
+    // if (!visibility[i]) {
+    //   continue;
+    // }
     var label = labels[i + 1];
     var colorStr = this.attributes_.getForSeries('color', label);
     if (!colorStr) {
@@ -4496,12 +4496,11 @@ Dygraph.prototype.drawGraph_ = function() {
 
   this.setIndexByName_ = {};
   var labels = this.attr_("labels");
-  if (labels.length > 0) {
-    this.setIndexByName_[labels[0]] = 0;
+  for (var i = 0; i < this.rolledSeries_.length; i++) {
+    this.setIndexByName_[labels[i]] = i;
   }
   var dataIdx = 0;
   for (var i = 1; i < points.length; i++) {
-    this.setIndexByName_[labels[i]] = i;
     if (!this.visibility()[i - 1]) continue;
     this.layout_.addDataset(labels[i], points[i]);
     this.datasetIndex_[i] = dataIdx++;
@@ -8989,6 +8988,18 @@ legend.prototype.activate = function(g) {
     this.is_generated_div_ = true;
   }
 
+  var self = this;
+  g.addAndTrackEvent(div, 'click', function(event) {
+    if(self.legend_div_) {
+      if(event.target.className.match(/\blabel\b/)) {
+        var series = event.target.innerText;
+        var visibility = g.visibility();
+        var num = g.indexFromSetName(series)-1;
+        g.setVisibility(num, !visibility[num]);
+      }
+    }
+  });
+
   this.legend_div_ = div;
   this.one_em_width_ = 10;  // just a guess, will be updated.
 
@@ -9134,13 +9145,12 @@ legend.generateLegendHTML = function(g, x, sel_points, oneEmWidth, row) {
     html = '';
     for (i = 1; i < labels.length; i++) {
       var series = g.getPropertiesForSeries(labels[i]);
-      if (!series.visible) continue;
-
+      var labelClass = "label " + (series.visible ? "series-visible" : "series-invisible");
       if (html !== '') html += (sepLines ? '<br/>' : ' ');
       strokePattern = g.getOption("strokePattern", labels[i]);
       dash = generateLegendDashHTML(strokePattern, series.color, oneEmWidth);
       html += "<span style='font-weight: bold; color: " + series.color + ";'>" +
-          dash + " <span class=\"label\">" + escapeHTML(labels[i]) + "</span></span>";
+          dash + " <span class=\"" + labelClass + "\">" + escapeHTML(labels[i]) + "</span></span>";
     }
     return html;
   }
@@ -10153,6 +10163,13 @@ tooltip.prototype.activate = function(g) {
     g.graphDiv.appendChild(div);
     this.is_generated_div_ = true;
   }
+
+  var self = this;
+  g.addAndTrackEvent(div, 'click', function(event) {
+    if(self.tooltip_div_) {
+      self.tooltip_div_.style.display = 'none'; 
+    }
+  });
 
   this.tooltip_div_ = div;
   this.one_em_width_ = 10;  // just a guess, will be updated.

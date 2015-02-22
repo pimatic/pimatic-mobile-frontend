@@ -144,7 +144,6 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           stateTicks.push {v: base, label: attribute.labels[1]}
           stateTicks.push {v: base + 0.5, label: attribute.labels[0]}
         stateTicker = -> stateTicks
-        console.log stateTicks
         for u in units
           do (u) ->
             unitAttribute = unitsAttributes[u]

@@ -1246,6 +1246,11 @@ li.item .attributes .outOfDate {
 
 #chart-legend .label {
   color: black;
+  cursor: pointer;
+}
+
+#chart-legend .label.series-invisible {
+  color: gray;
 }
 
 #chart-container .controls{
