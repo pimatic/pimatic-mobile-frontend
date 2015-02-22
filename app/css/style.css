@@ -200,10 +200,10 @@ html body .ui-panel-dismiss {
   border-top-width: 0px;
 }
 
-.ui-mobile #item-lists .ui-li-divider + li a {
+.ui-mobile #item-lists .ui-li-divider + li a,
+.ui-mobile #graph-device-list .ui-li-divider + li a{
   border-top-width: 1px;
 }
-
 
 .ui-mobile .ui-page-theme-a #item-lists .ui-li-divider {
   border-color: #ddd /*{a-body-border}*/;
@@ -1261,6 +1261,11 @@ li.item .attributes .outOfDate {
 #chart .dygraph-axis-label{
   font-size: 12px;
   color: #606060;
+}
+
+#chart-no-data {
+  padding: .7em 1em;
+  font-style: italic;
 }
 
 .edit-pages-handle-label {

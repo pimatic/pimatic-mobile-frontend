@@ -90,6 +90,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             @chart = null
           $("#chart").hide()
           $("#chart-info").hide()
+          $("#chart-no-data").hide()
           return
 
         nexStateGraphOffset = 0
@@ -201,8 +202,10 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         inited = false
         updateChart = =>
           chartDiv = $("#chart")
+          noDataInfo = $('#chart-no-data')
           #console.log allChartData, chartOptions
           if allChartData.length > 0
+            noDataInfo.hide()
             unless inited 
               @chart.destroy() if @chart?
               chartDiv.show().css('width', '100%')
@@ -215,7 +218,8 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               if chartOptions.axes.x.dateWindow?
                 updates.axes = chartOptions.axes
               @chart.updateOptions(updates);
-
+          else
+            noDataInfo.show()
 
 
         tDelta = 500
