@@ -285,6 +285,33 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             chartOptions.axes.x.dateWindow = xRange
           updateChart()
           
+        loadPreviousData = ( (item, time, onData, onError) =>
+          task = {
+            attributeName: item.attribute.name
+            abort: onError
+          }
+          task.start = ( =>
+            pimatic.client.rest.querySingleDeviceAttributeEvents({
+              deviceId: item.device.id
+              attributeName: item.attribute.name
+              criteria: {
+                before: time
+                limit: 1
+                order: 'desc'
+              }
+            }, {global: no}).done( (result) =>
+              if task.status is "aborted" then return
+              if result.success
+                onData(result.events)
+            ).always( ->
+              if task.status is "aborted" then return
+              task.onComplete()
+            ).fail( ->
+              onError()
+            )
+          )
+          @dataLoadingQuery.addTask(task, no)
+        )
 
 
         limit = 100
@@ -368,16 +395,33 @@ $(document).on("pagecreate", '#graph-page', (event) ->
             text: __("Loading data for #{item.device.name()}: #{item.attribute.label}")
             blocking: no
           })
-          loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>          
+
+          handleData = ( (events) =>
             data = ([time, value] for {time, value} in events)
             @addChartData index, item, data
             allData = allData.concat data
-            unless hasMore
-              item.data = allData
-              item.range = range
-              pimatic.loading(loadingId, "hide")
-            return
-          ), onError = => pimatic.loading(loadingId, "hide") )
+          )
+
+          callLoadData = ( =>
+            loadData(item, from.getTime(), to.getTime(), onData = ( (events, hasMore) =>          
+              handleData(events)
+              unless hasMore
+                item.data = allData
+                item.range = range
+                pimatic.loading(loadingId, "hide")
+              return
+            ), onError = => pimatic.loading(loadingId, "hide") )
+          )
+
+          if item.attribute.discrete
+            loadPreviousData(item, from.getTime(), (events) =>
+              if events.length is 1
+                events[0].time = from.getTime()
+              handleData(events)
+              callLoadData()
+            )
+          else
+            callLoadData()
         )
 
         addSeries(index, item) for item, index in displayed
