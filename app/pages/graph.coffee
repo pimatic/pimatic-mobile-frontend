@@ -297,7 +297,8 @@ $(document).on("pagecreate", '#graph-page', (event) ->
               criteria: {
                 before: time
                 limit: 1
-                order: 'desc'
+                order: 'time'
+                orderDirection: 'desc'
               }
             }, {global: no}).done( (result) =>
               if task.status is "aborted" then return
