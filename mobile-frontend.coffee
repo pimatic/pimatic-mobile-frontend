@@ -355,7 +355,7 @@ module.exports = (env) ->
           @_themesRenderings[themeFullName] = undefined
           return css
 
-        if @config.mode  is "production"
+        if @config.mode is "production"
           if @_themesRenderings[themeFullName]?
             return @_themesRenderings[themeFullName].then( (css) -> serveTheme(css) )
 
