@@ -314,39 +314,27 @@ class DevicePage
   constructor: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
 
-    # deviceByGroups = ko.computed( =>
-    #   groupToId = {}
-    #   i = 0
-    #   groups = []
-    #   for d in @devices()
-    #     g = d.device.group()
-    #     if g?.id and d.device isnt pimatic.nullDevice
-    #       if groupToId[i]
-    #         groups[i].push d
-    #       else
-    #         groups.push [d]
-    #         groupToId[g.id] = i
-    #         i++
-    #   console.log groups
-    #   return groups
-    # )
+    @deviceByGroups = ko.pureComputed( =>
+      mapping = {
+        '$ungrouped': []
+      }
+      for d in @devices()
+        if d.device isnt pimatic.nullDevice
+          g = pimatic.getGroupOfDevice(d.device.id)
+          groupId = g?.id or '$ungrouped'
+          if mapping[groupId]?
+            mapping[groupId].push d
+          else
+            mapping[groupId] = [d]
+      return mapping
+    )
 
 
   getDevicesInGroup: (groupId) ->
-    ds = (d for d in @devices() when (
-        d.device.group()?.id is groupId and d.device isnt pimatic.nullDevice
-      )
-    )
-    return ds 
+    return @deviceByGroups()[groupId] or []
 
   getUngroupedDevices: ->
-    devices = @devices()
-    ungrouped = (
-      d for d in devices when (
-        not d.device.group()? and d.device isnt pimatic.nullDevice
-      )
-    )
-    return ungrouped
+    return @deviceByGroups()['$ungrouped']
 
   update: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)

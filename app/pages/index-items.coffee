@@ -40,7 +40,7 @@ $(document).on( "pagebeforecreate", (event) ->
     constructor: (templData, @device) ->
       super(templData)
       @name = @device.name
-      @deviceId = @device.id
+      @deviceId = templData.deviceId
 
     getAttribute: (name) -> @device.getAttribute(name)
     getItemTemplate: -> @device.template
