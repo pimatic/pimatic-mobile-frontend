@@ -67,7 +67,7 @@ class DeviceAttribute
 
     @unitText = if @unit? then @unit else ''
     if @type is "number"
-      @sparklineHistory = ko.computed( => ([t, v] for {t,v} in @history()) )
+      @sparklineHistory = ko.pureComputed( => ([t, v] for {t,v} in @history()) )
 
   shouldDisplaySparkline: -> 
     return (
@@ -211,12 +211,12 @@ class Device
         action,
         { type: "get", url: "/api/device/#{@id}/#{action.name}" }
       )
-    @group = ko.computed( => 
+    @group = ko.pureComputed( => 
       if @id is 'null' then return null
       pimatic.getGroupOfDevice(@id) 
     )
 
-    @configWithDefaults = ko.computed( =>
+    @configWithDefaults = ko.pureComputed( =>
       result = {}
       for name, c of @configDefaults
         result[name] = c
@@ -257,7 +257,7 @@ class Rule
   }
   constructor: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @group = ko.computed( => pimatic.getGroupOfRule(@id) )
+    @group = ko.pureComputed( => pimatic.getGroupOfRule(@id) )
   update: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
   toJS: () -> 
@@ -279,10 +279,10 @@ class Variable
     unless data.exprInputStr? then data.exprInputStr = null
     unless data.exprTokens? then data.exprTokens = null
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @displayName = ko.computed( => "$#{@name}" )
-    @hasValue = ko.computed( => @value()? )
-    @displayValue = ko.computed( => if @hasValue() then @value() else "null" )
-    @group = ko.computed( => pimatic.getGroupOfVariable(@name) )
+    @displayName = ko.pureComputed( => "$#{@name}" )
+    @hasValue = ko.pureComputed( => @value()? )
+    @displayValue = ko.pureComputed( => if @hasValue() then @value() else "null" )
+    @group = ko.pureComputed( => pimatic.getGroupOfVariable(@name) )
   isDeviceAttribute: -> $.inArray('.', @name) isnt -1
   update: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
@@ -313,6 +313,24 @@ class DevicePage
 
   constructor: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
+
+    # deviceByGroups = ko.computed( =>
+    #   groupToId = {}
+    #   i = 0
+    #   groups = []
+    #   for d in @devices()
+    #     g = d.device.group()
+    #     if g?.id and d.device isnt pimatic.nullDevice
+    #       if groupToId[i]
+    #         groups[i].push d
+    #       else
+    #         groups.push [d]
+    #         groupToId[g.id] = i
+    #         i++
+    #   console.log groups
+    #   return groups
+    # )
+
 
   getDevicesInGroup: (groupId) ->
     ds = (d for d in @devices() when (
@@ -348,21 +366,21 @@ class Group
   }
   constructor: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @getDevices = ko.computed( =>
+    @getDevices = ko.pureComputed( =>
       devices = []
       for deviceId in @devices()
         deviceObj = pimatic.getDeviceById(deviceId)
         if deviceObj? then devices.push deviceObj
       return devices
     )
-    @getRules = ko.computed( =>
+    @getRules = ko.pureComputed( =>
       rules = []
       for ruleId in @rules()
         ruleObj = pimatic.getRuleById(ruleId)
         if ruleObj? then rules.push ruleObj
       return rules
     )
-    @getVariables = ko.computed( =>
+    @getVariables = ko.pureComputed( =>
       variables = []
       for variableName in @variables()
         variableObj = pimatic.getVariableByName(variableName)
@@ -499,7 +517,7 @@ class Pimatic
       pimatic.storage.set('pimatic', allData)
     )
 
-    @getUngroupedDevices = ko.computed( =>
+    @getUngroupedDevices = ko.pureComputed( =>
       d for d in @devices() when not d.group()?
     )
 
