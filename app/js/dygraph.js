@@ -8992,7 +8992,7 @@ legend.prototype.activate = function(g) {
   g.addAndTrackEvent(div, 'click', function(event) {
     if(self.legend_div_) {
       if(event.target.className.match(/\blabel\b/)) {
-        var series = event.target.innerText;
+        var series = event.target.innerText || event.target.textContent;
         var visibility = g.visibility();
         var num = g.indexFromSetName(series)-1;
         g.setVisibility(num, !visibility[num]);
