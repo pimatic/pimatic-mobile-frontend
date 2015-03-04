@@ -155,7 +155,11 @@ class DeviceAttribute
       if info.unit in ['W', 'Wh'] and info.prefix is 'k'
         info.num = Math.round(value) / 1e3
         info.num = info.num.toFixed(3)
-
+      # show > 1000m as km
+      else if info.unit is "m" and info.prefix is ""
+        if value >= 1000
+          info.num = Math.round(value / 100) / 10
+          info.prefix = 'k'
       return {
         num: info.num
         unit: info.prefix + info.unit
@@ -164,6 +168,10 @@ class DeviceAttribute
       if @unit in ['kW', 'kWh']
         num = Math.round(value * 1e3) / 1e3
         num = num.toFixed(3)
+      # handle seconds
+      else if @unit is "s"
+        num = pimatic.toHHMMSS(value)
+        return {num, unit: ''}
       else
         num = Math.round(value * 1e2) / 1e2
       return {
