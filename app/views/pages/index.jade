@@ -76,6 +76,7 @@ script#thermostat-template(type='text/template')
       <!-- /ko -->
 script#attribute-template(type='text/template')
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
+    span.acronym(data-bind="text: $data.displayAcronym()")
     span.val(data-bind="text: $data.displayValueText()")
     span.unit(data-bind="text: $data.displayUnitText()")
     <!-- ko if: $data.shouldDisplaySparkline()  -->

@@ -44,6 +44,7 @@ class DeviceAttribute
     $default: 'ignore'
     description: "copy"
     label: "copy"
+    acronym: "copy"
     labels: "copy"
     name: "copy"
     type: "copy"
@@ -127,6 +128,9 @@ class DeviceAttribute
       return format.unit
     else
       return ''
+
+  displayAcronym: ->
+    return @acronym or ''
 
   formatValue: (value) ->
     switch @type

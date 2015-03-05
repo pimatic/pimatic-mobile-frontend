@@ -601,6 +601,14 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   margin-left: 0.1em;
 }
 
+.items .attribute .acronym {
+  color: #888 /*{pm-unit-color}*/;
+  margin-right: 0.2em;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+
 #variables .var-name{
   display: inline;
 } 
