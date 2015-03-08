@@ -288,7 +288,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         loadPreviousData = ( (item, time, onData, onError) =>
           task = {
             attributeName: item.attribute.name
-            abort: onError
+            abort: onError or (->)
           }
           task.start = ( =>
             pimatic.client.rest.querySingleDeviceAttributeEvents({
@@ -319,7 +319,7 @@ $(document).on("pagecreate", '#graph-page', (event) ->
         loadData = ( (item, fromTime, tillTime, onData, onError, prepend = no) =>
           task = {
             attributeName: item.attribute.name
-            abort: onError
+            abort: onError or (->)
           }
           task.start = ( =>
             startTime = new Date().getTime()
