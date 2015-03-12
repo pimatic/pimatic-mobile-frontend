@@ -248,7 +248,8 @@
           tooltip.off("vclick", removeTooltip)
           target.off("mouseleave", mouseleave) if mouseleave?
           if event? and $(event.target).parents('#tooltip').length isnt 0
-            event.preventDefault()
+            href = $(event.target).attr('href')
+            event.preventDefault() if href is "" or href.match(/^#.*/)
             event.stopImmediatePropagation()
             $(event.target).click()
           ko.bindingHandlers.tooltip.remove_tooltip(target, tooltip)
