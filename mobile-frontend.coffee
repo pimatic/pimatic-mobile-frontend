@@ -357,7 +357,7 @@ module.exports = (env) ->
 
         if @config.mode is "production"
           if @_themesRenderings[themeFullName]?
-            return @_themesRenderings[themeFullName].then( (css) -> serveTheme(css) )
+            return @_themesRenderings[themeFullName].then( (css) -> serveTheme(css) ).done()
 
           @_themesRenderings[themeFullName] = fs.readFileAsync(cachePath)
             .then( (css) -> serveTheme(css.toString()))
@@ -369,7 +369,6 @@ module.exports = (env) ->
               else
                 throw error
             )
-            .done()
         else
           # always rerender theme in development mode
           @createThemeCss(themeFullName).then( (css) -> serveTheme(css) ).done()
