@@ -303,7 +303,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index .items .shutter-device label,
 #index .items .button label,
 #index .items .musicplayer label, 
-#index .items .switch-device label{
+#index .items .switch-device label,
+#index .items .timer label{
   float: left;
 }
 
@@ -330,7 +331,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 #index li.button div.buttons, 
 #index li.shutter-device .shutter-buttons,
-#index li.musicplayer div.controls {
+#index li.musicplayer div.controls,
+#index li.timer div.controls {
   float: right;
   max-width: 100%;
   margin: 0;
@@ -339,7 +341,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 #index li.button div.buttons,
 #index li.shutter-device .shutter-buttons,
-#index li.musicplayer div.controls {
+#index li.musicplayer div.controls,
+#index li.timer div.controls {
   margin-top: -4px;
   margin-bottom: -4px;
   text-align: right;
@@ -355,11 +358,13 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   margin-top: 4px;
 }
 
-#index li.musicplayer div.controls {
+#index li.musicplayer div.controls,
+#index li.timer div.controls {
   margin-top: -1px;
 }
 
-#index li.musicplayer span.controls-inner {
+#index li.musicplayer span.controls-inner,
+#index li.timer span.controls-inner {
   white-space: nowrap;
   margin-top: 0;
 }
@@ -374,7 +379,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 
-#index li.musicplayer div.controls a {
+#index li.musicplayer div.controls a,
+#index li.timer div.controls a {
   margin: 0;
   margin-left: 4px;
   margin-top: 2px;

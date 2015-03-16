@@ -427,6 +427,33 @@ $(document).on( "pagebeforecreate", (event) ->
       else
         return @device.configDefaults[name]
 
+  class TimerItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @startButtonIcon = ko.computed( =>
+        running = @device.getAttribute('running').value
+        return (
+          if running() then 'stop'
+          else 'play'
+        )
+      )
+
+    getItemTemplate: => 'timer'
+
+    sendTimerAction: (action) =>
+      @device.rest[action]({})
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+
+    toggleRunning: () =>
+      running = @device.getAttribute('running').value
+      if running()
+        action = 'stopTimer'
+      else
+        action = 'startTimer'
+      @sendTimerAction(action)
+
 
   # Export all classe to be extendable by plugins
   pimatic.Item = Item
@@ -442,6 +469,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.ContactItem = ContactItem
   pimatic.MuscicplayerItem = MuscicplayerItem
   pimatic.ThermostatItem = ThermostatItem
+  pimatic.TimerItem = TimerItem
 
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
@@ -457,6 +485,7 @@ $(document).on( "pagebeforecreate", (event) ->
     shutter: pimatic.ShutterItem
     musicplayer: pimatic.MuscicplayerItem
     thermostat: pimatic.ThermostatItem
+    timer: pimatic.TimerItem
   }
 
   $(document).trigger("templateinit", [ ])
