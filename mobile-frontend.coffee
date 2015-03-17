@@ -170,7 +170,7 @@ module.exports = (env) ->
               "pimatic-mobile-frontend/app/js/tracekit.js"
               "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
               "pimatic-mobile-frontend/app/mobile-init.js"
-              "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
+              "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.5.js"
               "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
               "pimatic-mobile-frontend/app/js/jquery.pep.js"
               "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
@@ -231,7 +231,7 @@ module.exports = (env) ->
             ]
           css:
             base: [
-              "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
+              "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.5.css"
             # ] .concat themeCss .concat [
               "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
               "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
