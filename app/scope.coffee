@@ -135,7 +135,7 @@ class DeviceAttribute
   formatValue: (value) ->
     switch @type
       when 'boolean'
-        if @labels then (if value is true then @labels[0] else @labels[1])
+        if @labels then (if value is true then __(@labels[0]) else __(@labels[1]))
         else value.toString()
       when 'string' then value
       when "number"
