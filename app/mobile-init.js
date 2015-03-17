@@ -7,5 +7,12 @@ $( document ).on( "mobileinit", function() {
     getMaxScrollForTransition: function(){return 5;}
   });
 
+  // monkeypatch resetActivePageHeight function because we are using overthrow
+  $.mobile.resetActivePageHeight = function( height ) {
+    var page = $( "." + $.mobile.activePageClass );
+    var screenHeight = $.mobile.getScreenHeight();
+    page.css( "min-height", screenHeight);
+    $('#nav-panel').css('height', screenHeight);
+  };
   $.mobile.toolbar.tapToggle = false; 
 });
