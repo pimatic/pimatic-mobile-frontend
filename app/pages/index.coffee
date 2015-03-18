@@ -434,6 +434,7 @@ $(document).on("pageshow", '#index', tc (event) ->
   updateCarousel()
   setTimeout(( ->
     updateCarousel()
+    $.mobile.resetActivePageHeight()
   ), 1)
 )
 
