@@ -126,6 +126,7 @@
       tooltipFormatter = valueUnwrapped.tooltipFormatter
       $(element).sparkline(data, {
         disableTooltips: yes
+        height: 19, # height auto is slow
         type: 'line',
         lineColor: '#7c7c7c',
         fillColor: '#cccccc',
