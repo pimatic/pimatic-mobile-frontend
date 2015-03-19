@@ -166,7 +166,7 @@ module.exports = (env) ->
         ]
         base: [
           "pimatic-mobile-frontend/app/js/tracekit.js"
-          "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
+          "pimatic-mobile-frontend/app/js/jquery-1.11.2.js"
           "pimatic-mobile-frontend/app/mobile-init.js"
           "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.5.js"
           "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
