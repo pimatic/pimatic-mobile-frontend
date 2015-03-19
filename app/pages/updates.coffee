@@ -5,7 +5,7 @@
 # log-page
 # ---------
 
-$(document).on("pagecreate", '#updates', (event) ->
+$(document).on("pagecreate", '#updates-page', (event) ->
 
   class UpdateViewModel
 
@@ -75,13 +75,13 @@ $(document).on("pagecreate", '#updates', (event) ->
 
   try
     pimatic.pages.updates = updatePage = new UpdateViewModel()
-    ko.applyBindings(updatePage, $('#updates')[0])
+    ko.applyBindings(updatePage, $('#updates-page')[0])
   catch e
     TraceKit.report(e)
   return
 )
 
-$(document).on "pageshow", '#updates', (event) ->
+$(document).on "pageshow", '#updates-page', (event) ->
   try
     updatesPage = pimatic.pages.updates
     updatesPage.searchForPimaticUpdate()

@@ -1,16 +1,16 @@
 # log-page
 # ---------
 tc = pimatic.tryCatch
-$(document).on("pagecreate", '#events', tc (event) ->
+$(document).on("pagecreate", '#events-page', tc (event) ->
 
   class DeviceAttributeEvent
 
     constructor: (@data) ->
       @device = ko.computed( => 
-        pimatic.getDeviceById(data.deviceId) 
+        pimatic.getDeviceById(@data.deviceId) 
       ).extend(rateLimit: {timeout: 10, method: "notifyAtFixedRate"})
       @attribute = ko.computed( =>
-        if @device()? then @device().getAttribute(data.attributeName)
+        if @device()? then @device().getAttribute(@data.attributeName)
         else null
       )
 
@@ -161,13 +161,13 @@ $(document).on("pagecreate", '#events', tc (event) ->
     
   try
     pimatic.pages.events = eventsPage = new EventViewModel()
-    ko.applyBindings(eventsPage, $('#events')[0])
+    ko.applyBindings(eventsPage, $('#events-page')[0])
   catch e
     TraceKit.report(e)
   return
 )
 
-$(document).on("pagebeforeshow", '#events', tc (event) ->
+$(document).on("pagebeforeshow", '#events-page', tc (event) ->
   try
     pimatic.pages.events.loadEvents()
     pimatic.pages.events.loadEventsMeta()

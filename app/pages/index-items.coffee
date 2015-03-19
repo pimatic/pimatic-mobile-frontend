@@ -12,9 +12,9 @@ $(document).on( "pagebeforecreate", (event) ->
   
   class Item
     constructor: (@templData) ->
-      ko.mapper.fromJS(templData, @constructor.mapping, this)
-    update: (templData) -> 
-      ko.mapper.fromJS(templData, @constructor.mapping, this)
+      ko.mapper.fromJS(@templData, @constructor.mapping, this)
+    update: (@templData) -> 
+      ko.mapper.fromJS(@templData, @constructor.mapping, this)
     afterRender: (elements) ->
       $(elements)
       .addClass('item')

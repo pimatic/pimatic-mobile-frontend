@@ -57,15 +57,15 @@ class AddItemViewModel
 
 tc( => pimatic.pages.addItem = new AddItemViewModel() )()
 
-$(document).on "pagecreate", '#add-item', tc (event) ->
-  ko.applyBindings(pimatic.pages.addItem, $('#add-item')[0])
+$(document).on "pagecreate", '#add-item-page', tc (event) ->
+  ko.applyBindings(pimatic.pages.addItem, $('#add-item-page')[0])
 
   $('#device-items').on "click", 'li.item', tc ->
     li = $(this)
     pimatic.pages.addItem.addDeviceToIndexPage(ko.dataFor(li[0]))
     return
 
-$(document).on "pageshow", '#add-item', tc (event) ->
+$(document).on "pageshow", '#add-item-page', tc (event) ->
   return
 
 

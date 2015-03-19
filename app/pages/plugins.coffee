@@ -1,7 +1,7 @@
 # plugins-page
 # ---------
 
-$(document).on "pageinit", '#plugins', (event) ->
+$(document).on "pageinit", '#plugins-page', (event) ->
   # Get all installed Plugins
   pimatic.client.rest.getInstalledPluginsWithInfo().done( (data) ->
     console.log data
@@ -14,7 +14,7 @@ $(document).on "pageinit", '#plugins', (event) ->
     $("#plugin-list input[type='checkbox']").checkboxradio()
   ).fail( ajaxAlertFail)
 
-  $('#plugins').on "click", '#plugin-do-action', (event, ui) ->
+  $('#plugins-page').on "click", '#plugin-do-action', (event, ui) ->
     val = $('#select-plugin-action').val()
     if val is 'select' then return alert __('Please select a action first')
     selected = []
@@ -37,11 +37,11 @@ $(document).on "pageinit", '#plugins', (event) ->
       return
     ).fail(ajaxAlertFail)
 
-  $('#plugins').on "click", '.restart-now', (event, ui) ->
+  $('#plugins-page').on "click", '.restart-now', (event, ui) ->
     pimatic.client.rest.restart({}).fail(ajaxAlertFail)
 
 
-$(document).on "pagebeforeshow", '#plugins', (event) ->
+$(document).on "pagebeforeshow", '#plugins-page', (event) ->
   pimatic.try => $('#select-plugin-action').val('select').selectmenu('refresh')
 
 # plugins-browse-page

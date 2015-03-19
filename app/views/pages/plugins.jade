@@ -33,7 +33,7 @@ script#plugin-browse-template(type='text/template')
 script#loading-template(type='text/template')
   li.loading=__('Loading') + "..."
 
-div#plugins(data-role='page')
+div#plugins-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
       data-inline='true', data-transition="slidefade", data-direction="reverse")=__('Back')
@@ -58,7 +58,7 @@ div#plugins(data-role='page')
       <!-- /ko -->
 div#plugins-browse(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
-    a(href='#plugins', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true', data-transition="slidefade")=__('Back')
+    a(href='#plugins-page', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true', data-transition="slidefade")=__('Back')
     h3=__('Install a Plugins')
   div.ui-content.overthrow
     form

@@ -4,10 +4,6 @@
 # scope this function
 ( ->
 
-  $.datepicker.setDefaults({
-    dateFormat: 'yy-mm-dd'
-  })
-
   jQuery.mobile.loader.prototype.fakeFixLoader = (->)
   pendingLoadings = {}
 
@@ -354,3 +350,17 @@ pimatic.fixedAddElement = (toggleObservable, sortingObservable, addEle, parentLi
       parentList.css('padding-bottom': 0)
       addEle.removeClass('fixed-add-element')
   ).extend(rateLimit: {timeout: 200, method: "notifyWhenChangesStop"})
+
+
+$.mobile.changePage = ( to, options ) ->
+  # lazyload page scripts from cache
+  if typeof to is "string"
+    toPage = to.split('#')[1]
+  else
+    toPage = to.attr('id')
+  if toPage isnt "index" and scripts[toPage]?
+    LazyLoad.js(scripts[toPage], ->
+      $.mobile.pageContainer.pagecontainer( "change", to, options )
+    )
+  else
+    $.mobile.pageContainer.pagecontainer( "change", to, options )

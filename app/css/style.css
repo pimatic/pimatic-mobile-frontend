@@ -804,7 +804,7 @@ table#database-attribute-info {
   padding-left: 10px;
 }
 
-#log .controls {
+#log-page .controls {
   margin-bottom: 1em;
 }
 
@@ -1528,7 +1528,7 @@ border-bottom-left-radius: inherit;
   display: block;
 }
 
-#config .ui-content {
+#config-page .ui-content {
   padding: 0;
 }
 

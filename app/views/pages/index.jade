@@ -105,7 +105,7 @@ script#sortable-handle-template(type='text/template')
     div.ui-btn-icon-notext.ui-icon.ui-icon-bars.ui-alt-icon.ui-nodisc-icon
 script#edit-devicepage-link-template(type='text/template')
   li
-    a(data-ajax="false", href="#devicepages-page", id="edit-devicepages-link")
+    a(data-ajax="false", href='#devicepages-page', id="edit-devicepages-link")
       div.edit-handle.no-carousel-slide
         div.ui-btn-icon-notext.ui-icon.ui-icon-gear.ui-alt-icon.ui-nodisc-icon
       span.edit-pages-handle-label=__('Edit Pages')
@@ -129,7 +129,7 @@ script#devicepage-template(type='text/template')
       <!-- /ko -->
       li.delete-link(data-theme='a', data-icon="delete", data-bind="visible: $root.isSortingItems, attr: {id: 'delete-item-' + $data.id}, css: 'droppable-' + $data.id")=__('Drop here to remove item')
       li(data-bind="visible: $root.enabledEditing() && !$root.isSortingItems(), attr: {id: 'add-item-link-' + $data.id}")
-        a(data-transition='slidefade', href='#add-item', data-bind="click: $root.onAddItemClicked")=__('Add a new item')+'...'
+        a(data-transition='slidefade', href='#add-item-page', data-bind="click: $root.onAddItemClicked")=__('Add a new item')+'...'
 script#device-group-template(type='text/template')
   <!-- ko if: $root.enabledEditing() || $parent.getDevicesInGroup($data.id).length > 0  -->
   li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
@@ -142,7 +142,7 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
     h3=customTitle
     div.ui-mini.ui-btn-right(data-role="controlgroup" data-type="horizontal")
       <!-- ko if: $root.hasPermission('messages', 'read') -->
-      a#error-count.ui-btn.ui-btn-inline.ui-mini.ui-btn-icon-left.ui-icon-alert(href='#log', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0, click: onLogMessageClicked")
+      a#error-count.ui-btn.ui-btn-inline.ui-mini.ui-btn-icon-left.ui-icon-alert(href='#log-page', data-transition="slidedown", data-bind="jqmbutton: {text: errorCount}, visible: errorCount() > 0, click: onLogMessageClicked")
       <!-- /ko -->
       <!-- ko if: $root.hasPermission('pages', 'write') || pimatic.isDemo() -->
       a.ui-btn.ui-btn-inline.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
@@ -177,11 +177,11 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Log')
       <!-- ko if: $root.hasPermission('messages', 'read') -->
       li(data-theme=theme.menuSwatch)
-        a(href='#log', data-transition="slidefade")=__('Messages')
+        a(href='#log-page', data-transition="slidefade")=__('Messages')
       <!-- /ko --> 
       <!-- ko if: $root.hasPermission('events', 'read') -->
       li(data-theme=theme.menuSwatch)
-        a(href='#events', data-transition="slidefade")=__('Events') 
+        a(href='#events-page', data-transition="slidefade")=__('Events') 
       <!-- /ko -->
       <!-- /ko --> 
       li(data-theme=theme.menuSwatch, data-role="list-divider")=__('Settings')
@@ -195,19 +195,19 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
       <!-- /ko --> 
       <!-- ko if: $root.hasPermission('plugins', 'read') -->
       li(data-theme=theme.menuSwatch)
-        a(href='#plugins', data-transition="slidefade")=__('Plugins') 
+        a(href='#plugins-page', data-transition="slidefade")=__('Plugins') 
       <!-- /ko --> 
       <!-- ko if: $root.hasPermission('config', 'read') -->
       li(data-theme=theme.menuSwatch)
-        a(href='#config', data-transition="slidefade")=__('Config')
+        a(href='#config-page', data-transition="slidefade")=__('Config')
       <!-- /ko --> 
       <!-- ko if: $root.hasPermission('database', 'read') -->
       li(data-theme=theme.menuSwatch)
-        a(href='#database', data-transition="slidefade")=__('Database')
+        a(href='#database-page', data-transition="slidefade")=__('Database')
       <!-- /ko --> 
       <!-- ko if: $root.hasPermission('updates', 'read') -->
       li(data-theme=theme.menuSwatch)
-        a(href='#updates', data-transition="slidefade")=__('Updates')
+        a(href='#updates-page', data-transition="slidefade")=__('Updates')
       <!-- /ko --> 
       li#import-ca-cert(data-theme=theme.menuSwatch)
         a(href='root-ca-cert.crt', data-ajax="false", data-bind="visible: hasRootCACert")=__('Show CA root certificate')

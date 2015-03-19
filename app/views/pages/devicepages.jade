@@ -1,6 +1,6 @@
 script#devicepage-item-template(type="text/template")
   li.devicepage.sortable
-    a(data-transition='slidefade', href='#edit-devicepage', data-bind="click: $root.onEditDevicepageClicked")
+    a(data-transition='slidefade', href='#edit-devicepage-page', data-bind="click: $root.onEditDevicepageClicked")
       span.name(data-bind="text: $data.name()")
 div#devicepages-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingDevicepages() }")
   div(data-theme=theme.headerSwatch, data-role='header')
@@ -12,4 +12,4 @@ div#devicepages-page(data-role='page', data-bind="css: {locked: !$root.enabledEd
       <!-- ko template: { name: 'devicepage-item-template', foreach: devicepages, afterRender: $root.afterRenderDevicepage} --><!-- /ko -->
       li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingDevicepages()")=__('Drop here to remove page')
       li#add-devicepage(data-bind="visible: $root.enabledEditing() && !$root.isSortingDevicepages() ")
-        a(data-transition='slidefade', href='#edit-devicepage', data-bind="click: $root.onAddDevicepageClicked")=__('Add a new page')+'...'
+        a(data-transition='slidefade', href='#edit-devicepage-page', data-bind="click: $root.onAddDevicepageClicked")=__('Add a new page')+'...'

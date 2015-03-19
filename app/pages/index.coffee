@@ -410,9 +410,16 @@ $(document).on("pagecreate", '#index', tc (event) ->
   $("#nav-panel").on('panelopen panelclose', tc (event) ->
     itemList = $('#item-lists')
     if itemList.is(":visible") then updateCarousel()
-      
-      
   )
+
+  $(document).on "vclick", '#to-graph-page', ->
+    deviceId = $('#to-graph-page').attr('data-deviceId')
+    device = pimatic.getDeviceById(deviceId)
+    jQuery.mobile.pageParams = {
+      device: device
+    }
+    jQuery.mobile.changePage '#graph-page', transition: 'slide'
+
   return
 )
 

@@ -1,7 +1,7 @@
 # edit-variable-page
 # --------------
 
-$(document).on("pagebeforecreate", (event) ->
+$(document).on("pagebeforecreate", '#edit-variable-page', (event) ->
   if pimatic.pages.editVariable? then return
 
   class EditVariableViewModel
@@ -71,11 +71,28 @@ $(document).on("pagebeforecreate", (event) ->
   return
 )
 
-$(document).on("pagecreate", '#edit-variable', (event) ->
+$(document).on("pagecreate", '#edit-variable-page', (event) ->
   try
-    ko.applyBindings(pimatic.pages.editVariable, $('#edit-variable')[0])
+    ko.applyBindings(pimatic.pages.editVariable, $('#edit-variable-page')[0])
   catch e
     TraceKit.report(e)
 )
 
-
+$(document).on("pagebeforeshow", '#edit-variable-page', (event) ->
+  editVariablePage = pimatic.pages.editVariable
+  params = jQuery.mobile.pageParams
+  jQuery.mobile.pageParams = {}
+  if params?.action is "update"
+    variable = params.variable
+    editVariablePage.action('update')
+    editVariablePage.variableName(variable.name)
+    editVariablePage.variableValue(
+      if variable.type() is 'value' then variable.value() else variable.exprInputStr()
+    )
+    editVariablePage.variableType(variable.type())
+    editVariablePage.variableUnit(variable.unit())
+  else
+    editVariablePage.resetFields()
+    editVariablePage.action('add')
+  return
+)

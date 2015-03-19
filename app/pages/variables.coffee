@@ -155,9 +155,7 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
       )()
 
     onAddVariableClicked: ->
-      editVariablePage = pimatic.pages.editVariable
-      editVariablePage.resetFields()
-      editVariablePage.action('add')
+      jQuery.mobile.pageParams = {action: 'add'}
       return true
 
     onEditVariableClicked: (variable) =>
@@ -165,14 +163,7 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
         pimatic.showToast(__("Sorry, you have no permissions to edit this variable."))
         return false
       unless variable.isDeviceAttribute()
-        editVariablePage = pimatic.pages.editVariable
-        editVariablePage.variableName(variable.name)
-        editVariablePage.variableValue(
-          if variable.type() is 'value' then variable.value() else variable.exprInputStr()
-        )
-        editVariablePage.variableType(variable.type())
-        editVariablePage.variableUnit(variable.unit())
-        editVariablePage.action('update')
+        jQuery.mobile.pageParams = {action: 'update', variable}
         return true
       else return false
 

@@ -5,15 +5,8 @@
 
 tc = pimatic.tryCatch
 
-$(document).on "pagecreate", '#index', (event) ->
-
-  $(document).on "vclick", '#to-graph-page', ->
-    deviceId = $('#to-graph-page').attr('data-deviceId')
-    device = pimatic.getDeviceById(deviceId)
-    jQuery.mobile.pageParams = {
-      device: device
-    }
-    jQuery.mobile.changePage '#graph-page', transition: 'slide'
+merge = Array.prototype.concat
+LazyLoad.js(merge.apply(scripts.dygraph, scripts.datepicker))
 
 $(document).on("pagecreate", '#graph-page', (event) ->
 

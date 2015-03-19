@@ -59,11 +59,24 @@ $(document).on("pagebeforecreate", (event) ->
   return
 )
 
-$(document).on("pagecreate", '#edit-devicepage', (event) ->
+$(document).on("pagecreate", '#edit-devicepage-page', (event) ->
   try
-    ko.applyBindings(pimatic.pages.editDevicepage, $('#edit-devicepage')[0])
+    ko.applyBindings(pimatic.pages.editDevicepage, $('#edit-devicepage-page')[0])
   catch e
     TraceKit.report(e)
 )
 
-
+$(document).on("pagebeforeshow", '#edit-devicepage-page', (event) ->
+  editDevicepage = pimatic.pages.editDevicepage
+  params = jQuery.mobile.pageParams
+  jQuery.mobile.pageParams = {}
+  if params?.action is "update"
+    page = params.page
+    editDevicepage.action('update')
+    editDevicepage.pageId(page.id)
+    editDevicepage.pageName(page.name())
+  else
+    editDevicepage.resetFields()
+    editDevicepage.action('add')
+  return
+)

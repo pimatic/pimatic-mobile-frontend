@@ -1,7 +1,7 @@
 # log-page
 # ---------
 tc = pimatic.tryCatch
-$(document).on("pagecreate", '#log', tc (event) ->
+$(document).on("pagecreate", '#log-page', tc (event) ->
 
   class LogMessageViewModel
 
@@ -134,7 +134,7 @@ $(document).on("pagecreate", '#log', tc (event) ->
       if count? then logPage.messageCount(count+1)
       logPage.messages.unshift entry
 
-    $('#log').on "click", '#clear-log', tc (event, ui) ->
+    $('#log-page').on "click", '#clear-log', tc (event, ui) ->
       lastMessage = logPage.messages[logPage.messages.length-1]
       pimatic.client.rest.deleteMessages({criteria: {}}).done( tc ->
         logPage.messages.removeAll()
@@ -142,13 +142,13 @@ $(document).on("pagecreate", '#log', tc (event) ->
         logPage.messageCount(0)
       ).fail(ajaxAlertFail)
 
-    ko.applyBindings(logPage, $('#log')[0])
+    ko.applyBindings(logPage, $('#log-page')[0])
   catch e
     TraceKit.report(e)
   return
 )
 
-$(document).on("pagebeforeshow", '#log', tc (event) ->
+$(document).on("pagebeforeshow", '#log-page', tc (event) ->
   try
     logPage = pimatic.pages.log
 
