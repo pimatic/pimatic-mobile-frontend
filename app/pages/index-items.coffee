@@ -278,9 +278,16 @@ $(document).on( "pagebeforecreate", (event) ->
     getItemTemplate: => 'buttons'
 
     onButtonPress: (button) =>
-      @device.rest.buttonPressed({buttonId: button.id}, global: no)
-        .done(ajaxShowToast)
-        .fail(ajaxAlertFail)
+      doIt = (
+        if button.confirm then confirm __("
+          Do you really want to press %s? 
+        ", button.text)
+        else yes
+      ) 
+      if doIt
+        @device.rest.buttonPressed({buttonId: button.id}, global: no)
+          .done(ajaxShowToast)
+          .fail(ajaxAlertFail)
 
   class MuscicplayerItem extends DeviceItem
 
