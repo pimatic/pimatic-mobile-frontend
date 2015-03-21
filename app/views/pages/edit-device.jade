@@ -1,3 +1,50 @@
+script#json-scheme-editor-field(type='text/template')
+  <!-- ko if: $data.schema.name && $data.schema.type !== "object" && $data.schema.type !== "array" -->
+  .ui-field-contain
+    label(for='', data-bind="text: $data.schema.name")
+    <!-- ko if: $data.schema.type !== "boolean" -->
+    div.ui-input-text.ui-body-inherit.ui-corner-all.ui-shadow-inset
+      //- div(data-bind="text: JSON.stringify($data, null, '  ')")
+      <!-- ko if: $data.schema.type === "string" -->
+      input(type="text", data-bind="textInput: $data.value")
+      <!-- /ko -->
+      <!-- ko if: $data.schema.type === "number" -->
+      input(type="text", data-bind="textInput: $data.value")
+      <!-- /ko -->
+      <!-- ko if: $data.schema.type === "integer" -->
+      input(type="text", data-bind="textInput: $data.value")
+      <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: $data.schema.type === "boolean" -->
+    select(data-bind="jqmflipswitch: $data.value")
+      option(value="false")=__('No')
+      option(value="true")=__('Yes')
+    <!-- /ko -->
+    div.description(data-bind="text: $data.schema.description")
+  <!-- /ko -->
+  <!-- ko if: $data.schema.type === "object" -->
+  h3(data-bind="text: $data.schema.name")
+  <!-- ko template: { name: 'json-scheme-editor-object', data: $data } --><!-- /ko -->
+  <!-- /ko -->
+  <!-- ko if: $data.schema.type === "array" -->
+  h3(data-bind="text: $data.schema.name")
+  <!-- ko template: { name: 'json-scheme-editor-array', data: $data } --><!-- /ko -->
+  <!-- /ko -->
+script#json-scheme-editor-object(type='text/template')
+  div.properties
+    <!-- ko if: $data.schema -->
+    <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getProperties($data.value) } --><!-- /ko -->
+    <!-- /ko -->
+script#json-scheme-editor-array(type='text/template')
+  div.elements
+    //- div(data-bind="text: JSON.stringify($data.schema.getItems($data.value), null, '  ')")
+    <!-- ko if: $data.schema -->
+    //-data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}
+    ul.items(data-role='listview', data-inset='true', data-bind="jqmlistview: $data.schema.getItems($data.value)") 
+      <!-- ko template: { name: 'json-scheme-editor-array-item', foreach: $data.schema.getItems($data.value) } --><!-- /ko -->
+    <!-- /ko -->
+script#json-scheme-editor-array-item(type='text/template')
+  li(data-bind="text: $data.schema.getItemLabel($data.value)")
 div#edit-device-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     h3(data-bind="text: pageTitle()")
@@ -12,8 +59,7 @@ div#edit-device-page(data-role='page')
       .ui-field-contain.has-device-id-input
         label(for='edit-device-class')=__('Class') + ': '
         select#select-device-class(name='select-device-class', data-bind="jqmoptions: deviceClasses, value: deviceClass, jqmenabled: action() == 'add'")
-    div
-      div#device-json-editor()
+      <!-- ko template: { name: 'json-scheme-editor-object', data: {schema: $root.configSchema(), value: $root.deviceConfig() } } --><!-- /ko -->
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-device-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"

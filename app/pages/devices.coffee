@@ -127,25 +127,18 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
       )()
 
     onAddDeviceClicked: ->
-      pimatic.showToast("Sorry that operation is not supported yet.")
-      return false
-      editDevicePage = pimatic.pages.editDevice
-      editDevicePage.resetFields()
-      editDevicePage.action('add')
+      #pimatic.showToast("Sorry that operation is not supported yet.")
+      #return false
+      jQuery.mobile.pageParams = {action: 'add'}
       return true
 
     onEditDeviceClicked: (device) =>
-      pimatic.showToast("Sorry that operation is not supported yet.")
-      return false
+      #pimatic.showToast("Sorry that operation is not supported yet.")
+      #return false
       unless @hasPermission('devices', 'write')
         pimatic.showToast(__("Sorry, you have no permissions to edit this device."))
         return false
-      editDevicePage = pimatic.pages.editDevice
-      editDevicePage.action('update')
-      editDevicePage.deviceId(device.id)
-      editDevicePage.deviceName(device.name())
-      editDevicePage.deviceConfig(device.config)
-      editDevicePage.deviceClass(device.config.class)
+      jQuery.mobile.pageParams = {action: 'update', device: device}
       return true
 
   pimatic.pages.devices = devicesPage = new DevicesViewModel()

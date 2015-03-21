@@ -99,6 +99,26 @@
       return
     }
 
+  ko.bindingHandlers.jqmflipswitch = {
+    init: (element, valueAccessor) ->
+      value = valueAccessor()
+      $ele = $(element)
+      $ele.flipswitch()
+      if ko.isObservable(value)
+        $ele.on('change', => 
+          val = $ele.val()
+          value(val)
+        )
+
+    update: (element, valueAccessor) ->
+      value = valueAccessor()
+      valueUnwrapped = ko.unwrap(value)
+      $ele = $(element)
+      $ele.val(valueUnwrapped)
+      $ele.flipswitch('refresh')
+      return
+    }
+
   ko.bindingHandlers.jqmoptions = {
     init: (element, valueAccessor, allBindings) ->
       ko.bindingHandlers.options.init(element, valueAccessor, allBindings)
@@ -110,6 +130,22 @@
       value = allBindings()?.value()
       $(element).val(value) if value?
       $(element).selectmenu("refresh")
+      return
+    }
+
+  ko.bindingHandlers.jqmlistview = {
+    init: (element, valueAccessor, allBindings) ->
+      setTimeout( ( ->
+        $(element).listview()
+      ), 1)
+      return
+    
+    update: (element, valueAccessor, allBindings) ->
+      valueAccessor()
+      try
+        $(element).listview('refresh')
+      catch e
+        # ignore
       return
     }
 

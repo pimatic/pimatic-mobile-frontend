@@ -1,7 +1,10 @@
 # edit-variable-page
 # --------------
 
-$(document).on("pagebeforecreate", (event) ->
+merge = Array.prototype.concat
+LazyLoad.js(merge.apply(scripts.jsoneditor))
+
+$(document).on("pagebeforecreate", '#edit-device-page', (event) ->
   if pimatic.pages.editDevice? then return
   
   class EditDeviceViewModel
@@ -12,6 +15,7 @@ $(document).on("pagebeforecreate", (event) ->
     deviceClass: ko.observable('')
     deviceClasses: ko.observableArray()
     deviceConfig: ko.observable({})
+    configSchema: ko.observable(null)
     editor: null
 
     constructor: ->
@@ -34,10 +38,46 @@ $(document).on("pagebeforecreate", (event) ->
         console.log "confCopy:", confCopy
         unless count is 0 then @editor.setValue(confCopy)
 
+      getProperties = (value) ->
+        unless @properties?
+          return []
+        return ( { schema: prop, value: value[name] } for name, prop of @properties)
+
+      getItems = (value) ->
+        unless value?
+          return []
+        return ( { schema: @items or {}, value: v} for v in value )
+
+      getItemLabel = (value) ->
+        if @type is "object" and @properties?
+          label = ""
+          if @properties.name? 
+            label = value.name
+          if @properties.id?
+            if label.length > 0
+              label += " (#{value.id})"
+            else
+              label = value.id
+          if label.length > 0 then return label
+        return JSON.stringify(value)
+
+      enhanceSchema = (schema, name) ->
+        schema.name = name
+        switch schema.type
+          #when 'string', 'number', "integer"
+          when 'object'
+            schema.getProperties = getProperties
+            if schema.properties?
+              for name, prop of schema.properties
+                enhanceSchema(prop, name)
+          when 'array'
+            schema.getItems = getItems
+            if schema.items?
+              schema.items.getItemLabel = getItemLabel
+              enhanceSchema(schema.items, null)
+        return
+
       @deviceClass.subscribe( (className) =>
-        if @editor?
-          @editor.destroy()
-          @editor = null
         if className? and typeof className is "string" and className.length > 0
           pimatic.client.rest.getDeviceConfigSchema({className}).done( (result) =>
             if result.success?
@@ -45,23 +85,13 @@ $(document).on("pagebeforecreate", (event) ->
               delete schema.properties.id
               delete schema.properties.name
               delete schema.properties.class
-              console.log "schema:", result.configSchema
-              @editor = new JSONEditor(editorEle[0], {
-                disable_collapse: yes
-                disable_properties: yes
-                disable_edit_json: yes
-                theme: 'jquerymobile'
-                schema: schema
-              });
-              @editor.on('ready', =>
-                editorSetConfig(@deviceConfig())
-              )
+              enhanceSchema schema, null
+              @configSchema(schema)
           )
       )
       # @deviceConfig.subscribe( (config) =>
       #   editorSetConfig(config)
       # )
-
 
     resetFields: () ->
       @deviceName('')
@@ -81,7 +111,7 @@ $(document).on("pagebeforecreate", (event) ->
           when 'update' then pimatic.client.rest.updateDeviceByConfig({deviceConfig})
           else throw new Error("Illegal devicedevice action: #{action()}")
       ).done( (data) ->
-        if data.success then $.mobile.changePage '#devicepages-page', {transition: 'slide', reverse: true}   
+        if data.success then $.mobile.changePage '#devices-page', {transition: 'slide', reverse: true}   
         else alert data.error
       ).fail(ajaxAlertFail)
       return false
@@ -91,7 +121,7 @@ $(document).on("pagebeforecreate", (event) ->
       if really
         pimatic.client.rest.removeDevice({deviceId: @deviceId()})
           .done( (data) ->
-            if data.success then $.mobile.changePage '#devicepages-page', {transition: 'slide', reverse: true}   
+            if data.success then $.mobile.changePage '#devices-page', {transition: 'slide', reverse: true}   
             else alert data.error
           ).fail(ajaxAlertFail)
       return false
@@ -103,7 +133,7 @@ $(document).on("pagebeforecreate", (event) ->
   return
 )
 
-$(document).on("pagebeforeshow", '#edit-device', (event) ->
+$(document).on("pagebeforeshow", '#edit-device-page', (event) ->
   pimatic.client.rest.getDeviceClasses({}).done( (result) =>
     if result.success
       pimatic.pages.editDevice.deviceClasses(result.deviceClasses)
@@ -111,11 +141,27 @@ $(document).on("pagebeforeshow", '#edit-device', (event) ->
 )
 
 
-$(document).on("pagecreate", '#edit-device', (event) ->
+$(document).on("pagecreate", '#edit-device-page', (event) ->
   try
-    ko.applyBindings(pimatic.pages.editDevice, $('#edit-device')[0])
+    ko.applyBindings(pimatic.pages.editDevice, $('#edit-device-page')[0])
   catch e
     TraceKit.report(e)
 )
 
 
+$(document).on("pagebeforeshow", '#edit-device-page', (event) ->
+  editDevicePage = pimatic.pages.editDevice
+  params = jQuery.mobile.pageParams
+  jQuery.mobile.pageParams = {}
+  if params?.action is "update"
+    device = params.device
+    editDevicePage.action('update')
+    editDevicePage.deviceId(device.id)
+    editDevicePage.deviceName(device.name())
+    editDevicePage.deviceConfig(device.config)
+    editDevicePage.deviceClass(device.config.class)
+  else
+    editDevicePage.resetFields()
+    editDevicePage.action('add')
+  return
+)

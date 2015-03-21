@@ -1053,6 +1053,16 @@ li.with-button a.ui-btn {
     width: 86%;
   }
 
+    /* Override field container CSS to prevent the flipswitch from becomming full width */
+  html .short-labels .ui-field-contain > label + .ui-flipswitch,
+  html .short-labels .ui-popup .ui-field-contain > label + .ui-flipswitch {
+    display: inline-block;
+    width: 5.875em; /* If you override the width for .ui-flipswitch you should repeat the same value here */
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+  }
+
 }
 
 
@@ -1882,4 +1892,11 @@ border-bottom-left-radius: inherit;
 
 .input-mode-switch{
   font-size: 14px;
+}
+
+.ui-field-contain .description {
+  clear: both;
+  padding-top: 8px;
+  font-style: italic;
+  color: gray;
 }

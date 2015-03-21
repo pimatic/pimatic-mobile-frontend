@@ -1,6 +1,6 @@
 script#device-edit-template(type="text/template")
   li.device-edit.sortable()
-    a(data-transition='slidefade', href='#edit-device', data-bind="click: $root.onEditDeviceClicked")
+    a(data-transition='slidefade', href='#edit-device-page', data-bind="click: $root.onEditDeviceClicked")
       span.name(data-bind="text: $data.name()")
 script#device-groups-template(type="text/template")
   <!-- ko if: $root.enabledEditing() || $data.getDevices().length > 0  -->
@@ -27,5 +27,5 @@ div#devices-page(data-role='page', data-bind="css: {locked: !$root.enabledEditin
       <!-- /ko -->
       li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingDevices()")=__('Drop here to remove device')
       li#add-device(data-bind="visible: $root.enabledEditing() && !$root.isSortingDevices() ")
-        a(data-transition='slidefade', href='#edit-device', data-bind="click: $root.onAddDeviceClicked")=__('Add a new device')+'...'
+        a(data-transition='slidefade', href='#edit-device-page', data-bind="click: $root.onAddDeviceClicked")=__('Add a new device')+'...'
        div.drag-message
