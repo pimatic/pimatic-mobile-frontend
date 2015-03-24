@@ -113,7 +113,7 @@ module.exports = (env) ->
         menuSwatch: 'f'
         fullName: @config.theme
       }
-
+      
       renderOptions = {
         pretty: @config.mode is "development"
         compileDebug: @config.mode is "development"

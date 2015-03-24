@@ -20,7 +20,7 @@ html(manifest=(mode=="production" ? 'application.manifest' : null))
     != nap.js('base')
     script(src='socket.io/socket.io.js')
     script(src='api/decl-api-client.js')
-    script(type='text/javascript')!="locale = " + JSON.stringify(i18n.getCatalog()) + ";"
+    script(type='text/javascript')!="locale = " + JSON.stringify(i18n.getCatalog(i18n.getLocale())) + ";"
     script(type='text/javascript')!="api = " + JSON.stringify(api) + ";"
     script(type='text/javascript')!="scripts = " + JSON.stringify(scripts) + ";"
     script(type='text/javascript')!="styles = " + JSON.stringify(styles) + ";"
