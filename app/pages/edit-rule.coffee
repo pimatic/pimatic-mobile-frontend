@@ -472,7 +472,7 @@ $(document).on("pagecreate", '#edit-rule-page', (event) ->
     editRulePage = pimatic.pages.editRule
 
     # https://github.com/yuku-t/jquery-textcomplete
-    $("#edit-rule-page-condition").textcomplete([
+    $("#edit-rule-condition").textcomplete([
       match: /^(.*)$/
       search: (term, callback) ->
         editRulePage.autocompleteAjax?.abort()
@@ -498,7 +498,7 @@ $(document).on("pagecreate", '#edit-rule-page', (event) ->
       template: customTemplate
     ])
 
-    $("#edit-rule-page-actions").textcomplete([
+    $("#edit-rule-actions").textcomplete([
       match: /^(.*)$/
       search: (term, callback) ->
         result = {autocomplete: [], format: []}
