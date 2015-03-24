@@ -4,7 +4,7 @@ script#json-scheme-editor-field(type='text/template')
     label(for='', data-bind="text: $data.schema.name")
     <!-- ko if: $data.schema.type !== "boolean" -->
     div.ui-input-text.ui-body-inherit.ui-corner-all.ui-shadow-inset
-      //- div(data-bind="text: JSON.stringify($data, null, '  ')")
+      //- div(data-bind="text: JSON.stringify(ko.unwrap($data), null, '  ')")
       <!-- ko if: $data.schema.type === "string" -->
       input(type="text", data-bind="textInput: $data.value")
       <!-- /ko -->
@@ -42,9 +42,25 @@ script#json-scheme-editor-array(type='text/template')
     //-data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}
     ul.items(data-role='listview', data-inset='true', data-bind="jqmlistview: $data.schema.getItems($data.value)") 
       <!-- ko template: { name: 'json-scheme-editor-array-item', foreach: $data.schema.getItems($data.value) } --><!-- /ko -->
+      li.add-item
+        a(data-bind="text: __('Add'), click: $data.schema.items.addItem",)
+    <!-- ko template: { name: 'json-scheme-editor-item-overlay', data: $data.schema.items.editingItem } --><!-- /ko -->
     <!-- /ko -->
 script#json-scheme-editor-array-item(type='text/template')
-  li(data-bind="text: $data.schema.getItemLabel($data.value)")
+  li
+    a(data-bind="text: $data.schema.getItemLabel($data.value), click: $data.schema.onEditItemClick.bind($data, $index(), $data)")
+script#json-scheme-editor-item-overlay(type='text/template')
+  <!-- ko if: $data !== null -->
+  div.popup-overlay()
+    div.outer.overthrow
+      div.inner
+        <!-- ko template: { name: 'json-scheme-editor-field', data: $data } --><!-- /ko -->
+        .ui-grid-a.controls
+          .ui-block-a
+            a#rule-condition-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-bind="click: $data.schema.editCancel")=__('Cancel')
+          .ui-block-b
+            a#rule-condition-ok.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: $data.schema.editOk.bind($data, $parent, $data)")=__('OK')
+  <!-- /ko -->
 div#edit-device-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     h3(data-bind="text: pageTitle()")

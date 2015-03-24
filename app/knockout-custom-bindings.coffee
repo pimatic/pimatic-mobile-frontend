@@ -107,6 +107,9 @@
       if ko.isObservable(value)
         $ele.on('change', => 
           val = $ele.val()
+          switch val
+            when "true" then val = true
+            when "false" then val = false
           value(val)
         )
 
@@ -114,6 +117,8 @@
       value = valueAccessor()
       valueUnwrapped = ko.unwrap(value)
       $ele = $(element)
+      if typeof valueUnwrapped is "boolean"
+        valueUnwrapped = "#{valueUnwrapped}"
       $ele.val(valueUnwrapped)
       $ele.flipswitch('refresh')
       return
@@ -142,10 +147,12 @@
     
     update: (element, valueAccessor, allBindings) ->
       valueAccessor()
-      try
-        $(element).listview('refresh')
-      catch e
-        # ignore
+      setTimeout( ( ->
+        try
+          $(element).listview('refresh')
+        catch e
+          # ignore
+       ), 1)
       return
     }
 

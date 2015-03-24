@@ -1837,7 +1837,7 @@ border-bottom-left-radius: inherit;
   margin-left: 12px;
 }
 
-#rule-condition-selector {
+.popup-overlay {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -1849,13 +1849,13 @@ border-bottom-left-radius: inherit;
   padding-top: 80px;
 }
 
-#rule-condition-selector .outer{
+.popup-overlay .outer{
   background-color: white;
   max-height: 100%;
   border: 1px solid gray;
 }
 
-#rule-condition-selector .inner{
+.popup-overlay .inner{
   background-color: white;
   padding: 20px;
 }

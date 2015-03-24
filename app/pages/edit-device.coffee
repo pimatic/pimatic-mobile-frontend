@@ -4,6 +4,43 @@
 merge = Array.prototype.concat
 LazyLoad.js(merge.apply(scripts.jsoneditor))
 
+wrap = (schema, value) ->
+  unless schema?
+    return ko.observable(value)
+  switch schema.type
+    when "string", "number", "integer", "boolean"
+      return ko.observable(value)
+    when "object"
+      unless value? then return ko.observable(value)
+      if schema.properties?
+        for name, prop of schema.properties
+          value[name] = wrap prop, value[name]
+      return ko.observable(value)
+    when "array"
+      unless value? then return ko.observableArray(value)
+      for ele, i in value
+        value[i] = wrap schema.items, value[i]
+      return ko.observableArray(value)
+    else
+      # no type given?
+      return ko.observable(value)
+
+unwrap = (value) ->
+  value = ko.unwrap(value)
+  unless value? then return value
+  unwraped = value
+  type = if Array.isArray(value) then 'array' else typeof value
+  switch type
+    when "object"
+      unwraped = {}
+      for name, prop of value
+        unwraped[name] = unwrap prop
+    when "array"
+      unwraped = []
+      for ele, i in value
+        unwraped[i] = unwrap ele
+  return unwraped
+
 $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
   if pimatic.pages.editDevice? then return
   
@@ -41,25 +78,65 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
       getProperties = (value) ->
         unless @properties?
           return []
+        value = ko.unwrap(value)
         return ( { schema: prop, value: value[name] } for name, prop of @properties)
 
       getItems = (value) ->
-        unless value?
+        unless ko.unwrap(value)?
           return []
-        return ( { schema: @items or {}, value: v} for v in value )
+        return ( { schema: @items or {}, value: v} for v in ko.unwrap(value) )
+
+      onEditItemClick = (index, data) ->
+        data.schema.editingItem({
+          schema: data.schema, 
+          value: wrap(data.schema, unwrap(data.value))
+          index: index
+        })
+
+      editOk = (parent, data) ->
+        editingItem = data.schema.editingItem()
+        if editingItem.index?
+          array = ko.unwrap(parent.value)
+          array[editingItem.index](editingItem.value())
+        else
+          parent.value.push(editingItem.value)
+        data.schema.editingItem(null)  
+
+      editCancel = (data) ->
+        data.schema.editingItem(null)
+
+      addItem = (data) ->
+        if data.schema.items.default?
+          # copy
+          value = wrap(data.schema.items, JSON.parse(JSON.stringify(data.schema.items.default)))
+        switch data.schema.items.type
+          when "string"
+            value = wrap data.schema.items, ""
+          when "number", "integer"
+            value = wrap data.schema.items, 0
+          when "boolean"
+            value = wrap data.schema.items, false
+          when "object"
+            value = wrap data.schema.items, {}
+          when "array"
+            value = wrap data.schema.items, []
+        data.schema.items.editingItem(schema: data.schema.items, value: value)
+        return     
 
       getItemLabel = (value) ->
+        unwraped = unwrap value
+        console.log unwraped
         if @type is "object" and @properties?
           label = ""
           if @properties.name? 
-            label = value.name
+            label = unwraped.name
           if @properties.id?
             if label.length > 0
-              label += " (#{value.id})"
+              label += " (#{unwraped.id})"
             else
-              label = value.id
-          if label.length > 0 then return label
-        return JSON.stringify(value)
+              label = unwraped.id
+          if label? and label.length > 0 then return label
+        return JSON.stringify(unwraped)
 
       enhanceSchema = (schema, name) ->
         schema.name = name
@@ -72,9 +149,15 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
                 enhanceSchema(prop, name)
           when 'array'
             schema.getItems = getItems
-            if schema.items?
-              schema.items.getItemLabel = getItemLabel
-              enhanceSchema(schema.items, null)
+            unless schema.items?
+              schema.items = {}
+            schema.items.getItemLabel = getItemLabel
+            schema.items.onEditItemClick = onEditItemClick
+            schema.items.editOk = editOk
+            schema.items.editCancel = editCancel
+            schema.items.addItem = addItem
+            schema.items.editingItem = ko.observable(null)
+            enhanceSchema(schema.items, null)
         return
 
       @deviceClass.subscribe( (className) =>
@@ -85,6 +168,9 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
               delete schema.properties.id
               delete schema.properties.name
               delete schema.properties.class
+              unwraped = unwrap(@deviceConfig())
+              rewraped = wrap(schema, unwraped)
+              @deviceConfig(rewraped())
               enhanceSchema schema, null
               @configSchema(schema)
           )
@@ -100,11 +186,11 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
       @deviceClass('')
 
     onSubmit: ->
-      deviceConfig = @editor.getValue();
+      deviceConfig = unwrap @deviceConfig()
       deviceConfig.id = @deviceId()
       deviceConfig.name = @deviceName()
       deviceConfig.class = @deviceClass()
-
+      console.log deviceConfig
       (
         switch @action()
           when 'add' then pimatic.client.rest.addDeviceByConfig({deviceConfig})
