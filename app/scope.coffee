@@ -55,6 +55,7 @@ class DeviceAttribute
     displaySparkline: 'observe'
     displayUnit: 'copy'
     discrete: 'copy'
+    icon: 'copy'
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
@@ -182,6 +183,29 @@ class DeviceAttribute
         num
         unit: @unit or ''
       }
+
+  shouldDisplayValue: ->
+    if @icon?.noText then return false
+    else return true
+
+  shouldDisplayIcon: -> @icon? and @value()?
+
+  _getIconClass: (value) ->
+    unless @icon? then return null
+    iconClass = null
+    if @icon.mapping?
+      for ico, val of @icon.mapping
+        if $.isArray(value) and value.length is 2 # range given
+          if value[0] <= val < value[1]
+            iconClass = ico
+            break
+        else if val is value
+          iconClass = ico
+          break
+    iconClass = @icon.default unless iconClass?
+    return iconClass
+
+  getIconClass: -> @_getIconClass(@value())
 
   formatTime: (time) -> 
     dt = pimatic.timestampToDateTime(time)

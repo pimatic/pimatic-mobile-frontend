@@ -86,9 +86,14 @@ script#timer-template(type='text/template')
 script#attribute-template(type='text/template')
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
     span.acronym(data-bind="text: $data.displayAcronym()")
+    <!-- ko if: $data.shouldDisplayIcon() -->
+    span.attribute-icon(data-bind="css: $data.getIconClass()")
+    <!-- /ko -->
+    <!-- ko if: $data.shouldDisplayValue() -->
     span.val(data-bind="text: $data.displayValueText()")
+    <!-- /ko -->
     span.unit(data-bind="text: $data.displayUnitText()")
-    <!-- ko if: $data.shouldDisplaySparkline()  -->
+    <!-- ko if: $data.shouldDisplaySparkline() -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
 script#switch-attribute-template(type='text/template')
