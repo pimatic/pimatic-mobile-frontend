@@ -130,6 +130,8 @@ class DeviceAttribute
     else
       return ''
 
+  shouldDisplayAcronym: -> @acronym?.length > 0
+
   displayAcronym: ->
     return @acronym or ''
 
