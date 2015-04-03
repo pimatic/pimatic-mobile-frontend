@@ -195,8 +195,8 @@ class DeviceAttribute
     iconClass = null
     if @icon.mapping?
       for ico, val of @icon.mapping
-        if $.isArray(value) and value.length is 2 # range given
-          if value[0] <= val < value[1]
+        if $.isArray(val) and val.length is 2 # range given
+          if val[0] <= value < val[1]
             iconClass = ico
             break
         else if val is value
