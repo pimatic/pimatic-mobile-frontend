@@ -84,13 +84,22 @@ script#timer-template(type='text/template')
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon(data-bind="jqmbutton: {icon: $data.startButtonIcon}, click: $data.toggleRunning")
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-refresh(data-bind="click: function(){$data.sendTimerAction('resetTimer');}")=__('Reset')
 script#attribute-template(type='text/template')
+  <!-- ko if: !$data.hidden -->
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
+    <!-- ko if: $data.shouldDisplayAcronym() -->
     span.acronym(data-bind="text: $data.displayAcronym()")
+    <!-- /ko -->
+    <!-- ko if: $data.shouldDisplayIcon() -->
+    span.attribute-icon(data-bind="css: $data.getIconClass()")
+    <!-- /ko -->
+    <!-- ko if: $data.shouldDisplayValue() -->
     span.val(data-bind="text: $data.displayValueText()")
     span.unit(data-bind="text: $data.displayUnitText()")
-    <!-- ko if: $data.shouldDisplaySparkline()  -->
+    <!-- /ko -->
+    <!-- ko if: $data.shouldDisplaySparkline() -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
+  <!-- /ko -->
 script#switch-attribute-template(type='text/template')
   <!-- ko if: $data.type !== 'boolean' -->
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")

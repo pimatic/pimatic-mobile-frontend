@@ -188,6 +188,13 @@ html body .ui-panel-dismiss {
   border-radius: 0;
 }
 
+#index .attribute-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-bottom: -1px;
+}
+
 .ui-mobile .ui-page-theme-a .ui-li-divider {
   border: none;
   border-bottom: 2px solid #005994 /*{pm-listdivider-color}*/;

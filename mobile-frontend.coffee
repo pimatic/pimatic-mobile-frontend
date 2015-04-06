@@ -293,6 +293,7 @@ module.exports = (env) ->
         ]
         style: [
           "pimatic-mobile-frontend/app/css/jqm-icon-pack-fa.css"
+          "pimatic-mobile-frontend/app/css/attribute-icons.css"
         ] .concat @additionalAssetFiles['css']
         editor: [
            "pimatic-mobile-frontend/app/css/jsoneditor.css"
