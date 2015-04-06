@@ -56,6 +56,7 @@ class DeviceAttribute
     displayUnit: 'copy'
     discrete: 'copy'
     icon: 'copy'
+    hidden: 'copy'
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
