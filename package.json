@@ -14,7 +14,7 @@
     "themes",
     "README.md"
   ],
-  "version": "0.8.41",
+  "version": "0.8.61",
   "homepage": "http://github.com/pimatic/pimatic",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "colour.js": "^1.5.2",
     "jade": "1.1.4",
     "jqmthemer": "0.0.1",
-    "nap": "0.8.0",
+    "nap": "0.8.1",
     "render-appcache-manifest": "0.3.0"
   },
   "peerDependencies": {

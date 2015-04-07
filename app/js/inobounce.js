@@ -16,6 +16,10 @@
 		while (el !== document.body) {
 			// Get some style properties
 			var style = window.getComputedStyle(el);
+			if(!style) {
+				// Something gone wrong, just exit
+				return;
+			}
 			var scrolling = style.getPropertyValue('-webkit-overflow-scrolling');
 			var overflowY = style.getPropertyValue('overflow-y');
 			var height = parseInt(style.getPropertyValue('height'), 10);

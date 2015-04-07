@@ -138,8 +138,9 @@
 
             var itemOptions = options.$itemOptions;
             if (typeof itemOptions == 'function') itemOptions = itemOptions();
-
+            var changed = false;
             if (options.$merge) {
+                changed = true;
                 array = targetArray || [];
                 for (var i = 0; i < value.length; i++) {
                     var item = findItems ? find(targetArray, options.$key, value[i]) : null;
@@ -153,8 +154,14 @@
                 array = [];
                 for (var i = 0; i < value.length; i++) {
                     var item = findItems ? find(targetArray, options.$key, value[i]) : null;
-
                     var val = exports.fromJS(value[i], itemOptions, item);
+                    if(!changed) {
+                        if(targetArray && i < targetArray.length) {
+                            changed = (targetArray[i] !== val);
+                        } else {
+                            changed = true;
+                        }
+                    }
                     if (val !== exports.ignore) {
                         array.push(val);
                     }
@@ -163,7 +170,10 @@
 
             if (wrap || wrap == undefined || wrap == null) {
                 if (ko.isObservable(target)) {
-					target(array);
+                    if(changed) {
+                        //console.log(targetArray, '->', array);
+                        target(array);    
+                    }
 					return target;
 				} else {
 					return ko.observableArray(array);

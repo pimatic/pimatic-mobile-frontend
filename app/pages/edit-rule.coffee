@@ -1,7 +1,10 @@
 # edit-rule-page
 # --------------
 
-$(document).on("pagebeforecreate", (event) ->
+merge = Array.prototype.concat
+LazyLoad.js(merge.apply(scripts.textcomplete))
+
+$(document).on("pagecreate", '#edit-rule-page' , (event) ->
   if pimatic.pages.editRule? then return
 
 
@@ -453,9 +456,9 @@ $(document).on("pagebeforecreate", (event) ->
   return
 )
 
-$(document).on("pagecreate", '#edit-rule', (event) ->
+$(document).on("pagecreate", '#edit-rule-page', (event) ->
   try
-    ko.applyBindings(pimatic.pages.editRule, $('#edit-rule')[0])
+    ko.applyBindings(pimatic.pages.editRule, $('#edit-rule-page')[0])
 
     customReplace = (pre, value) -> 
       commonPart = this.ac.getCommonPart(pre, value)
@@ -526,14 +529,14 @@ $(document).on("pagecreate", '#edit-rule', (event) ->
     TraceKit.report(e)
 )
 
-$(document).on("pagebeforehide", '#edit-rule', (event) ->
+$(document).on("pagebeforehide", '#edit-rule-page', (event) ->
   try
     pimatic.pages.editRule.autocompleteAjax?.abort()
   catch e
     TraceKit.report(e)
 )
 
-$(document).on("pagebeforeshow", '#edit-rule', (event) ->
+$(document).on("pagebeforeshow", '#edit-rule-page', (event) ->
   data = pimatic.storage.get('pimatic.editRule') or {}
   editRule = pimatic.pages.editRule
   params = jQuery.mobile.pageParams

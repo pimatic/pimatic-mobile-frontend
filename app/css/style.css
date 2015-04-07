@@ -200,10 +200,10 @@ html body .ui-panel-dismiss {
   border-top-width: 0px;
 }
 
-.ui-mobile #item-lists .ui-li-divider + li a {
+.ui-mobile #item-lists .ui-li-divider + li a,
+.ui-mobile #graph-device-list .ui-li-divider + li a{
   border-top-width: 1px;
 }
-
 
 .ui-mobile .ui-page-theme-a #item-lists .ui-li-divider {
   border-color: #ddd /*{a-body-border}*/;
@@ -303,7 +303,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index .items .shutter-device label,
 #index .items .button label,
 #index .items .musicplayer label, 
-#index .items .switch-device label{
+#index .items .switch-device label,
+#index .items .timer label{
   float: left;
 }
 
@@ -330,7 +331,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 #index li.button div.buttons, 
 #index li.shutter-device .shutter-buttons,
-#index li.musicplayer div.controls {
+#index li.musicplayer div.controls,
+#index li.timer div.controls {
   float: right;
   max-width: 100%;
   margin: 0;
@@ -339,12 +341,14 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 #index li.button div.buttons,
 #index li.shutter-device .shutter-buttons,
-#index li.musicplayer div.controls {
+#index li.musicplayer div.controls,
+#index li.timer div.controls {
   margin-top: -4px;
   margin-bottom: -4px;
   text-align: right;
   white-space: normal;
 }
+
 
 #index li.shutter-device .ui-controlgroup-controls{
   padding-top: 1px;
@@ -354,9 +358,18 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   margin-top: 4px;
 }
 
-#index li.musicplayer div.controls {
+#index li.musicplayer div.controls,
+#index li.timer div.controls {
   margin-top: -1px;
 }
+
+#index li.musicplayer span.controls-inner,
+#index li.timer span.controls-inner {
+  white-space: nowrap;
+  margin-top: 0;
+}
+
+
 
 #index li.button div.buttons a {
   margin: 0;
@@ -366,7 +379,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 
-#index li.musicplayer div.controls a {
+#index li.musicplayer div.controls a,
+#index li.timer div.controls a {
   margin: 0;
   margin-left: 4px;
   margin-top: 2px;
@@ -593,6 +607,14 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   margin-left: 0.1em;
 }
 
+.items .attribute .acronym {
+  color: #888 /*{pm-unit-color}*/;
+  margin-right: 0.2em;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+
 #variables .var-name{
   display: inline;
 } 
@@ -782,7 +804,7 @@ table#database-attribute-info {
   padding-left: 10px;
 }
 
-#log .controls {
+#log-page .controls {
   margin-bottom: 1em;
 }
 
@@ -1093,6 +1115,21 @@ li.with-button a.ui-btn {
     clear: both;
   }
 
+  #index.locked li.thermostat {
+    line-height: 1.3;
+  }
+
+
+  #index.locked li.thermostat .valve-position{
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  #index.locked li.thermostat div.controls {
+    margin-top: -4.5px;
+    margin-bottom: -4.5px;
+  }
+
 }
 
 .graph-device label {
@@ -1162,6 +1199,10 @@ li.item .attributes .outOfDate {
   font-size: 15px;
 }
 
+#chart-info #average-info {
+  padding: 13px 10px;
+}
+
 #graph-page #chart-container .ui-input-text{
   display: inline-block;
   vertical-align: middle;
@@ -1179,6 +1220,66 @@ li.item .attributes .outOfDate {
     display: none;
   }
  
+}
+
+#chart-container {
+  background-color: white;
+  padding: 0.7em 0;
+  margin: -1em;
+}
+
+#chart-legend-wrapper {
+  text-align: center;
+}
+
+#chart-legend {
+  text-align: center;
+  border: 1px solid gray;
+  padding: 2px 6px;
+  border-radius: 5px;
+  margin: 0px 10px;
+  font-size: 13px;
+  display: inline-block;
+}
+
+.dygraph-tooltip {
+  color: rgb(97, 97, 97) !important;
+  border: 1px solid #DADADA !important;
+  font-size: 13px !important;
+  background: rgba(249, 249, 249, 0.77) !important;
+  -webkit-transition: left 150ms linear, top 150ms linear;
+  -moz-transition: left 150ms linear, top 150ms linear;
+  -o-transition: left 150ms linear, top 150ms linear;
+  -ms-transition: left 150ms linear, top 150ms linear;
+  transition: left 150ms linear, top 150ms linear;
+}
+
+.dygraph-axis-label-x {
+  transform: rotate(-35deg);
+}
+
+#chart-legend .label {
+  color: black;
+  cursor: pointer;
+}
+
+#chart-legend .label.series-invisible {
+  color: gray;
+}
+
+#chart-container .controls{
+  padding-left: 10px;
+  padding-bottom: 10px;
+}
+
+#chart .dygraph-axis-label{
+  font-size: 12px;
+  color: #606060;
+}
+
+#chart-no-data {
+  padding: .7em 1em;
+  font-style: italic;
 }
 
 .edit-pages-handle-label {
@@ -1315,6 +1416,10 @@ border-bottom-left-radius: inherit;
   background-position: 4px 3px;
 }
 
+.ui-icon-stop:after {
+    background-position: 4px 3px;
+}
+
 .empty-list {
   font-style: italic;
 }
@@ -1337,7 +1442,10 @@ border-bottom-left-radius: inherit;
   height: 14px;
   margin: 0;
   border: 3px solid #007dcd /*{a-bar-background-color}*/;
-;
+}
+
+.contains-attr-presence {
+  height: 14px;
 }
 
 .attr-presence .val{
@@ -1353,7 +1461,7 @@ border-bottom-left-radius: inherit;
   padding-bottom: 3px;
 }
 
-#tooltip
+#tooltip, .dygraph-tooltip
 {
   font-weight: bold;
   font-size: 0.8em;
@@ -1376,7 +1484,8 @@ border-bottom-left-radius: inherit;
   background: black;
 }
  
-#tooltip:after /* triangle decoration */
+#tooltip:after, /* triangle decoration */
+.dygraph-tooltip:after
 {
   width: 0;
   height: 0;
@@ -1390,7 +1499,8 @@ border-bottom-left-radius: inherit;
   margin-left: -5px;
 }
 
-#tooltip.top:after
+#tooltip.top:after,
+.dygraph-tooltip.top:after
 {
   border-top-color: transparent;
   border-bottom: 5px solid rgba(0, 0, 0, 0.8);
@@ -1398,13 +1508,15 @@ border-bottom-left-radius: inherit;
   bottom: auto;
 }
 
-#tooltip.left:after
+#tooltip.left:after,
+.dygraph-tooltip.left:after
 {
   left: 15px;
   margin: 0;
 }
 
-#tooltip.right:after
+#tooltip.right:after,
+.dygraph-tooltip.right:after
 {
   right: 15px;
   left: auto;
@@ -1419,7 +1531,7 @@ border-bottom-left-radius: inherit;
   display: block;
 }
 
-#config .ui-content {
+#config-page .ui-content {
   padding: 0;
 }
 
@@ -1432,13 +1544,16 @@ border-bottom-left-radius: inherit;
   top: 5px;
 }
 
+#index li.thermostat {
+  text-align: right;
+  line-height: 30px;
+}
+
 #index li.thermostat div.controls {
   float: right;
   max-width: 100%;
   margin: 0;
   overflow: hidden;
-  margin-top: -4.5px;
-  margin-bottom: -4.5px;
   text-align: right;
   white-space: normal;
 }
@@ -1471,6 +1586,27 @@ border-bottom-left-radius: inherit;
   padding: 0;
   font-weight: bold;
   color: #000 /*{a-bup-color}*/;
+}
+
+#index li.thermostat .valve-position{
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  width: 6px;
+  line-height: 30px;
+  height: 30px;
+  background: #C7C7C7;
+  margin: 5px 0px;
+  border-radius: 2px;
+}
+
+#index li.thermostat .valve-position-bar{
+ display: inline-block;
+ height: 0%;
+ width: 100%;
+ background: #007dcd /*{a-bar-background-color}*/;
+ vertical-align: bottom;
+ border-radius: 2px;
 }
 
 #index li.thermostat.unsynced{

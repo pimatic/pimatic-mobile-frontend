@@ -3,7 +3,7 @@ Colour = require 'colour.js'
 module.exports = (BASE_COLOR, SECONDARY_COLOR, HIGHLIGHT_COLOR) ->
   theme = {
     'css': [
-      'app/css/themes/default/jquery.mobile-1.4.2.css'
+      'app/css/themes/default/jquery.mobile-1.4.5.css'
     ],
     'extraCss': [
       'themes/graphite/base.extra.css'

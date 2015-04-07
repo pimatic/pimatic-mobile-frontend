@@ -4,15 +4,6 @@
 # scope this function
 ( ->
 
-  Highcharts.setOptions(
-    global:
-      useUTC: false
-  )
-
-  $.datepicker.setDefaults({
-    dateFormat: 'yy-mm-dd'
-  })
-
   jQuery.mobile.loader.prototype.fakeFixLoader = (->)
   pendingLoadings = {}
 
@@ -167,6 +158,27 @@ window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   swal("Oops...", __(message), "error")
   return true
 
+pimatic.timestampToDateTime = (time) ->
+  pad = (n) => if n < 10 then "0#{n}" else "#{n}"
+  d = new Date(time)
+  date = d.getFullYear() + '-' + pad((d.getMonth()+1)) + '-' + pad(d.getDate())
+  time = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+  return {date, time}
+
+pimatic.toHHMMSS = (seconds) ->
+  sec_num = parseInt(seconds, 10)
+  # don't forget the second param
+  hours = Math.floor(sec_num / 3600)
+  minutes = Math.floor((sec_num - hours * 3600) / 60)
+  seconds = sec_num - hours * 3600 - minutes * 60
+  if hours < 10
+    hours = '0' + hours
+  if minutes < 10
+    minutes = '0' + minutes
+  if seconds < 10
+    seconds = '0' + seconds
+  time = "#{hours}:#{minutes}:#{seconds}"
+  return time
 
 
 $(document).ready( => 
@@ -338,3 +350,17 @@ pimatic.fixedAddElement = (toggleObservable, sortingObservable, addEle, parentLi
       parentList.css('padding-bottom': 0)
       addEle.removeClass('fixed-add-element')
   ).extend(rateLimit: {timeout: 200, method: "notifyWhenChangesStop"})
+
+
+$.mobile.changePage = ( to, options ) ->
+  # lazyload page scripts from cache
+  if typeof to is "string"
+    toPage = to.split('#')[1]
+  else
+    toPage = to.attr('id')
+  if toPage isnt "index" and scripts[toPage]?
+    LazyLoad.js(scripts[toPage], ->
+      $.mobile.pageContainer.pagecontainer( "change", to, options )
+    )
+  else
+    $.mobile.pageContainer.pagecontainer( "change", to, options )

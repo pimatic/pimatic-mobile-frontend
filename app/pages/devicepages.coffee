@@ -57,15 +57,11 @@ $(document).on( "pagebeforecreate", '#devicepages-page', tc (event) ->
         )()
 
     onAddDevicepageClicked: =>
-      pimatic.pages.editDevicepage.resetFields()
-      pimatic.pages.editDevicepage.action('add')
+      jQuery.mobile.pageParams = {action: 'add'}
       return true
 
     onEditDevicepageClicked: (page) =>
-      pimatic.pages.editDevicepage.pageId(page.id)
-      pimatic.pages.editDevicepage.pageName(page.name())
-      pimatic.pages.editDevicepage.action('update')
-      jQuery.mobile.changePage '#edit-devicepage'
+      jQuery.mobile.pageParams = {action: 'update', page: page}
       return true
 
   pimatic.pages.devicepages = devicepagesPage = new DevicepagesViewModel()

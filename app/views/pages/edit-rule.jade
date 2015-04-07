@@ -72,7 +72,7 @@ script#rule-predicate-template(type='text/template')
       <!-- ko if: type != 'predicate' || $parent.type != 'or'-->
       a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addOr")=__('or')
       <!-- /ko -->
-div#edit-rule(data-role='page')
+div#edit-rule-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     h3(data-bind="text: pageTitle()")
   div.ui-content.overthrow

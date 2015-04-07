@@ -139,7 +139,6 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       )()
 
     onAddRuleClicked: ->
-      editRulePage = pimatic.pages.editRule
       jQuery.mobile.pageParams = {action: 'add'}
       return true
 

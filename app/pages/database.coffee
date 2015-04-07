@@ -1,7 +1,7 @@
 # log-page
 # ---------
 tc = pimatic.tryCatch
-$(document).on("pagecreate", '#database', tc (event) ->
+$(document).on("pagecreate", '#database-page', tc (event) ->
 
   class DatabaseViewModel
 
@@ -122,13 +122,13 @@ $(document).on("pagecreate", '#database', tc (event) ->
 
   try
     pimatic.pages.database = databasePage = new DatabaseViewModel()
-    ko.applyBindings(databasePage, $('#database')[0])
+    ko.applyBindings(databasePage, $('#database-page')[0])
   catch e
     TraceKit.report(e)
   return
 )
 
-$(document).on("pagebeforeshow", '#database', tc (event) ->
+$(document).on("pagebeforeshow", '#database-page', tc (event) ->
   try
     databasePage = pimatic.pages.database
     databasePage.checkDatabase()

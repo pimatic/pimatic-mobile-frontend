@@ -60,11 +60,25 @@ $(document).on("pagebeforecreate", (event) ->
   return
 )
 
-$(document).on("pagecreate", '#edit-group', (event) ->
+$(document).on("pagecreate", '#edit-group-page', (event) ->
   try
-    ko.applyBindings(pimatic.pages.editGroup, $('#edit-group')[0])
+    ko.applyBindings(pimatic.pages.editGroup, $('#edit-group-page')[0])
   catch e
     TraceKit.report(e)
 )
 
 
+$(document).on("pagebeforeshow", '#edit-group-page', (event) ->
+  editGroupPage = pimatic.pages.editGroup
+  params = jQuery.mobile.pageParams
+  jQuery.mobile.pageParams = {}
+  if params?.action is "update"
+    group = params.group
+    editGroupPage.action('update')
+    editGroupPage.groupId(group.id)
+    editGroupPage.groupName(group.name())
+  else
+    editGroupPage.resetFields()
+    editGroupPage.action('add')
+  return
+)

@@ -12,9 +12,9 @@ $(document).on( "pagebeforecreate", (event) ->
   
   class Item
     constructor: (@templData) ->
-      ko.mapper.fromJS(templData, @constructor.mapping, this)
-    update: (templData) -> 
-      ko.mapper.fromJS(templData, @constructor.mapping, this)
+      ko.mapper.fromJS(@templData, @constructor.mapping, this)
+    update: (@templData) -> 
+      ko.mapper.fromJS(@templData, @constructor.mapping, this)
     afterRender: (elements) ->
       $(elements)
       .addClass('item')
@@ -40,7 +40,7 @@ $(document).on( "pagebeforecreate", (event) ->
     constructor: (templData, @device) ->
       super(templData)
       @name = @device.name
-      @deviceId = @device.id
+      @deviceId = templData.deviceId
 
     getAttribute: (name) -> @device.getAttribute(name)
     getItemTemplate: -> @device.template
@@ -68,8 +68,16 @@ $(document).on( "pagebeforecreate", (event) ->
         <div>ID: #{@deviceId}</div>
         <div>Class: #{@device.config.class}</div>
       """
+      buttons = []
       if @device.config.xLink
-        html += """<div><a href="#{@device.config.xLink}" target="_blank">Link</a></div>"""
+        buttons.push """<a href="#{@device.config.xLink}" target="_blank">Link</a>"""
+      if @device.hasAttibuteWith( (attr) => attr.type in ["number", "boolean"])
+        buttons.push """  
+          <a href="#" id="to-graph-page"
+          data-deviceId="#{@device.id}">Graph</a>
+        """
+      if buttons.length > 0
+        html += "<div>#{buttons.join('')}</div>"
       return html
 
   class SwitchItem extends DeviceItem
@@ -270,9 +278,16 @@ $(document).on( "pagebeforecreate", (event) ->
     getItemTemplate: => 'buttons'
 
     onButtonPress: (button) =>
-      @device.rest.buttonPressed({buttonId: button.id}, global: no)
-        .done(ajaxShowToast)
-        .fail(ajaxAlertFail)
+      doIt = (
+        if button.confirm then confirm __("
+          Do you really want to press %s? 
+        ", button.text)
+        else yes
+      ) 
+      if doIt
+        @device.rest.buttonPressed({buttonId: button.id}, global: no)
+          .done(ajaxShowToast)
+          .fail(ajaxAlertFail)
 
   class MuscicplayerItem extends DeviceItem
 
@@ -339,13 +354,16 @@ $(document).on( "pagebeforecreate", (event) ->
       @comfyButton = $(elements).find('[name=comfyButton]')
       # @vacButton = $(elements).find('[name=vacButton]')
       @input = $(elements).find('.spinbox input')
+      @valvePosition = $(elements).find('.valve-position-bar')
       @input.spinbox()
 
       @updateButtons()
       @updatePreTemperature()
+      @updateValvePosition()
 
       @getAttribute('mode').value.subscribe( => @updateButtons() )
       @stAttr.value.subscribe( => @updatePreTemperature() )
+      @getAttribute('valve')?.value.subscribe( => @updateValvePosition() )
       return
 
     # define the available actions for the template
@@ -390,6 +408,14 @@ $(document).on( "pagebeforecreate", (event) ->
         @comfyButton.removeClass('ui-btn-active')
       return
 
+    updateValvePosition: ->
+      valveVal = @getAttribute('valve')?.value()
+      if valveVal?
+        @valvePosition.css('height', "#{valveVal}%")
+        @valvePosition.parent().css('display', '')
+      else
+        @valvePosition.parent().css('display', 'none')
+
     changeModeTo: (mode) ->
       @device.rest.changeModeTo({mode}, global: no)
         .done(ajaxShowToast)
@@ -408,6 +434,33 @@ $(document).on( "pagebeforecreate", (event) ->
       else
         return @device.configDefaults[name]
 
+  class TimerItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @startButtonIcon = ko.computed( =>
+        running = @device.getAttribute('running').value
+        return (
+          if running() then 'stop'
+          else 'play'
+        )
+      )
+
+    getItemTemplate: => 'timer'
+
+    sendTimerAction: (action) =>
+      @device.rest[action]({})
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+
+    toggleRunning: () =>
+      running = @device.getAttribute('running').value
+      if running()
+        action = 'stopTimer'
+      else
+        action = 'startTimer'
+      @sendTimerAction(action)
+
 
   # Export all classe to be extendable by plugins
   pimatic.Item = Item
@@ -423,6 +476,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.ContactItem = ContactItem
   pimatic.MuscicplayerItem = MuscicplayerItem
   pimatic.ThermostatItem = ThermostatItem
+  pimatic.TimerItem = TimerItem
 
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
@@ -438,6 +492,7 @@ $(document).on( "pagebeforecreate", (event) ->
     shutter: pimatic.ShutterItem
     musicplayer: pimatic.MuscicplayerItem
     thermostat: pimatic.ThermostatItem
+    timer: pimatic.TimerItem
   }
 
   $(document).trigger("templateinit", [ ])

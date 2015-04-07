@@ -73,7 +73,7 @@ module.exports = (env) ->
         finished = @setupThemes().then( =>
           # and then setup the assets and manifest
           try
-            assets = @setupAssets()
+            [assets, packedAssets] = @setupAssets()
           catch e
             env.logger.error "Error setting up assets in mobile-frontend: #{e.message}"
             env.logger.debug e.stack
@@ -82,7 +82,7 @@ module.exports = (env) ->
           if @config.mode is "development"
             # render the index page at each load.
             @app.get '/', (req,res) =>
-              @renderIndex().then( (html) =>
+              @renderIndex(packedAssets).then( (html) =>
                 res.send html
               ).catch( (error) =>
                 env.logger.error error.message
@@ -92,7 +92,7 @@ module.exports = (env) ->
             return
           else 
             # In production mode render the index page on time and store it to a file
-            return @renderIndex().then( (html) =>
+            return @renderIndex(packedAssets).then( (html) =>
               indexFile = __dirname + '/public/index.html'
               fs.writeFileAsync(indexFile, html)
               @setupManifest(assets, html)
@@ -101,7 +101,7 @@ module.exports = (env) ->
         context.waitForIt finished
         return
 
-    renderIndex: () ->
+    renderIndex: (packedAssets) ->
       env.logger.info "rendering html"
       jade = require('jade')
       Promise.promisifyAll(jade)
@@ -113,7 +113,7 @@ module.exports = (env) ->
         menuSwatch: 'f'
         fullName: @config.theme
       }
-
+      
       renderOptions = {
         pretty: @config.mode is "development"
         compileDebug: @config.mode is "development"
@@ -123,6 +123,8 @@ module.exports = (env) ->
         customTitle: @config.customTitle
         theme
         themes: @themes
+        scripts: packedAssets.scripts
+        styles: packedAssets.styles
       }
 
       awaitingRenders = 
@@ -158,6 +160,145 @@ module.exports = (env) ->
     setupAssets: () ->
       parentDir = path.resolve __dirname, '..'
 
+      js = {
+        lazyload: [
+          "pimatic-mobile-frontend/app/js/lazyload.js"
+        ]
+        base: [
+          "pimatic-mobile-frontend/app/js/tracekit.js"
+          "pimatic-mobile-frontend/app/js/jquery-1.11.2.js"
+          "pimatic-mobile-frontend/app/mobile-init.js"
+          "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.5.js"
+          "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
+          "pimatic-mobile-frontend/app/js/jquery.pep.js"
+          "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
+          "pimatic-mobile-frontend/app/js/knockout-3.2.0.js"
+          "pimatic-mobile-frontend/app/js/knockout-template-cache.js"
+          "pimatic-mobile-frontend/app/js/knockout.mapper.js"
+          "pimatic-mobile-frontend/app/js/overthrow.js"
+          "pimatic-mobile-frontend/app/js/owl.carousel.js"
+          "pimatic-mobile-frontend/app/js/jquery.sparkline.js"
+          "pimatic-mobile-frontend/app/js/jqm-spinbox.js"
+          "pimatic-mobile-frontend/app/js/human-format.js"
+          "pimatic-mobile-frontend/app/js/sweet-alert.js"
+          "pimatic-mobile-frontend/app/js/headroom.js"
+          "pimatic-mobile-frontend/app/js/inobounce.js"
+        ]
+        textcomplete: [
+          "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
+        ]
+        jsoneditor: [
+          "pimatic-mobile-frontend/app/js/jsoneditor-schema.js"
+        ]
+        dygraph: [
+          "pimatic-mobile-frontend/app/js/dygraph.js"
+        ]
+        datepicker: [
+          "pimatic-mobile-frontend/app/js/jquery.ui.datepicker.js"
+          "pimatic-mobile-frontend/app/js/jquery.mobile.datepicker.mod.js"
+          "pimatic-mobile-frontend/app/datepicker-defaults.coffee"
+        ]
+        mobiscroll: [
+          "pimatic-mobile-frontend/app/js/mobiscroll.core.js"
+          "pimatic-mobile-frontend/app/js/mobiscroll.widget.js"
+          "pimatic-mobile-frontend/app/js/mobiscroll.scroller.js"
+          "pimatic-mobile-frontend/app/js/mobiscroll.util.datetime.js"
+          "pimatic-mobile-frontend/app/js/mobiscroll.datetimebase.js"
+          "pimatic-mobile-frontend/app/js/mobiscroll.datetime.js"
+          "pimatic-mobile-frontend/app/js/mobiscroll.select.js"
+        ]
+        index: [
+          "pimatic-mobile-frontend/app/scope.coffee"
+          "pimatic-mobile-frontend/app/helper.coffee"
+          "pimatic-mobile-frontend/app/knockout-custom-bindings.coffee"
+          "pimatic-mobile-frontend/app/connection.coffee"
+          "pimatic-mobile-frontend/app/pages/index-items.coffee"
+          "pimatic-mobile-frontend/app/pages/index.coffee"
+          "pimatic-mobile-frontend/app/pages/login.coffee"
+          
+        ] .concat @additionalAssetFiles['js']
+        'add-item-page': [
+          "pimatic-mobile-frontend/app/pages/add-item.coffee"
+        ]
+        editor: [
+          "pimatic-mobile-frontend/app/js/jsoneditor.js"
+          "pimatic-mobile-frontend/app/js/ace.js"
+          "pimatic-mobile-frontend/app/js/jsonlint.js"
+        ]
+        'edit-rule-page': [
+          "pimatic-mobile-frontend/app/pages/edit-rule.coffee"
+        ]
+        'edit-variable-page': [
+          "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
+        ]
+        'edit-group-page': [  
+          "pimatic-mobile-frontend/app/pages/edit-group.coffee"
+        ]
+        'edit-device-page': [
+          "pimatic-mobile-frontend/app/pages/edit-device.coffee"
+        ]
+        'edit-devicepage-page': [
+          "pimatic-mobile-frontend/app/pages/edit-devicepage.coffee"
+        ]
+        'database-page': [
+          "pimatic-mobile-frontend/app/pages/database.coffee"
+        ]
+        'updates-page': [
+          "pimatic-mobile-frontend/app/pages/updates.coffee"
+        ]
+        'config-page': [
+          "pimatic-mobile-frontend/app/pages/config.coffee"
+        ]
+        'rules-page': [
+          "pimatic-mobile-frontend/app/pages/rules.coffee"
+        ]
+        'groups-page': [
+          "pimatic-mobile-frontend/app/pages/groups.coffee"
+        ]
+        'devicepages-page': [
+          "pimatic-mobile-frontend/app/pages/devicepages.coffee"
+        ]
+        'devices-page': [
+          "pimatic-mobile-frontend/app/pages/devices.coffee"
+        ]
+        'variables-page': [
+          "pimatic-mobile-frontend/app/pages/variables.coffee"
+        ]
+        'log-page': [
+          "pimatic-mobile-frontend/app/pages/log-messages.coffee"
+        ]
+        'events-page': [
+          "pimatic-mobile-frontend/app/pages/events.coffee"
+        ]
+        'plugins-page': [
+          "pimatic-mobile-frontend/app/pages/plugins.coffee"
+        ]
+        'graph-page': [  
+          "pimatic-mobile-frontend/app/pages/graph.coffee"
+        ]
+      }
+
+      css = {
+        base: [
+          "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.5.css"
+        # ] .concat themeCss .concat [
+          "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
+          "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
+          "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
+          "pimatic-mobile-frontend/app/css/owl.carousel.css"
+          "pimatic-mobile-frontend/app/css/sweet-alert.css"
+          "pimatic-mobile-frontend/app/css/mobiscroll.animation.css"
+          "pimatic-mobile-frontend/app/css/mobiscroll.widget.css"
+          "pimatic-mobile-frontend/app/css/mobiscroll.scroller.css"
+        ]
+        style: [
+          "pimatic-mobile-frontend/app/css/jqm-icon-pack-fa.css"
+        ] .concat @additionalAssetFiles['css']
+        editor: [
+           "pimatic-mobile-frontend/app/css/jsoneditor.css"
+        ]
+      }
+
       # Configure static assets with nap
       napAssets = nap(
         appDir: parentDir
@@ -165,90 +306,8 @@ module.exports = (env) ->
         mode: @config.mode
         minify: false # to slow...
         assets:
-          js:
-            jquery: [
-              "pimatic-mobile-frontend/app/js/tracekit.js"
-              "pimatic-mobile-frontend/app/js/jquery-1.10.2.js"
-              "pimatic-mobile-frontend/app/mobile-init.js"
-              "pimatic-mobile-frontend/app/js/jquery.mobile-1.4.2.js"
-              "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
-              "pimatic-mobile-frontend/app/js/jquery.pep.js"
-              "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
-              "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
-              "pimatic-mobile-frontend/app/js/knockout-3.2.0.js"
-              "pimatic-mobile-frontend/app/js/knockout.mapper.js"
-              "pimatic-mobile-frontend/app/js/overthrow.js"
-              "pimatic-mobile-frontend/app/js/jsoneditor-schema.js"
-              "pimatic-mobile-frontend/app/js/owl.carousel.js"
-              "pimatic-mobile-frontend/app/js/highstock.js"
-              "pimatic-mobile-frontend/app/js/touch-tooltip-fix.js"
-              "pimatic-mobile-frontend/app/js/jquery.ui.datepicker.js"
-              "pimatic-mobile-frontend/app/js/jquery.mobile.datepicker.mod.js"
-              "pimatic-mobile-frontend/app/js/jquery.sparkline.js"
-              "pimatic-mobile-frontend/app/js/jqm-spinbox.js"
-              "pimatic-mobile-frontend/app/js/human-format.js"
-              "pimatic-mobile-frontend/app/js/sweet-alert.js"
-              "pimatic-mobile-frontend/app/js/headroom.js"
-              "pimatic-mobile-frontend/app/js/inobounce.js"
-              "pimatic-mobile-frontend/app/js/mobiscroll.core.js"
-              "pimatic-mobile-frontend/app/js/mobiscroll.widget.js"
-              "pimatic-mobile-frontend/app/js/mobiscroll.scroller.js"
-              "pimatic-mobile-frontend/app/js/mobiscroll.util.datetime.js"
-              "pimatic-mobile-frontend/app/js/mobiscroll.datetimebase.js"
-              "pimatic-mobile-frontend/app/js/mobiscroll.datetime.js"
-              "pimatic-mobile-frontend/app/js/mobiscroll.select.js"
-            ]
-            main: [
-              "pimatic-mobile-frontend/app/scope.coffee"
-              "pimatic-mobile-frontend/app/helper.coffee"
-              "pimatic-mobile-frontend/app/knockout-custom-bindings.coffee"
-              "pimatic-mobile-frontend/app/connection.coffee"
-              "pimatic-mobile-frontend/app/pages/index-items.coffee"
-              "pimatic-mobile-frontend/app/pages/add-item.coffee"
-              "pimatic-mobile-frontend/app/pages/edit-rule.coffee"
-              "pimatic-mobile-frontend/app/pages/edit-variable.coffee"
-              "pimatic-mobile-frontend/app/pages/edit-group.coffee"
-              "pimatic-mobile-frontend/app/pages/edit-device.coffee"
-              "pimatic-mobile-frontend/app/pages/index.coffee"
-              "pimatic-mobile-frontend/app/pages/login.coffee"
-              "pimatic-mobile-frontend/app/pages/rules.coffee"
-              "pimatic-mobile-frontend/app/pages/groups.coffee"
-              "pimatic-mobile-frontend/app/pages/devicepages.coffee"
-              "pimatic-mobile-frontend/app/pages/devices.coffee"
-              "pimatic-mobile-frontend/app/pages/variables.coffee"
-              "pimatic-mobile-frontend/app/pages/log-messages.coffee"
-              "pimatic-mobile-frontend/app/pages/events.coffee"
-              "pimatic-mobile-frontend/app/pages/plugins.coffee"
-              "pimatic-mobile-frontend/app/pages/config.coffee"
-              "pimatic-mobile-frontend/app/pages/updates.coffee"
-              "pimatic-mobile-frontend/app/pages/edit-devicepage.coffee"
-              "pimatic-mobile-frontend/app/pages/graph.coffee"
-              "pimatic-mobile-frontend/app/pages/database.coffee"
-            ] .concat @additionalAssetFiles['js']
-            editor: [
-              "pimatic-mobile-frontend/app/js/jsoneditor.js"
-              "pimatic-mobile-frontend/app/js/ace.js"
-              "pimatic-mobile-frontend/app/js/jsonlint.js"
-            ]
-          css:
-            base: [
-              "pimatic-mobile-frontend/app/css/theme/default/jquery.mobile-1.4.2.css"
-            # ] .concat themeCss .concat [
-              "pimatic-mobile-frontend/app/css/jquery.mobile.toast.css"
-              "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
-              "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
-              "pimatic-mobile-frontend/app/css/owl.carousel.css"
-              "pimatic-mobile-frontend/app/css/sweet-alert.css"
-              "pimatic-mobile-frontend/app/css/mobiscroll.animation.css"
-              "pimatic-mobile-frontend/app/css/mobiscroll.widget.css"
-              "pimatic-mobile-frontend/app/css/mobiscroll.scroller.css"
-            ]
-            style: [
-              "pimatic-mobile-frontend/app/css/jqm-icon-pack-fa.css"
-            ] .concat @additionalAssetFiles['css']
-            editor: [
-               "pimatic-mobile-frontend/app/css/jsoneditor.css"
-            ]
+          js: js
+          css: css
       )
 
       # Returns p.min.file versions of p.file when it exist
@@ -311,7 +370,15 @@ module.exports = (env) ->
       # * Static assets
       @app.use express.static(__dirname + "/public")
 
-      return assets
+      packedAssets = {
+        scripts: {}
+        styles: {}
+      }
+      for k of js
+        packedAssets.scripts[k] = nap.getSrcUrls('js', k, no)
+      for k of css
+        packedAssets.styles[k] = nap.getSrcUrls('css', k, no)
+      return [assets, packedAssets]
 
     createThemeCss: (themeName) ->
       env.logger.info "rendering theme: #{themeName}"
@@ -356,9 +423,9 @@ module.exports = (env) ->
           @_themesRenderings[themeFullName] = undefined
           return css
 
-        if @config.mode  is "production"
+        if @config.mode is "production"
           if @_themesRenderings[themeFullName]?
-            return @_themesRenderings[themeFullName].then( (css) -> serveTheme(css) )
+            return @_themesRenderings[themeFullName].then( (css) -> serveTheme(css) ).done()
 
           @_themesRenderings[themeFullName] = fs.readFileAsync(cachePath)
             .then( (css) -> serveTheme(css.toString()))
@@ -370,7 +437,6 @@ module.exports = (env) ->
               else
                 throw error
             )
-            .done()
         else
           # always rerender theme in development mode
           @createThemeCss(themeFullName).then( (css) -> serveTheme(css) ).done()

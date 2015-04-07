@@ -58,19 +58,14 @@ $(document).on( "pagebeforecreate", '#groups-page', tc (event) ->
       )()
 
     onAddGroupClicked: ->
-      editGroupPage = pimatic.pages.editGroup
-      editGroupPage.resetFields()
-      editGroupPage.action('add')
+      jQuery.mobile.pageParams = {action: 'add'}
       return true
 
     onEditGroupClicked: (group) =>
       unless @hasPermission('groups', 'write') or pimatic.isDemo()
         pimatic.showToast(__("Sorry, you have no permissions to edit this group."))
         return false
-      editGroupPage = pimatic.pages.editGroup
-      editGroupPage.action('update')
-      editGroupPage.groupId(group.id)
-      editGroupPage.groupName(group.name())
+      jQuery.mobile.pageParams = {action: 'update', group}
       return true
 
   pimatic.pages.groups = groupsPage = new GroupsViewModel()

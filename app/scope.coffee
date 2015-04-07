@@ -44,6 +44,7 @@ class DeviceAttribute
     $default: 'ignore'
     description: "copy"
     label: "copy"
+    acronym: "copy"
     labels: "copy"
     name: "copy"
     type: "copy"
@@ -67,7 +68,7 @@ class DeviceAttribute
 
     @unitText = if @unit? then @unit else ''
     if @type is "number"
-      @sparklineHistory = ko.computed( => ([t, v] for {t,v} in @history()) )
+      @sparklineHistory = ko.pureComputed( => ([t, v] for {t,v} in @history()) )
 
   shouldDisplaySparkline: -> 
     return (
@@ -80,7 +81,7 @@ class DeviceAttribute
     @label + ': ' +
     @formatValue(@value()) + 
     ' ' + @lastUpdateTimeText() + 
-    (if @type is "number" then """
+    (if @type in ["number", "boolean"] then """
       <a href="#" id="to-graph-page"
         data-attributeName="#{@name}"
         data-deviceId="#{@device.id}">Graph</a>
@@ -128,10 +129,13 @@ class DeviceAttribute
     else
       return ''
 
+  displayAcronym: ->
+    return @acronym or ''
+
   formatValue: (value) ->
     switch @type
       when 'boolean'
-        if @labels then (if value is true then @labels[0] else @labels[1])
+        if @labels then (if value is true then __(@labels[0]) else __(@labels[1]))
         else value.toString()
       when 'string' then value
       when "number"
@@ -155,7 +159,11 @@ class DeviceAttribute
       if info.unit in ['W', 'Wh'] and info.prefix is 'k'
         info.num = Math.round(value) / 1e3
         info.num = info.num.toFixed(3)
-
+      # show > 1000m as km
+      else if info.unit is "m" and info.prefix is ""
+        if value >= 1000
+          info.num = Math.round(value / 100) / 10
+          info.prefix = 'k'
       return {
         num: info.num
         unit: info.prefix + info.unit
@@ -164,6 +172,10 @@ class DeviceAttribute
       if @unit in ['kW', 'kWh']
         num = Math.round(value * 1e3) / 1e3
         num = num.toFixed(3)
+      # handle seconds
+      else if @unit is "s"
+        num = pimatic.toHHMMSS(value)
+        return {num, unit: ''}
       else
         num = Math.round(value * 1e2) / 1e2
       return {
@@ -172,17 +184,13 @@ class DeviceAttribute
       }
 
   formatTime: (time) -> 
-    day = Highcharts.dateFormat('%Y-%m-%d', time)
-    today = Highcharts.dateFormat('%Y-%m-%d', (new Date()).getTime())
+    dt = pimatic.timestampToDateTime(time)
+    today = pimatic.timestampToDateTime(new Date())
     return(
-      if day isnt today
-        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', time)
-      else
-        Highcharts.dateFormat('%H:%M:%S', time)
+      if dt.date isnt today.date then "#{dt.date} #{dt.time}" else dt.time
     )
 
   toJS: () -> ko.mapper.toJS(this, @constructor.mapping)
-
 
 
 class Device
@@ -215,12 +223,12 @@ class Device
         action,
         { type: "get", url: "/api/device/#{@id}/#{action.name}" }
       )
-    @group = ko.computed( => 
+    @group = ko.pureComputed( => 
       if @id is 'null' then return null
       pimatic.getGroupOfDevice(@id) 
     )
 
-    @configWithDefaults = ko.computed( =>
+    @configWithDefaults = ko.pureComputed( =>
       result = {}
       for name, c of @configDefaults
         result[name] = c
@@ -261,7 +269,7 @@ class Rule
   }
   constructor: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @group = ko.computed( => pimatic.getGroupOfRule(@id) )
+    @group = ko.pureComputed( => pimatic.getGroupOfRule(@id) )
   update: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
   toJS: () -> 
@@ -283,10 +291,10 @@ class Variable
     unless data.exprInputStr? then data.exprInputStr = null
     unless data.exprTokens? then data.exprTokens = null
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @displayName = ko.computed( => "$#{@name}" )
-    @hasValue = ko.computed( => @value()? )
-    @displayValue = ko.computed( => if @hasValue() then @value() else "null" )
-    @group = ko.computed( => pimatic.getGroupOfVariable(@name) )
+    @displayName = ko.pureComputed( => "$#{@name}" )
+    @hasValue = ko.pureComputed( => @value()? )
+    @displayValue = ko.pureComputed( => if @hasValue() then @value() else "null" )
+    @group = ko.pureComputed( => pimatic.getGroupOfVariable(@name) )
   isDeviceAttribute: -> $.inArray('.', @name) isnt -1
   update: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
@@ -318,21 +326,27 @@ class DevicePage
   constructor: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
 
-  getDevicesInGroup: (groupId) ->
-    ds = (d for d in @devices() when (
-        d.device.group()?.id is groupId and d.device isnt pimatic.nullDevice
-      )
+    @deviceByGroups = ko.pureComputed( =>
+      mapping = {
+        '$ungrouped': []
+      }
+      for d in @devices()
+        if d.device isnt pimatic.nullDevice
+          g = pimatic.getGroupOfDevice(d.device.id)
+          groupId = g?.id or '$ungrouped'
+          if mapping[groupId]?
+            mapping[groupId].push d
+          else
+            mapping[groupId] = [d]
+      return mapping
     )
-    return ds 
+
+
+  getDevicesInGroup: (groupId) ->
+    return @deviceByGroups()[groupId] or []
 
   getUngroupedDevices: ->
-    devices = @devices()
-    ungrouped = (
-      d for d in devices when (
-        not d.device.group()? and d.device isnt pimatic.nullDevice
-      )
-    )
-    return ungrouped
+    return @deviceByGroups()['$ungrouped']
 
   update: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
@@ -352,21 +366,21 @@ class Group
   }
   constructor: (data) ->
     ko.mapper.fromJS(data, @constructor.mapping, this)
-    @getDevices = ko.computed( =>
+    @getDevices = ko.pureComputed( =>
       devices = []
       for deviceId in @devices()
         deviceObj = pimatic.getDeviceById(deviceId)
         if deviceObj? then devices.push deviceObj
       return devices
     )
-    @getRules = ko.computed( =>
+    @getRules = ko.pureComputed( =>
       rules = []
       for ruleId in @rules()
         ruleObj = pimatic.getRuleById(ruleId)
         if ruleObj? then rules.push ruleObj
       return rules
     )
-    @getVariables = ko.computed( =>
+    @getVariables = ko.pureComputed( =>
       variables = []
       for variableName in @variables()
         variableObj = pimatic.getVariableByName(variableName)
@@ -379,8 +393,8 @@ class Group
   getDevicesWithAttibute: (predicate) ->
     return ( d for d in @getDevices() when d.hasAttibuteWith(predicate) )
 
-  getDevicesWithNumericAttribute: ->
-    return @getDevicesWithAttibute( (attr) => attr.type is "number" )
+  getDevicesWithGraphableAttribute: ->
+    return @getDevicesWithAttibute( (attr) => attr.type in ["number", "boolean"] )
 
   containsDevice: (deviceId) ->
     index = ko.utils.arrayIndexOf(@devices(), deviceId)
@@ -503,7 +517,7 @@ class Pimatic
       pimatic.storage.set('pimatic', allData)
     )
 
-    @getUngroupedDevices = ko.computed( =>
+    @getUngroupedDevices = ko.pureComputed( =>
       d for d in @devices() when not d.group()?
     )
 

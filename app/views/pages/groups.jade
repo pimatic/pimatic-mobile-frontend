@@ -1,6 +1,6 @@
 script#group-template(type="text/template")
   li.group.sortable
-    a(data-transition='slidefade', href='#edit-group', data-bind="click: $root.onEditGroupClicked")
+    a(data-transition='slidefade', href='#edit-group-page', data-bind="click: $root.onEditGroupClicked")
       span.name(data-bind="text: $data.name()")
 div#groups-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingGroups() }")
   div(data-theme=theme.headerSwatch, data-role='header')
@@ -11,4 +11,4 @@ div#groups-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing
       <!-- ko template: { name: 'group-template', foreach: groups, afterRender: $root.afterRenderGroup} --><!-- /ko -->
       li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingGroups()")=__('Drop here to remove group')
       li#add-group(data-bind="visible: $root.enabledEditing() && !$root.isSortingGroups() && $root.hasPermission('groups', 'write')")
-        a(data-transition='slidefade', href='#edit-group', data-bind="click: $root.onAddGroupClicked")=__('Add a new group')+'...'
+        a(data-transition='slidefade', href='#edit-group-page', data-bind="click: $root.onAddGroupClicked")=__('Add a new group')+'...'
