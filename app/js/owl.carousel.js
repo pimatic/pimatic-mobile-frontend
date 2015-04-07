@@ -880,6 +880,7 @@ if (typeof Object.create !== "function") {
                     maxSwipe: null,
                     sliding : null,
                     dargging: null,
+					scrolling: null,
                     targetElement : null
                 };
 
@@ -955,13 +956,14 @@ if (typeof Object.create !== "function") {
 
                 position = $(this).position();
                 locals.relativePos = position.left;
-
+				
                 locals.offsetX = getTouches(ev).x - position.left;
                 locals.offsetY = getTouches(ev).y - position.top;
 
                 swapEvents("on");
 
                 locals.sliding = false;
+				locals.scrolling = false;
                 locals.targetElement = ev.target || ev.srcElement;
             }
 
@@ -983,10 +985,24 @@ if (typeof Object.create !== "function") {
                     locals.dragging = true;
                     base.options.startDragging.apply(base, [base.$elem]);
                 }
-
+				
+				if(Math.abs(base.newPosY) > 20 && (locals.sliding === false) && (base.browser.isTouch === true)) {
+					locals.scrolling = true;
+				}
+				
+				/*if(base.newPosY > 20 || base.newPosY < -20) {
+					//alert(base.newPosY);
+					base.newRelativeX = 0;
+				}*/
+				
                 var minTrackingOffset = 60;
+				
+				if ((base.newPosY > 10 || base.newPosY < -10) && locals.sliding === false) {
+                    $(document).off("touchmove.owl");
+                    return;
+                }
 
-                if (Math.abs(base.newRelativeX) > minTrackingOffset && (base.browser.isTouch === true)) {
+                if (Math.abs(base.newRelativeX) > minTrackingOffset && (base.browser.isTouch === true) && (locals.scrolling === false)) {
                     if (ev.preventDefault !== undefined) {
                         ev.preventDefault();
                     } else {
@@ -994,11 +1010,9 @@ if (typeof Object.create !== "function") {
                     }
                     locals.sliding = true;
                 }
-
-                if ((base.newPosY > 10 || base.newPosY < -10) && locals.sliding === false) {
-                    $(document).off("touchmove.owl");
-                    return;
-                }
+				
+				if(locals.scrolling)
+					return;
 
                 if(Math.abs(base.newRelativeX) < minTrackingOffset && locals.sliding === false) {
                     return;
@@ -1038,6 +1052,8 @@ if (typeof Object.create !== "function") {
                 if (base.browser.isTouch !== true) {
                     base.$owlWrapper.removeClass("grabbing");
                 }
+				
+				
 
                 if (base.newRelativeX < 0) {
                     base.dragDirection = base.owl.dragDirection = "left";
@@ -1045,7 +1061,7 @@ if (typeof Object.create !== "function") {
                     base.dragDirection = base.owl.dragDirection = "right";
                 }
 
-                if (base.newRelativeX !== 0) {
+                if (base.newRelativeX !== 0 && locals.scrolling == false) {
                     newPosition = base.getNewPosition();
                     base.goTo(newPosition, false, "drag");
                     if (locals.targetElement === ev.target && base.browser.isTouch !== true) {
