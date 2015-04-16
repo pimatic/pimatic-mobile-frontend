@@ -188,6 +188,13 @@ html body .ui-panel-dismiss {
   border-radius: 0;
 }
 
+#index .attribute-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-bottom: -1px;
+}
+
 .ui-mobile .ui-page-theme-a .ui-li-divider {
   border: none;
   border-bottom: 2px solid #005994 /*{pm-listdivider-color}*/;
@@ -1053,6 +1060,16 @@ li.with-button a.ui-btn {
     width: 86%;
   }
 
+    /* Override field container CSS to prevent the flipswitch from becomming full width */
+  html .short-labels .ui-field-contain > label + .ui-flipswitch,
+  html .short-labels .ui-popup .ui-field-contain > label + .ui-flipswitch {
+    display: inline-block;
+    width: 5.875em; /* If you override the width for .ui-flipswitch you should repeat the same value here */
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+  }
+
 }
 
 
@@ -1442,10 +1459,7 @@ border-bottom-left-radius: inherit;
   height: 14px;
   margin: 0;
   border: 3px solid #007dcd /*{a-bar-background-color}*/;
-}
-
-.contains-attr-presence {
-  height: 14px;
+;
 }
 
 .attr-presence .val{
@@ -1830,7 +1844,7 @@ border-bottom-left-radius: inherit;
   margin-left: 12px;
 }
 
-#rule-condition-selector {
+.popup-overlay {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -1842,13 +1856,13 @@ border-bottom-left-radius: inherit;
   padding-top: 80px;
 }
 
-#rule-condition-selector .outer{
+.popup-overlay .outer{
   background-color: white;
   max-height: 100%;
   border: 1px solid gray;
 }
 
-#rule-condition-selector .inner{
+.popup-overlay .inner{
   background-color: white;
   padding: 20px;
 }
@@ -1885,4 +1899,11 @@ border-bottom-left-radius: inherit;
 
 .input-mode-switch{
   font-size: 14px;
+}
+
+.ui-field-contain .description {
+  clear: both;
+  padding-top: 8px;
+  font-style: italic;
+  color: gray;
 }

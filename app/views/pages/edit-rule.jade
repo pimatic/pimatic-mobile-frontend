@@ -21,7 +21,7 @@ script#rule-condition-selector-element(type='text/template')
     input(type="text", data-bind="textInput: match, disabled: $parent.disableElementsInput")
     <!-- /ko -->
 script#rule-condition-selector-template(type='text/template')
-  div#rule-condition-selector(data-bind="visible: conditionInput.visible, event: {keypress: conditionInput.keypress}")
+  div#rule-condition-selector.popup-overlay(data-bind="visible: conditionInput.visible, event: {keypress: conditionInput.keypress}")
     div.outer.overthrow
       div.inner
         .ui-field-contain 
