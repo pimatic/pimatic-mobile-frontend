@@ -1,0 +1,85 @@
+
+.icon-battery-arrow {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke%3D%22%23808080%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23808080%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2010H5l2-6h1v4h3l-2%206H8z%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-battery-empty {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20stroke%3D%22%23808080%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+.icon-battery-empty {
+	animation: battery-arrow 5s steps(2, end) infinite;
+  -webkit-animation: battery-arrow 5s steps(2, end) infinite;
+}
+
+@keyframes battery-arrow {
+  to {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke%3D%22%23808080%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23808080%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2010H5l2-6h1v4h3l-2%206H8z%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+  }
+}
+@-webkit-keyframes battery-arrow {
+  to {
+   background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke%3D%22%23808080%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23808080%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2010H5l2-6h1v4h3l-2%206H8z%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+  }
+}
+
+
+.icon-battery-filled-arrow {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20fill%3D%22%23808080%22%20stroke%3D%22%23808080%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20stroke%3D%22%23808080%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M8%2010H5l2-6h1v4h3l-2%206H8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-battery-filled {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23808080%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-battery-fuel-1 {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20stroke%3D%22%23808080%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11%2013H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-battery-fuel-2 {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20stroke%3D%22%23808080%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11%2013H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%2011H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-battery-fuel-3 {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20stroke%3D%22%23808080%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11%2013H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%2011H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%209H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-battery-fuel-4 {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20stroke%3D%22%23808080%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11%2013H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%2011H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%209H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%207H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-battery-fuel-5 {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cg%20stroke%3D%22%23808080%22%3E%3Cpath%20d%3D%22M12.523%2015.024H3.477V2.977h9.046z%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M6%203V1h4v2%22%20fill%3D%22%23808080%22%20fill-rule%3D%22evenodd%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M11%2013H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%2011H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%209H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%207H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M11%205H5%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22square%22%20stroke-miterlimit%3D%223.1%22%20fill%3D%22none%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
+
+.icon-bell {
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22699.428%22%20height%3D%22699.428%22%20viewBox%3D%220%200%20699.428%20699.428%22%3E%3Cpath%20d%3D%22M618.666%20487.262c-42.12-36.414-72.238-133.176-72.238-246.833%200-86.03-55.298-158.968-132.235-185.677C409.013%2023.715%20382.216%200%20349.713%200c-32.5%200-59.297%2023.715-64.478%2054.752C208.298%2081.462%20153%20154.4%20153%20240.43c0%20113.635-30.097%20210.373-72.238%20246.832-23.518%2020.35-37.048%2049.9-37.048%2081.023%200%2036.22%2029.354%2065.572%2065.57%2065.572h174.858c0%2036.217%2029.354%2065.57%2065.57%2065.57%2036.218%200%2065.572-29.354%2065.572-65.57H590.14c36.218%200%2065.572-29.354%2065.572-65.572.002-31.1-13.506-60.674-37.046-81.023zm-509.38%2081.023c0-12.064%205.245-23.54%2014.36-31.43%2058.554-50.62%2094.924-164.213%2094.924-296.427%200-72.325%2058.818-131.143%20131.143-131.143s131.143%2058.818%20131.143%20131.143c0%20132.214%2036.37%20245.806%2094.926%20296.427%209.137%207.912%2014.36%2019.365%2014.36%2031.43H109.285z%22%2F%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat;
+}
+
+
