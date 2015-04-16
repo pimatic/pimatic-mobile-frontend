@@ -5,6 +5,10 @@ script#json-scheme-editor-field(type='text/template')
     <!-- ko if: $data.schema.type !== "boolean" -->
     div.ui-input-text.ui-body-inherit.ui-corner-all.ui-shadow-inset
       //- div(data-bind="text: JSON.stringify(ko.unwrap($data), null, '  ')")
+      <!-- ko if: $.isArray($data.schema.enum) -->
+      select(data-mini="true", data-inline="true", data-bind="jqmoptions: $data.schema.enum, value: $data.value, optionsText: $data.schema.enum")
+      <!-- /ko -->
+      <!-- ko if: !$.isArray($data.schema.enum) -->
       <!-- ko if: $data.schema.type === "string" -->
       input(type="text", data-bind="textInput: $data.value")
       <!-- /ko -->
@@ -13,6 +17,7 @@ script#json-scheme-editor-field(type='text/template')
       <!-- /ko -->
       <!-- ko if: $data.schema.type === "integer" -->
       input(type="text", data-bind="textInput: $data.value")
+      <!-- /ko -->
       <!-- /ko -->
     <!-- /ko -->
     <!-- ko if: $data.schema.type === "boolean" -->

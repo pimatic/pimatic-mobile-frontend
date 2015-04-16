@@ -1,8 +1,8 @@
 # edit-variable-page
 # --------------
 
-merge = Array.prototype.concat
-LazyLoad.js(merge.apply(scripts.jsoneditor))
+#merge = Array.prototype.concat
+#LazyLoad.js(merge.apply(scripts.jsoneditor))
 
 wrap = (schema, value) ->
   unless schema?
@@ -72,7 +72,6 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
           unless k in ['name', 'id', 'class']
             confCopy[k] = v
             count++
-        console.log "confCopy:", confCopy
         unless count is 0 then @editor.setValue(confCopy)
 
       getProperties = (value) ->
@@ -125,7 +124,6 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 
       getItemLabel = (value) ->
         unwraped = unwrap value
-        console.log unwraped
         if @type is "object" and @properties?
           label = ""
           if @properties.name? 
@@ -158,6 +156,10 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
             schema.items.addItem = addItem
             schema.items.editingItem = ko.observable(null)
             enhanceSchema(schema.items, null)
+          when "string", "number", "integer", "boolean"
+            if schema.defines?
+              if schema.defines.options? and not schema.enum?
+                schema.enum = Object.keys(schema.defines.options)
         return
 
       @deviceClass.subscribe( (className) =>
@@ -173,7 +175,10 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
               @deviceConfig(rewraped())
               enhanceSchema schema, null
               @configSchema(schema)
-          )
+              console.log schema
+        )
+        else
+          @configSchema(null)
       )
       # @deviceConfig.subscribe( (config) =>
       #   editorSetConfig(config)
@@ -222,10 +227,10 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
   pimatic.client.rest.getDeviceClasses({}).done( (result) =>
     if result.success
-      pimatic.pages.editDevice.deviceClasses(result.deviceClasses)
+      deviceClasses = [""].concat result.deviceClasses
+      pimatic.pages.editDevice.deviceClasses(deviceClasses)
   )
 )
-
 
 $(document).on("pagecreate", '#edit-device-page', (event) ->
   try
