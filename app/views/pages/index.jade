@@ -101,6 +101,7 @@ script#attribute-template(type='text/template')
     <!-- /ko -->
   <!-- /ko -->
 script#switch-attribute-template(type='text/template')
+  <!-- ko if: !$data.hidden -->
   <!-- ko if: $data.type !== 'boolean' -->
   span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
     <!-- ko if: $data.shouldDisplayAcronym() -->
@@ -116,6 +117,7 @@ script#switch-attribute-template(type='text/template')
     <!-- ko if: $data.shouldDisplaySparkline()  -->
     span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
     <!-- /ko -->
+  <!-- /ko -->
   <!-- /ko -->
 script#sortable-handle-template(type='text/template')
   div.handle.no-carousel-slide
