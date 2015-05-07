@@ -10,6 +10,8 @@ $(document).ready( tc (event) ->
         @redirectPage = 'index'
       pimatic.socket.io.disconnect()
       jQuery.mobile.changePage '#login-page', transition: 'flip'
+      $("#login-page").bind 'pageshow', ->
+        $('#loginForm  #firstName').focus()
     hideLoginDialog: ->
       activePage = $.mobile.activePage?.attr("id") or 'index'
       if activePage is 'login-page'
