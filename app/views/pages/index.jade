@@ -101,23 +101,8 @@ script#attribute-template(type='text/template')
     <!-- /ko -->
   <!-- /ko -->
 script#switch-attribute-template(type='text/template')
-  <!-- ko if: !$data.hidden -->
-  <!-- ko if: $data.type !== 'boolean' -->
-  span.attribute(data-bind="tooltip: $data.tooltipHtml, css: {outOfDate: $data.outOfDate()}")
-    <!-- ko if: $data.shouldDisplayAcronym() -->
-    span.acronym(data-bind="text: $data.displayAcronym()")
-    <!-- /ko -->
-    <!-- ko if: $data.shouldDisplayIcon() -->
-    span.attribute-icon(data-bind="css: $data.getIconClass()")
-    <!-- /ko -->
-    <!-- ko if: $data.shouldDisplayValue() -->
-    span.val(data-bind="text: $data.displayValueText()")
-    span.unit(data-bind="text: $data.displayUnitText()")
-    <!-- /ko -->
-    <!-- ko if: $data.shouldDisplaySparkline()  -->
-    span.sparkline(data-bind="sparkline: {data: $data.sparklineHistory, tooltipFormatter: $data.tooltipFormatter}")
-    <!-- /ko -->
-  <!-- /ko -->
+  <!-- ko if: $data.name !== 'state' -->
+  <!-- ko template: {name: 'attribute-template', data: $data} --><!-- /ko -->
   <!-- /ko -->
 script#sortable-handle-template(type='text/template')
   div.handle.no-carousel-slide
