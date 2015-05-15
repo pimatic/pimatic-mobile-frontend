@@ -1459,7 +1459,10 @@ border-bottom-left-radius: inherit;
   height: 14px;
   margin: 0;
   border: 3px solid #007dcd /*{a-bar-background-color}*/;
-;
+}
+
+.contains-attr-presence {
+  height: 14px;
 }
 
 .attr-presence .val{
