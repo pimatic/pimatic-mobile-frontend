@@ -565,8 +565,12 @@ html.ui-mobile body .delete-link:hover {
   box-shadow: 0 1px 0           rgba(255,255,255,.3);
 }
 
-
 /* dimmer */
+li.sortable.dimmer-device.no-header{
+  min-height: 31px;
+}
+
+/* dimmer slider */
 ul.items .ui-slider-input{
   display: none;
 }
@@ -578,7 +582,7 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
 
 @media (min-width:35em) {
   ul.items .dimmer-device .ui-slider {
-    margin: 3px 10px 10px 0 !important;
+    margin: 5px 5px 5px 5px;
     position: absolute;
     right: 5px;
     top: 2px;
