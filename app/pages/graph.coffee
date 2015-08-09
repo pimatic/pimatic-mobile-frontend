@@ -279,9 +279,10 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           updateChart()
           
         loadPreviousData = ( (item, time, onData, onError) =>
+          onError = (->) if typeof onError isnt "function"
           task = {
             attributeName: item.attribute.name
-            abort: onError or (->)
+            abort: onError
           }
           task.start = ( =>
             pimatic.client.rest.querySingleDeviceAttributeEvents({
@@ -310,9 +311,10 @@ $(document).on("pagecreate", '#graph-page', (event) ->
 
         limit = 100
         loadData = ( (item, fromTime, tillTime, onData, onError, prepend = no) =>
+          onError = (->) if typeof onError isnt "function"
           task = {
             attributeName: item.attribute.name
-            abort: onError or (->)
+            abort: onError
           }
           task.start = ( =>
             startTime = new Date().getTime()
