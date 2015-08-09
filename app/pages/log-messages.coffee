@@ -138,7 +138,7 @@ $(document).on("pagecreate", '#log-page', tc (event) ->
       lastMessage = logPage.messages[logPage.messages.length-1]
       pimatic.client.rest.deleteMessages({criteria: {}}).done( tc ->
         logPage.messages.removeAll()
-        pimatic.pages.index.errorCount(0)
+        pimatic.pages?.index?.errorCount(0)
         logPage.messageCount(0)
       ).fail(ajaxAlertFail)
 
