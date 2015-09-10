@@ -91,14 +91,16 @@ $(document).on("pagecreate", '#index', tc (event) ->
         if dPages.length > 0 and @hasPermission('pages', 'read')
           html = """
             <ul data-bind="foreach: devicepages">
-              <li>
+              <li class="page-tab">
                 <a 
                   data-ajax='false' 
-                  data-bind="attr: {
-                    href: '#item-tab-'+$data.id}, 
+                  data-bind="
+                    attr: {
+                      href: '#item-tab-'+$data.id
+                    }, 
                     text: name, 
-                    css: {'ui-btn-active': $data == $root.activeDevicepage()}, 
-                    click: $root.onPageTabClicked"
+                    css: {'ui-btn-active': $data == $root.activeDevicepage()}
+                  "
                 ></a>
               </li>
             </ul>
@@ -262,9 +264,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
     updateFromJs: (data) -> 
       ko.mapper.fromJS(data, IndexViewModel.mapping, this)
 
-    onPageTabClicked: (page) =>
-      @activeDevicepage(page)
-
     onAddItemClicked: =>
       return true
 
@@ -368,6 +367,12 @@ $(document).on("pagecreate", '#index', tc (event) ->
     TraceKit.report(e)
     pimatic.storage?.removeAll()
     window.location.reload()
+
+  $('#index').on("vclick", ".page-tab", tc (event) ->
+    page = ko.dataFor(this)
+    indexPage.activeDevicepage(page)
+    return false
+  )
 
   $('#index').on("change", "#item-lists .switch", tc (event) ->
     switchDevice = ko.dataFor(this)
