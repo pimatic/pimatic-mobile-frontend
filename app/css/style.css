@@ -567,7 +567,7 @@ html.ui-mobile body .delete-link:hover {
 
 /* dimmer */
 li.sortable.dimmer-device.no-header{
-  min-height: 31px;
+  min-height: 30px;
 }
 
 /* dimmer slider */
@@ -580,13 +580,18 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   margin-right: 8px;
 }
 
+ul.items .dimmer-device .ui-slider {
+  margin: 8px 4px 2px 0;
+}
+
 @media (min-width:35em) {
   ul.items .dimmer-device .ui-slider {
-    margin: 5px 5px 5px 5px;
-    position: absolute;
-    right: 5px;
-    top: 2px;
+    margin: 1px 4px -1px 5px;
+    float: right;
     width: 20em;
+  }
+  ul.items .dimmer-device label {
+    float: left;
   }
 }
 
