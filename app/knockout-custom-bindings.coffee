@@ -473,11 +473,17 @@
     init: (element, valueAccessor, allBindingsAccessor, viewModel) ->
       if typeof ko.bindingHandlers.value.init isnt "undefined"
         ko.bindingHandlers.value.init element, valueAccessor, allBindingsAccessor, viewModel
+      # access value
+      value = valueAccessor()
+      ko.unwrap(value)
 
     update: (element, valueAccessor, allBindingsAccessor, viewModel) ->
       if typeof ko.bindingHandlers.value.update isnt "undefined"
         ko.bindingHandlers.value.update element, valueAccessor, allBindingsAccessor, viewModel
       $(element).selectmenu("refresh", true)
+      # access value
+      value = valueAccessor()
+      ko.unwrap(value)
   }
 
   ko.bindingHandlers.dragslide = {
