@@ -37,7 +37,7 @@ $(document).on( "pagebeforecreate", (event) ->
 
     pimatic.socket.emit('call', {
       id: 'guiSettings'
-      action: 'getGuiSetttings'
+      action: 'getGuiSettings'
       params: {}
     })
 

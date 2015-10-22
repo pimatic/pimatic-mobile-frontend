@@ -565,8 +565,12 @@ html.ui-mobile body .delete-link:hover {
   box-shadow: 0 1px 0           rgba(255,255,255,.3);
 }
 
-
 /* dimmer */
+li.sortable.dimmer-device.no-header{
+  min-height: 30px;
+}
+
+/* dimmer slider */
 ul.items .ui-slider-input{
   display: none;
 }
@@ -576,13 +580,18 @@ ul.items .dimmer-device div.item-inner .ui-slider-track {
   margin-right: 8px;
 }
 
+ul.items .dimmer-device .ui-slider {
+  margin: 8px 4px 2px 0;
+}
+
 @media (min-width:35em) {
   ul.items .dimmer-device .ui-slider {
-    margin: 3px 10px 10px 0 !important;
-    position: absolute;
-    right: 5px;
-    top: 2px;
+    margin: 1px 4px -1px 5px;
+    float: right;
     width: 20em;
+  }
+  ul.items .dimmer-device label {
+    float: left;
   }
 }
 
@@ -1459,7 +1468,10 @@ border-bottom-left-radius: inherit;
   height: 14px;
   margin: 0;
   border: 3px solid #007dcd /*{a-bar-background-color}*/;
-;
+}
+
+.contains-attr-presence {
+  height: 14px;
 }
 
 .attr-presence .val{

@@ -183,6 +183,7 @@ module.exports = (env) ->
           "pimatic-mobile-frontend/app/js/sweet-alert.js"
           "pimatic-mobile-frontend/app/js/headroom.js"
           "pimatic-mobile-frontend/app/js/inobounce.js"
+          "pimatic-mobile-frontend/app/js/fastclick.js"
         ]
         textcomplete: [
           "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"

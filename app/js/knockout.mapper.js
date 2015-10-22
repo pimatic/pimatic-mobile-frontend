@@ -152,6 +152,9 @@
                 }
             } else {
                 array = [];
+                if(targetArray && targetArray.length !== value.length) {
+                    changed = true;
+                }
                 for (var i = 0; i < value.length; i++) {
                     var item = findItems ? find(targetArray, options.$key, value[i]) : null;
                     var val = exports.fromJS(value[i], itemOptions, item);
@@ -171,7 +174,7 @@
             if (wrap || wrap == undefined || wrap == null) {
                 if (ko.isObservable(target)) {
                     if(changed) {
-                        //console.log(targetArray, '->', array);
+                        // console.log(targetArray, '->', array);
                         target(array);    
                     }
 					return target;

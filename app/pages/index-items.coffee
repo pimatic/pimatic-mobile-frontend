@@ -151,9 +151,12 @@ $(document).on( "pagebeforecreate", (event) ->
     constructor: (templData, @device) ->
       super(templData, @device)
       @sliderId = "switch-#{templData.deviceId}"
-      dimlevel = @getAttribute('dimlevel').value
+      dimAttribute = @getAttribute('dimlevel')
+      unless dimAttribute?
+        throw new Error("A dimmer device needs an dimlevel attribute!")
+      dimlevel = dimAttribute.value
       @sliderValue = ko.observable(if dimlevel()? then dimlevel() else 0)
-      @getAttribute('dimlevel').value.subscribe( (newDimlevel) =>
+      dimAttribute.value.subscribe( (newDimlevel) =>
         @sliderValue(newDimlevel)
         pimatic.try => @sliderEle.slider('refresh') 
       )
