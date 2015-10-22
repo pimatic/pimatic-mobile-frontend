@@ -85,7 +85,7 @@ div#edit-rule-page(data-role='page')
         label.short-label(for='edit-rule-name')=__('ID') + ': '
         input#edit-rule-id(type="text", placeholder="Internal ID" data-bind="textInput: ruleId, jqmenabled: action() == 'add'")  
       .ui-field-contain
-        label(for='edit-rule-condition')='if'
+        label(for='edit-rule-condition')='when'
         textarea#edit-rule-condition(placeholder="Condition", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleCondition, visible: editMode() == 'text'")
         <!-- ko if: editMode() == "text" -->
         a.input-mode-switch(href="#", data-bind="click: $root.setGuiMode")=__('switch to gui mode')
