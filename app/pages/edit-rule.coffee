@@ -294,8 +294,8 @@ $(document).on("pagecreate", '#edit-rule-page' , (event) ->
 
     constructor: ->
       @ruleAsText = ko.computed( => 
-        if @editMode() is "text" then "if #{@ruleCondition()} then #{@ruleActions()}"
-        else "if #{@getTreeAsString()} then #{@ruleActions()}"
+        if @editMode() is "text" then "when #{@ruleCondition()} then #{@ruleActions()}"
+        else "when #{@getTreeAsString()} then #{@ruleActions()}"
       )
       @pageTitle = ko.computed( => 
         return (if @action() is 'add' then __('Add new rule') else __('Edit rule'))

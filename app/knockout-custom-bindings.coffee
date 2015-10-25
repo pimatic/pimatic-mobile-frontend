@@ -62,8 +62,11 @@
       $ele = $(element)
       switch element.type
         when "select-one"
-          if valueUnwrapped then $ele.selectmenu('enable') else $ele.selectmenu('disable') 
-        else 
+          if $ele.data('mobileFlipswitch')?
+            if valueUnwrapped then $ele.flipswitch('enable') else $ele.flipswitch('disable') 
+          else
+            if valueUnwrapped then $ele.selectmenu('enable') else $ele.selectmenu('disable') 
+        else
           if valueUnwrapped then $ele.textinput('enable') else $ele.textinput('disable')
       return
   }
@@ -110,7 +113,8 @@
           switch val
             when "true" then val = true
             when "false" then val = false
-          value(val)
+          if ko.unwrap(value) isnt val
+            value(val)
         )
 
     update: (element, valueAccessor) ->
@@ -153,6 +157,13 @@
         catch e
           # ignore
        ), 1)
+      return
+    }
+
+  ko.bindingHandlers.jqmtextinput = {
+    init: (element, valueAccessor, allBindings) ->
+      $(element).textinput(enhanced: true)
+      ko.bindingHandlers.textInput.init(element, valueAccessor, allBindings)
       return
     }
 

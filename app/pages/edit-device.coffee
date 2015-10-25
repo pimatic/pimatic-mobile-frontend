@@ -95,8 +95,9 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
       editOk = (parent, data) ->
         editingItem = data.schema.editingItem()
         if editingItem.index?
-          array = ko.unwrap(parent.value)
+          array = parent.value()
           array[editingItem.index](editingItem.value())
+          parent.value(array)
         else
           parent.value.push(editingItem.value)
         data.schema.editingItem(null)  
@@ -138,6 +139,26 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 
       enhanceSchema = (schema, name) ->
         schema.name = name
+        # console.log(name, schema)
+        schema.notDefault = (data) => 
+          ko.pureComputed(
+            read: => 
+              data.value()?
+            write: (notDefault) => 
+              if notDefault
+                data.value(data.schema.default)
+              else
+                data.value(undefined)
+          )
+
+        schema.enabled = (data) => not data.schema.default or data.value()?
+
+        schema.valueOrDefault = (data) => 
+          ko.pureComputed(
+            read: => if data.value()? then data.value() else data.schema.default
+            write: (value) => data.value(value)
+          )
+
         switch schema.type
           #when 'string', 'number', "integer"
           when 'object'
@@ -176,13 +197,10 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
               enhanceSchema schema, null
               @configSchema(schema)
               console.log schema
-        )
+          )
         else
           @configSchema(null)
       )
-      # @deviceConfig.subscribe( (config) =>
-      #   editorSetConfig(config)
-      # )
 
     resetFields: () ->
       @deviceName('')
@@ -249,7 +267,13 @@ $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
     editDevicePage.action('update')
     editDevicePage.deviceId(device.id)
     editDevicePage.deviceName(device.name())
+    editDevicePage.deviceClass(null)
+    editDevicePage.configSchema(null)
     editDevicePage.deviceConfig(device.config)
+    deviceClasses = pimatic.pages.editDevice.deviceClasses()
+    unless device.config.class in deviceClasses
+      deviceClasses.push device.config.class
+      editDevicePage.deviceClasses(deviceClasses)
     editDevicePage.deviceClass(device.config.class)
   else
     editDevicePage.resetFields()

@@ -1079,6 +1079,11 @@ li.with-button a.ui-btn {
     box-sizing: content-box;
   }
 
+  html .short-labels .ui-field-contain .ui-flipswitch.ui-flipswitch-active, 
+  html .short-labels .ui-popup .ui-field-contain .ui-flipswitch.ui-flipswitch-active {
+    width: 1.875em;
+  }
+
 }
 
 
@@ -1918,4 +1923,13 @@ border-bottom-left-radius: inherit;
   padding-top: 8px;
   font-style: italic;
   color: gray;
+}
+
+#edit-device-form .properties label.ui-checkbox input{
+  left: 0;
+}
+
+
+#edit-device-form .properties label.ui-checkbox span{
+  padding-left: 28px;
 }
