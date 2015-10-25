@@ -49,9 +49,6 @@
                 // If the cached data doesn't exist yet, create it.
                 if (!templateData)
                 {
-                    console.log('Creating Cached Template: ', templateSources.elem);
- 
-                    // Strip all endlines and spaces before < characters
                     var templateText = templateSources.text();
                     var parsedNodes = ko.utils.parseHtmlFragment(templateText);
  
@@ -67,7 +64,6 @@
  
                     return compiledNodes;
                 }
-                console.log('Resuing Cached Template: ', templateSources.cachedNodes);
                 return templateData.cachedNodes;
             }
         };
