@@ -56,8 +56,10 @@ script#musicplayer-template(type='text/template')
 script#thermostat-template(type='text/template')
   li.sortable.device.no-header.thermostat(data-bind='css: {unsynced: !$data.synced()}')
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
+    <!-- ko if: $data.getConfig('guiShowValvePosition')  -->
     .valve-position
       .valve-position-bar!='&nbsp'
+    <!-- /ko -->
     .controls
       <!-- ko if: $data.getConfig('guiShowModeControl')  -->
       .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
