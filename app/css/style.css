@@ -468,8 +468,13 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 .unlocked ul#rules li.sortable a,
 .unlocked ul#groups li.sortable a,
 .unlocked ul#devices li.sortable a,
-.unlocked ul#devicepages li.sortable a {
+.unlocked ul#devicepages li.sortable a,
+#edit-device-page .elements li.sortable a {
   padding-left: 36px !important;
+}
+
+#edit-device-page .elements {
+  position: relative;
 }
 
 li.sortable .handle{
@@ -543,7 +548,7 @@ html.ui-mobile body .delete-link:hover {
     margin-right: 0px;
 }
 
-#li.sortable-placeholder{
+li.sortable-placeholder{
   border-style: dashed;
   border-width: 1px;
   background-color: #333 /*{a-page-color}*/;

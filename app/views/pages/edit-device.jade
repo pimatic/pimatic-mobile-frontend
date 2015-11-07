@@ -46,21 +46,22 @@ script#json-scheme-editor-field(type='text/template')
 script#json-scheme-editor-object(type='text/template')
   div.properties
     <!-- ko if: $data.schema -->
-    <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getProperties($data.value) } --><!-- /ko -->
+    <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getProperties($data) } --><!-- /ko -->
     <!-- /ko -->
 script#json-scheme-editor-array(type='text/template')
   div.elements
     //- div(data-bind="text: JSON.stringify($data.schema.getItems($data.value), null, '  ')")
     <!-- ko if: $data.schema -->
     //-data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}
-    ul.items(data-role='listview', data-inset='true', data-bind="jqmlistview: $data.schema.getItems($data.value)") 
-      <!-- ko template: { name: 'json-scheme-editor-array-item', foreach: $data.schema.getItems($data.value) } --><!-- /ko -->
-      li.add-item
+    ul.items(data-role='listview', data-inset='true', data-bind="sortable: {isSorting: $data.schema.items.isSorting, sorted: $data.schema.items.onSorted($data), drop: $data.schema.items.onRemove($data)}, jqmlistview: $data.schema.getItems($data.value)") 
+      <!-- ko template: { name: 'json-scheme-editor-array-item', foreach: $data.schema.getItems($data.value), afterRender: $root.afterRenderItem } --><!-- /ko -->
+      li.add-item(data-bind="visible: !$data.schema.items.isSorting()")
         a(data-bind="text: __('Add'), click: $data.schema.items.addItem",)
+      li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $data.schema.items.isSorting()")=__('Drop here to remove item')
     <!-- ko template: { name: 'json-scheme-editor-item-overlay', data: $data.schema.items.editingItem } --><!-- /ko -->
     <!-- /ko -->
 script#json-scheme-editor-array-item(type='text/template')
-  li
+  li.sortable
     a(data-bind="text: $data.schema.getItemLabel($data.value), click: $data.schema.onEditItemClick.bind($data, $index(), $data)")
 script#json-scheme-editor-item-overlay(type='text/template')
   <!-- ko if: $data !== null -->
