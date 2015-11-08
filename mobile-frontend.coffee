@@ -172,7 +172,7 @@ module.exports = (env) ->
           "pimatic-mobile-frontend/app/js/jquery.mobile.toast.js"
           "pimatic-mobile-frontend/app/js/jquery.pep.js"
           "pimatic-mobile-frontend/app/js/jquery.storageapi.js"
-          "pimatic-mobile-frontend/app/js/knockout-3.2.0.js"
+          "pimatic-mobile-frontend/app/js/knockout-3.4.0rc.js"
           "pimatic-mobile-frontend/app/js/knockout-template-cache.js"
           "pimatic-mobile-frontend/app/js/knockout.mapper.js"
           "pimatic-mobile-frontend/app/js/overthrow.js"

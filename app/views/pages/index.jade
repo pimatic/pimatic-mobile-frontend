@@ -56,8 +56,10 @@ script#musicplayer-template(type='text/template')
 script#thermostat-template(type='text/template')
   li.sortable.device.no-header.thermostat(data-bind='css: {unsynced: !$data.synced()}')
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
+    <!-- ko if: $data.getConfig('guiShowValvePosition')  -->
     .valve-position
       .valve-position-bar!='&nbsp'
+    <!-- /ko -->
     .controls
       <!-- ko if: $data.getConfig('guiShowModeControl')  -->
       .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
@@ -72,7 +74,7 @@ script#thermostat-template(type='text/template')
           a.ui-first-child.ui-btn.ui-corner-all(name='ecoButton', data-bind='click: modeEco') eco      
           a.ui-last-child.ui-btn.ui-corner-all(name='comfyButton', data-bind='click: modeComfy') comfy
       <!-- /ko -->
-      <!-- ko if: $data.getConfig('guiShowTemperatueInput') -->
+      <!-- ko if: $data.getConfig('guiShowTemperatureInput') -->
       .spinbox.no-carousel-slide
         input(type='text', data-role='spinbox', name='spin', value='0', min='0', max='100', data-mini='true', step='0.5', data-bind='textInput: inputValue')
       <!-- /ko -->
