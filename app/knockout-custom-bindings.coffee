@@ -388,13 +388,15 @@
       
       $(element).on("MSPointerDown touchstart mousedown", '.handle', (event) ->
         parent = $(this).parents('.sortable')
+
         updatePlaceholder = =>
           pos = parent.offset()
           eleHeight = parent.outerHeight()
           pos.bottom = pos.top + eleHeight
           {eleBefore, eleAfter} = getElementBeforeAndAfter(parent)
           # reset elements css
-          $(element).find('.sortable').each((i, o) =>
+          sortableElements = $(element).find('.sortable')
+          sortableElements.each((i, o) =>
             if o is parent[0] then return
             # $(o).css('background-color', 'white')
             $(o).css('margin-bottom', 0)
@@ -404,26 +406,32 @@
           # Just for debugging
           # if eleBefore? then $(eleBefore).css('background-color', 'green')
           # if eleAfter? then $(eleAfter).css('background-color', 'red')
-
-          if eleBefore? 
-            eleBeforePos = $(eleBefore).offset()
-            eleBeforePos.width = $(eleBefore).outerHeight()
-            eleBeforePos.middle = eleBeforePos.top + eleBeforePos.width / 2.0
-            eleBeforePos.bottom = eleBeforePos.top + eleBeforePos.width
-            if pos.top < eleBeforePos.middle
-              $(eleBefore).css('margin-top', eleHeight)
-            else
-              if eleAfter?
-                eleAfterPos = $(eleAfter).offset()
-                eleAfterPos.width = $(eleAfter).outerHeight()
-                eleAfterPos.middle = eleAfterPos.top + eleAfterPos.width / 2.0
-                if pos.bottom > eleAfterPos.middle and pos.top > eleBeforePos.bottom + eleHeight/2.0
-                  $(eleAfter).css('margin-bottom', eleHeight)
+          if sortableElements.length > 1
+            if eleBefore? 
+              eleBeforePos = $(eleBefore).offset()
+              eleBeforePos.width = $(eleBefore).outerHeight()
+              eleBeforePos.middle = eleBeforePos.top + eleBeforePos.width / 2.0
+              eleBeforePos.bottom = eleBeforePos.top + eleBeforePos.width
+              if pos.top < eleBeforePos.middle
+                $(eleBefore).css('margin-top', eleHeight)
+              else
+                if eleAfter?
+                  eleAfterPos = $(eleAfter).offset()
+                  eleAfterPos.width = $(eleAfter).outerHeight()
+                  eleAfterPos.middle = eleAfterPos.top + eleAfterPos.width / 2.0
+                  if pos.bottom > eleAfterPos.middle and pos.top > eleBeforePos.bottom + eleHeight/2.0
+                    $(eleAfter).css('margin-bottom', eleHeight)
+                  else
+                    $(eleBefore).css('margin-bottom', eleHeight)
                 else
                   $(eleBefore).css('margin-bottom', eleHeight)
-              else
-                $(eleBefore).css('margin-bottom', eleHeight)
-          else if eleAfter? then $(eleAfter).css('margin-top', eleHeight)
+            else if eleAfter?
+              $(eleAfter).css('margin-top', eleHeight)
+          else
+            # No other elements are there, to be used as placeholder, spreserve the space for 
+            # the element, by removinf the negative margin bottom
+            parent.css('margin-bottom', '')
+
           offset = pos.top - parent.offset().top
           if offset isnt 0
             parent.data('plugin_pep').doMoveTo(0, offset)
