@@ -62,8 +62,11 @@
       $ele = $(element)
       switch element.type
         when "select-one"
-          if valueUnwrapped then $ele.selectmenu('enable') else $ele.selectmenu('disable') 
-        else 
+          if $ele.data('mobileFlipswitch')?
+            if valueUnwrapped then $ele.flipswitch('enable') else $ele.flipswitch('disable') 
+          else
+            if valueUnwrapped then $ele.selectmenu('enable') else $ele.selectmenu('disable') 
+        else
           if valueUnwrapped then $ele.textinput('enable') else $ele.textinput('disable')
       return
   }
@@ -99,6 +102,32 @@
       return
     }
 
+  ko.bindingHandlers.jqmflipswitch = {
+    init: (element, valueAccessor) ->
+      value = valueAccessor()
+      $ele = $(element)
+      $ele.flipswitch()
+      if ko.isObservable(value)
+        $ele.on('change', => 
+          val = $ele.val()
+          switch val
+            when "true" then val = true
+            when "false" then val = false
+          if ko.unwrap(value) isnt val
+            value(val)
+        )
+
+    update: (element, valueAccessor) ->
+      value = valueAccessor()
+      valueUnwrapped = ko.unwrap(value)
+      $ele = $(element)
+      if typeof valueUnwrapped is "boolean"
+        valueUnwrapped = "#{valueUnwrapped}"
+      $ele.val(valueUnwrapped)
+      $ele.flipswitch('refresh')
+      return
+    }
+
   ko.bindingHandlers.jqmoptions = {
     init: (element, valueAccessor, allBindings) ->
       ko.bindingHandlers.options.init(element, valueAccessor, allBindings)
@@ -110,6 +139,31 @@
       value = allBindings()?.value()
       $(element).val(value) if value?
       $(element).selectmenu("refresh")
+      return
+    }
+
+  ko.bindingHandlers.jqmlistview = {
+    init: (element, valueAccessor, allBindings) ->
+      setTimeout( ( ->
+        $(element).listview()
+      ), 1)
+      return
+    
+    update: (element, valueAccessor, allBindings) ->
+      valueAccessor()
+      setTimeout( ( ->
+        try
+          $(element).listview('refresh')
+        catch e
+          # ignore
+       ), 1)
+      return
+    }
+
+  ko.bindingHandlers.jqmtextinput = {
+    init: (element, valueAccessor, allBindings) ->
+      $(element).textinput(enhanced: true)
+      ko.bindingHandlers.textInput.init(element, valueAccessor, allBindings)
       return
     }
 
@@ -334,13 +388,15 @@
       
       $(element).on("MSPointerDown touchstart mousedown", '.handle', (event) ->
         parent = $(this).parents('.sortable')
+
         updatePlaceholder = =>
           pos = parent.offset()
           eleHeight = parent.outerHeight()
           pos.bottom = pos.top + eleHeight
           {eleBefore, eleAfter} = getElementBeforeAndAfter(parent)
           # reset elements css
-          $(element).find('.sortable').each((i, o) =>
+          sortableElements = $(element).find('.sortable')
+          sortableElements.each((i, o) =>
             if o is parent[0] then return
             # $(o).css('background-color', 'white')
             $(o).css('margin-bottom', 0)
@@ -350,26 +406,32 @@
           # Just for debugging
           # if eleBefore? then $(eleBefore).css('background-color', 'green')
           # if eleAfter? then $(eleAfter).css('background-color', 'red')
-
-          if eleBefore? 
-            eleBeforePos = $(eleBefore).offset()
-            eleBeforePos.width = $(eleBefore).outerHeight()
-            eleBeforePos.middle = eleBeforePos.top + eleBeforePos.width / 2.0
-            eleBeforePos.bottom = eleBeforePos.top + eleBeforePos.width
-            if pos.top < eleBeforePos.middle
-              $(eleBefore).css('margin-top', eleHeight)
-            else
-              if eleAfter?
-                eleAfterPos = $(eleAfter).offset()
-                eleAfterPos.width = $(eleAfter).outerHeight()
-                eleAfterPos.middle = eleAfterPos.top + eleAfterPos.width / 2.0
-                if pos.bottom > eleAfterPos.middle and pos.top > eleBeforePos.bottom + eleHeight/2.0
-                  $(eleAfter).css('margin-bottom', eleHeight)
+          if sortableElements.length > 1
+            if eleBefore? 
+              eleBeforePos = $(eleBefore).offset()
+              eleBeforePos.width = $(eleBefore).outerHeight()
+              eleBeforePos.middle = eleBeforePos.top + eleBeforePos.width / 2.0
+              eleBeforePos.bottom = eleBeforePos.top + eleBeforePos.width
+              if pos.top < eleBeforePos.middle
+                $(eleBefore).css('margin-top', eleHeight)
+              else
+                if eleAfter?
+                  eleAfterPos = $(eleAfter).offset()
+                  eleAfterPos.width = $(eleAfter).outerHeight()
+                  eleAfterPos.middle = eleAfterPos.top + eleAfterPos.width / 2.0
+                  if pos.bottom > eleAfterPos.middle and pos.top > eleBeforePos.bottom + eleHeight/2.0
+                    $(eleAfter).css('margin-bottom', eleHeight)
+                  else
+                    $(eleBefore).css('margin-bottom', eleHeight)
                 else
                   $(eleBefore).css('margin-bottom', eleHeight)
-              else
-                $(eleBefore).css('margin-bottom', eleHeight)
-          else if eleAfter? then $(eleAfter).css('margin-top', eleHeight)
+            else if eleAfter?
+              $(eleAfter).css('margin-top', eleHeight)
+          else
+            # No other elements are there, to be used as placeholder, spreserve the space for 
+            # the element, by removinf the negative margin bottom
+            parent.css('margin-bottom', '')
+
           offset = pos.top - parent.offset().top
           if offset isnt 0
             parent.data('plugin_pep').doMoveTo(0, offset)
