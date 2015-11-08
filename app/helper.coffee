@@ -320,10 +320,12 @@ pimatic.fixedAddElement = (toggleObservable, sortingObservable, addEle, parentLi
     if sorting
       parentList.css(
         'height': parentList.height() + addEle.outerHeight()
+      )
+      parentList.parent().css(
         'padding-bottom': 0
       )
     else
-      parentList.css('padding-bottom': addEle.outerHeight() )
+      parentList.parent().css('padding-bottom': addEle.outerHeight() )
   )
 
   ko.computed( ->
@@ -337,7 +339,7 @@ pimatic.fixedAddElement = (toggleObservable, sortingObservable, addEle, parentLi
         width: parentList.width()
         'z-index': 3
       )
-      parentList.css(
+      parentList.parent().css(
         'padding-bottom': addEle.outerHeight()
       )
       addEle.addClass('fixed-add-element')
@@ -347,7 +349,7 @@ pimatic.fixedAddElement = (toggleObservable, sortingObservable, addEle, parentLi
         height: 'auto'
         width: 'auto'
       )
-      parentList.css('padding-bottom': 0)
+      parentList.parent().css('padding-bottom': 0)
       addEle.removeClass('fixed-add-element')
   ).extend(rateLimit: {timeout: 200, method: "notifyWhenChangesStop"})
 
