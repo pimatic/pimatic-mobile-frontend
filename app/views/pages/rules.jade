@@ -3,7 +3,7 @@ script#rule-template(type="text/template")
     a(data-transition='slidefade', href='#edit-rule-page', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
       span.name(data-bind="text: ($data.name() != '' ? $data.name() : __('Unnamed rule') ) ")
       p
-        span.if='if'
+        span.if='when'
         | 
         span.condition(data-bind="text: conditionToken")
         | 
@@ -24,19 +24,20 @@ div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(
     a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
     <!-- /ko -->
   div.ui-content.overthrow
-    ul#rules(data-role='listview', data-bind="sortable: {isSorting: isSortingRules, sorted: onRulesSorted, drop: onDropRuleOnTrash}, dragslide: {}, css: ruleCss")
-      <!-- ko template: { name: 'rule-groups-template', foreach: groups} --><!-- /ko -->
-      <!-- ko if: $root.enabledEditing() || $root.getUngroupedRules().length > 0  -->
-      <!-- ko with: $root -->
-      li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
-        label()=__('Ungrouped')
-      <!-- ko template: { name: 'rule-template', foreach: $root.getUngroupedRules, afterRender: $root.afterRenderRule } --><!-- /ko -->
+    div
+      ul#rules(data-role='listview', data-bind="sortable: {isSorting: isSortingRules, sorted: onRulesSorted, drop: onDropRuleOnTrash}, dragslide: {}, css: ruleCss")
+        <!-- ko template: { name: 'rule-groups-template', foreach: groups} --><!-- /ko -->
+        <!-- ko if: $root.enabledEditing() || $root.getUngroupedRules().length > 0  -->
+        <!-- ko with: $root -->
+        li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+          label()=__('Ungrouped')
+        <!-- ko template: { name: 'rule-template', foreach: $root.getUngroupedRules, afterRender: $root.afterRenderRule } --><!-- /ko -->
+        <!-- /ko -->
+        <!-- /ko -->
+        li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingRules()")=__('Drop here to remove rule')
+        li#add-rule(data-bind="visible: $root.enabledEditing() && !$root.isSortingRules() ")
+          a.ui-btn.ui-btn-icon-left.ui-icon-plus(data-transition='slidefade', href='#edit-rule-page', data-bind="click: $root.onAddRuleClicked")=__('Add a new rule')+'...'
+         div.drag-message
+      <!-- ko if: !$root.hasPermission('rules', 'read') -->
+      div.denied=__('Permission denied')
       <!-- /ko -->
-      <!-- /ko -->
-      li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingRules()")=__('Drop here to remove rule')
-      li#add-rule(data-bind="visible: $root.enabledEditing() && !$root.isSortingRules() ")
-        a.ui-btn.ui-btn-icon-left.ui-icon-plus(data-transition='slidefade', href='#edit-rule-page', data-bind="click: $root.onAddRuleClicked")=__('Add a new rule')+'...'
-       div.drag-message
-    <!-- ko if: !$root.hasPermission('rules', 'read') -->
-    div.denied=__('Permission denied')
-    <!-- /ko -->
