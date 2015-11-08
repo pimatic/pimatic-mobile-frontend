@@ -1084,6 +1084,10 @@ li.with-button a.ui-btn {
     box-sizing: content-box;
   }
 
+  html .short-labels .ui-field-contain > label + .ui-btn-inline {
+    width: auto;
+  }
+
   html .short-labels .ui-field-contain .ui-flipswitch.ui-flipswitch-active, 
   html .short-labels .ui-popup .ui-field-contain .ui-flipswitch.ui-flipswitch-active {
     width: 1.875em;
@@ -1937,4 +1941,14 @@ border-bottom-left-radius: inherit;
 
 #edit-device-form .properties label.ui-checkbox span{
   padding-left: 28px;
+}
+
+.ui-field-contain .notset, .default {
+  display: inline-block;
+  font-style: italic;
+  position: absolute;
+  top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  right: 10px;
 }

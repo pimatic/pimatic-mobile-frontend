@@ -1,22 +1,17 @@
 script#json-scheme-editor-field(type='text/template')
   <!-- ko if: $data.schema.name && $data.schema.type !== "object" && $data.schema.type !== "array" -->
   .ui-field-contain
-    div
-    <!-- ko if: typeof $data.schema.default !== "undefined" -->
+    <!-- ko if: typeof $data.schema.default !== "undefined" || $data.schema.notRequired -->
     label.ui-checkbox.ui-mini(for='')
       span(data-bind="text: $data.schema.name")
       input(type='checkbox', data-enhanced='true', data-bind="jqmchecked: $data.schema.notDefault($data)")
     <!-- /ko -->
-    <!-- ko if: typeof $data.schema.default === "undefined" -->
+    <!-- ko if: !(typeof $data.schema.default !== "undefined" || $data.schema.notRequired) -->
     label(for='', data-bind="text: $data.schema.name")
     <!-- /ko -->
-    <!-- ko if: $data.schema.type !== "boolean" -->
+    //- div(data-bind="text: JSON.stringify(ko.unwrap($data), null, '  ')")
+    <!-- ko if: $data.schema.type !== "boolean" && !$.isArray($data.schema.enum) -->
     div.ui-input-text.ui-body-inherit.ui-corner-all.ui-shadow-inset
-      //- div(data-bind="text: JSON.stringify(ko.unwrap($data), null, '  ')")
-      <!-- ko if: $.isArray($data.schema.enum) -->
-      select(data-mini="true", data-inline="true", data-bind="jqmoptions: $data.schema.enum, value: $data.schema.valueOrDefault($data), optionsText: $data.schema.enum, jqmenabled: $data.schema.enabled($data)")
-      <!-- /ko -->
-      <!-- ko if: !$.isArray($data.schema.enum) -->
       <!-- ko if: $data.schema.type === "string" -->
       input(type="text", data-bind="jqmtextinput: $data.schema.valueOrDefault($data), jqmenabled: $data.schema.enabled($data)")
       <!-- /ko -->
@@ -26,12 +21,20 @@ script#json-scheme-editor-field(type='text/template')
       <!-- ko if: $data.schema.type === "integer" -->
       input(type="text", data-bind="jqmtextinput: $data.schema.valueOrDefault($data), jqmenabled: $data.schema.enabled($data)")
       <!-- /ko -->
-      <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: $.isArray($data.schema.enum) -->
+    select(data-mini="true", data-inline="true", data-bind="jqmoptions: $data.schema.enum, value: $data.schema.valueOrDefault($data), optionsText: $data.schema.enum, jqmenabled: $data.schema.enabled($data)")
     <!-- /ko -->
     <!-- ko if: $data.schema.type === "boolean" -->
     select(data-bind="jqmflipswitch: $data.schema.valueOrDefault($data), jqmenabled: $data.schema.enabled($data)")
       option(value="false")=__('No')
       option(value="true")=__('Yes')
+    <!-- /ko -->
+    <!-- ko if: typeof $data.schema.default !== "undefined" && !$data.schema.enabled($data) -->
+    span.default=__('use default')
+    <!-- /ko -->
+    <!-- ko if: typeof $data.schema.default === "undefined" && $data.schema.notRequired && !$data.schema.enabled($data) -->
+    span.notset=__('not set')
     <!-- /ko -->
     div.description(data-bind="text: $data.schema.description")
   <!-- /ko -->

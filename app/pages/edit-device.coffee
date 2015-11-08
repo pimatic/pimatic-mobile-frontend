@@ -41,6 +41,19 @@ unwrap = (value) ->
         unwraped[i] = unwrap ele
   return unwraped
 
+getDefaultValue = (schema) =>
+  if schema.defaut?
+    return schema.default
+  if schema.enum?.length > 0
+    return schema.enum[0]
+  switch schema.type
+    when "string" then ""
+    when "number", "integer" then 0
+    when "boolean" then false
+    when "object" then {}
+    when "array" then []
+
+
 $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
   if pimatic.pages.editDevice? then return
   
@@ -78,7 +91,6 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
         unless data.schema.properties?
           return []
         parentValue = ko.unwrap(data.value)
-        # console.log("parentV", parentValue)
         unless parentValue?
           parentValue = {}
           data.value(parentValue)
@@ -86,19 +98,13 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
         for name, prop of data.schema.properties
           if prop.definedBy?
             definedByValue = ko.unwrap(parentValue[prop.definedBy])
-            if definedByValue?
-              schema = prop.options[definedByValue]
-              propValue = unwrap parentValue[name]
-              unless propValue?
-                propValue = {}
-              propValue = parentValue[name] = wrap(schema, propValue)
-              console.log("propV",propValue())
-              props.push({ schema, value: propValue })
-            else
-              props.push({ schema: prop, value: parentValue[name] })
-          else
-            props.push({ schema: prop, value: parentValue[name] })
-        # console.log props
+            if definedByValue? and definedByValue of prop.options
+              prop = prop.options[definedByValue]
+          propValue = unwrap parentValue[name]
+          if (not propValue?) and not ((prop.required is false) or (prop.default?))
+            propValue = getDefaultValue prop
+          parentValue[name] = wrap(prop, propValue)
+          props.push({ schema: prop, value: parentValue[name] })
         return props
 
       getItems = (value) ->
@@ -115,7 +121,6 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 
       editOk = (parent, data) ->
         editingItem = data.schema.editingItem()
-        console.log(editingItem.value())
         if editingItem.index?
           array = parent.value()
           array[editingItem.index](editingItem.value())
@@ -131,17 +136,8 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
         if data.schema.items.default?
           # copy
           value = wrap(data.schema.items, JSON.parse(JSON.stringify(data.schema.items.default)))
-        switch data.schema.items.type
-          when "string"
-            value = wrap data.schema.items, ""
-          when "number", "integer"
-            value = wrap data.schema.items, 0
-          when "boolean"
-            value = wrap data.schema.items, false
-          when "object"
-            value = wrap data.schema.items, {}
-          when "array"
-            value = wrap data.schema.items, []
+        else
+          value = wrap data.schema.items, getDefaultValue(data.schema.items)
         data.schema.items.editingItem(schema: data.schema.items, value: value)
         return     
 
@@ -161,18 +157,22 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 
       enhanceSchema = (schema, name) ->
         schema.name = name
-        # console.log(name, schema)
         schema.notDefault = (data) => 
           ko.pureComputed(
             read: => data.value?()?
-            write: (notDefault) => 
+            write: (notDefault) =>
               if notDefault
-                data.value(data.schema.default)
+                defaultValue = data.schema.default
+                unless defaultValue?
+                  defaultValue = getDefaultValue(data.schema)
+                data.value(defaultValue)
               else
                 data.value(undefined)
           )
 
-        schema.enabled = (data) => not data.schema.default? or data.value?()?
+        schema.enabled = (data) => data.value?()?
+
+        schema.notRequired = schema?.required is false
 
         schema.valueOrDefault = (data) => 
           ko.pureComputed(
@@ -255,7 +255,7 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
               unwraped = unwrap(@deviceConfig())
               rewraped = wrap(schema, unwraped)
               @deviceConfig(rewraped())
-              console.log JSON.stringify(schema, null, 2);
+              # console.log JSON.stringify(schema, null, 2);
               enhanceSchema schema, null
               @configSchema(schema)
           )
@@ -278,7 +278,7 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
       deviceConfig.id = @deviceId()
       deviceConfig.name = @deviceName()
       deviceConfig.class = @deviceClass()
-      console.log deviceConfig
+      # console.log deviceConfig
       (
         switch @action()
           when 'add' then pimatic.client.rest.addDeviceByConfig({deviceConfig})
