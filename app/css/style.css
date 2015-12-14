@@ -828,6 +828,10 @@ table#database-attribute-info {
   color: #0e1b52;
 }
 
+#log-messages .msg {
+  white-space: pre-wrap;
+}
+
 .level.info {
     color: #339900;
 }
