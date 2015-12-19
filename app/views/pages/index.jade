@@ -23,7 +23,7 @@ script#dimmer-template(type='text/template')
     div.item-inner
       label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
       | 
-      input.dimmer(min="0", max="100", step="5", data-highlight="true",
+      input.dimmer(min="0", max="100", step="1", data-highlight="true",
         data-bind="attr: { id: sliderId }, value: sliderValue")
       | 
       span.attributes(data-bind="template: { name: 'dimmer-attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")  
