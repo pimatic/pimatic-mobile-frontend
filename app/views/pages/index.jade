@@ -34,9 +34,6 @@ script#device-template(type='text/template')
     span.error(data-bind="text: ($data.error() ? $data.error() : '') ")
     | 
     span.attributes(data-bind="template: { name: 'attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")
-script#header-template(type='text/template')
-  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
-    label(data-bind="text: title")
 script#buttons-template(type='text/template')
   li.sortable.button.no-header
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
@@ -132,21 +129,25 @@ script#devicepage-template(type='text/template')
       data-bind="sortable: {isSorting: $root.isSortingItems, sorted: $root.onItemsSorted, drop: $root.onDropItemOnTrash, droppable: '.droppable-' + $data.id, scroller: '.owl-item'}")
       <!-- ko if: ! $root.enabledEditing() && $data.devices().length === 0  -->
       li.empty-list()=__("I'm an empty page, add some items!")
-      <!-- /ko -->      
+      <!-- /ko -->
       <!-- ko template: { name: 'device-group-template', foreach: $root.groups} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $data.getUngroupedDevices().length > 0  -->
-      li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+      li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.createToggleGroupCallback($data, {id: '$ungrouped'}), css: ($root.isGroupCollapsed($data, {id: '$ungrouped'}) ? 'closed' : 'open')")
         label()=__('Ungrouped')
+      <!-- ko if: !$root.isGroupCollapsed($data, {id: '$ungrouped'}) -->
       <!-- ko template: { name: $root.getItemTemplate, foreach: $data.getUngroupedDevices(), afterRender: $data.afterRenderDevice } --><!-- /ko -->
+      <!-- /ko -->
       <!-- /ko -->
       li.delete-link(data-theme='a', data-icon="delete", data-bind="visible: $root.isSortingItems, attr: {id: 'delete-item-' + $data.id}, css: 'droppable-' + $data.id")=__('Drop here to remove item')
       li(data-bind="visible: $root.enabledEditing() && !$root.isSortingItems(), attr: {id: 'add-item-link-' + $data.id}")
         a(data-transition='slidefade', href='#add-item-page', data-bind="click: $root.onAddItemClicked")=__('Add a new item')+'...'
 script#device-group-template(type='text/template')
   <!-- ko if: $root.enabledEditing() || $parent.getDevicesInGroup($data.id).length > 0  -->
-  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+  li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.createToggleGroupCallback($parent, $data), css: ($root.isGroupCollapsed($parent, $data) ? 'closed' : 'open')")
     label(data-bind="text: $data.name")
+  <!-- ko if: !$root.isGroupCollapsed($parent, $data) -->
   <!-- ko template: { name: $root.getItemTemplate, foreach: $parent.getDevicesInGroup($data.id), afterRender: $parent.afterRenderDevice } --><!-- /ko -->
+  <!-- /ko -->
   <!-- /ko -->
 div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingItems()}")
   div(data-theme=theme.headerSwatch, data-role='header')

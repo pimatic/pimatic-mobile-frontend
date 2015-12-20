@@ -12,9 +12,11 @@ script#rule-template(type="text/template")
         span.actions(data-bind="text: actionsToken")
 script#rule-groups-template(type="text/template")
   <!-- ko if: $root.enabledEditing() || $data.getRules().length > 0  -->
-  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+  li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup, css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
     label(data-bind="text: name")
+  <!-- ko if: !$root.isGroupCollapsed($data) -->
   <!-- ko template: { name: 'rule-template', foreach: $data.getRules, afterRender: $root.afterRenderRule } --><!-- /ko -->
+  <!-- /ko -->
   <!-- /ko -->
 div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingRules() }")
   div(data-theme=theme.headerSwatch, data-role='header')
@@ -29,9 +31,11 @@ div#rules-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(
         <!-- ko template: { name: 'rule-groups-template', foreach: groups} --><!-- /ko -->
         <!-- ko if: $root.enabledEditing() || $root.getUngroupedRules().length > 0  -->
         <!-- ko with: $root -->
-        li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+        li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup, css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
           label()=__('Ungrouped')
+        <!-- ko if: !$root.isGroupCollapsed($data) -->
         <!-- ko template: { name: 'rule-template', foreach: $root.getUngroupedRules, afterRender: $root.afterRenderRule } --><!-- /ko -->
+        <!-- /ko -->
         <!-- /ko -->
         <!-- /ko -->
         li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingRules()")=__('Drop here to remove rule')

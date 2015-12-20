@@ -9,9 +9,11 @@ script#variable-template(type="text/template")
         span.var-unit(data-bind="text: unit")
 script#variable-groups-template(type="text/template")
   <!-- ko if: $root.enabledEditing() || $data.getVariables().length > 0  -->
-  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+  li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup, css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
     label(data-bind="text: name")
+  <!-- ko if: !$root.isGroupCollapsed($data) -->
   <!-- ko template: { name: 'variable-template', foreach: $data.getVariables, afterRender: $root.afterRenderVariable } --><!-- /ko -->
+  <!-- /ko -->
   <!-- /ko -->
 div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingVariables() }")
   div(data-theme=theme.headerSwatch, data-role='header')
@@ -25,14 +27,18 @@ div#variables-page(data-role='page', data-bind="css: {locked: !$root.enabledEdit
       ul#variables(data-role='listview', data-bind="sortable: {isSorting: isSortingVariables, sorted: onVariablesSorted, drop: onDropVariableOnTrash}")
         <!-- ko template: { name: 'variable-groups-template', foreach: groups} --><!-- /ko -->
         <!-- ko if: $root.enabledEditing() || $root.getUngroupedVariables().length > 0  -->
-        li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+        li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup, css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
           label()=__('Ungrouped')
+        <!-- ko if: !$root.isGroupCollapsed($data) -->
         <!-- ko template: { name: 'variable-template', foreach: $root.getUngroupedVariables, afterRender: $root.afterRenderVariable } --><!-- /ko -->
         <!-- /ko -->
+        <!-- /ko -->
         <!-- ko if: !$root.enabledEditing() && $root.getDeviceAttributeVariables().length > 0  -->
-        li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+        li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroupDA, css: ($root.isGroupCollapsedDA() ? 'closed' : 'open')")
           label()=__('Device Attributes')
+        <!-- ko if: !$root.isGroupCollapsedDA() -->
         <!-- ko template: { name: 'variable-template', foreach: $root.getDeviceAttributeVariables, afterRender: $root.afterRenderVariable } --><!-- /ko -->
+        <!-- /ko -->
         <!-- /ko -->
         li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: isSortingVariables()")=__('Drop here to remove variable')
         li#add-a-variable(data-bind="visible: enabledEditing() && !isSortingVariables()")

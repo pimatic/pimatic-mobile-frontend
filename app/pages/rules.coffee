@@ -14,10 +14,14 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
       @groups = pimatic.groups
       @hasPermission = pimatic.hasPermission
 
+      data = pimatic.storage.get('pimatic.rules') or {}
+      @collapsedGroups = ko.observable(data.collapsed or {})
+
       @rulesListViewRefresh = ko.computed( tc =>
         @rules()
         @isSortingRules()
         @enabledEditing()
+        @collapsedGroups()
         g.rules() for g in @groups()
         pimatic.try( => $('#rules').listview('refresh').addClass("dark-background") )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
@@ -138,6 +142,17 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
         ).done(ajaxShowToast).fail(ajaxAlertFail)
       )()
 
+    toggleGroup: (group) =>
+      collapsed = @collapsedGroups()
+      if collapsed[group.id]
+        delete collapsed[group.id]
+      else
+        collapsed[group.id] = true
+      @collapsedGroups(collapsed)
+      @saveCollapseState()
+
+    isGroupCollapsed: (group) => @collapsedGroups()[group.id] is true
+
     onAddRuleClicked: ->
       jQuery.mobile.pageParams = {action: 'add'}
       return true
@@ -148,6 +163,11 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
         return false
       jQuery.mobile.pageParams = {action: 'update', rule}
       return true
+
+    saveCollapseState: () =>
+      data = pimatic.storage.get('pimatic.rules') or {}
+      data.collapsed = @collapsedGroups()
+      pimatic.storage.set('pimatic.rules', data)
 
   pimatic.pages.rules = rulesPage = new RulesViewModel()
 

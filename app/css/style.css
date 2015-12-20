@@ -1923,3 +1923,33 @@ border-bottom-left-radius: inherit;
   font-style: italic;
   color: gray;
 }
+
+.ui-listview > .ui-li-divider.collapsible,
+.ui-listview > .ui-li-divider.collapsible label{
+  cursor: pointer;
+}
+
+.collapsible label::before {
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  display: inline-block;
+  content: "";
+  position: relative;
+  cursor: pointer;
+}
+
+.collapsible.closed label::before {
+  border-left-color: #0071b9 /*{pm-listdivider-color}*/;
+  border-width: 5px 0 5px 7px;
+  margin-right: 10px;
+  left: 2px
+}
+
+.collapsible.open label::before {
+  border-top-color: #0071b9 /*{pm-listdivider-color}*/;
+  border-width: 7px 5px 0 5px;
+  margin-right: 6px;
+  top: -2px
+}

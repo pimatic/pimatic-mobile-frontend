@@ -13,8 +13,12 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
       @devices = pimatic.devices
       @groups = pimatic.groups
       @hasPermission = pimatic.hasPermission
-      
+
+      data = pimatic.storage.get('pimatic.devices') or {}
+      @collapsedGroups = ko.observable(data.collapsed or {})
+
       @devicesListViewRefresh = ko.computed( tc =>
+        @collapsedGroups()
         @devices()
         @isSortingDevices()
         @enabledEditing()
@@ -147,6 +151,23 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
       editDevicePage.deviceConfig(device.config)
       editDevicePage.deviceClass(device.config.class)
       return true
+
+    toggleGroup: (group) =>
+      collapsed = @collapsedGroups()
+      if collapsed[group.id]
+        delete collapsed[group.id]
+      else
+        collapsed[group.id] = true
+      @collapsedGroups(collapsed)
+      @saveCollapseState()
+
+    isGroupCollapsed: (group) => @collapsedGroups()[group.id] is true
+
+    saveCollapseState: () =>
+      data = pimatic.storage.get('pimatic.devices') or {}
+      data.collapsed = @collapsedGroups()
+      pimatic.storage.set('pimatic.devices', data)
+
 
   pimatic.pages.devices = devicesPage = new DevicesViewModel()
 

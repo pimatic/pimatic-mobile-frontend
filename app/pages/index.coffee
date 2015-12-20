@@ -9,7 +9,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
     @mapping = {
       $default: 'ignore'
       ruleItemCssClass: 'observe'
-      hasRootCACert: 'observe'
+      hasRootCACert: 'observe',
+      collapsedGroups: 'observe'
     }
 
     devicepages: pimatic.devicepages
@@ -25,7 +26,8 @@ $(document).on("pagecreate", '#index', tc (event) ->
 
       @updateFromJs(
         ruleItemCssClass: ''
-        hasRootCACert: no
+        hasRootCACert: no,
+        collapsedGroups: {}
       )
 
       @lockButton = ko.computed( tc => 
@@ -217,6 +219,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
         g.devices() for g in pimatic.groups()
         @isSortingItems()
         @enabledEditing()
+        @collapsedGroups()
         pimatic.try( => 
           $('#item-lists [data-role="listview"]').each( ->
             lw = $(this)
@@ -357,6 +360,20 @@ $(document).on("pagecreate", '#index', tc (event) ->
           pimatic.loading "deleteitem", "hide"
         ).done(ajaxShowToast).fail(ajaxAlertFail)
       )()
+
+    createToggleGroupCallback: (page, group) =>
+      fullId = "#{page.id}$#{group.id}"
+      return () =>
+        collapsed = @collapsedGroups()
+        if collapsed[fullId]
+          delete collapsed[fullId]
+        else
+          collapsed[fullId] = true
+        @collapsedGroups(collapsed)
+
+    isGroupCollapsed: (page, group) => 
+      fullId = "#{page.id}$#{group.id}"
+      return @collapsedGroups()[fullId] is true
 
   pimatic.pages.index = indexPage = new IndexViewModel()
 
