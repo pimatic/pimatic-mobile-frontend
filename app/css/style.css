@@ -309,6 +309,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index .items .device label,
 #index .items .shutter-device label,
 #index .items .button label,
+#index .items .input label,
 #index .items .musicplayer label, 
 #index .items .switch-device label,
 #index .items .timer label{
@@ -336,7 +337,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 
-#index li.button div.buttons, 
+#index li.button div.buttons,
+#index li.input div.inputs,
 #index li.shutter-device .shutter-buttons,
 #index li.musicplayer div.controls,
 #index li.timer div.controls {
@@ -347,6 +349,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 #index li.button div.buttons,
+#index li.input div.inputs,
 #index li.shutter-device .shutter-buttons,
 #index li.musicplayer div.controls,
 #index li.timer div.controls {
@@ -354,6 +357,12 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   margin-bottom: -4px;
   text-align: right;
   white-space: normal;
+}
+
+#index li.input input {
+  border-color: #ccc /*{a-bup-border}*/;
+  padding: 4px 5px;
+  margin: 4px 0;
 }
 
 
