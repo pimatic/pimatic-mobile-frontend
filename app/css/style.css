@@ -446,6 +446,14 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   color: #000 /*{a-bup-color}*/;
 }
 
+/* webkit-only: fix layout bug, where items sometimes do not have full width */
+@media screen and (-webkit-min-device-pixel-ratio:0) {  
+  .unlocked ul.items li.sortable {
+    box-sizing: border-box;
+    width:100%;
+  }
+}
+
 .fixed-add-element, .fixed-add-element a {
   border-color: #007dcd  /*{a-bar-background-color}*/ !important;
   background:       #007dcd /*{a-bar-background-color}*/ !important;
