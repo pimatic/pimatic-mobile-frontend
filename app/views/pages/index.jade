@@ -39,6 +39,11 @@ script#buttons-template(type='text/template')
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
+script#input-template(type='text/template')
+  li.sortable.button.no-header
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
+    div.buttons()
+      input.ui-input-text.ui-corner-all(data-bind='textInput: inputValue')
 script#musicplayer-template(type='text/template')
   li.sortable.musicplayer.no-header
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")

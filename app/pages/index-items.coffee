@@ -273,6 +273,35 @@ $(document).on( "pagebeforecreate", (event) ->
       position = @getAttribute('position').value()
       @_updateButtons(position) if position?
 
+  class InputItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      # The value in the input
+      @inputValue = ko.observable()
+
+      @inputAttr = @getAttribute('input')
+      @inputValue(@inputAttr.value())
+
+      attrValue = @inputAttr.value()
+      @inputAttr.value.subscribe( (value) =>
+        @inputValue(value)
+        attrValue = value
+      )
+
+      # input changes -> update variable value
+      ko.computed( =>
+        textValue = @inputValue()
+        if attrValue isnt textValue
+          @changeInputTo(textValue)
+      ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } })
+
+    changeInputTo: (value) ->
+      @device.rest.changeInputTo({value}, global: no)
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+        .always( => ; )
+
   class ButtonsItem extends DeviceItem
 
     constructor: (templData, @device) ->
@@ -480,6 +509,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.MuscicplayerItem = MuscicplayerItem
   pimatic.ThermostatItem = ThermostatItem
   pimatic.TimerItem = TimerItem
+  pimatic.InputItem = InputItem
 
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
@@ -496,6 +526,7 @@ $(document).on( "pagebeforecreate", (event) ->
     musicplayer: pimatic.MuscicplayerItem
     thermostat: pimatic.ThermostatItem
     timer: pimatic.TimerItem
+    input: pimatic.InputItem
   }
 
   $(document).trigger("templateinit", [ ])
