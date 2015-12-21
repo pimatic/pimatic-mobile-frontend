@@ -22,7 +22,7 @@ div#devices-page(data-role='page', data-bind="css: {locked: !$root.enabledEditin
       <!-- ko template: { name: 'device-groups-template', foreach: groups} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $root.getUngroupedDevices().length > 0  -->
       <!-- ko with: $root -->
-      li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.createToggleGroupCallback($parent, $data), css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
+      li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup($data), css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
         label()=__('Ungrouped')
       <!-- ko if: !$root.isGroupCollapsed($data) -->
       <!-- ko template: { name: 'device-edit-template', foreach: $root.getUngroupedDevices, afterRender: $root.afterRenderDevice } --><!-- /ko -->
