@@ -489,6 +489,10 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   padding-left: 36px !important;
 }
 
+.unlocked ul.items li.sortable.header {
+    padding-left: 16px !important;
+}
+
 li.sortable .handle{
   float: left;
   padding: 5px;
