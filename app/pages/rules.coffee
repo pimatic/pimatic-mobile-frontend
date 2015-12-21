@@ -150,6 +150,7 @@ $(document).on( "pagebeforecreate", '#rules-page', tc (event) ->
         collapsed[group.id] = true
       @collapsedGroups(collapsed)
       @saveCollapseState()
+      return false;
 
     isGroupCollapsed: (group) => @collapsedGroups()[group.id] is true
 

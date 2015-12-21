@@ -370,6 +370,7 @@ $(document).on("pagecreate", '#index', tc (event) ->
         else
           collapsed[fullId] = true
         @collapsedGroups(collapsed)
+        return false;
 
     isGroupCollapsed: (page, group) => 
       fullId = "#{page.id}$#{group.id}"

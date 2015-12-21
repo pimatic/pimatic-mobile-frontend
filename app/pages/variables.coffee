@@ -179,6 +179,7 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
         collapsed[group.id] = true
       @collapsedGroups(collapsed)
       @saveCollapseState()
+      return false;
 
     toggleGroupDA: => @toggleGroup({id: '$da'})
 
