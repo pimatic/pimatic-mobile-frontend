@@ -359,12 +359,14 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   white-space: normal;
 }
 
-#index li.input input {
+#index .input input {
   border-color: #ccc /*{a-bup-border}*/;
   padding: 4px 5px;
   margin: 4px 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 120px;
 }
-
 
 #index li.shutter-device .ui-controlgroup-controls{
   padding-top: 1px;
@@ -407,6 +409,20 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
   margin-top: 1px;
 }
+
+#index .spinbox input{
+  border: none;
+  background: none;
+  width: 36px;
+  min-width: 36px;
+  margin: 0;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding: 0;
+  font-weight: bold;
+  color: #000 /*{a-bup-color}*/;
+}
+
 
 /* rules-page */
 #rules span.if, #rules span.then {
@@ -1176,7 +1192,8 @@ li.with-button a.ui-btn {
     margin-bottom: 0;
   }
 
-  #index.locked li.thermostat div.controls {
+  #index.locked li.thermostat div.controls,
+  #index.locked li.input div.inputs {
     margin-top: -4.5px;
     margin-bottom: -4.5px;
   }
@@ -1609,7 +1626,8 @@ border-bottom-left-radius: inherit;
   white-space: normal;
 }
 
-#index li.thermostat div.controls .ui-controlgroup{
+#index li.thermostat div.controls .ui-controlgroup,
+#index li.input div.inputs .ui-controlgroup {
   display: inline-block;
   margin: 0;
   margin-left: 4px;
@@ -1618,25 +1636,13 @@ border-bottom-left-radius: inherit;
   border-radius: 0.8em;
 }
 
-#index li.thermostat div.controls .ui-group-theme-a{
+#index .items .ui-group-theme-a{
   border-radius: 2em
 }
 
-#index li.thermostat div.controls .ui-controlgroup .ui-btn{
+#index .items .ui-controlgroup .ui-btn{
   padding-left: 8px;
   padding-right: 8px;
-}
-
-#index li.thermostat div.controls .spinbox input{
-  border: none;
-  background: none;
-  width: 36px;
-  margin: 0;
-  margin-left: -8px;
-  margin-right: -8px;
-  padding: 0;
-  font-weight: bold;
-  color: #000 /*{a-bup-color}*/;
 }
 
 #index li.thermostat .valve-position{

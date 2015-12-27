@@ -35,17 +35,21 @@
 		},
 		_offset: function( obj, direction ) {
 			var tmp,
+			  val,
 				w = this,
 				o = this.options;
-				
+
+			val = parseFloat(w.d.input.val());
+			val -= (val%o.step); //round down to multiple of step
+
 			if ( !w.disabled ) {
 				if ( direction < 1 ) {
-					tmp = parseFloat( w.d.input.val()) - o.step;
+					tmp = val - o.step;
 					if ( tmp >= o.dmin ) { 
 						w.d.input.val( tmp ).trigger( "change" );
 					}
 				} else {
-					tmp = parseFloat( w.d.input.val()) + o.step;
+					tmp = val + o.step;
 					if ( tmp <= o.dmax ) { 
 						w.d.input.val( tmp ).trigger( "change" );
 					}
@@ -66,7 +70,7 @@
 					eEnd   : (touch ? "touchend" : "mouseup")+".spinbox",
 					eEndA  : (touch ? 
 						"mouseup.spinbox touchend.spinbox touchcancel.spinbox touchmove.spinbox" :
-						"mouseup.spinbox"
+						"mouseup.spinbox mouseleave.spinbox"
 					),
 					move   : false,
 					start  : false,

@@ -40,10 +40,16 @@ script#buttons-template(type='text/template')
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
 script#input-template(type='text/template')
-  li.sortable.input.no-header
+  li.sortable.input.no-header.no-carousel-slide
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.inputs()
+      <!-- ko if: $data.getConfig('type') === 'string'  -->
       input.ui-input-text.ui-corner-all(data-bind='textInput: inputValue')
+      <!-- /ko -->
+      <!-- ko if: $data.getConfig('type') === 'number' -->
+      .spinbox.no-carousel-slide
+        input(type='text', data-role='spinbox', name='spin', data-mini='true', data-bind='textInput: inputValue')
+      <!-- /ko -->
 script#musicplayer-template(type='text/template')
   li.sortable.musicplayer.no-header
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
@@ -62,7 +68,7 @@ script#thermostat-template(type='text/template')
     .valve-position
       .valve-position-bar!='&nbsp'
     <!-- /ko -->
-    .controls
+    .controls.no-carousel-slide
       <!-- ko if: $data.getConfig('guiShowModeControl')  -->
       .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
         .ui-controlgroup-controls
