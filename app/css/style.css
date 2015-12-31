@@ -1645,6 +1645,10 @@ border-bottom-left-radius: inherit;
   padding-right: 8px;
 }
 
+#index .items .ui-controlgroup .ui-btn.ui-btn-icon-left {
+  padding-left: 2.5em;
+}
+
 #index li.thermostat .valve-position{
   display: inline-block;
   margin: 0;
