@@ -179,6 +179,7 @@ module.exports = (env) ->
           "pimatic-mobile-frontend/app/js/owl.carousel.js"
           "pimatic-mobile-frontend/app/js/jquery.sparkline.js"
           "pimatic-mobile-frontend/app/js/jqm-spinbox.js"
+          "pimatic-mobile-frontend/app/js/jquery.autosize.input.js"
           "pimatic-mobile-frontend/app/js/human-format.js"
           "pimatic-mobile-frontend/app/js/sweet-alert.js"
           "pimatic-mobile-frontend/app/js/headroom.js"

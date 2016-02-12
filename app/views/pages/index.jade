@@ -23,7 +23,7 @@ script#dimmer-template(type='text/template')
     div.item-inner
       label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
       | 
-      input.dimmer(min="0", max="100", step="5", data-highlight="true",
+      input.dimmer(min="0", max="100", step="1", data-highlight="true",
         data-bind="attr: { id: sliderId }, value: sliderValue")
       | 
       span.attributes(data-bind="template: { name: 'dimmer-attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")  
@@ -34,14 +34,22 @@ script#device-template(type='text/template')
     span.error(data-bind="text: ($data.error() ? $data.error() : '') ")
     | 
     span.attributes(data-bind="template: { name: 'attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")
-script#header-template(type='text/template')
-  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
-    label(data-bind="text: title")
 script#buttons-template(type='text/template')
   li.sortable.button.no-header
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
+script#input-template(type='text/template')
+  li.sortable.input.no-header.no-carousel-slide
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
+    div.inputs()
+      <!-- ko if: $data.getConfig('type') === 'string'  -->
+      input.ui-input-text.ui-corner-all(data-bind='textInput: inputValue')
+      <!-- /ko -->
+      <!-- ko if: $data.getConfig('type') === 'number' -->
+      .spinbox.no-carousel-slide
+        input(type='text', data-role='spinbox', name='spin', data-mini='true', data-bind='textInput: inputValue')
+      <!-- /ko -->
 script#musicplayer-template(type='text/template')
   li.sortable.musicplayer.no-header
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
@@ -60,7 +68,7 @@ script#thermostat-template(type='text/template')
     .valve-position
       .valve-position-bar!='&nbsp'
     <!-- /ko -->
-    .controls
+    .controls.no-carousel-slide
       <!-- ko if: $data.getConfig('guiShowModeControl')  -->
       .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
         .ui-controlgroup-controls
@@ -132,21 +140,25 @@ script#devicepage-template(type='text/template')
       data-bind="sortable: {isSorting: $root.isSortingItems, sorted: $root.onItemsSorted, drop: $root.onDropItemOnTrash, droppable: '.droppable-' + $data.id, scroller: '.owl-item'}")
       <!-- ko if: ! $root.enabledEditing() && $data.devices().length === 0  -->
       li.empty-list()=__("I'm an empty page, add some items!")
-      <!-- /ko -->      
+      <!-- /ko -->
       <!-- ko template: { name: 'device-group-template', foreach: $root.groups} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $data.getUngroupedDevices().length > 0  -->
-      li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+      li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.createToggleGroupCallback($data, {id: '$ungrouped'}), css: ($root.isGroupCollapsed($data, {id: '$ungrouped'}) ? 'closed' : 'open')")
         label()=__('Ungrouped')
+      <!-- ko if: !$root.isGroupCollapsed($data, {id: '$ungrouped'}) -->
       <!-- ko template: { name: $root.getItemTemplate, foreach: $data.getUngroupedDevices(), afterRender: $data.afterRenderDevice } --><!-- /ko -->
+      <!-- /ko -->
       <!-- /ko -->
       li.delete-link(data-theme='a', data-icon="delete", data-bind="visible: $root.isSortingItems, attr: {id: 'delete-item-' + $data.id}, css: 'droppable-' + $data.id")=__('Drop here to remove item')
       li(data-bind="visible: $root.enabledEditing() && !$root.isSortingItems(), attr: {id: 'add-item-link-' + $data.id}")
         a(data-transition='slidefade', href='#add-item-page', data-bind="click: $root.onAddItemClicked")=__('Add a new item')+'...'
 script#device-group-template(type='text/template')
   <!-- ko if: $root.enabledEditing() || $parent.getDevicesInGroup($data.id).length > 0  -->
-  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+  li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.createToggleGroupCallback($parent, $data), css: ($root.isGroupCollapsed($parent, $data) ? 'closed' : 'open')")
     label(data-bind="text: $data.name")
+  <!-- ko if: !$root.isGroupCollapsed($parent, $data) -->
   <!-- ko template: { name: $root.getItemTemplate, foreach: $parent.getDevicesInGroup($data.id), afterRender: $parent.afterRenderDevice } --><!-- /ko -->
+  <!-- /ko -->
   <!-- /ko -->
 div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingItems()}")
   div(data-theme=theme.headerSwatch, data-role='header')

@@ -4,9 +4,11 @@ script#device-edit-template(type="text/template")
       span.name(data-bind="text: $data.name()")
 script#device-groups-template(type="text/template")
   <!-- ko if: $root.enabledEditing() || $data.getDevices().length > 0  -->
-  li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+  li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup, css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
     label(data-bind="text: name")
+  <!-- ko if: !$root.isGroupCollapsed($data) -->
   <!-- ko template: { name: 'device-edit-template', foreach: $data.getDevices, afterRender: $root.afterRenderDevice } --><!-- /ko -->
+  <!-- /ko -->
   <!-- /ko -->
 div#devices-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingDevices() }")
   div(data-theme=theme.headerSwatch, data-role='header')
@@ -14,15 +16,17 @@ div#devices-page(data-role='page', data-bind="css: {locked: !$root.enabledEditin
     h3=__("Devices")
     <!-- ko if: $root.hasPermission('devices', 'write') -->
     a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
-    <!-- /ko -->      
+    <!-- /ko -->
   div.ui-content.overthrow
     ul#devices(data-role='listview', data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}")
       <!-- ko template: { name: 'device-groups-template', foreach: groups} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $root.getUngroupedDevices().length > 0  -->
       <!-- ko with: $root -->
-      li.sortable.header(data-role='list-divider', data-theme=theme.dividerSwatch)
+      li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup($data), css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
         label()=__('Ungrouped')
+      <!-- ko if: !$root.isGroupCollapsed($data) -->
       <!-- ko template: { name: 'device-edit-template', foreach: $root.getUngroupedDevices, afterRender: $root.afterRenderDevice } --><!-- /ko -->
+      <!-- /ko -->
       <!-- /ko -->
       <!-- /ko -->
       li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $root.isSortingDevices()")=__('Drop here to remove device')

@@ -309,6 +309,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index .items .device label,
 #index .items .shutter-device label,
 #index .items .button label,
+#index .items .input label,
 #index .items .musicplayer label, 
 #index .items .switch-device label,
 #index .items .timer label{
@@ -336,7 +337,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 
-#index li.button div.buttons, 
+#index li.button div.buttons,
+#index li.input div.inputs,
 #index li.shutter-device .shutter-buttons,
 #index li.musicplayer div.controls,
 #index li.timer div.controls {
@@ -347,6 +349,7 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 }
 
 #index li.button div.buttons,
+#index li.input div.inputs,
 #index li.shutter-device .shutter-buttons,
 #index li.musicplayer div.controls,
 #index li.timer div.controls {
@@ -356,6 +359,14 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   white-space: normal;
 }
 
+#index .input input {
+  border-color: #ccc /*{a-bup-border}*/;
+  padding: 4px 5px;
+  margin: 4px 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 120px;
+}
 
 #index li.shutter-device .ui-controlgroup-controls{
   padding-top: 1px;
@@ -398,6 +409,20 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
   margin-top: 1px;
 }
+
+#index .spinbox input{
+  border: none;
+  background: none;
+  width: 36px;
+  min-width: 36px;
+  margin: 0;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding: 0;
+  font-weight: bold;
+  color: #000 /*{a-bup-color}*/;
+}
+
 
 /* rules-page */
 #rules span.if, #rules span.then {
@@ -446,6 +471,14 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   color: #000 /*{a-bup-color}*/;
 }
 
+/* webkit-only: fix layout bug, where items sometimes do not have full width */
+@media screen and (-webkit-min-device-pixel-ratio:0) {  
+  .unlocked ul.items li.sortable {
+    box-sizing: border-box;
+    width:100%;
+  }
+}
+
 .fixed-add-element, .fixed-add-element a {
   border-color: #007dcd  /*{a-bar-background-color}*/ !important;
   background:       #007dcd /*{a-bar-background-color}*/ !important;
@@ -475,6 +508,10 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 
 #edit-device-page .elements {
   position: relative;
+}
+
+.unlocked ul.items li.sortable.header {
+    padding-left: 16px !important;
 }
 
 li.sortable .handle{
@@ -833,6 +870,10 @@ table#database-attribute-info {
   color: #0e1b52;
 }
 
+#log-messages .msg {
+  white-space: pre-wrap;
+}
+
 .level.info {
     color: #339900;
 }
@@ -1165,7 +1206,8 @@ li.with-button a.ui-btn {
     margin-bottom: 0;
   }
 
-  #index.locked li.thermostat div.controls {
+  #index.locked li.thermostat div.controls,
+  #index.locked li.input div.inputs {
     margin-top: -4.5px;
     margin-bottom: -4.5px;
   }
@@ -1598,7 +1640,8 @@ border-bottom-left-radius: inherit;
   white-space: normal;
 }
 
-#index li.thermostat div.controls .ui-controlgroup{
+#index li.thermostat div.controls .ui-controlgroup,
+#index li.input div.inputs .ui-controlgroup {
   display: inline-block;
   margin: 0;
   margin-left: 4px;
@@ -1607,25 +1650,17 @@ border-bottom-left-radius: inherit;
   border-radius: 0.8em;
 }
 
-#index li.thermostat div.controls .ui-group-theme-a{
+#index .items .ui-group-theme-a{
   border-radius: 2em
 }
 
-#index li.thermostat div.controls .ui-controlgroup .ui-btn{
+#index .items .ui-controlgroup .ui-btn{
   padding-left: 8px;
   padding-right: 8px;
 }
 
-#index li.thermostat div.controls .spinbox input{
-  border: none;
-  background: none;
-  width: 36px;
-  margin: 0;
-  margin-left: -8px;
-  margin-right: -8px;
-  padding: 0;
-  font-weight: bold;
-  color: #000 /*{a-bup-color}*/;
+#index .items .ui-controlgroup .ui-btn.ui-btn-icon-left {
+  padding-left: 2.5em;
 }
 
 #index li.thermostat .valve-position{
@@ -1938,7 +1973,6 @@ border-bottom-left-radius: inherit;
   left: 0;
 }
 
-
 #edit-device-form .properties label.ui-checkbox span{
   padding-left: 28px;
 }
@@ -1951,4 +1985,34 @@ border-bottom-left-radius: inherit;
   padding-left: 10px;
   padding-right: 10px;
   right: 10px;
+}
+
+.ui-listview > .ui-li-divider.collapsible,
+.ui-listview > .ui-li-divider.collapsible label{
+  cursor: pointer;
+}
+
+.collapsible label::before {
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  display: inline-block;
+  content: "";
+  position: relative;
+  cursor: pointer;
+}
+
+.collapsible.closed label::before {
+  border-left-color: #0071b9 /*{pm-listdivider-color}*/;
+  border-width: 5px 0 5px 7px;
+  margin-right: 10px;
+  left: 2px
+}
+
+.collapsible.open label::before {
+  border-top-color: #0071b9 /*{pm-listdivider-color}*/;
+  border-width: 7px 5px 0 5px;
+  margin-right: 6px;
+  top: -2px
 }

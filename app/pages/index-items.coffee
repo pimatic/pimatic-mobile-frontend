@@ -80,6 +80,12 @@ $(document).on( "pagebeforecreate", (event) ->
         html += "<div>#{buttons.join('')}</div>"
       return html
 
+    getConfig: (name) ->
+      if @device.config[name]?
+        return @device.config[name]
+      else
+        return @device.configDefaults[name]
+
   class SwitchItem extends DeviceItem
 
     constructor: (templData, @device) ->
@@ -273,6 +279,61 @@ $(document).on( "pagebeforecreate", (event) ->
       position = @getAttribute('position').value()
       @_updateButtons(position) if position?
 
+  class InputItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @type = @getConfig('type')
+      # The value in the input
+      @inputValue = ko.observable()
+
+      @inputAttr = @getAttribute('input')
+      @inputValue(@inputAttr.value())
+
+      attrValue = @inputAttr.value()
+      @inputAttr.value.subscribe( (value) =>
+        @inputValue(value)
+        attrValue = value
+      )
+
+      # input changes -> update variable value
+      ko.computed( =>
+        textValue = @inputValue()
+        if attrValue isnt textValue
+          if @type is "string"
+            @changeInputTo(textValue)
+          else if @type is "number"
+            if textValue? and attrValue? and parseFloat(attrValue) isnt parseFloat(textValue)
+              numVal = parseFloat(textValue)
+              if isNaN(textValue) or numVal isnt numVal #only true for NaN
+                swal("Oops...", __("#{textValue} is not a number."), "error")
+                @inputValue(attrValue)
+                return
+              @changeInputTo(numVal)
+      ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } })
+
+    changeInputTo: (value) ->
+      @device.rest.changeInputTo({value}, global: no)
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+        .always( => ; )
+
+    afterRender: (elements) ->
+      super(elements)
+      @input = $(elements).find('input')
+      if @type is "number"
+        min = @getConfig('min')
+        max = @getConfig('max')
+        step = @getConfig('step')
+        if min?
+          @input.attr('min', min)
+        if max?
+          @input.attr('max', max)
+        @input.attr('step', step)
+        @input.spinbox().autosizeInput(space: 30)
+      else
+        @input.autosizeInput(space: 5)
+
   class ButtonsItem extends DeviceItem
 
     constructor: (templData, @device) ->
@@ -431,11 +492,6 @@ $(document).on( "pagebeforecreate", (event) ->
         .fail(ajaxAlertFail)
         .always( => @input.spinbox('enable') )
 
-    getConfig: (name) ->
-      if @device.config[name]?
-        return @device.config[name]
-      else
-        return @device.configDefaults[name]
 
   class TimerItem extends DeviceItem
 
@@ -480,6 +536,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.MuscicplayerItem = MuscicplayerItem
   pimatic.ThermostatItem = ThermostatItem
   pimatic.TimerItem = TimerItem
+  pimatic.InputItem = InputItem
 
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
@@ -496,6 +553,7 @@ $(document).on( "pagebeforecreate", (event) ->
     musicplayer: pimatic.MuscicplayerItem
     thermostat: pimatic.ThermostatItem
     timer: pimatic.TimerItem
+    input: pimatic.InputItem
   }
 
   $(document).trigger("templateinit", [ ])

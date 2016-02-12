@@ -342,7 +342,7 @@ class DevicePage
             device = pimatic.nullDevice
           itemClass = pimatic.templateClasses[device.template]
           unless itemClass?
-            console.warn "Could not find a template class for #{data.template}"
+            console.warn "Could not find a template class for #{device.template}"
             itemClass = pimatic.DeviceItem
           unless device? then return console.error("Device should never be null")
           #console.log "Creating #{itemClass.name} for #{device.id} (#{device.template})"

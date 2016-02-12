@@ -15,7 +15,11 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
       @groups = pimatic.groups
       @hasPermission = pimatic.hasPermission
 
+      data = pimatic.storage.get('pimatic.variables') or {}
+      @collapsedGroups = ko.observable(data.collapsed or {})
+
       @variablesListViewRefresh = ko.computed( tc =>
+        @collapsedGroups()
         @variables()
         @enabledEditing()
         g.variables() for g in @groups()
@@ -167,6 +171,26 @@ $(document).on( "pagebeforecreate", '#variables-page', tc (event) ->
         return true
       else return false
 
+    toggleGroup: (group) =>
+      collapsed = @collapsedGroups()
+      if collapsed[group.id]
+        delete collapsed[group.id]
+      else
+        collapsed[group.id] = true
+      @collapsedGroups(collapsed)
+      @saveCollapseState()
+      return false;
+
+    toggleGroupDA: => @toggleGroup({id: '$da'})
+
+    isGroupCollapsed: (group) => @collapsedGroups()[group.id] is true
+
+    isGroupCollapsedDA: => @isGroupCollapsed({id: '$da'})
+
+    saveCollapseState: () =>
+      data = pimatic.storage.get('pimatic.variables') or {}
+      data.collapsed = @collapsedGroups()
+      pimatic.storage.set('pimatic.variables', data)
 
   pimatic.pages.variables = variablePage = new VariablesViewModel()
 
