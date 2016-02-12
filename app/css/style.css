@@ -468,8 +468,13 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 .unlocked ul#rules li.sortable a,
 .unlocked ul#groups li.sortable a,
 .unlocked ul#devices li.sortable a,
-.unlocked ul#devicepages li.sortable a {
+.unlocked ul#devicepages li.sortable a,
+#edit-device-page .elements li.sortable a {
   padding-left: 36px !important;
+}
+
+#edit-device-page .elements {
+  position: relative;
 }
 
 li.sortable .handle{
@@ -543,7 +548,7 @@ html.ui-mobile body .delete-link:hover {
     margin-right: 0px;
 }
 
-#li.sortable-placeholder{
+li.sortable-placeholder{
   border-style: dashed;
   border-width: 1px;
   background-color: #333 /*{a-page-color}*/;
@@ -1077,6 +1082,15 @@ li.with-button a.ui-btn {
     -webkit-box-sizing: content-box;
     -moz-box-sizing: content-box;
     box-sizing: content-box;
+  }
+
+  html .short-labels .ui-field-contain > label + .ui-btn-inline {
+    width: auto;
+  }
+
+  html .short-labels .ui-field-contain .ui-flipswitch.ui-flipswitch-active, 
+  html .short-labels .ui-popup .ui-field-contain .ui-flipswitch.ui-flipswitch-active {
+    width: 1.875em;
   }
 
 }
@@ -1918,4 +1932,23 @@ border-bottom-left-radius: inherit;
   padding-top: 8px;
   font-style: italic;
   color: gray;
+}
+
+#edit-device-form .properties label.ui-checkbox input{
+  left: 0;
+}
+
+
+#edit-device-form .properties label.ui-checkbox span{
+  padding-left: 28px;
+}
+
+.ui-field-contain .notset, .default {
+  display: inline-block;
+  font-style: italic;
+  position: absolute;
+  top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  right: 10px;
 }

@@ -364,7 +364,7 @@ $(document).on( "pagebeforecreate", (event) ->
       @updatePreTemperature()
       @updateValvePosition()
 
-      @getAttribute('mode').value.subscribe( => @updateButtons() )
+      @getAttribute('mode')?.value.subscribe( => @updateButtons() )
       @stAttr.value.subscribe( => @updatePreTemperature() )
       @getAttribute('valve')?.value.subscribe( => @updateValvePosition() )
       return
@@ -379,7 +379,7 @@ $(document).on( "pagebeforecreate", (event) ->
     setTemp: -> @changeTemperatureTo "#{@inputValue.value()}"
 
     updateButtons: ->
-      modeAttr = @getAttribute('mode').value()
+      modeAttr = @getAttribute('mode')?.value()
       switch modeAttr
         when 'auto'
           @manuButton.removeClass('ui-btn-active')
