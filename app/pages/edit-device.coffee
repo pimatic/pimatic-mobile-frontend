@@ -101,7 +101,7 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
             if definedByValue? and definedByValue of prop.options
               prop = prop.options[definedByValue]
           propValue = unwrap parentValue[name]
-          if (not propValue?) and not ((prop.required is false) or (prop.default?))
+          if (not propValue?) and data.schema.required? and name in data.schema.required
             propValue = getDefaultValue prop
           parentValue[name] = wrap(prop, propValue)
           props.push({ schema: prop, value: parentValue[name] })
@@ -172,8 +172,6 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 
         schema.enabled = (data) => data.value?()?
 
-        schema.notRequired = schema?.required is false
-
         schema.valueOrDefault = (data) => 
           ko.pureComputed(
             read: => if data.value?()? then data.value() else data.schema.default
@@ -189,6 +187,8 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
             schema.getProperties = getProperties
             if schema.properties?
               for name, prop of schema.properties
+                if schema.required?
+                  prop.notRequired = not (name in schema.required)
                 enhanceSchema(prop, name)
                 if prop.defines?.property?
                   definedProp = schema.properties[prop.defines.property]
