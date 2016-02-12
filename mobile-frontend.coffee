@@ -189,8 +189,8 @@ module.exports = (env) ->
         textcomplete: [
           "pimatic-mobile-frontend/app/js/jquery.textcomplete.js"
         ]
-        jsoneditor: [
-          "pimatic-mobile-frontend/app/js/jsoneditor-schema.js"
+        jsonschemaeditor: [
+          "pimatic-mobile-frontend/app/js/json-schema-editor.coffee"
         ]
         dygraph: [
           "pimatic-mobile-frontend/app/js/dygraph.js"

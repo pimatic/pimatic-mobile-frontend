@@ -1,0 +1,80 @@
+script#json-scheme-editor-field(type='text/template')
+  <!-- ko if: $data.schema.name && $data.schema.type !== "object" && $data.schema.type !== "array" -->
+  .ui-field-contain
+    <!-- ko if: typeof $data.schema.default !== "undefined" || $data.schema.notRequired -->
+    label.ui-checkbox.ui-mini(for='')
+      span(data-bind="text: $data.schema.name")
+      input(type='checkbox', data-enhanced='true', data-bind="jqmchecked: $data.schema.notDefault($data)")
+    <!-- /ko -->
+    <!-- ko if: !(typeof $data.schema.default !== "undefined" || $data.schema.notRequired) -->
+    label(for='', data-bind="text: $data.schema.name")
+    <!-- /ko -->
+    //- div(data-bind="text: JSON.stringify(ko.unwrap($data), null, '  ')")
+    <!-- ko if: $data.schema.type !== "boolean" && !$.isArray($data.schema.enum) -->
+    div.ui-input-text.ui-body-inherit.ui-corner-all.ui-shadow-inset
+      <!-- ko if: $data.schema.type === "string" -->
+      input(type="text", data-bind="jqmtextinput: $data.schema.valueOrDefault($data), jqmenabled: $data.schema.enabled($data)")
+      <!-- /ko -->
+      <!-- ko if: $data.schema.type === "number" -->
+      input(type="text", data-bind="jqmtextinput: $data.schema.valueOrDefault($data), jqmenabled: $data.schema.enabled($data)")
+      <!-- /ko -->
+      <!-- ko if: $data.schema.type === "integer" -->
+      input(type="text", data-bind="jqmtextinput: $data.schema.valueOrDefault($data), jqmenabled: $data.schema.enabled($data)")
+      <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: $.isArray($data.schema.enum) -->
+    select(data-mini="true", data-inline="true", data-bind="jqmoptions: $data.schema.enum, value: $data.schema.valueOrDefault($data), optionsText: $data.schema.enum, jqmenabled: $data.schema.enabled($data)")
+    <!-- /ko -->
+    <!-- ko if: $data.schema.type === "boolean" -->
+    select(data-bind="jqmflipswitch: $data.schema.valueOrDefault($data), jqmenabled: $data.schema.enabled($data)")
+      option(value="false")=__('No')
+      option(value="true")=__('Yes')
+    <!-- /ko -->
+    <!-- ko if: typeof $data.schema.default !== "undefined" && !$data.schema.enabled($data) -->
+    span.default=__('use default')
+    <!-- /ko -->
+    <!-- ko if: typeof $data.schema.default === "undefined" && $data.schema.notRequired && !$data.schema.enabled($data) -->
+    span.notset=__('not set')
+    <!-- /ko -->
+    div.description(data-bind="text: $data.schema.description")
+  <!-- /ko -->
+  <!-- ko if: $data.schema.type === "object" -->
+  h3(data-bind="text: $data.schema.name")
+  <!-- ko template: { name: 'json-scheme-editor-object', data: $data } --><!-- /ko -->
+  <!-- /ko -->
+  <!-- ko if: $data.schema.type === "array" -->
+  h3(data-bind="text: $data.schema.name")
+  <!-- ko template: { name: 'json-scheme-editor-array', data: $data } --><!-- /ko -->
+  <!-- /ko -->
+script#json-scheme-editor-object(type='text/template')
+  div.properties
+    <!-- ko if: $data.schema -->
+    <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getProperties($data) } --><!-- /ko -->
+    <!-- /ko -->
+script#json-scheme-editor-array(type='text/template')
+  div.elements
+    //- div(data-bind="text: JSON.stringify($data.schema.getItems($data.value), null, '  ')")
+    <!-- ko if: $data.schema -->
+    //-data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}
+    ul.items(data-role='listview', data-inset='true', data-bind="sortable: {isSorting: $data.schema.items.isSorting, sorted: $data.schema.items.onSorted($data), drop: $data.schema.items.onRemove($data)}, jqmlistview: $data.schema.getItems($data.value)") 
+      <!-- ko template: { name: 'json-scheme-editor-array-item', foreach: $data.schema.getItems($data.value), afterRender: $root.afterRenderItem } --><!-- /ko -->
+      li.add-item(data-bind="visible: !$data.schema.items.isSorting()")
+        a(data-bind="text: __('Add'), click: $data.schema.items.addItem",)
+      li.delete-link.droppable(data-theme='a',data-icon="delete", data-bind="visible: $data.schema.items.isSorting()")=__('Drop here to remove item')
+    <!-- ko template: { name: 'json-scheme-editor-item-overlay', data: $data.schema.items.editingItem } --><!-- /ko -->
+    <!-- /ko -->
+script#json-scheme-editor-array-item(type='text/template')
+  li.sortable
+    a(data-bind="text: $data.schema.getItemLabel($data.value), click: $data.schema.onEditItemClick.bind($data, $index(), $data)")
+script#json-scheme-editor-item-overlay(type='text/template')
+  <!-- ko if: $data !== null -->
+  div.popup-overlay()
+    div.outer.overthrow
+      div.inner
+        <!-- ko template: { name: 'json-scheme-editor-field', data: $data } --><!-- /ko -->
+        .ui-grid-a.controls
+          .ui-block-a
+            a#rule-condition-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-bind="click: $data.schema.editCancel")=__('Cancel')
+          .ui-block-b
+            a#rule-condition-ok.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: $data.schema.editOk.bind($data, $parent, $data)")=__('OK')
+  <!-- /ko -->
