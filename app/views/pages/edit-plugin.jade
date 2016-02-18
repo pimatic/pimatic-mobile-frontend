@@ -1,0 +1,12 @@
+div#edit-plugin-page(data-role='page')
+  div(data-theme=theme.headerSwatch, data-role='header')
+    h3(data-bind="text: pageTitle()")
+  div.ui-content.overthrow
+    div#edit-plugin-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false" action="#")
+      <!-- ko template: { name: 'json-scheme-editor-object', data: {schema: $root.configSchema(), value: $root.pluginConfig() } } --><!-- /ko -->
+      .ui-field-contain.ui-grid-a
+        div.ui-block-a
+          a#edit-plugin-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
+                             data-role="button", href='#devices-page')=__('Cancel')
+        div.ui-block-b
+          a#edit-plugin-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-role="button", data-bind="click: onSubmit")=__('Save')
