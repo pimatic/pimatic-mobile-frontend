@@ -1,35 +1,3 @@
-script#plugin-template(type='text/template')
-  li
-    a(href='#')
-      label
-        h2
-          span.name
-          | 
-          span.version
-          | 
-          span.active=__('active')
-          | 
-          span.update-available=__('update available')
-        //-p
-        //-  a.homepage(data-role="none")
-        p.description
-        input(type='checkbox')
-script#plugin-browse-template(type='text/template')
-  li
-    a(href='#')
-      label
-        h2
-          span.name
-          | 
-          span.version
-          | 
-          span.installed=__('installed')
-          | 
-          span.active=__('active')
-        //-p
-        //-  a.homepage(data-role="none")
-        p.description
-    a.add-to-config()=__('Add')
 script#loading-template(type='text/template')
   li.loading=__('Loading') + "..."
 
@@ -40,26 +8,48 @@ div#plugins-page(data-role='page')
     <!-- ko if: $root.hasPermission('plugins', 'write') -->
     a.restart-now(data-role="button", data-icon="refresh",  data-iconpos='left', data-inline="true")=__('Restart')
     <!-- /ko -->
-    h3=__('Installed Plugins')
+    h3=__('Plugins')
   div.ui-content.overthrow
-    form
-      ul#plugin-list.checkbox-list(data-role='listview', data-inset='true')
-      <!-- ko if: $root.hasPermission('plugins', 'write') -->
-      .ui-field-contain.ui-grid-a
-        div.ui-block-a
-          select#select-plugin-action(name='select-plugin-action')
-            option(value="select")=__('Select an action')
-            option(value="add")=__('Add to config')
-            option(value="remove")=__('Remove from config')
-        div.ui-block-b
-          a#plugin-do-action(data-icon="arrow-r", data-theme="a", data-role="button")=__('Do it!')
-      .ui-field-contain
-          a#plugin-install(href="#plugins-browse", data-icon="plus", data-role="button")=__('Install a Plugin')
-      <!-- /ko -->
-div#plugins-browse(data-role='page')
-  div(data-theme=theme.headerSwatch, data-role='header')
-    a(href='#plugins-page', data-role='button', data-icon='arrow-l', data-iconpos='left', data-inline='true', data-transition="slidefade")=__('Back')
-    h3=__('Install a Plugins')
-  div.ui-content.overthrow
-    form
-      ul#plugin-browse-list(data-role='listview', data-split-icon="plus", data-inset="true")
+    div(data-role="tabs")
+      div(data-role="navbar")
+        ul
+          li
+            a(href="#installed-plugins")=__('Installed Plugins')
+          li
+            a(href="#download-plugins")=__('Browse Plugins')
+      div#installed-plugins
+        ul#plugin-list(data-role='listview', data-inset='true', data-bind="foreach: installedPlugins")
+          li
+            label
+              h2
+                span.name(data-bind="text: name")
+                | 
+                span.version(data-bind="text: version")
+                | 
+                span.active(data-bind="visible: active")=__('active')
+                | 
+                span.update-available(data-bind="visible: $data.updateAvailable")=__('update available')
+              p.description(data-bind="text: description")
+              .buttons
+                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.activate(data-bind="visible: !active, click: $root.onActivateClick")=__('Activate')
+                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.deactivate(data-bind="visible: active, click: $root.onDeactivateClick")=__('Deactivate')
+                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-gear.ui-btn-icon-left(data-bind="visible: active, click: $root.onSettingsClick")=__('Settings')
+                a.ui-btn.ui-mini.ui-btn-inline.delete-link.ui-icon-delete.ui-btn-icon-left(data-bind="click: $root.onSettingsClick")=__('Uninstall')
+      div#download-plugins
+        form
+          ul#plugin-browse-list(data-role='listview', data-split-icon="plus", data-inset="true")
+            li
+              a(href='#')
+                label
+                  h2
+                    span.name
+                    | 
+                    span.version
+                    | 
+                    span.installed=__('installed')
+                    | 
+                    span.active=__('active')
+                  //-p
+                  //-  a.homepage(data-role="none")
+                  p.description
+              a.add-to-config()=__('Add')
