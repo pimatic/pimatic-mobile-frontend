@@ -24,6 +24,8 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
           activated: 'observe'
     }
 
+    restartRequired: ko.observable(false)
+
     updateFromJs: (data) ->
       ko.mapper.fromJS(data, PluginsViewModel.mapping, this)
 
@@ -44,9 +46,10 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
         oldStatus = newStatus
       )
 
-    onActivateClick: (plugin) ->
+    onActivateClick: (plugin) =>
       pimatic.client.rest.getPluginConfig({pluginName: plugin.name}).done( (result) =>
         if result.success?
+          @restartRequired(true)
           unless result.config?
             jQuery.mobile.pageParams = {action: 'add', pluginName: plugin.name}
             jQuery.mobile.changePage('#edit-plugin-page')
@@ -61,13 +64,14 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
       )
       return false
 
-    onDeactivateClick: (plugin) ->
+    onDeactivateClick: (plugin) =>
       pimatic.client.rest.setPluginActivated({
         pluginName: plugin.name
         active: false
       }).done( (result) =>
         if result.success
           plugin.activated(false)
+          @restartRequired(true)
       ).fail( ajaxAlertFail)
 
     onUninstallClick: (plugin) =>
@@ -76,6 +80,7 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
         pimatic.client.rest.uninstallPlugin({
           name: "pimatic-#{plugin.name}"
         }).done( =>
+          @restartRequired(true)
           @refresh()
           removeConfig = confirm(__("Do you want to remove all config options as well?"))
           if removeConfig
@@ -89,11 +94,11 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
             }).done( => @refresh() ).fail( ajaxAlertFail)
         ).fail( ajaxAlertFail)
 
-    onSettingsClick: (plugin) ->
+    onSettingsClick: (plugin) =>
       jQuery.mobile.pageParams = {action: 'update', pluginName: plugin.name}
       return true
 
-    onInstallClick: (plugin) ->
+    onInstallClick: (plugin) =>
       modules = ["pimatic-#{plugin.name}"]
       pimatic.client.rest.installUpdatesAsync({modules})
       .fail( (jqXHR, textStatus, errorThrown) =>

@@ -55,6 +55,7 @@ $(document).on("pagebeforecreate", '#edit-plugin-page', (event) ->
         pluginPage = pimatic.pages.plugins
         # Get all installed Plugins
         pluginPage.refresh()
+        pluginPage.restartRequired(true)
         if data.success then $.mobile.changePage '#plugins-page', {transition: 'slide', reverse: true}
         else alert data.error
       ).fail(ajaxAlertFail)

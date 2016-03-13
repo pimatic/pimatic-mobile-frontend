@@ -933,6 +933,10 @@ table#database-attribute-info {
   color: white;
 }
 
+.restart-alert {
+  margin-bottom: 15px;
+}
+
 .ui-simpledialog-controls{
   padding: 0 6px;
 }

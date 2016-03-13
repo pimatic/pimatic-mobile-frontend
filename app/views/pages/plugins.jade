@@ -10,6 +10,9 @@ div#plugins-page(data-role='page')
     <!-- /ko -->
     h3=__('Plugins')
   div.ui-content.overthrow
+    div.ui-body.ui-body-a.ui-corner-all.restart-alert(data-bind="visible: restartRequired")
+      p=__('Some settings have changed, a restart is required.')
+      a.restart-now(href="#")=__('Restart Now')
     div(data-role="tabs")
       div(data-role="navbar")
         ul
