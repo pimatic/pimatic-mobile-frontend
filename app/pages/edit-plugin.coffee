@@ -28,6 +28,7 @@ $(document).on("pagebeforecreate", '#edit-plugin-page', (event) ->
               rewraped = jsonschemaeditor.wrap(schema, unwraped)
               @pluginConfig(rewraped())
               jsonschemaeditor.enhanceSchema schema, null
+              schema.name = pluginName
               @configSchema(schema)
           )
         else
@@ -46,6 +47,11 @@ $(document).on("pagebeforecreate", '#edit-plugin-page', (event) ->
     onSubmit: ->
       pluginName = @pluginName()
       pluginConfig = jsonschemaeditor.unwrap @pluginConfig()
+      errors = []
+      jsonschemaeditor.validate @configSchema(), pluginConfig, errors
+      if errors.length > 0
+        alert(errors.join("\n"))
+        return
       pluginConfig.plugin = pluginName
       pluginConfig.active = true
       pimatic.client.rest.updatePluginConfig({

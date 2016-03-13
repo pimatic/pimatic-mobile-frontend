@@ -56,10 +56,15 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 
     onSubmit: ->
       deviceConfig = jsonschemaeditor.unwrap @deviceConfig()
+      errors = []
+      jsonschemaeditor.validate @configSchema(), deviceConfig, errors
+      if errors.length > 0
+        alert(errors.join("\n"))
+        return
       deviceConfig.id = @deviceId()
       deviceConfig.name = @deviceName()
       deviceConfig.class = @deviceClass()
-      # console.log deviceConfig
+
       (
         switch @action()
           when 'add' then pimatic.client.rest.addDeviceByConfig({deviceConfig})

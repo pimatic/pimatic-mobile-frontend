@@ -36,7 +36,37 @@ unwrap = (value) ->
         unwraped[i] = unwrap ele
   return unwraped
 
-getDefaultValue = (schema) =>
+validate = (schema, value, errors, parent) ->
+  unless value? then return
+  switch schema.type
+    when "string" then return
+    when "boolean" then return
+    when "object"
+      if schema.properties and schema.properties?
+        for name, prop of schema.properties
+          if prop.definedBy?
+            definedByValue = value[prop.definedBy]
+            if definedByValue? and definedByValue of prop.options
+              prop = prop.options[definedByValue]
+          propValue = value[name]
+          if propValue? and prop.type in ["number", "integer"]
+            if isNaN(propValue)
+              errors.push("#{name} must be a number")
+            else
+              value[name] = parseFloat(propValue)
+          validate prop, propValue, errors, value
+    when "array"
+      if schema.items?
+        for i in [0...value.length]
+          propValue = value[i]
+          if propValue? and prop.type in ["number", "integer"]
+            if isNaN(propValue)
+              errors.push("#{name} must be a number")
+            else
+              value[i] = parseFloat(propValue)
+          validate schema.items, propValue, errors, value
+
+getDefaultValue = (schema) ->
   if schema.defaut?
     return schema.default
   if schema.enum?.length > 0
@@ -100,7 +130,7 @@ addItem = (data) ->
   else
     value = wrap data.schema.items, getDefaultValue(data.schema.items)
   data.schema.items.editingItem(schema: data.schema.items, value: value)
-  return     
+  return
 
 getItemLabel = (value) ->
   unwraped = unwrap value
@@ -137,8 +167,6 @@ enhanceSchema = (schema, name) ->
     ko.pureComputed(
       read: => if data.value?()? then data.value() else data.schema.default
       write: (value) => 
-        if data.schema.type in ["number", "integer"]
-          value = parseFloat(value)
         data.value(value)
     )
 
@@ -147,6 +175,7 @@ enhanceSchema = (schema, name) ->
     when 'object'
       schema.getProperties = getProperties
       if schema.properties?
+        schema.hasProperties = Object.keys(schema.properties).length > 0
         for name, prop of schema.properties
           if schema.required?
             prop.notRequired = not (name in schema.required)
@@ -157,6 +186,8 @@ enhanceSchema = (schema, name) ->
             definedProp.definedBy = name
             for optName, option of definedProp.options
               enhanceSchema(option, prop.defines.property)
+      else
+        schema.hasProperties = false
     when 'array'
       schema.getItems = getItems
       unless schema.items?
@@ -205,4 +236,4 @@ enhanceSchema = (schema, name) ->
           schema.enum = Object.keys(schema.defines.options)
   return
 
-window.jsonschemaeditor = {wrap, unwrap, enhanceSchema}
+window.jsonschemaeditor = {wrap, unwrap, enhanceSchema, validate}

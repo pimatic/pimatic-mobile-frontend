@@ -50,6 +50,9 @@ script#json-scheme-editor-object(type='text/template')
   div.properties
     <!-- ko if: $data.schema -->
     <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getProperties($data) } --><!-- /ko -->
+    <!-- ko if: !$data.schema.hasProperties -->
+    p(data-bind="text: __('%s has no config options.', $data.schema.name)")
+    <!-- /ko -->
     <!-- /ko -->
 script#json-scheme-editor-array(type='text/template')
   div.elements
