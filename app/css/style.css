@@ -502,11 +502,11 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 .unlocked ul#groups li.sortable a,
 .unlocked ul#devices li.sortable a,
 .unlocked ul#devicepages li.sortable a,
-#edit-device-page .elements li.sortable a {
+.json-schema-editor .elements li.sortable a {
   padding-left: 36px !important;
 }
 
-#edit-device-page .elements {
+.json-schema-editor .elements {
   position: relative;
 }
 
@@ -908,8 +908,8 @@ table#database-attribute-info {
   border: none;
 }
 
-#plugin-list .active, #plugin-browse-list .active, #plugin-list .update-available, 
-#plugin-browse-list .installed{
+#plugin-list .activated, #plugin-browse-list .activated, #plugin-list .update-available,
+#plugin-browse-list .installed, #plugin-list .loaded, #plugin-browse-list .loaded{
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   border-radius: 6px;
@@ -917,7 +917,8 @@ table#database-attribute-info {
   padding: 3px;
 }
 
-#plugin-list .active, #plugin-browse-list .active{
+#plugin-list .activated, #plugin-browse-list .activated,
+#plugin-list .loaded, #plugin-browse-list .loaded {
   background: #339900;
   color: white;
 }
@@ -1969,12 +1970,27 @@ border-bottom-left-radius: inherit;
   color: gray;
 }
 
-#edit-device-form .properties label.ui-checkbox input{
+.json-schema-editor .properties label.ui-checkbox input{
   left: 0;
 }
 
-#edit-device-form .properties label.ui-checkbox span{
+.json-schema-editor .properties label.ui-checkbox span{
   padding-left: 28px;
+}
+
+.json-schema-editor .properties .properties {
+  padding-left: 20px;
+  margin-left: -10px;
+  border-left: 5px solid #ddd /*{a-body-border}*/;
+  margin-top: -47px;
+  padding-top: 22px;
+  padding-right: 10px;
+  border-radius: 5px;
+  margin-bottom: 25px;
+}
+
+.json-schema-editor .properties  h3 {
+  padding: 0 5px;
 }
 
 .ui-field-contain .notset, .default {

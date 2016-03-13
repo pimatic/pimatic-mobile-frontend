@@ -12,41 +12,111 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
       installedPlugins:
         $key: 'name'
         $itemOptions:
-          $handler: 'copy'
+          $default: 'copy'
+          loaded: 'observe'
+          activated: 'observe'
+      browsePlugins:
+        $key: 'name'
+        $itemOptions:
+          $default: 'copy'
+          installed: 'observe'
+          loaded: 'observe'
+          activated: 'observe'
     }
 
     updateFromJs: (data) ->
-      ko.mapper.fromJS({installedPlugins: data}, PluginsViewModel.mapping, this)
+      ko.mapper.fromJS(data, PluginsViewModel.mapping, this)
 
     constructor: ->
       @hasPermission = pimatic.hasPermission
-      @updateFromJs([])
+      @updateProcessStatus = pimatic.updateProcessStatus
+      @updateFromJs(installedPlugins: [], browsePlugins: [])
 
       @updateListView = ko.computed( tc =>
         @installedPlugins()
         pimatic.try( => $('#plugin-list').listview('refresh') )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
 
+      oldStatus = @updateProcessStatus()
+      @updateProcessStatus.subscribe( (newStatus) =>
+        if oldStatus is "running" and newStatus = "done"
+          @refresh()
+        oldStatus = newStatus
+      )
+
     onActivateClick: (plugin) ->
-      pimatic.client.rest.activatePlugin({
-        name: plugin.name
-      }).fail( ajaxAlertFail)
+      pimatic.client.rest.getPluginConfig({pluginName: plugin.name}).done( (result) =>
+        if result.success?
+          unless result.config?
+            jQuery.mobile.pageParams = {action: 'add', pluginName: plugin.name}
+            jQuery.mobile.changePage('#edit-plugin-page')
+          else
+            pimatic.client.rest.setPluginActivated({
+              pluginName: plugin.name
+              active: true
+            }).done( (result) =>
+              if result.success
+                plugin.activated(true)
+            )
+      )
+      return false
 
     onDeactivateClick: (plugin) ->
-      pimatic.client.rest.deactivatePlugin({
-        name: plugin.name
-      }).fail( ajaxAlertFail)
+      pimatic.client.rest.setPluginActivated({
+        pluginName: plugin.name
+        active: false
+      }).done( (result) =>
+        if result.success
+          plugin.activated(false)
+      ).fail( ajaxAlertFail)
 
-    onUninstallClick: (plugin) ->
-      pimatic.client.rest.addPluginsToConfig({
-        pluginNames: [plugin.name]
-      }).fail( ajaxAlertFail)
+    onUninstallClick: (plugin) =>
+      really = confirm(__("Do you really want to uninstall the %s plugin?", plugin.name))
+      if really
+        pimatic.client.rest.uninstallPlugin({
+          name: "pimatic-#{plugin.name}"
+        }).done( =>
+          @refresh()
+          removeConfig = confirm(__("Do you want to remove all config options as well?"))
+          if removeConfig
+            pimatic.client.rest.removePluginFromConfig({
+              pluginName: plugin.name
+            }).done( => @refresh() ).fail( ajaxAlertFail)
+          else
+            pimatic.client.rest.setPluginActivated({
+              pluginName: plugin.name
+              active: false
+            }).done( => @refresh() ).fail( ajaxAlertFail)
+        ).fail( ajaxAlertFail)
 
     onSettingsClick: (plugin) ->
-      pimatic.client.rest.addPluginsToConfig({
-        pluginNames: [plugin.name]
-      }).fail( ajaxAlertFail)
+      jQuery.mobile.pageParams = {action: 'update', pluginName: plugin.name}
+      return true
 
+    onInstallClick: (plugin) ->
+      modules = ["pimatic-#{plugin.name}"]
+      pimatic.client.rest.installUpdatesAsync({modules})
+      .fail( (jqXHR, textStatus, errorThrown) =>
+        # ignore timeouts:
+        if textStatus isnt "timeout"
+          ajaxAlertFail(jqXHR, textStatus, errorThrown)
+      )
+
+    getInstalledPluginsWithInfo: ->
+      pimatic.client.rest.getInstalledPluginsWithInfo().done( (data) =>
+        # save the plugins in installedPlugins
+        @updateFromJs(installedPlugins: data.plugins)
+      ).fail(ajaxAlertFail)
+
+    searchForPluginsWithInfo: ->
+      pimatic.client.rest.searchForPluginsWithInfo().done( (data) =>
+        # save the plugins in installedPlugins
+        @updateFromJs(browsePlugins: data.plugins)
+      ).fail(ajaxAlertFail)
+
+    refresh: ->
+      @getInstalledPluginsWithInfo()
+      @searchForPluginsWithInfo()
 
   try
     pimatic.pages.plugins = new PluginsViewModel()
@@ -60,15 +130,15 @@ $(document).on("pagecreate", '#plugins-page', (event) ->
     ko.applyBindings(pimatic.pages.plugins, $('#plugins-page')[0])
   catch e
     TraceKit.report(e)
+
+  $('#plugins-page').on "click", '.restart-now', (event, ui) ->
+    pimatic.client.rest.restart({}).fail(ajaxAlertFail)
 )
 
 $(document).on "pageinit", '#plugins-page', (event) ->
   pluginPage = pimatic.pages.plugins
   # Get all installed Plugins
-  pimatic.client.rest.getInstalledPluginsWithInfo().done( (data) ->
-    # save the plugins in installedPlugins
-    pluginPage.updateFromJs(data.plugins)
-  ).fail( ajaxAlertFail)
+  pluginPage.refresh()
 
   # $('#plugins-page').on "click", '#plugin-do-action', (event, ui) ->
   #   val = $('#select-plugin-action').val()

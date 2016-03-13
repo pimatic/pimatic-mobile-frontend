@@ -242,6 +242,9 @@ module.exports = (env) ->
         'edit-devicepage-page': [
           "pimatic-mobile-frontend/app/pages/edit-devicepage.coffee"
         ]
+        'edit-plugin-page': [
+          "pimatic-mobile-frontend/app/pages/edit-plugin.coffee"
+        ]
         'database-page': [
           "pimatic-mobile-frontend/app/pages/database.coffee"
         ]

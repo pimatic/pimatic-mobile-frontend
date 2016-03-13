@@ -2,7 +2,7 @@ div#edit-device-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
     h3(data-bind="text: pageTitle()")
   div.ui-content.overthrow
-    div#edit-device-form.short-labels(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false" action="#")
+    div#edit-device-form.short-labels.json-schema-editor(autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false" action="#")
       .ui-field-contain.has-device-name-input
         label(for='edit-device-name')=__('Name') + ': '
         input#edit-device-name(placeholder="device-name", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: deviceName")

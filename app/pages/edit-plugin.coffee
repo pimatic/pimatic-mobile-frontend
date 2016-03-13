@@ -2,11 +2,11 @@
 # --------------
 
 merge = Array.prototype.concat
-LazyLoad.js(merge.apply(scripts.jsonschemeeditor))
+LazyLoad.js(merge.apply(scripts.jsonschemaeditor))
 
 $(document).on("pagebeforecreate", '#edit-plugin-page', (event) ->
   if pimatic.pages.editPlugin? then return
-  
+
   class EditPluginViewModel
 
     action: ko.observable('add')
@@ -16,7 +16,23 @@ $(document).on("pagebeforecreate", '#edit-plugin-page', (event) ->
 
     constructor: ->
       @pageTitle = ko.computed( => __('Plugin Config') )
-      pimatic.autoFillId(@deviceName, @deviceId, @action)
+
+      @pluginName.subscribe( (pluginName) =>
+        if pluginName? and typeof pluginName is "string" and pluginName.length > 0
+          pimatic.client.rest.getPluginConfigSchema({pluginName: "pimatic-#{pluginName}"}).done( (result) =>
+            if result.success?
+              schema = result.configSchema
+              delete schema.properties.active
+              delete schema.properties.plugin
+              unwraped = jsonschemaeditor.unwrap(@pluginConfig())
+              rewraped = jsonschemaeditor.wrap(schema, unwraped)
+              @pluginConfig(rewraped())
+              jsonschemaeditor.enhanceSchema schema, null
+              @configSchema(schema)
+          )
+        else
+          @configSchema(null)
+      )
 
     afterRenderItem: (elements, device) ->
       handleHTML = $('#sortable-handle-template').text()
@@ -28,21 +44,21 @@ $(document).on("pagebeforecreate", '#edit-plugin-page', (event) ->
       @configSchema(null)
 
     onSubmit: ->
-      # deviceConfig = JsonSchemeEditor.unwrap @deviceConfig()
-      # deviceConfig.id = @deviceId()
-      # deviceConfig.name = @deviceName()
-      # deviceConfig.class = @deviceClass()
-      # # console.log deviceConfig
-      # (
-      #   switch @action()
-      #     when 'add' then pimatic.client.rest.addDeviceByConfig({deviceConfig})
-      #     when 'update' then pimatic.client.rest.updateDeviceByConfig({deviceConfig})
-      #     else throw new Error("Illegal devicedevice action: #{action()}")
-      # ).done( (data) ->
-      #   if data.success then $.mobile.changePage '#devices-page', {transition: 'slide', reverse: true}   
-      #   else alert data.error
-      # ).fail(ajaxAlertFail)
-      # return false
+      pluginName = @pluginName()
+      pluginConfig = jsonschemaeditor.unwrap @pluginConfig()
+      pluginConfig.plugin = pluginName
+      pluginConfig.active = true
+      pimatic.client.rest.updatePluginConfig({
+        pluginName: pluginName,
+        config: pluginConfig
+      }).done( (data) ->
+        pluginPage = pimatic.pages.plugins
+        # Get all installed Plugins
+        pluginPage.refresh()
+        if data.success then $.mobile.changePage '#plugins-page', {transition: 'slide', reverse: true}
+        else alert data.error
+      ).fail(ajaxAlertFail)
+      return false
 
   try
     pimatic.pages.editPlugin = new EditPluginViewModel()
@@ -67,11 +83,19 @@ $(document).on("pagecreate", '#edit-plugin-page', (event) ->
 )
 
 
-$(document).on("pagebeforeshow", '#edit-device-page', (event) ->
+$(document).on("pagebeforeshow", '#edit-plugin-page', (event) ->
   editPluginPage = pimatic.pages.editPlugin
   params = jQuery.mobile.pageParams
   jQuery.mobile.pageParams = {}
-  # if params?.action is "update"
+  if params?
+    editPluginPage.pluginName(null)
+    editPluginPage.configSchema(null)
+    pimatic.client.rest.getPluginConfig({pluginName: params.pluginName}).done( (result) =>
+      if result.success?
+        config = result.config || {}
+        editPluginPage.pluginConfig(config)
+        editPluginPage.pluginName(params.pluginName)
+    )
   #   device = params.device
   #   editPluginPage.action('update')
   #   editPluginPage.deviceId(device.id)

@@ -26,30 +26,34 @@ div#plugins-page(data-role='page')
                 | 
                 span.version(data-bind="text: version")
                 | 
-                span.active(data-bind="visible: active")=__('active')
+                span.loaded(data-bind="visible: loaded()")=__('loaded')
+                | 
+                span.activated(data-bind="visible: $data.activated()")=__('activated')
                 | 
                 span.update-available(data-bind="visible: $data.updateAvailable")=__('update available')
               p.description(data-bind="text: description")
               .buttons
-                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.activate(data-bind="visible: !active, click: $root.onActivateClick")=__('Activate')
-                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.deactivate(data-bind="visible: active, click: $root.onDeactivateClick")=__('Deactivate')
-                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-gear.ui-btn-icon-left(data-bind="visible: active, click: $root.onSettingsClick")=__('Settings')
-                a.ui-btn.ui-mini.ui-btn-inline.delete-link.ui-icon-delete.ui-btn-icon-left(data-bind="click: $root.onSettingsClick")=__('Uninstall')
+                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.activate(data-bind="visible: !$data.activated(), click: $root.onActivateClick")=__('Activate')
+                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.deactivate(data-bind="visible: $data.activated(), click: $root.onDeactivateClick")=__('Deactivate')
+                a.ui-btn.ui-mini.ui-btn-inline.ui-icon-gear.ui-btn-icon-left(data-bind="visible: $data.activated(), click: $root.onSettingsClick", href="#edit-plugin-page")=__('Settings')
+                a.ui-btn.ui-mini.ui-btn-inline.delete-link.ui-icon-delete.ui-btn-icon-left(data-bind="click: $root.onUninstallClick")=__('Uninstall')
       div#download-plugins
         form
-          ul#plugin-browse-list(data-role='listview', data-split-icon="plus", data-inset="true")
+          ul#plugin-browse-list(data-role='listview', data-inset="true", data-bind="foreach: browsePlugins")
             li
-              a(href='#')
-                label
-                  h2
-                    span.name
-                    | 
-                    span.version
-                    | 
-                    span.installed=__('installed')
-                    | 
-                    span.active=__('active')
-                  //-p
-                  //-  a.homepage(data-role="none")
-                  p.description
-              a.add-to-config()=__('Add')
+              label
+                h2
+                  span.name(data-bind="text: name")
+                  | 
+                  span.version(data-bind="text: version")
+                  | 
+                  span.installed(data-bind="visible: installed()")=__('installed')
+                  | 
+                  span.loaded(data-bind="visible: loaded()")=__('loaded')
+                  | 
+                  span.activated(data-bind="visible: $data.activated()")=__('activated')
+                //-p
+                //-  a.homepage(data-role="none")
+                p.description(data-bind="text: description")
+                .buttons
+                  a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.install(data-bind="visible: !installed(), click: $root.onInstallClick")=__('Install')
