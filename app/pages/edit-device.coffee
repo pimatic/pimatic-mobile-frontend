@@ -113,19 +113,26 @@ $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
   editDevicePage = pimatic.pages.editDevice
   params = jQuery.mobile.pageParams
   jQuery.mobile.pageParams = {}
-  if params?.action is "update"
-    device = params.device
-    editDevicePage.action('update')
-    editDevicePage.deviceId(device.id)
-    editDevicePage.deviceName(device.name())
+
+  fill = (action, deviceId, deviceName, deviceConfig) =>
+    editDevicePage.action(action)
+    editDevicePage.deviceId(deviceId)
+    editDevicePage.deviceName(deviceName)
     editDevicePage.deviceClass(null)
     editDevicePage.configSchema(null)
-    editDevicePage.deviceConfig(device.config)
+    editDevicePage.deviceConfig(deviceConfig)
     deviceClasses = pimatic.pages.editDevice.deviceClasses()
-    unless device.config.class in deviceClasses
-      deviceClasses.push device.config.class
+    unless deviceConfig.class in deviceClasses
+      deviceClasses.push deviceConfig.class
       editDevicePage.deviceClasses(deviceClasses)
-    editDevicePage.deviceClass(device.config.class)
+    editDevicePage.deviceClass(deviceConfig.class)
+
+  if params?.action is "update"
+    device = params.device
+    fill('update', device.id, device.name(), device.config)
+  else if params?.action is "discovered"
+    discoveredDevice = params.discoveredDevice
+    fill('add', '', discoveredDevice.deviceName, discoveredDevice.config)
   else
     editDevicePage.resetFields()
     editDevicePage.action('add')

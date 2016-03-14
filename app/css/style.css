@@ -933,8 +933,12 @@ table#database-attribute-info {
   color: white;
 }
 
-.restart-alert {
+.page-message {
   margin-bottom: 15px;
+}
+
+.discover-messages {
+  margin-bottom: 25px;
 }
 
 .ui-simpledialog-controls{

@@ -10,15 +10,35 @@ script#device-groups-template(type="text/template")
   <!-- ko template: { name: 'device-edit-template', foreach: $data.getDevices, afterRender: $root.afterRenderDevice } --><!-- /ko -->
   <!-- /ko -->
   <!-- /ko -->
+script#discover-message-template(type="text/template")
+  p.discover-message
+    span(data-bind="text: pluginName")
+    | : 
+    span(data-bind="text: message")
+script#discovered-device-template(type="text/template")
+  li.device-edit
+    a(data-transition='slidefade', href='#edit-device-page', data-bind="click: $root.onDiscoveredDeviceClicked")
+      span.pluginName(data-bind="text: pluginName")
+      | : 
+      span.name(data-bind="text: deviceName")
 div#devices-page(data-role='page', data-bind="css: {locked: !$root.enabledEditing(), unlocked: $root.enabledEditing(), notSorting: !$root.isSortingDevices() }")
   div(data-theme=theme.headerSwatch, data-role='header')
     a.ui-btn-left.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-arrow-l(href='#index', data-transition="slidefade", data-direction="reverse")=__('Back')
     h3=__("Devices")
     <!-- ko if: $root.hasPermission('devices', 'write') -->
-    a.ui-btn-right.ui-btn.ui-btn-inline.ui-corner-all.ui-btn-icon-left.ui-icon-bars.ui-btn-icon-notext(data-bind="jqmbutton: lockButton(), click: toggleEditing" href="")
+    a.discover-devices(href="#" data-role="button", data-icon="refresh",  data-iconpos='left', data-inline="true", data-bind="click: discoverDevices")=__('Discover Devices')
     <!-- /ko -->
   div.ui-content.overthrow
+    <!-- ko if: $root.discoverMessages().length > 0 -->
+    div.discover-messages.ui-body.ui-body-a.ui-corner-all.page-message
+      <!-- ko template: { name: 'discover-message-template', foreach: $root.discoverMessages } --><!-- /ko -->
+    <!-- /ko -->
     ul#devices(data-role='listview', data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}")
+      <!-- ko if: $root.discoveredDevices().length > 0 -->
+      li(data-role='list-divider', data-theme=theme.dividerSwatch)
+        label=__("Discovered devices")
+      <!-- ko template: { name: 'discovered-device-template', foreach: $root.discoveredDevices } --><!-- /ko -->
+      <!-- /ko -->
       <!-- ko template: { name: 'device-groups-template', foreach: groups} --><!-- /ko -->
       <!-- ko if: $root.enabledEditing() || $root.getUngroupedDevices().length > 0  -->
       <!-- ko with: $root -->

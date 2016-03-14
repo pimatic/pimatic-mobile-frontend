@@ -6,8 +6,10 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
 
   class DevicesViewModel
 
-    enabledEditing: ko.observable(no)
+    enabledEditing: ko.observable(yes)
     isSortingDevices: ko.observable(no)
+    discoverMessages: ko.observableArray([])
+    discoveredDevices: ko.observableArray([])
 
     constructor: () ->
       @devices = pimatic.devices
@@ -22,6 +24,7 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
         @devices()
         @isSortingDevices()
         @enabledEditing()
+        @discoveredDevices()
         g.devices() for g in @groups()
         pimatic.try( => $('#devices').listview('refresh') )
       ).extend(rateLimit: {timeout: 1, method: "notifyWhenChangesStop"})
@@ -145,6 +148,15 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
       jQuery.mobile.pageParams = {action: 'update', device: device}
       return true
 
+    onDiscoveredDeviceClicked: (discoveredDevice) =>
+      #pimatic.showToast("Sorry that operation is not supported yet.")
+      #return false
+      unless @hasPermission('devices', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to edit this device."))
+        return false
+      jQuery.mobile.pageParams = {action: 'discovered', discoveredDevice}
+      return true
+
     toggleGroup: (group) =>
       collapsed = @collapsedGroups()
       if collapsed[group.id]
@@ -162,6 +174,20 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
       data.collapsed = @collapsedGroups()
       pimatic.storage.set('pimatic.devices', data)
 
+    discoverDevices: () =>
+      time = 20000 #ms
+      pimatic.client.rest.discoverDevices({time})
+      .done( =>
+        @discoverMessages([])
+        @discoveredDevices([])
+        pimatic.loading "discoverdevices", "show", text: __('Searching for devices')
+        setTimeout(( =>
+          @discoverMessages([])
+          pimatic.loading "discoverdevices", "hide"
+        ), time)
+      )
+      .fail(ajaxAlertFail)
+
 
   pimatic.pages.devices = devicesPage = new DevicesViewModel()
 
@@ -177,6 +203,15 @@ $(document).on("pagecreate", '#devices-page', tc (event) ->
     window.location.reload()
 
   $("#devices .handle").disableSelection()
+
+  pimatic.socket.on('discoverMessage', (data) =>
+    devicesPage.discoverMessages.push(data)
+  )
+
+  pimatic.socket.on('deviceDiscovered', (data) =>
+    devicesPage.discoveredDevices.push(data)
+  )
+
   return
 )
 
