@@ -2007,6 +2007,29 @@ border-bottom-left-radius: inherit;
   right: 10px;
 }
 
+@media (min-width: 28em) {
+
+  #edit-rule-form label[for='edit-rule-condition'],
+  #edit-rule-form label[for='edit-rule-actions'] {
+    float: none;
+  }
+
+
+  .json-schema-editor  .ui-field-contain > label,
+  .json-schema-editor  .ui-field-contain .ui-controlgroup-label,
+  .json-schema-editor  .ui-field-contain > .ui-rangeslider > label {
+    width: 32%;
+  }
+
+  .json-schema-editor  .ui-field-contain > label ~ [class*="ui-"],
+  .json-schema-editor  .ui-field-contain .ui-controlgroup-controls {
+    float: left;
+    width: 66%;
+  }
+
+
+}
+
 .ui-listview > .ui-li-divider.collapsible,
 .ui-listview > .ui-li-divider.collapsible label{
   cursor: pointer;
