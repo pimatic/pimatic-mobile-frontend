@@ -36,6 +36,9 @@ unwrap = (value) ->
         unwraped[i] = unwrap ele
   return unwraped
 
+isNoNum = (value) ->
+  (typeof value is 'string' and value.length is 0) or isNaN(value)
+
 validate = (schema, value, errors, parent) ->
   unless value? then return
   switch schema.type
@@ -50,7 +53,7 @@ validate = (schema, value, errors, parent) ->
               prop = prop.options[definedByValue]
           propValue = value[name]
           if propValue? and prop.type in ["number", "integer"]
-            if isNaN(propValue)
+            if isNoNum propValue
               errors.push("#{name} must be a number")
             else
               value[name] = parseFloat(propValue)
@@ -59,8 +62,8 @@ validate = (schema, value, errors, parent) ->
       if schema.items?
         for i in [0...value.length]
           propValue = value[i]
-          if propValue? and prop.type in ["number", "integer"]
-            if isNaN(propValue)
+          if propValue? and schema.items.type in ["number", "integer"]
+            if isNoNum propValue
               errors.push("#{name} must be a number")
             else
               value[i] = parseFloat(propValue)
@@ -73,7 +76,7 @@ getDefaultValue = (schema) ->
     return schema.enum[0]
   switch schema.type
     when "string" then ""
-    when "number", "integer" then 0
+    when "number", "integer" then ""
     when "boolean" then false
     when "object" then {}
     when "array" then []
@@ -87,11 +90,17 @@ getProperties = (data) ->
     data.value(parentValue)
   props = []
   for name, prop of data.schema.properties
+    propValue = unwrap parentValue[name]
     if prop.definedBy?
       definedByValue = ko.unwrap(parentValue[prop.definedBy])
       if definedByValue? and definedByValue of prop.options
+        commonProp = prop
         prop = prop.options[definedByValue]
-    propValue = unwrap parentValue[name]
+        commonProp.values = commonProp.values or {}
+        if commonProp.definedByValue?
+          commonProp.values[commonProp.definedByValue] = propValue
+        commonProp.definedByValue = definedByValue
+        propValue = commonProp.values[definedByValue]
     if (not propValue?) and data.schema.required? and name in data.schema.required
       propValue = getDefaultValue prop
     parentValue[name] = wrap(prop, propValue)

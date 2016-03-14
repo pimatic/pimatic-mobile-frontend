@@ -1982,7 +1982,7 @@ border-bottom-left-radius: inherit;
   padding-left: 28px;
 }
 
-.json-schema-editor .properties .properties {
+.json-schema-editor .properties > .properties {
   padding-left: 20px;
   margin-left: -10px;
   border-left: 5px solid #ddd /*{a-body-border}*/;
