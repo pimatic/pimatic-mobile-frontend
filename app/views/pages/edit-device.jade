@@ -12,7 +12,12 @@ div#edit-device-page(data-role='page')
       .ui-field-contain.has-device-id-input
         label(for='edit-device-class')=__('Class') + ': '
         select#select-device-class(name='select-device-class', data-bind="jqmoptions: deviceClasses, value: deviceClass, jqmenabled: action() == 'add'")
+      <!-- ko if: $root.configSchema() && $root.configSchema().error -->
+      div(data-bind="text: $root.configSchema().error")
+      <!-- /ko -->
+      <!-- ko if: !($root.configSchema() && $root.configSchema().error) -->
       <!-- ko template: { name: 'json-scheme-editor-object', data: {schema: $root.configSchema(), value: $root.deviceConfig() } } --><!-- /ko -->
+      <!-- /ko -->
       .ui-field-contain.ui-grid-a
         div.ui-block-a
           a#edit-device-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"

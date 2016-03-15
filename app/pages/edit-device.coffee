@@ -29,7 +29,12 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
         if className? and typeof className is "string" and className.length > 0
           pimatic.client.rest.getDeviceConfigSchema({className}).done( (result) =>
             if result.success?
-              schema = result.configSchema
+              schema = result.configSchema or {
+                error: __('No plugin was found that handles this device class.')
+                type: 'object'
+                properties: {}
+              }
+              console.log(schema)
               delete schema.properties.id
               delete schema.properties.name
               delete schema.properties.class
@@ -94,10 +99,14 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 )
 
 $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
+  editDevicePage = pimatic.pages.editDevice
   pimatic.client.rest.getDeviceClasses({}).done( (result) =>
     if result.success
       deviceClasses = [""].concat result.deviceClasses
-      pimatic.pages.editDevice.deviceClasses(deviceClasses)
+      deviceClass = editDevicePage.deviceClass()
+      if deviceClass? and deviceClass.length > 0
+        deviceClasses.push(deviceClass)
+      editDevicePage.deviceClasses(deviceClasses)
   )
 )
 
