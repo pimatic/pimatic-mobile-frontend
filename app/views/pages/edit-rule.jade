@@ -55,7 +55,7 @@ script#rule-condition-selector-template(type='text/template')
             a#rule-condition-ok.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-bind="click: conditionInput.ok")=__('OK')
         a#rule-confition-remove.delete-link.ui-btn.ui-icon-delete.ui-btn-icon-left(data-bind="visible: conditionInput.canRemove, click: conditionInput.remove")=__('Remove')
 script#rule-predicate-template(type='text/template')
-  div.node(data-bind="css: { 'node-predicate': type == 'predicate', 'node-and': type == 'and', 'node-or': type == 'or' }")
+  div.node(data-bind="css: { 'node-predicate': type == 'predicate', 'node-and': type == 'and' , 'node-andIf': type == 'and if', 'node-or': type == 'or', 'node-orWhen': type == 'or when' }")
     <!-- ko template: { name: "rule-predicate-template", data: $data.left, if: $data.left} --><!-- /ko -->
     <!-- ko if: type != 'predicate' -->
     span.binary-operator(data-bind="text: type")
@@ -66,11 +66,17 @@ script#rule-predicate-template(type='text/template')
     <!-- /ko -->
     <!-- ko template: { name: "rule-predicate-template", data: $data.right, if: $data.right} --><!-- /ko -->
     div.buttons
-      <!-- ko if: type != 'predicate' || $parent.type != 'and'-->
+      <!-- ko if: type != 'predicate' || $parent.type != 'and' -->
       a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addAnd")=__('and')
       <!-- /ko -->
-      <!-- ko if: type != 'predicate' || $parent.type != 'or'-->
+      <!-- ko if: !$parent.type -->
+      a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addAndIf")=__('and if')
+      <!-- /ko -->
+      <!-- ko if: (type != 'predicate' || $parent.type != 'or') && $parent.type -->
       a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addOr")=__('or')
+      <!-- /ko -->
+      <!-- ko if: !$parent.type -->
+      a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini.ui-corner-all(data-bind="click: $root.addOrWhen")=__('or when')
       <!-- /ko -->
 div#edit-rule-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
@@ -85,7 +91,7 @@ div#edit-rule-page(data-role='page')
         label.short-label(for='edit-rule-name')=__('ID') + ': '
         input#edit-rule-id(type="text", placeholder="Internal ID" data-bind="textInput: ruleId, jqmenabled: action() == 'add'")  
       .ui-field-contain
-        label(for='edit-rule-condition')='when'
+        label(for='edit-rule-condition')='When'
         textarea#edit-rule-condition(placeholder="Condition", autocomplete="off", autocapitalize="none", autocorrect="off", spellcheck="false", data-bind="textInput: ruleCondition, visible: editMode() == 'text'")
         <!-- ko if: editMode() == "text" -->
         a.input-mode-switch(href="#", data-bind="click: $root.setGuiMode")=__('switch to gui mode')

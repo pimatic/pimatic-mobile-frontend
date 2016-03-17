@@ -3,7 +3,7 @@ script#rule-template(type="text/template")
     a(data-transition='slidefade', href='#edit-rule-page', style="white-space: normal", data-bind="click: $root.onEditRuleClicked")
       span.name(data-bind="text: ($data.name() != '' ? $data.name() : __('Unnamed rule') ) ")
       p
-        span.if='if'
+        span.if='When'
         | 
         span.condition(data-bind="text: conditionToken")
         | 

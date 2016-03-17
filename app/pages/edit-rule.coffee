@@ -319,8 +319,10 @@ $(document).on("pagecreate", '#edit-rule-page' , (event) ->
       @conditionInput.editPredicate(ele)
 
     addAnd: (ele) => @addBinaryOp('and', ele)
+    addAndIf: (ele) => @addBinaryOp('and if', ele)
 
     addOr: (ele) =>  @addBinaryOp('or', ele)
+    addOrWhen: (ele) =>  @addBinaryOp('or when', ele)
 
     addBinaryOp: (type, ele) ->
       newBinOp =  {type, left: ele, right: null}
@@ -410,7 +412,8 @@ $(document).on("pagecreate", '#edit-rule-page' , (event) ->
             @predicateToString(node.predicate)
           else 
             sub = "#{nodeToString node.left, node} #{node.type} #{nodeToString node.right, node}"
-            wrap = parent? and (parent.type isnt node.type)
+            wrap = parent? and (parent.type isnt node.type) and
+              not (parent.type in ['and if', 'or when'])
             if wrap then "[#{sub}]" else sub
 
       return nodeToString tree

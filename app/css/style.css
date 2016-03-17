@@ -1858,7 +1858,8 @@ border-bottom-left-radius: inherit;
 }
 
 .node-and > .node-and, .node-or > .node-or, 
-#rule-condition-gui > .node-and, #rule-condition-gui > .node-or{
+#rule-condition-gui > .node-and, #rule-condition-gui > .node-or,
+#rule-condition-gui > .node-andIf, #rule-condition-gui > .node-orWhen{
   padding: 0;
   border: none;
 }
