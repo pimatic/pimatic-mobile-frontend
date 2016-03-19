@@ -9,7 +9,11 @@ wrap = (schema, value) ->
       unless value? then return ko.observable(value)
       if schema.properties?
         for name, prop of schema.properties
-          value[name] = wrap prop, value[name]
+          propValue = value[name]
+          if not propValue? and prop?.type?
+            if prop.type in ["array", "object"]
+              propValue = prop.default
+          value[name] = wrap prop, propValue
       return ko.observable(value)
     when "array"
       unless value? then return ko.observableArray(value)
@@ -153,7 +157,9 @@ getItemLabel = (value) ->
       else
         label = unwraped.id
     if label? and label.length > 0 then return label
-  return JSON.stringify(unwraped)
+    return JSON.stringify(unwraped)
+  else
+    return "#{unwraped}"
 
 enhanceSchema = (schema, name) ->
   schema.name = name
@@ -238,7 +244,10 @@ enhanceSchema = (schema, name) ->
               array.splice(i, 1)
               data.value(array)
               return
-      enhanceSchema(schema.items, null)
+      itemName = schema.items.name or "#{name} Item"
+      if name? and (matches = name.match(/^(.+)s/))?
+        itemName = matches[1]
+      enhanceSchema(schema.items, itemName)
     when "string", "number", "integer", "boolean"
       if schema.defines?.options?
         if not schema.enum?

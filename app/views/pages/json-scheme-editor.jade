@@ -47,6 +47,9 @@ script#json-scheme-editor-field(type='text/template')
   <!-- ko template: { name: 'json-scheme-editor-array', data: $data } --><!-- /ko -->
   <!-- /ko -->
 script#json-scheme-editor-object(type='text/template')
+  <!-- ko if: $data.schema && $data.schema.description -->
+  div.description(data-bind="text: $data.schema.description")
+  <!-- /ko -->
   div.properties
     <!-- ko if: $data.schema -->
     <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getProperties($data) } --><!-- /ko -->
@@ -56,6 +59,9 @@ script#json-scheme-editor-object(type='text/template')
     <!-- /ko -->
 script#json-scheme-editor-array(type='text/template')
   div.elements
+    <!-- ko if: $data.schema && $data.schema.description -->
+    div.description(data-bind="text: $data.schema.description")
+    <!-- /ko -->
     //- div(data-bind="text: JSON.stringify($data.schema.getItems($data.value), null, '  ')")
     <!-- ko if: $data.schema -->
     //-data-bind="sortable: {isSorting: isSortingDevices, sorted: onDevicesSorted, drop: onDropDeviceOnTrash}, dragslide: {}

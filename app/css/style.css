@@ -1972,11 +1972,23 @@ border-bottom-left-radius: inherit;
   font-size: 14px;
 }
 
-.ui-field-contain .description {
+.json-schema-editor .description {
   clear: both;
   padding-top: 8px;
   font-style: italic;
   color: gray;
+}
+
+.json-schema-editor h3 {
+  margin-bottom: 5px;
+}
+
+.json-schema-editor .elements {
+  padding-left: 5px;
+}
+
+.json-schema-editor .elements > ul {
+  margin-top: 7px;
 }
 
 .json-schema-editor .properties label.ui-checkbox input{
@@ -1991,7 +2003,7 @@ border-bottom-left-radius: inherit;
   padding-left: 20px;
   margin-left: -10px;
   border-left: 5px solid #ddd /*{a-body-border}*/;
-  margin-top: -47px;
+  margin-top: -33px;
   padding-top: 22px;
   padding-right: 10px;
   border-radius: 5px;
