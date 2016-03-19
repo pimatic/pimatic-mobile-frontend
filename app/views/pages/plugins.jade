@@ -3,7 +3,7 @@ script#loading-template(type='text/template')
 
 div#plugins-page(data-role='page')
   div(data-theme=theme.headerSwatch, data-role='header')
-    a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left', 
+    a(href='#index', data-role='button', data-icon='arrow-l', data-iconpos='left',
       data-inline='true', data-transition="slidefade", data-direction="reverse")=__('Back')
     <!-- ko if: $root.hasPermission('plugins', 'write') -->
     a.restart-now(data-role="button", data-icon="refresh",  data-iconpos='left', data-inline="true")=__('Restart')
@@ -33,8 +33,13 @@ div#plugins-page(data-role='page')
                 | 
                 span.activated(data-bind="visible: $data.activated()")=__('activated')
                 | 
+                span.compatibility-unknown(data-bind="visible: $data.isCompatible !== true")=__('compatibility unknown')
+                | 
                 span.update-available(data-bind="visible: $data.updateAvailable")=__('update available')
-              p.description(data-bind="text: description")
+              p.description
+                span(data-bind="text: description")
+                | 
+                a(target="_blank" data-bind="attr: {href: 'https://pimatic.org/plugins/pimatic-'+$data.name}")=__('Show Readme')
               .buttons
                 a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.activate(data-bind="visible: !$data.activated(), click: $root.onActivateClick")=__('Activate')
                 a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.deactivate(data-bind="visible: $data.activated(), click: $root.onDeactivateClick")=__('Deactivate')
@@ -55,8 +60,13 @@ div#plugins-page(data-role='page')
                   span.loaded(data-bind="visible: loaded()")=__('loaded')
                   | 
                   span.activated(data-bind="visible: $data.activated()")=__('activated')
+                  | 
+                  span.compatibility-unknown(data-bind="visible: $data.isCompatible !== true")=__('compatibility unknown')
                 //-p
                 //-  a.homepage(data-role="none")
-                p.description(data-bind="text: description")
+                p.description
+                  span(data-bind="text: description")
+                  | 
+                  a(target="_blank" data-bind="attr: {href: 'https://pimatic.org/plugins/pimatic-'+$data.name}")=__('Show Readme')
                 .buttons
                   a.ui-btn.ui-mini.ui-btn-inline.ui-icon-power.ui-btn-icon-left.install(data-bind="visible: !installed(), click: $root.onInstallClick")=__('Install')

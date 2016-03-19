@@ -909,7 +909,9 @@ table#database-attribute-info {
 }
 
 #plugin-list .activated, #plugin-browse-list .activated, #plugin-list .update-available,
-#plugin-browse-list .installed, #plugin-list .loaded, #plugin-browse-list .loaded{
+#plugin-list .compatibility-unknown,
+#plugin-browse-list .installed, #plugin-list .loaded, #plugin-browse-list .loaded,
+#plugin-browse-list .compatibility-unknown {
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   border-radius: 6px;
@@ -931,6 +933,25 @@ table#database-attribute-info {
 #plugin-list .update-available{
   background: #FFCC00;
   color: white;
+}
+
+#plugin-list .compatibility-unknown,
+#plugin-browse-list .compatibility-unknown {
+  background: #7C7C7C;
+  color: white;
+}
+
+#plugin-list .version, #plugin-browse-list .version {
+  color: #7C7C7C;
+}
+
+#plugins-page .description {
+  font-size: 0.85em;
+  padding: 8px 0;
+}
+
+#plugins-page .buttons {
+  margin-left: -.446em;
 }
 
 .page-message {
