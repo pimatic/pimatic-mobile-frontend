@@ -23,7 +23,7 @@ $(document).ready( tc (event) ->
 )
 
 $(document).on("pagebeforeshow", '#login-page', (event) ->
-  if pimatic.socket.io?.connected.length isnt 0
+  if pimatic.socket.io?.connected? and pimatic.socket.io?.connected?.length isnt 0
     pimatic.pages.login.hideLoginDialog()
     return false
   return true
