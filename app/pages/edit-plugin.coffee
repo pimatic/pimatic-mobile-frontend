@@ -97,7 +97,7 @@ $(document).on("pagebeforeshow", '#edit-plugin-page', (event) ->
   if params?
     editPluginPage.pluginName(null)
     editPluginPage.configSchema(null)
-    pimatic.client.rest.getPluginConfig({pluginName: params.pluginName}).done( (result) =>
+    pimatic.client.rest.getPluginConfig({pluginName: params.pluginName}).always( (result) =>
       if result.success?
         config = result.config || {}
         editPluginPage.pluginConfig(config)

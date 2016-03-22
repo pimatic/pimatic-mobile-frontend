@@ -47,7 +47,7 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
       )
 
     onActivateClick: (plugin) =>
-      pimatic.client.rest.getPluginConfig({pluginName: plugin.name}).done( (result) =>
+      pimatic.client.rest.getPluginConfig({pluginName: plugin.name}).always( (result) =>
         if result.success?
           @restartRequired(true)
           unless result.config?
