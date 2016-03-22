@@ -46,14 +46,14 @@ module.exports = (env) ->
         if theme.indexOf('/') is -1 then continue
         @themes.push theme
       
-      app.post('/client-error', (req, res) =>
+      @app.post('/client-error', (req, res) =>
         error = req.body.error
         env.logger.error("Client error:", error.message)
         env.logger.debug JSON.stringify(error, null, "  ")
         res.send 200
       )
 
-      app.get('/refresh', (req, res) =>
+      @app.get('/refresh', (req, res) =>
         url = req.query.url
         unless url then url = "/"
         res.redirect 302, url
@@ -65,7 +65,7 @@ module.exports = (env) ->
         @framework.config.settings.httpsServer.rootCertFile
       )
       fs.exists certFile, (exists) => @hasRootCACert = exists
-      app.get '/root-ca-cert.crt', (req, res) =>
+      @app.get '/root-ca-cert.crt', (req, res) =>
         res.setHeader('content-type', 'application/x-x509-ca-cert')
         res.sendfile(certFile)
 
