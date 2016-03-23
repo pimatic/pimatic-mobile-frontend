@@ -176,10 +176,10 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
 
     discoverDevices: () =>
       time = 20000 #ms
+      @discoverMessages([])
+      @discoveredDevices([])
       pimatic.client.rest.discoverDevices({time})
       .done( =>
-        @discoverMessages([])
-        @discoveredDevices([])
         pimatic.loading "discoverdevices", "show", text: __('Searching for devices')
         setTimeout(( =>
           @discoverMessages([])
