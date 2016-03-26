@@ -506,7 +506,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   padding-left: 36px !important;
 }
 
-.json-schema-editor .elements {
+.json-schema-editor .elements,
+.json-schema-editor .elements > ul {
   position: relative;
 }
 
