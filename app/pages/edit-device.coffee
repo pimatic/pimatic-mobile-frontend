@@ -16,6 +16,7 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
     deviceClasses: ko.observableArray()
     deviceConfig: ko.observable({})
     configSchema: ko.observable(null)
+    lastDeviceClass: null
     editor: null
 
     constructor: ->
@@ -24,7 +25,6 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
       )
 
       pimatic.autoFillId(@deviceName, @deviceId, @action)
-
       @deviceClass.subscribe( (className) =>
         if className? and typeof className is "string" and className.length > 0
           pimatic.client.rest.getDeviceConfigSchema({className}).done( (result) =>
@@ -34,16 +34,20 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
                 type: 'object'
                 properties: {}
               }
-              console.log(schema)
               delete schema.properties.id
               delete schema.properties.name
               delete schema.properties.class
-              unwraped = jsonschemaeditor.unwrap(@deviceConfig())
-              rewraped = jsonschemaeditor.wrap(schema, unwraped)
-              @deviceConfig(rewraped())
-              # console.log JSON.stringify(schema, null, 2);
+              wrapedConfig = null
+              unless @lastDeviceClass?
+                # insert initial config
+                unwraped = jsonschemaeditor.unwrap(@deviceConfig())
+                wrapedConfig = jsonschemaeditor.wrap(schema, unwraped)
+              else
+                wrapedConfig = jsonschemaeditor.wrap(schema, {})
+              @deviceConfig(wrapedConfig())
               jsonschemaeditor.enhanceSchema schema, null
               @configSchema(schema)
+              @lastDeviceClass = className
           )
         else
           @configSchema(null)
@@ -100,6 +104,7 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
 
 $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
   editDevicePage = pimatic.pages.editDevice
+  editDevicePage.lastDeviceClass = null
   pimatic.client.rest.getDeviceClasses({}).done( (result) =>
     if result.success
       deviceClasses = [""].concat result.deviceClasses
