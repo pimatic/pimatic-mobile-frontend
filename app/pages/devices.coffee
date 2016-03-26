@@ -160,7 +160,7 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
         collapsed[group.id] = true
       @collapsedGroups(collapsed)
       @saveCollapseState()
-      return false;
+      return false
 
     isGroupCollapsed: (group) => @collapsedGroups()[group.id] is true
 
