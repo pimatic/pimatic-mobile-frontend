@@ -99,10 +99,10 @@ getProperties = (data) ->
       definedByValue = ko.unwrap(parentValue[prop.definedBy])
       if definedByValue? and definedByValue of prop.options
         commonProp = prop
+        commonProp.definedByValue = commonProp.definedByValue or definedByValue
         prop = prop.options[definedByValue]
         commonProp.values = commonProp.values or {}
-        if commonProp.definedByValue?
-          commonProp.values[commonProp.definedByValue] = propValue
+        commonProp.values[commonProp.definedByValue] = propValue
         commonProp.definedByValue = definedByValue
         propValue = commonProp.values[definedByValue]
     if (not propValue?) and data.schema.required? and name in data.schema.required
