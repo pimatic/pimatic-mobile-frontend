@@ -1550,6 +1550,7 @@ border-bottom-left-radius: inherit;
 
 .attr-presence {
   display: inline-block;
+  float: right;
   border-radius: 20px;
   width: 14px;
   height: 14px;
