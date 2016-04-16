@@ -44,6 +44,7 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
                 wrapedConfig = jsonschemaeditor.wrap(schema, unwraped)
               else
                 wrapedConfig = jsonschemaeditor.wrap(schema, {})
+              @configSchema(null)
               @deviceConfig(wrapedConfig())
               jsonschemaeditor.enhanceSchema schema, null
               @configSchema(schema)
@@ -73,7 +74,6 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
       deviceConfig.id = @deviceId()
       deviceConfig.name = @deviceName()
       deviceConfig.class = @deviceClass()
-
       (
         switch @action()
           when 'add' then pimatic.client.rest.addDeviceByConfig({deviceConfig})

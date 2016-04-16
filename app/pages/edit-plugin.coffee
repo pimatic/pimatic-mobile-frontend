@@ -26,6 +26,7 @@ $(document).on("pagebeforecreate", '#edit-plugin-page', (event) ->
               delete schema.properties.plugin
               unwraped = jsonschemaeditor.unwrap(@pluginConfig())
               rewraped = jsonschemaeditor.wrap(schema, unwraped)
+              @configSchema(null)
               @pluginConfig(rewraped())
               jsonschemaeditor.enhanceSchema schema, null
               schema.name = pluginName
