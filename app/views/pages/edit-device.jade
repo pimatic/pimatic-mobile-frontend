@@ -20,8 +20,7 @@ div#edit-device-page(data-role='page')
       <!-- /ko -->
       .ui-field-contain.ui-grid-a
         div.ui-block-a
-          a#edit-device-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-transition='slide', data-direction="reverse"
-                             data-role="button", href='#devices-page')=__('Cancel')
+          a#edit-device-cancel.ui-btn.ui-icon-back.ui-btn-icon-left(data-role="button", data-bind="click: onCancel")=__('Cancel')
         div.ui-block-b
           a#edit-device-save.ui-btn.ui-icon-check.ui-btn-icon-left.ui-btn-b(data-role="button", data-bind="click: onSubmit")=__('Save')
       div#edit-device-advanced(data-bind="visible: action() == 'update'")

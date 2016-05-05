@@ -443,6 +443,12 @@ $(document).on("pagecreate", '#index', tc (event) ->
     }
     jQuery.mobile.changePage '#graph-page', transition: 'slide'
 
+  $(document).on "vclick", '#to-device-editor-page', ->
+    deviceId = $('#to-device-editor-page').attr('data-deviceId')
+    device = pimatic.getDeviceById(deviceId)
+    jQuery.mobile.pageParams = {action: 'update', device: device, back: '#index'}
+    jQuery.mobile.changePage '#edit-device-page', transition: 'slide'
+
   return
 )
 
