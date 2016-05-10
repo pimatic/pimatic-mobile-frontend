@@ -76,7 +76,8 @@ $(document).on( "pagebeforecreate", (event) ->
           <a href="#" id="to-graph-page"
           data-deviceId="#{@device.id}">Graph</a>
         """
-      buttons.push """
+      if pimatic.hasPermission('devices', 'write')
+        buttons.push """
           <a href="#" id="to-device-editor-page"
           data-deviceId="#{@device.id}">Edit Device</a>
         """

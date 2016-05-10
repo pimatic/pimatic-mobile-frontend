@@ -444,9 +444,6 @@ $(document).on("pagecreate", '#index', tc (event) ->
     jQuery.mobile.changePage '#graph-page', transition: 'slide'
 
   $(document).on "vclick", '#to-device-editor-page', ->
-    unless pimatic.hasPermission('devices', 'write')
-      pimatic.showToast(__("Sorry, you have no permissions to edit this device."))
-      return false
     deviceId = $('#to-device-editor-page').attr('data-deviceId')
     device = pimatic.getDeviceById(deviceId)
     jQuery.mobile.pageParams = {action: 'update', device: device, back: '#index'}
