@@ -16,6 +16,7 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
     deviceClasses: ko.observableArray()
     deviceConfig: ko.observable({})
     configSchema: ko.observable(null)
+    back: null
     lastDeviceClass: null
     editor: null
 
@@ -79,8 +80,9 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
           when 'add' then pimatic.client.rest.addDeviceByConfig({deviceConfig})
           when 'update' then pimatic.client.rest.updateDeviceByConfig({deviceConfig})
           else throw new Error("Illegal devicedevice action: #{action()}")
-      ).done( (data) ->
-        if data.success then $.mobile.changePage '#devices-page', {transition: 'slide', reverse: true}   
+      ).done( (data) =>
+        page = @back ?  '#devices-page'
+        if data.success then $.mobile.changePage page, {transition: 'slide', reverse: true}
         else alert data.error
       ).fail(ajaxAlertFail)
       return false
@@ -89,11 +91,16 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
       really = confirm(__("Do you really want to delete the %s device?", @deviceName()))
       if really
         pimatic.client.rest.removeDevice({deviceId: @deviceId()})
-          .done( (data) ->
-            if data.success then $.mobile.changePage '#devices-page', {transition: 'slide', reverse: true}   
+          .done( (data) =>
+            page = @back ?  '#devices-page'
+            if data.success then $.mobile.changePage page, {transition: 'slide', reverse: true}
             else alert data.error
           ).fail(ajaxAlertFail)
       return false
+
+    onCancel: ->
+      page = @back ?  '#devices-page'
+      $.mobile.changePage page, {transition: 'slide', reverse: true}
 
   try
     pimatic.pages.editDevice = new EditDeviceViewModel()
@@ -128,13 +135,14 @@ $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
   params = jQuery.mobile.pageParams
   jQuery.mobile.pageParams = {}
 
-  fill = (action, deviceId, deviceName, deviceConfig) =>
+  fill = (action, deviceId, deviceName, deviceConfig, back) =>
     editDevicePage.action(action)
     editDevicePage.deviceId(deviceId)
     editDevicePage.deviceName(deviceName)
     editDevicePage.deviceClass(null)
     editDevicePage.configSchema(null)
     editDevicePage.deviceConfig(deviceConfig)
+    editDevicePage.back = back
     deviceClasses = pimatic.pages.editDevice.deviceClasses()
     unless deviceConfig.class in deviceClasses
       deviceClasses.push deviceConfig.class
@@ -143,7 +151,7 @@ $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
 
   if params?.action is "update"
     device = params.device
-    fill('update', device.id, device.name(), device.config)
+    fill('update', device.id, device.name(), device.config, params?.back)
   else if params?.action is "discovered"
     discoveredDevice = params.discoveredDevice
     fill('add', '', discoveredDevice.deviceName, discoveredDevice.config)
