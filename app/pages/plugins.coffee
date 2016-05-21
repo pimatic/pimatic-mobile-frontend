@@ -49,7 +49,6 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
     onActivateClick: (plugin) =>
       pimatic.client.rest.getPluginConfig({pluginName: plugin.name}).always( (result) =>
         if result.success?
-          @restartRequired(true)
           unless result.config?
             jQuery.mobile.pageParams = {action: 'add', pluginName: plugin.name}
             jQuery.mobile.changePage('#edit-plugin-page')
@@ -60,6 +59,7 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
             }).done( (result) =>
               if result.success
                 plugin.activated(true)
+                @restartRequired(true)
             )
       )
       return false
@@ -119,9 +119,16 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
         @updateFromJs(browsePlugins: data.plugins)
       ).fail(ajaxAlertFail)
 
-    refresh: ->
+    doesRequireRestart: ->
+      pimatic.client.rest.doesRequireRestart().done( (data) =>
+        # save the plugins in installedPlugins
+        @restartRequired(data.restartRequired)
+      ).fail(ajaxAlertFail)
+
+    refresh: =>
       @getInstalledPluginsWithInfo()
       @searchForPluginsWithInfo()
+      @doesRequireRestart()
 
   try
     pimatic.pages.plugins = new PluginsViewModel()
@@ -138,12 +145,24 @@ $(document).on("pagecreate", '#plugins-page', (event) ->
 
   $('#plugins-page').on "click", '.restart-now', (event, ui) ->
     pimatic.client.rest.restart({}).fail(ajaxAlertFail)
+
+  pimatic.socket.on('connect', () ->
+    console.log()
+  )
 )
 
 $(document).on "pageinit", '#plugins-page', (event) ->
   pluginPage = pimatic.pages.plugins
   # Get all installed Plugins
   pluginPage.refresh()
+
+$(document).on "pageshow","#plugins-page", ->
+  pimatic.socket.on('connect', pimatic.pages.plugins.refresh)
+
+$(document).on "pagebeforehide","#plugins-page", ->
+  pimatic.socket.off('connect', pimatic.pages.plugins.refresh)
+
+
 
   # $('#plugins-page').on "click", '#plugin-do-action', (event, ui) ->
   #   val = $('#select-plugin-action').val()
