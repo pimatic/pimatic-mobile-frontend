@@ -50,7 +50,7 @@ module.exports = (env) ->
         error = req.body.error
         env.logger.error("Client error:", error.message)
         env.logger.debug JSON.stringify(error, null, "  ")
-        res.send 200
+        res.sendStatus 200
       )
 
       @app.get('/refresh', (req, res) =>
