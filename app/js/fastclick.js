@@ -237,13 +237,6 @@
 
 			break;
 		case 'input':
-
-			// File inputs need real clicks on iOS 6 due to a browser bug (issue #68)
-			if ((deviceIsIOS && target.type === 'file') || target.disabled) {
-				return true;
-			}
-
-			break;
 		case 'label':
 		case 'iframe': // iOS8 homescreen apps can prevent events bubbling into frames
 		case 'video':
