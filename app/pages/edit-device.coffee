@@ -154,7 +154,8 @@ $(document).on("pagebeforeshow", '#edit-device-page', (event) ->
     fill('update', device.id, device.name(), device.config, params?.back)
   else if params?.action is "discovered"
     discoveredDevice = params.discoveredDevice
-    fill('add', '', discoveredDevice.deviceName, discoveredDevice.config)
+    config = discoveredDevice.config
+    fill('add', config.id or '', config.name or discoveredDevice.deviceName, config)
   else
     editDevicePage.resetFields()
     editDevicePage.action('add')
