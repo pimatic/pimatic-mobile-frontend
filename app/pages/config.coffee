@@ -41,7 +41,7 @@ $(document).on("pagecreate", '#config-page', (event) ->
       )
 
       @editor = new JSONEditor(container, {
-        mode: 'view',
+        mode: 'code',
         modes: ['view', 'code'] 
       })
       @getConfig()
