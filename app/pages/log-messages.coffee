@@ -84,6 +84,17 @@ $(document).on("pagecreate", '#log-page', tc (event) ->
         if current.date is before.date then return current.time
         else return "#{current.date} #{current.time}"
 
+    orderedInsert: (@list, item)->
+      pos = -1
+      for elem, index in @list
+        if elem >= item
+          pos = index
+          break
+      if pos is -1
+        @list.push item
+      else
+        @list.splice index, 0, item
+
     loadMessages: ->
 
       ajaxCall = =>
@@ -107,7 +118,7 @@ $(document).on("pagecreate", '#log-page', tc (event) ->
             @updateFromJs(data.messages)
             for m in data.messages 
               for t in m.tags
-                unless t in @tags() then @tags.push t
+                unless t in @tags() then @orderedInsert @tags, t
           return
         ).fail(ajaxAlertFail)
 
@@ -118,7 +129,7 @@ $(document).on("pagecreate", '#log-page', tc (event) ->
       pimatic.client.rest.queryMessagesTags({criteria: {}}).done( tc (data) =>
         if data.success
           for t in data.tags
-            unless t in @tags() then @tags.push t
+            unless t in @tags() then @orderedInsert @tags, t
       )
       pimatic.client.rest.queryMessagesCount({criteria: {}}).done( tc (data) =>
         if data.success
