@@ -62,8 +62,9 @@ $(document).on("pagebeforecreate", '#edit-device-page', (event) ->
     resetFields: () ->
       @deviceName('')
       @deviceId('')
-      @deviceConfig({})
       @deviceClass('')
+      @configSchema(null)
+      @deviceConfig({})
 
     onSubmit: ->
       deviceConfig = jsonschemaeditor.unwrap @deviceConfig()
