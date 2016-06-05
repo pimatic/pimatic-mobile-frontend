@@ -2014,6 +2014,10 @@ border-bottom-left-radius: inherit;
   margin-top: 7px;
 }
 
+.json-schema-editor .properties {
+  position: relative;
+}
+
 .json-schema-editor .properties label.ui-checkbox input{
   left: 0;
 }
@@ -2035,6 +2039,44 @@ border-bottom-left-radius: inherit;
 
 .json-schema-editor .properties  h3 {
   padding: 0 5px;
+}
+
+.json-schema-editor .add-property > label{
+  font-weight: bold;
+}
+
+.json-schema-editor .add-property-name {
+  width: 32%;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.json-schema-editor .add-property-fields {
+  margin-top: -8px;
+}
+
+
+
+.json-schema-editor .remove-property {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 5px;
+  margin-left: 0;
+}
+
+.json-schema-editor .properties > .remove-property {
+  left: 10px;
+  top: -4px;
+}
+
+.json-schema-editor .isExtra > label {
+  padding-left: 40px;
+  box-sizing: border-box;
+}
+
+.json-schema-editor h3.isExtra  {
+  padding-left: 45px;
 }
 
 .ui-field-contain .notset, .default {

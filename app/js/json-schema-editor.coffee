@@ -111,6 +111,33 @@ getProperties = (data) ->
     props.push({ schema: prop, value: parentValue[name] })
   return props
 
+getExtraProperties = (data) ->
+  unless data.schema.extraProperties?
+    return []
+  parentValue = ko.unwrap(data.value)
+  unless parentValue?
+    parentValue = {}
+    data.value(parentValue)
+  extraProperties = data.schema.extraProperties()
+  modified = false
+  for name, val of parentValue
+    unless name of extraProperties and name of (data.schema.properties or {})
+      val = unwrap val
+      if typeof val isnt "undefined"
+        newScheme = {type: typeof val, isExtra: true}
+        enhanceSchema(newScheme, name)
+        extraProperties[name] = newScheme
+        modified = true
+  if modified
+    data.schema.extraProperties(extraProperties)
+  props = []
+  for name, prop of extraProperties
+    propValue = unwrap parentValue[name]
+    parentValue[name] = wrap(prop, propValue)
+    props.push({ schema: prop, value: parentValue[name], parent: data })
+  return props
+
+
 getItems = (value) ->
   unless ko.unwrap(value)?
     return []
@@ -131,7 +158,7 @@ editOk = (parent, data) ->
     parent.value(array)
   else
     parent.value.push(editingItem.value)
-  data.schema.editingItem(null)  
+  data.schema.editingItem(null)
 
 editCancel = (data) ->
   data.schema.editingItem(null)
@@ -144,6 +171,32 @@ addItem = (data) ->
     value = wrap data.schema.items, getDefaultValue(data.schema.items)
   data.schema.items.editingItem(schema: data.schema.items, value: value)
   return
+
+addNewProperty = (data) ->
+  name = data.schema.newPropertyName()
+  if name.length is 0
+    alert('Name can not be empty')
+    return
+  type = data.schema.newPropertyType()
+  schema = {type: type, isExtra: true}
+  enhanceSchema(schema, name)
+  parentValue = data.value()
+  parentValue[name] = getDefaultValue(schema)
+  data.value(parentValue)
+  extraProperties = data.schema.extraProperties()
+  extraProperties[name] = schema
+  data.schema.extraProperties(extraProperties)
+  data.schema.newPropertyName("")
+  data.schema.newPropertyType("string")
+
+removeExtraProperty = (data) ->
+  name = data.schema.name
+  parentValue = unwrap data.parent.value
+  delete parentValue[name]
+  extraProperties = data.parent.schema.extraProperties()
+  delete extraProperties[name]
+  data.parent.value(parentValue)
+  data.parent.schema.extraProperties(extraProperties)
 
 getItemLabel = (value) ->
   unwraped = unwrap value
@@ -189,6 +242,15 @@ enhanceSchema = (schema, name) ->
     #when 'string', 'number', "integer"
     when 'object'
       schema.getProperties = getProperties
+      schema.allowAdditionalProperties = not schema.properties?
+      if schema.allowAdditionalProperties
+        schema.newPropertyName = ko.observable("")
+        schema.newPropertyType = ko.observable("string")
+        schema.newPropertyTypes = ["string", "number", "boolean", "object"]
+        schema.newPropertyAdd = addNewProperty
+        schema.extraProperties = ko.observable({})
+        schema.getExtraProperties = getExtraProperties
+        schema.removeExtraProperty = removeExtraProperty
       if schema.properties?
         schema.hasProperties = Object.keys(schema.properties).length > 0
         for name, prop of schema.properties

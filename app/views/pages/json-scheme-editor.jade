@@ -1,6 +1,9 @@
 script#json-scheme-editor-field(type='text/template')
   <!-- ko if: $data.schema.name && $data.schema.type !== "object" && $data.schema.type !== "array" -->
-  .ui-field-contain
+  .ui-field-contain(data-bind="css: {isExtra: $data.schema.isExtra}")
+    <!-- ko if: $data.schema && $data.schema.isExtra -->
+    a.remove-property.ui-btn.ui-icon-minus.ui-btn-inline.ui-mini.ui-btn-icon-notext(data-bind="click: $parent.schema.removeExtraProperty")
+    <!-- /ko -->
     <!-- ko if: typeof $data.schema.default !== "undefined" || $data.schema.notRequired -->
     label.ui-checkbox.ui-mini(for='')
       span(data-bind="text: $data.schema.name")
@@ -39,11 +42,11 @@ script#json-scheme-editor-field(type='text/template')
     div.description(data-bind="text: $data.schema.description")
   <!-- /ko -->
   <!-- ko if: $data.schema.type === "object" -->
-  h3(data-bind="text: $data.schema.name")
+  h3(data-bind="text: $data.schema.name, css: {isExtra: $data.schema && $data.schema.isExtra}")
   <!-- ko template: { name: 'json-scheme-editor-object', data: $data } --><!-- /ko -->
   <!-- /ko -->
   <!-- ko if: $data.schema.type === "array" -->
-  h3(data-bind="text: $data.schema.name")
+  h3(data-bind="text: $data.schema.name, css: {isExtra: $data.schema && $data.schema.isExtra}")
   <!-- ko template: { name: 'json-scheme-editor-array', data: $data } --><!-- /ko -->
   <!-- /ko -->
 script#json-scheme-editor-object(type='text/template')
@@ -51,14 +54,30 @@ script#json-scheme-editor-object(type='text/template')
   div.description(data-bind="text: $data.schema.description")
   <!-- /ko -->
   div.properties
+    <!-- ko if: $data.schema && $data.schema.isExtra -->
+    a.remove-property.ui-btn.ui-icon-minus.ui-btn-inline.ui-mini.ui-btn-icon-notext(data-bind="click: $data.schema.removeExtraProperty")
+    <!-- /ko -->
     <!-- ko if: $data.schema -->
     <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getProperties($data) } --><!-- /ko -->
-    <!-- ko if: !$data.schema.hasProperties -->
+    <!-- ko if: $data.schema.allowAdditionalProperties -->
+    <!-- ko template: { name: 'json-scheme-editor-field', foreach: $data.schema.getExtraProperties($data) } --><!-- /ko -->
+    div.ui-field-contain.add-property
+      label=__('Add a property')
+      div.add-property-fields
+        div.ui-input-text.ui-body-inherit.ui-corner-all.ui-shadow-inset.add-property-name
+          input(type="text", placeholder="Name" data-mini="true", data-inline="true", data-bind="jqmtextinput: $data.schema.newPropertyName")
+        select(data-mini="true", data-inline="true", data-bind="jqmoptions: $data.schema.newPropertyTypes, value: $data.schema.newPropertyType")
+        a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini(data-bind="click: $data.schema.newPropertyAdd")=__('Add')
+    <!-- /ko -->
+    <!-- ko if: !$data.schema.hasProperties && !$data.schema.allowAdditionalProperties -->
     p(data-bind="text: __('%s has no config options.', $data.schema.name)")
     <!-- /ko -->
     <!-- /ko -->
 script#json-scheme-editor-array(type='text/template')
   div.elements
+    <!-- ko if: $data.schema && $data.schema.isExtra -->
+    a.remove-property.ui-btn.ui-icon-minus.ui-btn-inline.ui-mini.ui-btn-icon-notext(data-bind="click: $data.schema.removeExtraProperty")
+    <!-- /ko -->
     <!-- ko if: $data.schema && $data.schema.description -->
     div.description(data-bind="text: $data.schema.description")
     <!-- /ko -->
