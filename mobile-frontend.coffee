@@ -165,6 +165,7 @@ module.exports = (env) ->
           "pimatic-mobile-frontend/app/js/lazyload.js"
         ]
         base: [
+          "pimatic-mobile-frontend/app/js/es6-promise.js"
           "pimatic-mobile-frontend/app/js/tracekit.js"
           "pimatic-mobile-frontend/app/js/jquery-1.11.2.js"
           "pimatic-mobile-frontend/app/mobile-init.js"
@@ -181,7 +182,7 @@ module.exports = (env) ->
           "pimatic-mobile-frontend/app/js/jqm-spinbox.js"
           "pimatic-mobile-frontend/app/js/jquery.autosize.input.js"
           "pimatic-mobile-frontend/app/js/human-format.js"
-          "pimatic-mobile-frontend/app/js/sweet-alert.js"
+          "pimatic-mobile-frontend/app/js/sweetalert2.js"
           "pimatic-mobile-frontend/app/js/headroom.js"
           "pimatic-mobile-frontend/app/js/inobounce.js"
           "pimatic-mobile-frontend/app/js/fastclick.js"
@@ -291,7 +292,7 @@ module.exports = (env) ->
           "pimatic-mobile-frontend/app/css/jquery.mobile.datepicker.css"
           "pimatic-mobile-frontend/app/css/jquery.textcomplete.css"
           "pimatic-mobile-frontend/app/css/owl.carousel.css"
-          "pimatic-mobile-frontend/app/css/sweet-alert.css"
+          "pimatic-mobile-frontend/app/css/sweetalert2.css"
           "pimatic-mobile-frontend/app/css/mobiscroll.animation.css"
           "pimatic-mobile-frontend/app/css/mobiscroll.widget.css"
           "pimatic-mobile-frontend/app/css/mobiscroll.scroller.css"

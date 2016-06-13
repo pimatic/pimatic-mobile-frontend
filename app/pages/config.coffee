@@ -66,7 +66,7 @@ $(document).on("pagecreate", '#config-page', (event) ->
             showCancelButton: true,
             confirmButtonText: "Continue",
             closeOnConfirm: true
-          }, =>
+          }).then( =>
             @locked(true)
             $.mobile.pageContainer.pagecontainer("change", data.toPage, {options: data.options})
           )
@@ -77,13 +77,13 @@ $(document).on("pagecreate", '#config-page', (event) ->
     toggleLock: ->
       if @locked()
         swal({
-          type: "prompt"
+          type: "question"
           title: "Unlock"
           text: "Please Enter your password to unlock the config page:"
-          promptPlaceholder: "Password"
-          promptDefaultValue: ""
-          promptInputType: "password"
-        }, (value) => 
+          inputPlaceholder: "Password"
+          inputValue: ""
+          input: "password"
+        }).then( (value) => 
           return pimatic.client.rest.getConfig({password: value}).done( (data) =>
             @config(data.config)
             @locked(no)
@@ -111,7 +111,7 @@ $(document).on("pagecreate", '#config-page', (event) ->
         showCancelButton: true,
         confirmButtonText: "Yes",
         closeOnConfirm: false
-      }, =>
+      }).then( =>
         try
           config = @editor.get()
           pimatic.client.rest.updateConfig(config: config).done( =>
