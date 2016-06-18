@@ -202,9 +202,11 @@ getItemLabel = (value) ->
   unwraped = unwrap value
   if @type is "object" and @properties?
     label = ""
-    if @properties.name? 
+    if @nameProperty? and unwraped[@nameProperty]?
+      label = unwraped[@nameProperty]
+    else if @properties.name? 
       label = unwraped.name
-    if @properties.id?
+    else if @properties.id?
       if label.length > 0
         label += " (#{unwraped.id})"
       else
