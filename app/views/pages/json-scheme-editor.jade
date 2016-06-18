@@ -68,6 +68,9 @@ script#json-scheme-editor-object(type='text/template')
           input(type="text", placeholder="Name" data-mini="true", data-inline="true", data-bind="jqmtextinput: $data.schema.newPropertyName")
         select(data-mini="true", data-inline="true", data-bind="jqmoptions: $data.schema.newPropertyTypes, value: $data.schema.newPropertyType")
         a.ui-btn.ui-icon-plus.ui-btn-icon-left.ui-btn-inline.ui-mini(data-bind="click: $data.schema.newPropertyAdd")=__('Add')
+    <!-- ko if: $data.schema && $data.schema.extraPropertiesDescription -->
+    div.description(data-bind="text: $data.schema.extraPropertiesDescription")
+    <!-- /ko -->
     <!-- /ko -->
     <!-- ko if: !$data.schema.hasProperties && !$data.schema.allowAdditionalProperties -->
     p(data-bind="text: __('%s has no config options.', $data.schema.name)")

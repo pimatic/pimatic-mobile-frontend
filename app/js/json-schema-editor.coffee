@@ -121,7 +121,7 @@ getExtraProperties = (data) ->
   extraProperties = data.schema.extraProperties()
   modified = false
   for name, val of parentValue
-    unless name of extraProperties and name of (data.schema.properties or {})
+    unless name of extraProperties or name of (data.schema.properties or {})
       val = unwrap val
       if typeof val isnt "undefined"
         newScheme = {type: typeof val, isExtra: true}
@@ -242,11 +242,17 @@ enhanceSchema = (schema, name) ->
     #when 'string', 'number', "integer"
     when 'object'
       schema.getProperties = getProperties
-      schema.allowAdditionalProperties = not schema.properties?
+      schema.allowAdditionalProperties = (
+        not schema.properties? or typeof schema.additionalProperties is "object"
+      )
       if schema.allowAdditionalProperties
         schema.newPropertyName = ko.observable("")
         schema.newPropertyType = ko.observable("string")
-        schema.newPropertyTypes = ["string", "number", "boolean", "object"]
+        if typeof schema.additionalProperties is "object" and schema.additionalProperties.type?
+          schema.extraPropertiesDescription = schema.additionalProperties.description
+          schema.newPropertyTypes = [schema.additionalProperties.type]
+        else
+          schema.newPropertyTypes = ["string", "number", "boolean", "object"]
         schema.newPropertyAdd = addNewProperty
         schema.extraProperties = ko.observable({})
         schema.getExtraProperties = getExtraProperties
