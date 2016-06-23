@@ -134,14 +134,13 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
       )()
 
     onAddDeviceClicked: ->
-      #pimatic.showToast("Sorry that operation is not supported yet.")
-      #return false
+      unless @hasPermission('devices', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to edit this device."))
+        return false
       jQuery.mobile.pageParams = {action: 'add'}
       return true
 
     onEditDeviceClicked: (device) =>
-      #pimatic.showToast("Sorry that operation is not supported yet.")
-      #return false
       unless @hasPermission('devices', 'write')
         pimatic.showToast(__("Sorry, you have no permissions to edit this device."))
         return false
@@ -149,8 +148,6 @@ $(document).on( "pagebeforecreate", '#devices-page', tc (event) ->
       return true
 
     onDiscoveredDeviceClicked: (discoveredDevice) =>
-      #pimatic.showToast("Sorry that operation is not supported yet.")
-      #return false
       unless @hasPermission('devices', 'write')
         pimatic.showToast(__("Sorry, you have no permissions to edit this device."))
         return false

@@ -47,6 +47,9 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
       )
 
     onActivateClick: (plugin) =>
+      unless @hasPermission('plugins', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to avtivate the plugin."))
+        return false
       pimatic.client.rest.getPluginConfig({pluginName: plugin.name}).always( (result) =>
         if result.success?
           unless result.config?
@@ -65,6 +68,9 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
       return false
 
     onDeactivateClick: (plugin) =>
+      unless @hasPermission('plugins', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to deactivate the plugin."))
+        return false
       pimatic.client.rest.setPluginActivated({
         pluginName: plugin.name
         active: false
@@ -75,6 +81,9 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
       ).fail( ajaxAlertFail)
 
     onUninstallClick: (plugin) =>
+      unless @hasPermission('plugins', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to uninstall the plugin."))
+        return false
       really = confirm(__("Do you really want to uninstall the %s plugin?", plugin.name))
       if really
         pimatic.client.rest.uninstallPlugin({
@@ -95,10 +104,16 @@ $(document).on("pagebeforecreate", '#plugins-page', (event) ->
         ).fail( ajaxAlertFail)
 
     onSettingsClick: (plugin) =>
+      unless @hasPermission('plugins', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to edit the plugin."))
+        return false
       jQuery.mobile.pageParams = {action: 'update', pluginName: plugin.name}
       return true
 
     onInstallClick: (plugin) =>
+      unless @hasPermission('updates', 'write')
+        pimatic.showToast(__("Sorry, you have no permissions to install the plugin."))
+        return false
       modules = ["pimatic-#{plugin.name}"]
       pimatic.client.rest.installUpdatesAsync({modules})
       .fail( (jqXHR, textStatus, errorThrown) =>
