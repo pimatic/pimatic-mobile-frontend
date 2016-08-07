@@ -526,7 +526,7 @@ $(document).on( "pagebeforecreate", (event) ->
       @sendTimerAction(action)
 
 
-  # Export all classe to be extendable by plugins
+  # Export all classes to be extendable by plugins
   pimatic.Item = Item
   pimatic.HeaderItem = HeaderItem
   pimatic.ButtonsItem = ButtonsItem
@@ -559,6 +559,7 @@ $(document).on( "pagebeforecreate", (event) ->
     thermostat: pimatic.ThermostatItem
     timer: pimatic.TimerItem
     input: pimatic.InputItem
+    inputTime: pimatic.InputItem
   }
 
   $(document).trigger("templateinit", [ ])
