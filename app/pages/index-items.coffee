@@ -382,18 +382,18 @@ $(document).on( "pagebeforecreate", (event) ->
       super(elements)
       @input = $(elements).find('input')
       #if @type is "number"
-        min = @getConfig('min')
-        max = @getConfig('max')
-        step = @getConfig('step')
-        if min?
-          @input.attr('min', min)
-        if max?
-          @input.attr('max', max)
-        @input.attr('step', step)
+      #  min = @getConfig('min')
+      #  max = @getConfig('max')
+      #  step = @getConfig('step')
+      #  if min?
+      #    @input.attr('min', min)
+      #  if max?
+      #    @input.attr('max', max)
+      #  @input.attr('step', step)
         #@input.spinbox().autosizeInput(space: 30)
       #else
         #@input.autosizeInput(space: 5)
-        @input.timebox().autosizeInput(space: 30)
+      @input.timebox().autosizeInput(space: 30)
 
   class ButtonsItem extends DeviceItem
 
@@ -598,6 +598,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.ThermostatItem = ThermostatItem
   pimatic.TimerItem = TimerItem
   pimatic.InputItem = InputItem
+  pimatic.InputTimeItem = InputTimeItem
 
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
