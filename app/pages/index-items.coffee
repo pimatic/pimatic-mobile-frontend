@@ -339,6 +339,62 @@ $(document).on( "pagebeforecreate", (event) ->
       else
         @input.autosizeInput(space: 5)
 
+  class InputTimeItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @type = @getConfig('type')
+      # The value in the input
+      @inputValue = ko.observable()
+
+      @inputAttr = @getAttribute('input')
+      @inputValue(@inputAttr.value())
+
+      attrValue = @inputAttr.value()
+      @inputAttr.value.subscribe( (value) =>
+        @inputValue(value)
+        attrValue = value
+      )
+
+      # input changes -> update variable value
+      ko.computed( =>
+        textValue = @inputValue()
+        if attrValue isnt textValue
+          if @type is "string"
+            @changeInputTo(textValue)
+          else if @type is "number"
+            if textValue? and attrValue? and parseFloat(attrValue) isnt parseFloat(textValue)
+              numVal = parseFloat(textValue)
+              if isNaN(textValue) or numVal isnt numVal #only true for NaN
+                swal("Oops...", __("#{textValue} is not a number."), "error")
+                @inputValue(attrValue)
+                return
+              @changeInputTo(numVal)
+      ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } })
+
+    changeInputTo: (value) ->
+      @device.rest.changeInputTo({value}, global: no)
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+        .always( => ; )
+
+    afterRender: (elements) ->
+      super(elements)
+      @input = $(elements).find('input')
+      #if @type is "number"
+        min = @getConfig('min')
+        max = @getConfig('max')
+        step = @getConfig('step')
+        if min?
+          @input.attr('min', min)
+        if max?
+          @input.attr('max', max)
+        @input.attr('step', step)
+        #@input.spinbox().autosizeInput(space: 30)
+      #else
+        #@input.autosizeInput(space: 5)
+        @input.timebox().autosizeInput(space: 30)
+
   class ButtonsItem extends DeviceItem
 
     constructor: (templData, @device) ->
@@ -559,7 +615,7 @@ $(document).on( "pagebeforecreate", (event) ->
     thermostat: pimatic.ThermostatItem
     timer: pimatic.TimerItem
     input: pimatic.InputItem
-    inputTime: pimatic.InputItem
+    inputTime: pimatic.InputTimeItem
   }
 
   $(document).trigger("templateinit", [ ])
