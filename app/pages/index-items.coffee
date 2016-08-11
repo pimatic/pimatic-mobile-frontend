@@ -359,17 +359,26 @@ $(document).on( "pagebeforecreate", (event) ->
       # input changes -> update variable value
       ko.computed( =>
         textValue = @inputValue()
+        timePattern = ///
+            ^ # begin of line
+            (
+            [01]?       # 0, 1 or nothing and
+            [0-9]       # 0-9 leads to every possible hour up to 19
+            |           # or
+            2[0-3]      # 20-23 -> exclude 24-29 this way
+            )
+            :
+            [0-5][0-9]  # minutes
+            ///
+        hourPattern = /// [01]?[0-9]|2[0-3] ///
         if attrValue isnt textValue
-          if @type is "string"
+          if textValue.match timePattern
             @changeInputTo(textValue)
-          else if @type is "number"
-            if textValue? and attrValue? and parseFloat(attrValue) isnt parseFloat(textValue)
-              numVal = parseFloat(textValue)
-              if isNaN(textValue) or numVal isnt numVal #only true for NaN
-                swal("Oops...", __("#{textValue} is not a number."), "error")
-                @inputValue(attrValue)
-                return
-              @changeInputTo(numVal)
+          else
+            if textValue.match hourPattern
+              @changeInputTo("#{textValue}:00")
+            else
+              swal("Oops...", __("#{textValue} is not a vaild time."), "error")
       ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } })
 
     changeInputTo: (value) ->
@@ -381,18 +390,14 @@ $(document).on( "pagebeforecreate", (event) ->
     afterRender: (elements) ->
       super(elements)
       @input = $(elements).find('input')
-      #if @type is "number"
-      #  min = @getConfig('min')
-      #  max = @getConfig('max')
-      #  step = @getConfig('step')
-      #  if min?
-      #    @input.attr('min', min)
-      #  if max?
-      #    @input.attr('max', max)
-      #  @input.attr('step', step)
-        #@input.spinbox().autosizeInput(space: 30)
-      #else
-        #@input.autosizeInput(space: 5)
+      min = @getConfig('min')
+      max = @getConfig('max')
+      step = @getConfig('step')
+      if min?
+        @input.attr('min', min)
+      if max?
+        @input.attr('max', max)
+      @input.attr('step', step)
       @input.timebox().autosizeInput(space: 30)
 
   class ButtonsItem extends DeviceItem

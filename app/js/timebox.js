@@ -36,6 +36,10 @@
 			  val,
 			  hours,
 			  minutes,
+			  minHours,
+			  minMinutes,
+			  maxHours,
+			  maxMinutes,
 			  output,
 				w = this,
 				o = this.options;
@@ -45,11 +49,11 @@
 			if (/([01]?[0-9]|2[0-3]):[0-5][0-9]/.test(val)) {
 				hours = parseInt(val.substring(0, val.indexOf(":")));
 				minutes = parseInt(val.substring(val.indexOf(":") + 1));
+				minHours = parseInt(o.dmin.substring(0, val.indexOf(":")));
+				minMinutes = parseInt(o.dmin.substring(val.indexOf(":") + 1));
+				maxHours = parseInt(o.dmax.substring(0, val.indexOf(":")));
+				maxMinutes = parseInt(o.dmax.substring(val.indexOf(":") + 1));
 				output = true;
-				//alert(minutes);
-			//}
-			//val = parseFloat(w.d.input.val());
-			//val -= (val%o.step); //round down to multiple of step
 
 				if (!w.disabled) {
 					tmpHours = hours;
@@ -59,24 +63,23 @@
 							tmpMinutes += 60;
 							tmpHours -= 1;
 						}
-						if (tmpHours < 0) { tmpHours += 24; }						
-						//if ( tmp >= o.dmin ) { 
-						//w.d.input.val( String(tmpHours) + ":" + String(tmpMinutes) ).trigger( "change" );
-						//}
+						if (tmpHours < 0) { tmpHours += 24; }
+						if ((tmpHours * 60 + tmpMinutes) < (minHours * 60 + minMinutes)) { output = false; }
 					} else {
-					    tmpMinutes = minutes + o.step;
-					    while (tmpMinutes > 59) {
-					        tmpMinutes -= 60;
-					        tmpHours += 1;
-					    }
-					    if (tmpHours > 23) { tmpHours -= 24; }
-						//if ( tmp <= o.dmax ) { 
-						//w.d.input.val( String(tmpHours) + ":" + String(tmpMinutes) ).trigger("change");
-						//}
+						tmpMinutes = minutes + o.step;
+						while (tmpMinutes > 59) {
+							tmpMinutes -= 60;
+							tmpHours += 1;
+						}
+						if (tmpHours > 23) { tmpHours -= 24; }
+						if ((tmpHours * 60 + tmpMinutes) > (maxHours * 60 + maxMinutes)) { output = false; }
 					}
-					if (tmpMinutes < 10) { tmpMinutes = "0" + String(tmpMinutes) }
-					if (tmpHours < 10) { tmpHours = "0" + String(tmpHours) }
-					if (output === true) { w.d.input.val(String(tmpHours) + ":" + String(tmpMinutes)).trigger("change"); }
+					
+					if (output === true) {
+						if (tmpMinutes < 10) { tmpMinutes = "0" + String(tmpMinutes) }
+						if (tmpHours < 10) { tmpHours = "0" + String(tmpHours) }
+						w.d.input.val(String(tmpHours) + ":" + String(tmpMinutes)).trigger("change");
+					}
 				}
 			}
 		},
@@ -119,14 +122,14 @@
 			}
 			
 			if ( o.dmin === false ) { 
-				o.dmin = ( typeof w.d.input.attr( "min" ) !== "undefined" ) ?
-					parseFloat( w.d.input.attr( "min" ) ) :
-					Number.MAX_VALUE * -1;
+				o.dmin = ( /([01]?[0-9]|2[0-3]):[0-5][0-9]/.test(w.d.input.attr( "min" )) === true ) ?
+					w.d.input.attr( "min" ) :
+					"00:00";
 			}
 			if ( o.dmax === false ) { 
-				o.dmax = ( typeof w.d.input.attr( "max" ) !== "undefined" ) ?
-					parseFloat(w.d.input.attr( "max" )) :
-					Number.MAX_VALUE;
+				o.dmax = ( /([01]?[0-9]|2[0-3]):[0-5][0-9]/.test(w.d.input.attr( "max" )) === true ) ?
+					w.d.input.attr( "max" ) :
+					"23:59";
 			}
 			if ( o.step === false) {
 				o.step = ( typeof w.d.input.attr( "step") !== "undefined" ) ?
