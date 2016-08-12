@@ -46,7 +46,7 @@
 
 			val=w.d.input.val()
 			// If the value looks like a solid 24h-time
-			if (/([01]?[0-9]|2[0-3]):[0-5][0-9]/.test(val)) {
+			if (/^([01]?[0-9]|2[0-3]):[0-5][0-9]/.test(val)) {
 				hours = parseInt(val.substring(0, val.indexOf(":")));
 				minutes = parseInt(val.substring(val.indexOf(":") + 1));
 				minHours = parseInt(o.dmin.substring(0, val.indexOf(":")));
