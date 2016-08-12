@@ -370,7 +370,7 @@ $(document).on( "pagebeforecreate", (event) ->
             :
             [0-5][0-9]  # minutes
             ///
-        hourPattern = /// [01]?[0-9]|2[0-3] ///
+        hourPattern = /// ^[01]?[0-9]|2[0-3] ///
         if attrValue isnt textValue
           if textValue.match timePattern
             @changeInputTo(textValue)
@@ -398,7 +398,7 @@ $(document).on( "pagebeforecreate", (event) ->
       if max?
         @input.attr('max', max)
       @input.attr('step', step)
-      @input.timebox().autosizeInput(space: 30)
+      @input.timebox().autosizeInput(space: 10)
 
   class ButtonsItem extends DeviceItem
 
