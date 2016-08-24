@@ -9,6 +9,7 @@ Example configuration
 
     {
       "plugin": "mobile-frontend",
+      "customTitle": "Pimatic", 
       "theme": "water",
       "flat": true,
       "debug": false,
