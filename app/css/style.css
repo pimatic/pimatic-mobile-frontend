@@ -1548,6 +1548,10 @@ border-bottom-left-radius: inherit;
   border-radius: 10px;
 }
 
+.process-message p {
+    margin: 0;
+}
+
 .attr-presence {
   display: inline-block;
   float: right;
