@@ -152,8 +152,8 @@ $(document).on( "pagebeforecreate", (event) ->
       state = @getAttribute('state')
       if state.labels?
         capitaliseFirstLetter = (s) -> s.charAt(0).toUpperCase() + s.slice(1)
-        @sliderEle.find('option[value=on]').text(capitaliseFirstLetter state.labels[0])
-        @sliderEle.find('option[value=off]').text(capitaliseFirstLetter state.labels[1])
+        @sliderEle.find('option[value=on]').text(__(capitaliseFirstLetter state.labels[0]))
+        @sliderEle.find('option[value=off]').text(__(capitaliseFirstLetter state.labels[1]))
 
       @sliderEle.flipswitch()
       $(elements).find('.ui-flipswitch').addClass('no-carousel-slide')
