@@ -50,6 +50,12 @@ script#input-template(type='text/template')
       .spinbox.no-carousel-slide
         input(type='text', data-role='spinbox', name='spin', data-mini='true', data-bind='textInput: inputValue')
       <!-- /ko -->
+script#inputTime-template(type='text/template')
+  li.sortable.input.no-header.no-carousel-slide
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
+    div.inputs()
+      .timebox.no-carousel-slide
+        input(type='time', name='time', data-role='timebox', data-mini='true', data-bind='textInput: inputValue')
 script#musicplayer-template(type='text/template')
   li.sortable.musicplayer.no-header
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")

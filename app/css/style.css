@@ -423,6 +423,24 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
   color: #000 /*{a-bup-color}*/;
 }
 
+#index .timebox input{
+  border: none;
+  background: none;
+  width: 36px;
+  min-width: 36px;
+  margin: 0;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding: 0;
+  font-weight: bold;
+  color: #000 /*{a-bup-color}*/;
+  /* sorry about the non-standard
+  solution but Chrome messes otherwise*/
+  -webkit-margin-before: -3px;
+  -webkit-margin-after: -3px;
+  -webkit-min-logical-width: 90px;
+}
+
 
 /* rules-page */
 #rules span.if, #rules span.then {

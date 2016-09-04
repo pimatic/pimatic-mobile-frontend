@@ -339,6 +339,67 @@ $(document).on( "pagebeforecreate", (event) ->
       else
         @input.autosizeInput(space: 5)
 
+  class InputTimeItem extends DeviceItem
+
+    constructor: (templData, @device) ->
+      super(templData, @device)
+      @type = @getConfig('type')
+      # The value in the input
+      @inputValue = ko.observable()
+
+      @inputAttr = @getAttribute('input')
+      @inputValue(@inputAttr.value())
+
+      attrValue = @inputAttr.value()
+      @inputAttr.value.subscribe( (value) =>
+        @inputValue(value)
+        attrValue = value
+      )
+
+      # input changes -> update variable value
+      ko.computed( =>
+        textValue = @inputValue()
+        timePattern = ///
+            ^ # begin of line
+            (
+            [01]?       # 0, 1 or nothing and
+            [0-9]       # 0-9 leads to every possible hour up to 19
+            |           # or
+            2[0-3]      # 20-23 -> exclude 24-29 this way
+            )
+            :
+            [0-5][0-9]  # minutes
+            ///
+        hourPattern = /// ^[01]?[0-9]|2[0-3] ///
+        if attrValue isnt textValue
+          if textValue.match timePattern
+            @changeInputTo(textValue)
+          else
+            if textValue.match hourPattern
+              @changeInputTo("#{textValue}:00")
+            else
+              swal("Oops...", __("#{textValue} is not a vaild time."), "error")
+      ).extend({ rateLimit: { timeout: 1000, method: "notifyWhenChangesStop" } })
+
+    changeInputTo: (value) ->
+      @device.rest.changeInputTo({value}, global: no)
+        .done(ajaxShowToast)
+        .fail(ajaxAlertFail)
+        .always( => ; )
+
+    afterRender: (elements) ->
+      super(elements)
+      @input = $(elements).find('input')
+      min = @getConfig('min')
+      max = @getConfig('max')
+      step = @getConfig('step')
+      if min?
+        @input.attr('min', min)
+      if max?
+        @input.attr('max', max)
+      @input.attr('step', step)
+      @input.timebox().autosizeInput(space: 10)
+
   class ButtonsItem extends DeviceItem
 
     constructor: (templData, @device) ->
@@ -526,7 +587,7 @@ $(document).on( "pagebeforecreate", (event) ->
       @sendTimerAction(action)
 
 
-  # Export all classe to be extendable by plugins
+  # Export all classes to be extendable by plugins
   pimatic.Item = Item
   pimatic.HeaderItem = HeaderItem
   pimatic.ButtonsItem = ButtonsItem
@@ -542,6 +603,7 @@ $(document).on( "pagebeforecreate", (event) ->
   pimatic.ThermostatItem = ThermostatItem
   pimatic.TimerItem = TimerItem
   pimatic.InputItem = InputItem
+  pimatic.InputTimeItem = InputTimeItem
 
   pimatic.templateClasses = {
     null: pimatic.DeviceItem
@@ -559,6 +621,7 @@ $(document).on( "pagebeforecreate", (event) ->
     thermostat: pimatic.ThermostatItem
     timer: pimatic.TimerItem
     input: pimatic.InputItem
+    inputTime: pimatic.InputTimeItem
   }
 
   $(document).trigger("templateinit", [ ])
