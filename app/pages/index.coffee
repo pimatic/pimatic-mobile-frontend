@@ -449,6 +449,18 @@ $(document).on("pagecreate", '#index', tc (event) ->
     jQuery.mobile.pageParams = {action: 'update', device: device, back: '#index'}
     jQuery.mobile.changePage '#edit-device-page', transition: 'slide'
 
+  $(document).on "vclick", '#to-device-xButton', ->
+    deviceId = $('#to-device-xButton').attr('data-deviceId')
+    device = pimatic.getDeviceById(deviceId)
+    device.rest.xButton({})
+    .done( (response) =>
+      if response.success
+        eval(response.result)
+      else
+        throw new Error("xButton call failed: #{response.result}!")
+    )
+    .fail(ajaxAlertFail)
+
   return
 )
 
