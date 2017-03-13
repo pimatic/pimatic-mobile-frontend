@@ -136,7 +136,7 @@ pimatic.tryCatch = (func) ->
       TraceKit.report(e)
 
 window.ajaxShowToast = (data, textStatus, jqXHR) -> 
-  pimatic.showToast (if data.message? then data.message else 'done')
+  pimatic.showToast (if data.message? then data.message else __('done'))
 
 window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   data = null
