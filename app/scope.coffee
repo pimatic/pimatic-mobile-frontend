@@ -86,10 +86,10 @@ class DeviceAttribute
     (if @type in ["number", "boolean"] then """
       <a href="#" id="to-graph-page"
         data-attributeName="#{@name}"
-        data-deviceId="#{@device.id}">Graph</a>
+        data-deviceId="#{@device.id}">#{__('Graph')}</a>
     """ else '') + """
     <a href="#" id="to-device-editor-page"
-    data-deviceId="#{@device.id}">Edit Device</a>
+    data-deviceId="#{@device.id}">#{__('Edit Device')}</a>
     """
 
   outOfDate: -> 

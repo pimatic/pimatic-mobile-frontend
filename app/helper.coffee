@@ -40,7 +40,7 @@
 
   pimatic.loading = (context, action, options) ->
     ###
-    There is aproblem showing the loading indicater in pageinit. It doesn't get showen if 
+    There is a problem showing the loading indicator in pageinit. It doesn't get shown if
     $.mobile.loading is called directly. Wrapping the call in setTimeut seems to fix the issue
     ###
     setTimeout( ->
@@ -136,7 +136,7 @@ pimatic.tryCatch = (func) ->
       TraceKit.report(e)
 
 window.ajaxShowToast = (data, textStatus, jqXHR) -> 
-  pimatic.showToast (if data.message? then data.message else __('done'))
+  pimatic.showToast (if data.message? then __(data.message) else __('done'))
 
 window.ajaxAlertFail = (jqXHR, textStatus, errorThrown) ->
   data = null
