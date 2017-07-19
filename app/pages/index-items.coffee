@@ -71,6 +71,11 @@ $(document).on( "pagebeforecreate", (event) ->
       buttons = []
       if @device.config.xLink
         buttons.push """<a href="#{@device.config.xLink}" target="_blank">Link</a>"""
+      if @device.config.xButton
+        buttons.push """
+          <a href="#" id="to-device-xButton"
+          data-deviceId="#{@device.id}">#{@device.config.xButton}</a>
+        """
       if @device.hasAttibuteWith( (attr) => attr.type in ["number", "boolean"])
         buttons.push """  
           <a href="#" id="to-graph-page"
