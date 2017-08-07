@@ -123,8 +123,8 @@ $(document).on( "pagebeforecreate", (event) ->
 
       doIt = (
         if @device.config.xConfirm then confirm __("""
-          Do you really want to turn %s #{@switchState()}? 
-        """, @device.name())
+          Do you really want to turn %s?
+        """, "#{@device.name()} #{__(@switchState())}")
         else yes
       ) 
 
@@ -243,13 +243,27 @@ $(document).on( "pagebeforecreate", (event) ->
       if @getAttribute('position').value() is 'down'
         @_ajaxCall('stop')
       else
-        @_ajaxCall('moveDown')
+        doIt = (
+          if @device.config.xConfirm then confirm __("
+          Do you really want to press \"%s\"?
+        ", __('down'))
+          else yes
+        )
+        if doIt
+          @_ajaxCall('moveDown')
 
     onShutterUpClicked: -> 
       if @getAttribute('position').value() is 'up'
         @_ajaxCall('stop')
       else
-        @_ajaxCall('moveUp')
+        doIt = (
+          if @device.config.xConfirm then confirm __("
+          Do you really want to press \"%s\"?
+        ", __('up'))
+          else yes
+        )
+        if doIt
+          @_ajaxCall('moveUp')
     
     _ajaxCall: (action) ->
       text = (
@@ -415,7 +429,7 @@ $(document).on( "pagebeforecreate", (event) ->
     onButtonPress: (button) =>
       doIt = (
         if button.confirm then confirm __("
-          Do you really want to press %s? 
+          Do you really want to press \"%s\"?
         ", button.text)
         else yes
       ) 
