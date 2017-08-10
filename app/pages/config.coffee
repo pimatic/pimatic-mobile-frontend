@@ -44,6 +44,8 @@ $(document).on("pagecreate", '#config-page', (event) ->
         mode: 'code',
         modes: ['view', 'code'] 
       })
+      @editor.editor.setReadOnly(true);
+      $('#config-editor .ace_content').addClass('readonly')
       @getConfig()
       @config.subscribe( (value) =>
         @editor.set(value)
