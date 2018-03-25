@@ -1601,6 +1601,10 @@ border-bottom-left-radius: inherit;
   padding-bottom: 3px;
 }
 
+span.attribute.attr-contact.attr-type-boolean {
+  float: right !important;
+}
+
 #tooltip, .dygraph-tooltip
 {
   font-weight: bold;
