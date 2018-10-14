@@ -14,7 +14,10 @@ module.exports = (env) ->
   S = env.require 'string'
   M = env.matcher
 
-  global.i18n = env.require('i18n')
+  try
+    global.i18n = env.require('i18n')
+  catch e
+    global.i18n = env.require('i18n-pimatic')
   global.__ = i18n.__
   _ = env.require 'lodash'
   crypto = require 'crypto'
