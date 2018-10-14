@@ -69,6 +69,9 @@ $(document).on("pagecreate", '#graph-page', (event) ->
 
       @chosenDate($.datepicker.formatDate(@dateFormat, new Date()))
 
+      data = pimatic.storage.get('pimatic.graph') or {}
+      @collapsedGroups = ko.observable(data.collapsed or {})
+
       attributeToUnit = (attribute) ->
         return (
           if attribute.type is "boolean" then "__state"
@@ -505,6 +508,24 @@ $(document).on("pagecreate", '#graph-page', (event) ->
           else
             text = "#{h}h #{text}"
       return text.trim()
+
+
+    toggleGroup: (group) =>
+      collapsed = @collapsedGroups()
+      if collapsed[group.id]
+        delete collapsed[group.id]
+      else
+        collapsed[group.id] = true
+      @collapsedGroups(collapsed)
+      @saveCollapseState()
+      return false
+
+    isGroupCollapsed: (group) => @collapsedGroups()[group.id] is true
+
+    saveCollapseState: () =>
+      data = pimatic.storage.get('pimatic.graph') or {}
+      data.collapsed = @collapsedGroups()
+      pimatic.storage.set('pimatic.graph', data)
 
   pimatic.pages.graph = graphPage = new GraphPageViewModel()
 

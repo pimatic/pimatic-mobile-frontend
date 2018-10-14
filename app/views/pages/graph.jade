@@ -1,11 +1,13 @@
 script#graph-group-template(type='text/template')
   <!-- ko if: $data.getDevicesWithGraphableAttribute().length > 0  -->
-  li(data-role='list-divider', data-theme=theme.dividerSwatch)
+  li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup, css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
     label(data-bind="text: name")
+  <!-- ko if: !$root.isGroupCollapsed($data) -->
   <!-- ko template: { name: 'graph-device-template', foreach: $data.getDevicesWithGraphableAttribute() } --><!-- /ko -->
   <!-- /ko -->
+  <!-- /ko -->
 script#graph-device-template(type='text/template')
-  li.graph-device
+  li.graph-device.ui-li-static.ui-body-inherit
     label(data-bind='text: name')
     <!-- ko template: { name: 'graph-attribute-template', foreach: $data.attributes(), afterRender: $root.afterRenderAttribute } --><!-- /ko -->
 script#graph-attribute-template(type='text/template')
@@ -58,8 +60,10 @@ div#graph-page(data-role='page')
     ul#graph-device-list.device-attribute-list(data-role='listview')
       <!-- ko template: { name: 'graph-group-template', foreach: groups} --><!-- /ko -->
       <!-- ko if: $root.getUngroupedDevicesWithGraphableAttribute().length > 0  -->
-      li(data-role='list-divider', data-theme=theme.dividerSwatch)
+      li.sortable.header.collapsible(data-role='list-divider', data-theme=theme.dividerSwatch, data-bind="click: $root.toggleGroup, css: ($root.isGroupCollapsed($data) ? 'closed' : 'open')")
         label()=__('Ungrouped')
+      <!-- ko if: !$root.isGroupCollapsed($data) -->
       <!-- ko template: { name: 'graph-device-template', foreach: $root.getUngroupedDevicesWithGraphableAttribute() } --><!-- /ko -->
+      <!-- /ko -->
       <!-- /ko -->
 
