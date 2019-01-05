@@ -1,5 +1,5 @@
 script#switch-template(type='text/template')
-  li.sortable.switch-device.no-header
+  li.sortable.switch-device.no-header(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     | 
     select.switch(
@@ -11,7 +11,7 @@ script#switch-template(type='text/template')
     | 
     span.attributes(data-bind="template: { name: 'switch-attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")
 script#shutter-template(type='text/template')
-  li.sortable.shutter-device.no-header
+  li.sortable.shutter-device.no-header(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     | 
     div.shutter-buttons.ui-mini.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced="true")
@@ -19,7 +19,7 @@ script#shutter-template(type='text/template')
         a.shutter-down.ui-first-child.ui-btn.ui-corner-all.ui-icon-arrow-d.ui-btn-icon-left(href='#')=__('Down')
         a.shutter-up.ui-last-child.ui-btn.ui-corner-all.ui-icon-arrow-u.ui-btn-icon-left(href='#')=__('Up')
 script#dimmer-template(type='text/template')
-  li.sortable.dimmer-device.no-header
+  li.sortable.dimmer-device.no-header(data-bind="attr:{ id: device.id }")
     div.item-inner
       label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
       | 
@@ -28,19 +28,19 @@ script#dimmer-template(type='text/template')
       | 
       span.attributes(data-bind="template: { name: 'dimmer-attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")  
 script#device-template(type='text/template')     
-  li.sortable.device.no-header
+  li.sortable.device.no-header(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     | 
     span.error(data-bind="text: ($data.error() ? $data.error() : '') ")
     | 
     span.attributes(data-bind="template: { name: 'attribute-template', foreach: $data.device.attributes, afterRender: $data.afterAttributeRender }")
 script#buttons-template(type='text/template')
-  li.sortable.button.no-header
+  li.sortable.button.no-header(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
       a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
 script#input-template(type='text/template')
-  li.sortable.input.no-header.no-carousel-slide
+  li.sortable.input.no-header.no-carousel-slide(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.inputs()
       <!-- ko if: $data.getConfig('type') === 'string'  -->
@@ -51,13 +51,13 @@ script#input-template(type='text/template')
         input(type='text', data-role='spinbox', name='spin', data-mini='true', data-bind='textInput: inputValue')
       <!-- /ko -->
 script#inputTime-template(type='text/template')
-  li.sortable.input.no-header.no-carousel-slide
+  li.sortable.input.no-header.no-carousel-slide(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.inputs()
       .timebox.no-carousel-slide
         input(type='time', name='time', data-role='timebox', data-mini='true', data-bind='textInput: inputValue')
 script#musicplayer-template(type='text/template')
-  li.sortable.musicplayer.no-header
+  li.sortable.musicplayer.no-header(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.controls()
       span.songTitle(data-bind="text: $data.currentTitle")
@@ -68,7 +68,7 @@ script#musicplayer-template(type='text/template')
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon-stop(data-bind="click: function(){$data.sendPlayerAction('stop');}")=__('Stop')
         a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-icon-notext.ui-icon.ui-icon-step-forward(data-bind="click: function(){$data.sendPlayerAction('next');}")=__('Next')
 script#thermostat-template(type='text/template')
-  li.sortable.device.no-header.thermostat(data-bind='css: {unsynced: !$data.synced()}')
+  li.sortable.device.no-header.thermostat(data-bind='css: {unsynced: !$data.synced(), attr: { id: device.id }}')
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     <!-- ko if: $data.getConfig('guiShowValvePosition')  -->
     .valve-position
