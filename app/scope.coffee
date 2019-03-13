@@ -183,6 +183,13 @@ class DeviceAttribute
       else if @unit is "s"
         num = pimatic.toHHMMSS(value)
         return {num, unit: ''}
+      else if @unit is "€"
+        if value >= 1e3
+          num = Math.round(value / 1e3)
+          return {num, unit: 'k€'}
+        else
+          num = Math.round(value * 1e2) / 1e2
+          num = Number(num.toFixed(2))
       else
         num = Math.round(value * 1e2) / 1e2
       return {
