@@ -57,6 +57,7 @@ class DeviceAttribute
     discrete: 'copy'
     icon: 'copy'
     hidden: 'copy'
+    displayFormat: 'copy'
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
@@ -151,8 +152,74 @@ class DeviceAttribute
       else
         value.toString()
 
+  _uptimeFormat: (seconds) ->
+    date = new Date(seconds*1000)
+    days = date.getUTCDate() - 1
+    hours = date.getUTCHours()
+    minutes = date.getUTCMinutes()
+    seconds = date.getUTCSeconds()
+    elements = []
+    if days > 0
+      elements.push(days + ' ' +
+          if days is 1 then __('day') else __('days'))
+    if hours > 0
+      elements.push(hours + ' ' +
+          if days is 1 then __('hour') else __('hours'))
+    if minutes > 0
+      elements.push(minutes + ' ' +
+          if minutes is 1 then __('minute') else __('minutes'))
+    if seconds > 0
+      elements.push(seconds + ' ' +
+          if seconds is 1 then __('second') else __('seconds'))
+    if elements.length is 0
+      elements.push(__('just now'))
+    return elements.join(', ')
+
+  _getDisplayFormat: ->
+    result = {}
+    if @displayFormat? and @displayFormat.trim().length isnt 0
+      properties = @displayFormat.match(/('.*?'|".*?"|[^"',]+)+(?=,*|,*$)/g) ? []
+      properties.forEach((prop, index) ->
+        i = prop.indexOf(':')
+        if (i > 0)
+          key = prop.slice(0, i).trim().replace(/^["']+|["']+$/g, '')
+          value = prop.slice(i + 1).trim().replace(/^["']+|["']+$/g, '')
+          value = true if value == "true"
+          value = false if value == "false"
+          if key.length is 0
+            throw new Error("Invalid key in property: " + prop)
+          else if value.length is 0
+            throw new Error("Invalid value in property: " + prop)
+          else
+            result[key] = value
+        else
+          if (index is 0)
+            result.output = prop.trim().replace(/^["']+|["']+$/g, '')
+          else
+            throw new Error("Invalid property: " + prop)
+      )
+    return result
+
   _getNumberFormat: (value) ->
-    if @unit in Object.keys(humanFormat.unitPrefixes)
+    format = @_getDisplayFormat()
+    result = { unit: @unit or ''}
+    if format.output is 'raw'
+      result.num = value
+      return result
+    else if format.output is 'fixed'
+      keys = Object.keys(format).filter((k) ->
+        ['fractionDigits', 'digits', 'decimals'].indexOf(k) isnt -1
+      )
+      result.num = Number(value).toFixed(format[keys[0]] ? 0)
+      return result
+    else if format.output is 'localeString'
+      locales = format.locales or format.locale
+      result.num = Number(value).toLocaleString(locales, format)
+      return result
+    else if format.output is 'uptime'
+      result.num = @_uptimeFormat(value)
+      return result
+    else if @unit in Object.keys(humanFormat.unitPrefixes)
       if @displayUnit? and @unit?
         prefix = @displayUnit.substring(0, @displayUnit.length - @unit.length)
       else
