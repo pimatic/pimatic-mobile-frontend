@@ -33,6 +33,8 @@ setupUnitPrefixes = ( ->
 
   humanFormat.unitPrefixes = {
     'B': siPrefixes,
+    'Bps': siPrefixes,
+    'bps': siPrefixes,
     'W': wPrefixes,
     'Wh': wPrefixes,
     'm': mPrefixes
@@ -61,7 +63,7 @@ class DeviceAttribute
   }
   constructor: (data, @device) ->
     #console.log "creating device attribute", data
-    # Allways create an observable for value:
+    # Always create an observable for value:
     unless data.value? then data.value = null
 
     @history = ko.observableArray([])
@@ -218,6 +220,7 @@ class DeviceAttribute
       return result
     else if format.output is 'uptime'
       result.num = @_uptimeFormat(value)
+      result.unit = '' if format.hideUnit ? true
       return result
     else if @unit in Object.keys(humanFormat.unitPrefixes)
       if @displayUnit? and @unit?
