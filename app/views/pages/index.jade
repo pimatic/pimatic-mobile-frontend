@@ -243,3 +243,15 @@ div#index(data-role='page' data-bind="css: {locked: !$root.enabledEditing(), unl
         a(href='root-ca-cert.crt', data-ajax="false", data-bind="visible: hasRootCACert")=__('Show CA root certificate')
       li(data-theme=theme.menuSwatch)
         a(href='/logout',data-bind="text: $root.logoutText, click: onLogoutClicked")=__('Logout')
+// Resize
+script.
+  if (typeof(Event) === 'function') {
+  // modern browsers
+  window.dispatchEvent(new Event('resize'));
+  } else {
+  // for IE and other old browsers
+  // causes deprecation warning on modern browsers
+  var evt = window.document.createEvent('UIEvents');
+  evt.initUIEvent('resize', true, false, window, 0);
+  window.dispatchEvent(evt);
+  };
