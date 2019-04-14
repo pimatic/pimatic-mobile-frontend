@@ -1,6 +1,6 @@
 # Release History
 
-* unreleased 
+* 20190415, V0.9.15
     * Added format and units options for uptime displayFormat
     * Added support for formatting of user defined enum value labels 
     * Added support for rendering the labels of Shutter device buttons with xUpLabel und xDownLabel values
