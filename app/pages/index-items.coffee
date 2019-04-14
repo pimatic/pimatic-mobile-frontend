@@ -300,8 +300,15 @@ $(document).on( "pagebeforecreate", (event) ->
       super(elements)
       @downBtn = $(elements).find('.shutter-down')
       @upBtn = $(elements).find('.shutter-up')
-      position = @getAttribute('position').value()
+      attr = @getAttribute('position')
+      position = attr.value()
       @_updateButtons(position) if position?
+      if attr.labels?
+        capitaliseFirstLetter = (s) -> s.charAt(0).toUpperCase() + s.slice(1)
+        if attr.labels['up']?
+          @upBtn.text(__(capitaliseFirstLetter attr.labels['up']))
+        if attr.labels['down']?
+          @downBtn.text(__(capitaliseFirstLetter attr.labels['down']))
 
   class InputItem extends DeviceItem
 

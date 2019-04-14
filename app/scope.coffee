@@ -151,31 +151,68 @@ class DeviceAttribute
       when "number"
         format = @_getNumberFormat(value)
         "#{format.num} #{format.unit}"
+      when 'enum'
+        if @labels and @labels[value]?
+          @labels[value]
+        else
+          value.toString()
       else
         value.toString()
 
-  _uptimeFormat: (seconds) ->
+  _uptimeFormat: (seconds, format) ->
     date = new Date(seconds*1000)
     days = date.getUTCDate() - 1
     hours = date.getUTCHours()
     minutes = date.getUTCMinutes()
     seconds = date.getUTCSeconds()
+    shortFmt = format.format is 'short'
+    mediumFmt = format.format is 'medium'
+    shortUnits = format.units is 'short'
     elements = []
     if days > 0
-      elements.push(days + ' ' +
-          if days is 1 then __('day') else __('days'))
-    if hours > 0
-      elements.push(hours + ' ' +
-          if days is 1 then __('hour') else __('hours'))
-    if minutes > 0
-      elements.push(minutes + ' ' +
-          if minutes is 1 then __('minute') else __('minutes'))
-    if seconds > 0
-      elements.push(seconds + ' ' +
-          if seconds is 1 then __('second') else __('seconds'))
-    if elements.length is 0
-      elements.push(__('just now'))
-    return elements.join(', ')
+      if shortUnits
+        units = 'd'
+      else
+        units = if days is 1 then __('day') else __('days')
+      elements.push(days + ' ' + units)
+    if shortFmt and elements.length is 0
+      h = ('0' + hours).slice -2
+      m = ('0' + minutes).slice -2
+      s = ('0' + seconds).slice -2
+      result = "#{h}:#{m}:#{s}"
+    else
+      if shortFmt and elements.length is 1
+        minutes = 0 if hours > 0
+
+      if hours > 0
+        if shortUnits
+          units = 'h'
+        else
+          units = if hours is 1 then __('hour') else __('hours')
+        elements.push(hours + ' ' + units)
+
+      if minutes > 0
+        if shortUnits
+          units = 'min'
+        else
+          units = if minutes is 1 then __('minute') else __('minutes')
+        elements.push(minutes + ' ' + units)
+
+      if (shortFmt or mediumFmt) and elements.length > 1
+        seconds = 0
+
+      if seconds > 0
+        if shortUnits
+          units = 's'
+        else
+          units = if seconds is 1 then __('second') else __('seconds')
+        elements.push(seconds + ' ' + units)
+
+      if elements.length is 0
+        elements.push(__('just now'))
+
+      result = elements.join(', ')
+    return result
 
   _getDisplayFormat: ->
     result = {}
@@ -219,7 +256,7 @@ class DeviceAttribute
       result.num = Number(value).toLocaleString(locales, format)
       return result
     else if format.output is 'uptime'
-      result.num = @_uptimeFormat(value)
+      result.num = @_uptimeFormat(value, format)
       result.unit = '' if format.hideUnit ? true
       return result
     else if @unit in Object.keys(humanFormat.unitPrefixes)
