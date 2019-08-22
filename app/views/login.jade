@@ -8,7 +8,7 @@ div#login-page(data-role='page', data-dialog='true', data-close-btn="none")
     form#loginForm
       div(data-role='fieldcontain')
         label(for='Username')=__('Username') + ':'
-        input#firstName(type='text', name='username', value='')
+        input#firstName(type='text', autocapitalize="none", autocorrect="off", name='username', value='')
       div(data-role='fieldcontain')
         label(for='password')=__('Password') + ':'
         input#password(type='password', name='password', value='', autocomplete='off')
