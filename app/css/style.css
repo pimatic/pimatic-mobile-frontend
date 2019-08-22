@@ -1585,7 +1585,7 @@ border-bottom-left-radius: inherit;
 }
 
 .contains-attr-presence {
-  height: 14px;
+  min-height: 14px;
 }
 
 .attr-presence .val{
