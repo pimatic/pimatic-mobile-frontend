@@ -38,7 +38,12 @@ script#buttons-template(type='text/template')
   li.sortable.button.no-header(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     div.buttons(data-bind="foreach: $data.device.configWithDefaults().buttons")
-      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
+      <!-- ko if: $data.id == $parent.buttonId() -->
+      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all.ui-btn-active(data-bind="attr:{ id: $data.id }, jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
+      <!-- /ko -->
+      <!-- ko ifnot: $data.id == $parent.buttonId() -->
+      a.ui-btn.ui-mini.ui-btn-inline.ui-corner-all(data-bind="attr:{ id: $data.id }, jqmbutton: {text: $data.text}, click: $parent.onButtonPress")
+      <!-- /ko -->
 script#input-template(type='text/template')
   li.sortable.input.no-header.no-carousel-slide(data-bind="attr:{ id: device.id }")
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")

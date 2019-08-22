@@ -430,6 +430,21 @@ $(document).on( "pagebeforecreate", (event) ->
 
     constructor: (templData, @device) ->
       super(templData, @device)
+      @buttonAttr = @getAttribute('button')
+      @buttonId = ko.observable()
+
+      if @getConfig('enableActiveButton')
+        @buttonId(@buttonAttr.value())
+      else
+        @buttonId("null")
+
+      @buttonAttr.value.subscribe((value) =>
+        enableActiveButton = @getConfig('enableActiveButton')
+        if value? and enableActiveButton
+          @buttonId(value)
+        else
+          @buttonId("null")
+      )
 
     getItemTemplate: => 'buttons'
 
@@ -444,6 +459,7 @@ $(document).on( "pagebeforecreate", (event) ->
         @device.rest.buttonPressed({buttonId: button.id}, global: no)
           .done(ajaxShowToast)
           .fail(ajaxAlertFail)
+
 
   class MuscicplayerItem extends DeviceItem
 
