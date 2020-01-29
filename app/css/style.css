@@ -195,10 +195,6 @@ html body .ui-panel-dismiss {
   margin-bottom: -1px;
 }
 
-#index .timebox input {
-  min-width: 100px;
-}
-
 .ui-mobile .ui-page-theme-a .ui-li-divider {
   border: none;
   border-bottom: 2px solid #005994 /*{pm-listdivider-color}*/;
@@ -430,8 +426,8 @@ html, body.ui-mobile-viewport, div.ui-mobile-viewport {
 #index .timebox input{
   border: none;
   background: none;
-  width: 36px;
-  min-width: 36px;
+  width: 100px;
+  min-width: 100px;
   margin: 0;
   margin-left: -8px;
   margin-right: -8px;
